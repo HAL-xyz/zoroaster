@@ -14,4 +14,3 @@ func JsonToBlock(jsonBlock string) (*jsonrpc_client.Block, error) {
 	}
 	return &block, nil
 }
-

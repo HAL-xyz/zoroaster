@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	uuid "github.com/satori/go.uuid"
 	"testing"
 )
 
@@ -254,6 +255,9 @@ const mockedBlock = `
 }
 `
 
+var UUID, _ = uuid.FromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
+
+
 func TestConvertJsonToBlock(t *testing.T) {
 
 	_, err := JsonToBlock(mockedBlock)
@@ -266,13 +270,15 @@ func TestTriggerTransactionFrom(t *testing.T) {
 
 	block, _ := JsonToBlock(mockedBlock)
 
-	var trigger Trigger = TriggerTransactionFrom{"0x2f1233ec3a4930fd95874291db7da9e90dfb2f03"}
-	if TriggerAction(trigger, block.Transactions[0]) != true {
+	var trigger Trigger = TriggerTransactionFrom{UUID, "0x2f1233ec3a4930fd95874291db7da9e90dfb2f03"}
+	_, ok := TriggerAction(trigger, block.Transactions[0])
+	if ok != true {
 		t.Error()
 	}
 
-	var trigger2 Trigger = TriggerTransactionFrom{"not an address"}
-	if TriggerAction(trigger2, block.Transactions[0]) != false {
+	var trigger2 Trigger = TriggerTransactionFrom{UUID, "not an address"}
+	_, ok2 := TriggerAction(trigger2, block.Transactions[0])
+	if ok2 != false {
 		t.Error()
 	}
 }
@@ -281,18 +287,21 @@ func TestTriggerTransactionNonce(t *testing.T) {
 
 	block, _ := JsonToBlock(mockedBlock)
 
-	var trigger Trigger = TriggerTransactionNonce{GreaterThan{13626}}
-	if TriggerAction(trigger, block.Transactions[9]) != true {
+	var trigger Trigger = TriggerTransactionNonce{UUID,GreaterThan{13626}}
+	_, ok := TriggerAction(trigger, block.Transactions[9])
+	if ok != true {
 		t.Error()
 	}
 
-	var trigger2 Trigger = TriggerTransactionNonce{GreaterThan{3333333}}
-	if TriggerAction(trigger2, block.Transactions[9]) != false {
+	var trigger2 Trigger = TriggerTransactionNonce{UUID, GreaterThan{3333333}}
+	_, ok2 := TriggerAction(trigger2, block.Transactions[9])
+	if ok2 != false {
 		t.Error()
 	}
 
-	var trigger3 Trigger = TriggerTransactionNonce{SmallerThan{3333333}}
-	if TriggerAction(trigger3, block.Transactions[9]) != true {
+	var trigger3 Trigger = TriggerTransactionNonce{UUID, SmallerThan{3333333}}
+	_, ok3 := TriggerAction(trigger3, block.Transactions[9])
+	if ok3 != true {
 		t.Error()
 	}
 

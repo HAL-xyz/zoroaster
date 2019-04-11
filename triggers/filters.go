@@ -17,4 +17,3 @@ type InBetween struct {
 	lowerBound int
 	upperBound int
 }
-

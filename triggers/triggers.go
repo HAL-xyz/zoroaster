@@ -2,44 +2,60 @@ package trigger
 
 import (
 	"github.com/INFURA/go-libs/jsonrpc_client"
+	"github.com/satori/go.uuid"
 )
 
-// Triggers
+/*
+	Triggers implement the Trigger interface. Each Action will reference a Trigger.uuid.
+ */
 
 type Trigger interface {
-	checkCondition(transaction *jsonrpc_client.Transaction) bool
+	GetUUID() uuid.UUID
+	checkCondition(transaction *jsonrpc_client.Transaction) (uuid.UUID, bool)
 }
 
 // Transaction FROM
 type TriggerTransactionFrom struct {
+	uuid uuid.UUID
 	wallet string
 }
 
-func (ttf TriggerTransactionFrom) checkCondition(transaction *jsonrpc_client.Transaction) bool {
+func (tg TriggerTransactionFrom) GetUUID() uuid.UUID {
+	return tg.uuid
+}
 
-	return ttf.wallet == transaction.From
+func (tg TriggerTransactionFrom) checkCondition(ts *jsonrpc_client.Transaction) (uuid.UUID, bool) {
+
+	return tg.uuid, tg.wallet == ts.From
 }
 
 // Transaction NONCE
 type TriggerTransactionNonce struct {
+	uuid uuid.UUID
 	filter Filter
 }
 
-func (ttf TriggerTransactionNonce) checkCondition(transaction *jsonrpc_client.Transaction) bool {
+func (tg TriggerTransactionNonce) checkCondition(ts *jsonrpc_client.Transaction) (uuid.UUID, bool) {
 
-	switch v := ttf.filter.(type) {
+	switch v := tg.filter.(type) {
 	case GreaterThan:
-		return transaction.Nonce > v.value
+		return tg.GetUUID(), ts.Nonce > v.value
 	case SmallerThan:
-		return transaction.Nonce < v.value
+		return tg.GetUUID(), ts.Nonce < v.value
 	default:
 		// TODO: this should never happen. Return an error perhaps?
-		return false
+		return tg.GetUUID(), false
 	}
 }
 
+func (tg TriggerTransactionNonce) GetUUID() uuid.UUID {
+	return tg.uuid
+}
+
+
+
 // TODO: this will read an array of transactions I guess
-func TriggerAction(trigger Trigger, transaction jsonrpc_client.Transaction) bool {
+func TriggerAction(trigger Trigger, transaction jsonrpc_client.Transaction) (uuid.UUID, bool) {
 
 	return trigger.checkCondition(&transaction)
 
