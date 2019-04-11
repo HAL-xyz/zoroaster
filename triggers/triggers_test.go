@@ -269,13 +269,13 @@ func TestTriggerTransactionFrom(t *testing.T) {
 
 	block, _ := JsonToBlock(mockedBlock)
 
-	var trigger Trigger = TriggerTransactionFrom{UUID, "0x2f1233ec3a4930fd95874291db7da9e90dfb2f03"}
+	trigger := TriggerTransactionFrom{UUID, "0x2f1233ec3a4930fd95874291db7da9e90dfb2f03"}
 	_, ok := TriggerAction(trigger, block.Transactions[0])
 	if ok != true {
 		t.Error()
 	}
 
-	var trigger2 Trigger = TriggerTransactionFrom{UUID, "not an address"}
+	trigger2 := TriggerTransactionFrom{UUID, "not an address"}
 	_, ok2 := TriggerAction(trigger2, block.Transactions[0])
 	if ok2 != false {
 		t.Error()
@@ -286,19 +286,19 @@ func TestTriggerTransactionNonce(t *testing.T) {
 
 	block, _ := JsonToBlock(mockedBlock)
 
-	var trigger Trigger = TriggerTransactionNonce{UUID, GreaterThan{13626}}
+	trigger := TriggerTransactionNonce{UUID, GreaterThan{13626}}
 	_, ok := TriggerAction(trigger, block.Transactions[9])
 	if ok != true {
 		t.Error()
 	}
 
-	var trigger2 Trigger = TriggerTransactionNonce{UUID, GreaterThan{3333333}}
+	trigger2 := TriggerTransactionNonce{UUID, GreaterThan{3333333}}
 	_, ok2 := TriggerAction(trigger2, block.Transactions[9])
 	if ok2 != false {
 		t.Error()
 	}
 
-	var trigger3 Trigger = TriggerTransactionNonce{UUID, SmallerThan{3333333}}
+	trigger3 := TriggerTransactionNonce{UUID, SmallerThan{3333333}}
 	_, ok3 := TriggerAction(trigger3, block.Transactions[9])
 	if ok3 != true {
 		t.Error()
@@ -310,7 +310,7 @@ func TestGetTriggersForTransactions(t *testing.T) {
 	block, _ := JsonToBlock(mockedBlock)
 
 	// one trigger VS all transactions
-	var t1 Trigger = TriggerTransactionNonce{UUID, SmallerThan{1000}}
+	t1 := TriggerTransactionNonce{UUID, SmallerThan{1000}}
 	triggers := []Trigger{t1}
 	matchingTriggers1 := GetTriggersForTransactions(triggers, block.Transactions)
 	if len(matchingTriggers1) != 3 {
@@ -318,7 +318,7 @@ func TestGetTriggersForTransactions(t *testing.T) {
 	}
 
 	// one trigger VS all transactions
-	var t2 Trigger = TriggerTransactionNonce{UUID, GreaterThan{5000}}
+	t2 := TriggerTransactionNonce{UUID, GreaterThan{5000}}
 	triggers2 := []Trigger{t2}
 	matchingTriggers2 := GetTriggersForTransactions(triggers2, block.Transactions)
 	if len(matchingTriggers2) != 5 {
@@ -329,6 +329,14 @@ func TestGetTriggersForTransactions(t *testing.T) {
 	triggers3 := []Trigger{t1, t2}
 	matchingTriggers3 := GetTriggersForTransactions(triggers3, block.Transactions)
 	if len(matchingTriggers3) != 8 {
+		t.Error()
+	}
+
+	// inBetween filter
+	t4 := TriggerTransactionNonce{UUID, InBetween{1000, 5000}}
+	triggers4 := []Trigger{t4}
+	matchingTriggers4 := GetTriggersForTransactions(triggers4, block.Transactions)
+	if len(matchingTriggers4) != 2 {
 		t.Error()
 	}
 }

@@ -27,7 +27,7 @@ func (tg TriggerTransactionFrom) GetUUID() uuid.UUID {
 
 func (tg TriggerTransactionFrom) checkCondition(ts *jsonrpc_client.Transaction) (uuid.UUID, bool) {
 
-	return tg.uuid, tg.wallet == ts.From
+	return tg.GetUUID(), tg.wallet == ts.From
 }
 
 // Transaction NONCE
@@ -43,8 +43,9 @@ func (tg TriggerTransactionNonce) checkCondition(ts *jsonrpc_client.Transaction)
 		return tg.GetUUID(), ts.Nonce > v.value
 	case SmallerThan:
 		return tg.GetUUID(), ts.Nonce < v.value
+	case InBetween:
+		return tg.GetUUID(), ts.Nonce > v.lowerBound && ts.Nonce < v.upperBound
 	default:
-		// TODO: this should never happen. Return an error perhaps?
 		return tg.GetUUID(), false
 	}
 }
