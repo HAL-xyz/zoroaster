@@ -257,7 +257,6 @@ const mockedBlock = `
 
 var UUID, _ = uuid.FromString("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
 
-
 func TestConvertJsonToBlock(t *testing.T) {
 
 	_, err := JsonToBlock(mockedBlock)
@@ -287,7 +286,7 @@ func TestTriggerTransactionNonce(t *testing.T) {
 
 	block, _ := JsonToBlock(mockedBlock)
 
-	var trigger Trigger = TriggerTransactionNonce{UUID,GreaterThan{13626}}
+	var trigger Trigger = TriggerTransactionNonce{UUID, GreaterThan{13626}}
 	_, ok := TriggerAction(trigger, block.Transactions[9])
 	if ok != true {
 		t.Error()
@@ -304,5 +303,32 @@ func TestTriggerTransactionNonce(t *testing.T) {
 	if ok3 != true {
 		t.Error()
 	}
+}
 
+func TestGetTriggersForTransactions(t *testing.T) {
+
+	block, _ := JsonToBlock(mockedBlock)
+
+	// one trigger VS all transactions
+	var t1 Trigger = TriggerTransactionNonce{UUID, SmallerThan{1000}}
+	triggers := []Trigger{t1}
+	matchingTriggers1 := GetTriggersForTransactions(triggers, block.Transactions)
+	if len(matchingTriggers1) != 3 {
+		t.Error()
+	}
+
+	// one trigger VS all transactions
+	var t2 Trigger = TriggerTransactionNonce{UUID, GreaterThan{5000}}
+	triggers2 := []Trigger{t2}
+	matchingTriggers2 := GetTriggersForTransactions(triggers2, block.Transactions)
+	if len(matchingTriggers2) != 5 {
+		t.Error()
+	}
+
+	// triggers VS transactions
+	triggers3 := []Trigger{t1, t2}
+	matchingTriggers3 := GetTriggersForTransactions(triggers3, block.Transactions)
+	if len(matchingTriggers3) != 8 {
+		t.Error()
+	}
 }

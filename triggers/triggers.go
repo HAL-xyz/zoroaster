@@ -7,7 +7,7 @@ import (
 
 /*
 	Triggers implement the Trigger interface. Each Action will reference a Trigger.uuid.
- */
+*/
 
 type Trigger interface {
 	GetUUID() uuid.UUID
@@ -16,11 +16,12 @@ type Trigger interface {
 
 // Transaction FROM
 type TriggerTransactionFrom struct {
-	uuid uuid.UUID
+	uuid   uuid.UUID
 	wallet string
 }
 
 func (tg TriggerTransactionFrom) GetUUID() uuid.UUID {
+
 	return tg.uuid
 }
 
@@ -31,7 +32,7 @@ func (tg TriggerTransactionFrom) checkCondition(ts *jsonrpc_client.Transaction) 
 
 // Transaction NONCE
 type TriggerTransactionNonce struct {
-	uuid uuid.UUID
+	uuid   uuid.UUID
 	filter Filter
 }
 
@@ -49,14 +50,26 @@ func (tg TriggerTransactionNonce) checkCondition(ts *jsonrpc_client.Transaction)
 }
 
 func (tg TriggerTransactionNonce) GetUUID() uuid.UUID {
+
 	return tg.uuid
 }
 
-
-
-// TODO: this will read an array of transactions I guess
 func TriggerAction(trigger Trigger, transaction jsonrpc_client.Transaction) (uuid.UUID, bool) {
 
 	return trigger.checkCondition(&transaction)
+}
 
+func GetTriggersForTransactions(tgs []Trigger, tss []jsonrpc_client.Transaction) []uuid.UUID {
+
+	matchingTriggersUUIDs := []uuid.UUID{}
+
+	for _, tg := range tgs {
+		for _, ts := range tss {
+			tid, ok := TriggerAction(tg, ts)
+			if ok {
+				matchingTriggersUUIDs = append(matchingTriggersUUIDs, tid)
+			}
+		}
+	}
+	return matchingTriggersUUIDs
 }
