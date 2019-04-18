@@ -16,10 +16,10 @@ func DecodeInputData(data string, tsABI string) map[string]interface{} {
 	}
 
 	/*
-	decode method signature
-	strip hex prefix (0x)
-	signature is the first 32 bits of the has of the function
-	in HEX 1 char = 4 bits, so 32 bits = 8 chars
+		decode method signature
+		strip hex prefix (0x)
+		signature is the first 32 bits of the has of the function
+		in HEX 1 char = 4 bits, so 32 bits = 8 chars
 	*/
 	decodedSig, err := hex.DecodeString(data[2:10])
 	if err != nil {
@@ -64,12 +64,12 @@ func DecodeInputData(data string, tsABI string) map[string]interface{} {
 	//}
 
 	/*
-	Decoding Solidity => Go
+		Decoding Solidity => Go
 
-	uint256[8] => [8]*big.Int
-	addresses[4] => [4]common.Address
-	uint8[2] => [2]uint8
-	bytes32[4] => [4][32]uint8 (array of 4 arrays of 32 uint8 each)
+		uint256[8] => [8]*big.Int
+		addresses[4] => [4]common.Address
+		uint8[2] => [2]uint8
+		bytes32[4] => [4][32]uint8 (array of 4 arrays of 32 uint8 each)
 	*/
 
 }

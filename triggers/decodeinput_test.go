@@ -28,7 +28,7 @@ func TestDecodeInputData(t *testing.T) {
 	}
 
 	v := res["v"].([2]uint8)
-	y := [2]uint8{27,28}
+	y := [2]uint8{27, 28}
 	if v != y {
 		t.Error()
 	}
