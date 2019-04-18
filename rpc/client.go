@@ -17,19 +17,25 @@ func main() {
 
 	client := jsonrpc_client.EthereumClient{ENDPOINT}
 
-	lastBlockNumber, err := client.Eth_blockNumber()
-	if err != nil {
-		fmt.Println(err)
-	}
-	fmt.Println(lastBlockNumber)
+	//lastBlockNumber, err := client.Eth_blockNumber()
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println(lastBlockNumber)
+	//
+	//lastBlock, err := client.Eth_getBlockByNumber(lastBlockNumber, true)
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//
+	//js, _ := json2.Marshal(lastBlock)
+	//fmt.Println(string(js))
 
-	lastBlock, err := client.Eth_getBlockByNumber(lastBlockNumber, true)
-	if err != nil {
-		fmt.Println(err)
-	}
+	trans, _ := client.Eth_getTransactionByHash("0x79c0518b28bd2cfaf722504cccfbb283878a655dd40907527578ced4d9028c66")
+	js2, _ := json2.Marshal(trans)
+	fmt.Println(string(js2))
 
-	js, err := json2.Marshal(lastBlock)
-	fmt.Println(string(js))
+
 
 
 }
