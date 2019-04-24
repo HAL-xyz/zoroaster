@@ -64,46 +64,73 @@ type Conditioner interface {
 type Condition struct {
 }
 
-// Implement Conditioner interface
+type Predicate int
+
+const (
+	Eq Predicate = iota
+	BiggerThan
+	SmallerThan
+)
+
+// Implements Conditioner interface
 func (Condition) Yes() {}
 
 type ConditionTo struct {
 	Condition
-	Predicate string
+	Predicate Predicate
 	Attribute string
 }
 
 type ConditionNonce struct {
 	Condition
-	Predicate string
+	Predicate Predicate
 	Attribute int
 }
 
 type FunctionParamCondition struct {
 	Condition
-	Predicate string
+	Predicate Predicate
 	Attribute string
 }
 
+func unpackPredicate(p string) Predicate {
+	switch p {
+	case "Eq":
+		return Eq
+	case "BiggerThan":
+		return BiggerThan
+	case "SmallerThan":
+		return SmallerThan
+	default:
+		return -1
+	}
+}
+
 func makeCondition(fjs FilterJson) (Conditioner, error) {
+
+	pred := unpackPredicate(fjs.Condition.Predicate)
+	if pred < 0 {
+		return nil, fmt.Errorf("unsupported predicate type %s", fjs.Condition.Predicate)
+	}
+
 	if fjs.FilterType == "BasicFilter" {
 		switch fjs.ParameterName {
 		case "To":
-			c := ConditionTo{Condition{}, fjs.Condition.Predicate, fjs.Condition.Attribute}
+			c := ConditionTo{Condition{}, pred, fjs.Condition.Attribute}
 			return c, nil
 		case "Nonce":
 			nonce, err := strconv.Atoi(fjs.Condition.Attribute)
 			if err != nil {
 				return nil, err
 			}
-			c := ConditionNonce{Condition{}, fjs.Condition.Predicate, nonce}
+			c := ConditionNonce{Condition{}, pred, nonce}
 			return c, nil
 		default:
 			return nil, fmt.Errorf("parameter name not supported: %s", fjs.ParameterName)
 		}
 	}
 	if fjs.FilterType == "CheckFunctionParameter" {
-		c := FunctionParamCondition{Condition{}, fjs.Condition.Predicate, fjs.Condition.Attribute}
+		c := FunctionParamCondition{Condition{}, pred, fjs.Condition.Attribute}
 		return c, nil
 	}
 	return nil, fmt.Errorf("unsupported filter type %s", fjs.FilterType)
@@ -149,7 +176,7 @@ func (fjs FilterJson) ToFilter() (*Filter, error) {
 	return &f, nil
 }
 
-//////////////////// TODO BREAK UP TO DIFFERENT FILE
+//////////////////// TODO BREAK UP TO DIFFERENT FILE (Json stuff, types, executions)
 
 // TODO ABI
 // TODO AND logic
@@ -170,14 +197,15 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 
 	switch v := f.Condition.(type) {
 	case ConditionTo:
-		if v.Attribute == *ts.To {
-			return true
-
-		}
-	// TODO implement predicates
+		return v.Attribute == *ts.To
 	case ConditionNonce:
-		if v.Attribute > ts.Nonce {
-			return true
+		switch v.Predicate {
+		case Eq:
+			return v.Attribute == ts.Nonce
+		case BiggerThan:
+			return ts.Nonce > v.Attribute
+		case SmallerThan:
+			return ts.Nonce < v.Attribute
 		}
 	// TODO extract to func?
 	// TODO use typed errors?
