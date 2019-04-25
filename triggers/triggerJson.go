@@ -78,6 +78,7 @@ func (fjs FilterJson) ToFilter() (*Filter, error) {
 	return &f, nil
 }
 
+// TODO implement all Filters
 func makeCondition(fjs FilterJson) (Conditioner, error) {
 
 	pred := unpackPredicate(fjs.Condition.Predicate)

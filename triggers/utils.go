@@ -30,6 +30,15 @@ func getBlockFromFile(path string) *jsonrpc_client.Block {
 	return block
 }
 
+func getTriggerFromFile(path string) *Trigger {
+	triggerSrc, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return getTriggerFromJson(string(triggerSrc))
+}
+
 func getTriggerFromJson(json string) *Trigger {
 	tjs, err := NewTriggerJson(json)
 	if err != nil {

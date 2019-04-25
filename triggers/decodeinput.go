@@ -3,16 +3,16 @@ package trigger
 import (
 	"encoding/hex"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"log"
 	"strings"
 )
 
-func DecodeInputData(data string, tsABI string) map[string]interface{} {
+func DecodeInputData(data string, tsABI string) (map[string]interface{}, error) {
 
 	// load contract ABI
 	abi, err := abi.JSON(strings.NewReader(tsABI))
 	if err != nil {
-		log.Fatal(err)
+		println("I fail here")
+		return nil, err
 	}
 
 	/*
@@ -23,19 +23,19 @@ func DecodeInputData(data string, tsABI string) map[string]interface{} {
 	*/
 	decodedSig, err := hex.DecodeString(data[2:10])
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	// recover Method from signature and ABI
 	method, err := abi.MethodById(decodedSig)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	// decode function arguments
 	decodedData, err := hex.DecodeString(data[10:])
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
 	getMap := map[string]interface{}{}
@@ -43,10 +43,10 @@ func DecodeInputData(data string, tsABI string) map[string]interface{} {
 	// unpack method inputs
 	err = method.Inputs.UnpackIntoMap(getMap, decodedData)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 
-	return getMap
+	return getMap, nil
 
 	// Unpack into struct:
 	//

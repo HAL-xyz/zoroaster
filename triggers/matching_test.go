@@ -2,39 +2,60 @@ package trigger
 
 import "testing"
 
+// Testing one Filter VS one Transaction, Basic Filters
 func TestValidateFilter(t *testing.T) {
 
-	block := getBlockFromFile("../resources/block.json")
-	trigger := getTriggerFromJson(trigger)
-	abi := `[{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"pausedPublic","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_value","type":"uint256"}],"name":"burn","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"pausedOwnerAdmin","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_subtractedValue","type":"uint256"}],"name":"decreaseApproval","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"}],"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_value","type":"uint256"}],"name":"burnFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newAdmin","type":"address"}],"name":"changeAdmin","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_addedValue","type":"uint256"}],"name":"increaseApproval","outputs":[{"name":"success","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"token","type":"address"},{"name":"amount","type":"uint256"}],"name":"emergencyERC20Drain","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newPausedPublic","type":"bool"},{"name":"newPausedOwnerAdmin","type":"bool"}],"name":"pause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"admin","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"inputs":[{"name":"_admin","type":"address"},{"name":"_totalTokenAmount","type":"uint256"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_burner","type":"address"},{"indexed":false,"name":"_value","type":"uint256"}],"name":"Burn","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"previousAdmin","type":"address"},{"indexed":true,"name":"newAdmin","type":"address"}],"name":"AdminTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newState","type":"bool"}],"name":"PausePublic","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newState","type":"bool"}],"name":"PauseOwnerAdmin","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}]`
-
-	// Testing one filter VS one transaction
+	block := getBlockFromFile("../resources/blocks/block1.json")
+	trigger := getTriggerFromFile("../resources/triggers/t1.json")
 
 	// BasicFilter / To
 
-	if ValidateFilter(block.Transactions[0], trigger.Filters[0], abi) != true {
+	if ValidateFilter(block.Transactions[0], trigger.Filters[0], trigger.ContractABI) != true {
 		t.Error("Basic Filter / To should match")
 	}
-	if ValidateFilter(block.Transactions[1], trigger.Filters[0], abi) != false {
+	if ValidateFilter(block.Transactions[1], trigger.Filters[0], trigger.ContractABI) != false {
 		t.Error("Basic Filter / To should NOT match")
 	}
 
 	// BasicFilter / Nonce
-	if ValidateFilter(block.Transactions[0], trigger.Filters[3], abi) != true {
+	if ValidateFilter(block.Transactions[0], trigger.Filters[2], trigger.ContractABI) != true {
 		t.Error("Basic Filter / Nonce should match")
 	}
-	if ValidateFilter(block.Transactions[4], trigger.Filters[3], abi) != false {
+	if ValidateFilter(block.Transactions[4], trigger.Filters[2], trigger.ContractABI) != false {
 		t.Error("Basic Filter / Nonce should match")
 	}
+}
+
+// Testing one Filter VS one Transaction, Function Params
+func TestValidateFilter2(t *testing.T) {
+
+	block := getBlockFromFile("../resources/blocks/block1.json")
+	trigger := getTriggerFromFile("../resources/triggers/t1.json")
 
 	// FunctionParameter / Address
 
-	if ValidateFilter(block.Transactions[0], trigger.Filters[1], abi) != true {
+	if ValidateFilter(block.Transactions[0], trigger.Filters[1], trigger.ContractABI) != true {
 		t.Error("FuncParam should match")
 	}
 
-	if ValidateFilter(block.Transactions[1], trigger.Filters[1], abi) != false {
+	if ValidateFilter(block.Transactions[1], trigger.Filters[1], trigger.ContractABI) != false {
 		t.Error("FuncParam should NOT match")
 	}
+}
 
+// Testing one Trigger vs one Transaction
+func TestValidateTrigger(t *testing.T) {
+
+	block := getBlockFromFile("../resources/blocks/block1.json")
+	trigger := getTriggerFromFile("../resources/triggers/t1.json")
+
+	trig, ok := ValidateTrigger(*trigger, block.Transactions[0])
+	if trig.TriggerId != 101 || ok != true {
+		t.Error()
+	}
+
+	trig2, ok2 := ValidateTrigger(*trigger, block.Transactions[1])
+	if trig2 != nil || ok2 != false {
+		t.Error()
+	}
 }

@@ -3,16 +3,16 @@ package trigger
 type Trigger struct {
 	TriggerId   int
 	TriggerName string
-	TriggerType string
+	TriggerType string // TODO use enum
 	ContractABI string
 	Filters     []Filter
 }
 
 type Filter struct {
-	FilterType    string
+	FilterType    string // TODO use enum
 	ToContract    string
 	ParameterName string
-	ParameterType string
+	ParameterType string // TODO use enum
 	Condition     Conditioner
 }
 
@@ -23,16 +23,7 @@ type Conditioner interface {
 type Condition struct {
 }
 
-// Implements Conditioner interface
-func (Condition) I() {}
-
-type Predicate int
-
-const (
-	Eq Predicate = iota
-	BiggerThan
-	SmallerThan
-)
+func (Condition) I() {} // Implements Conditioner interface
 
 type ConditionTo struct {
 	Condition
@@ -50,4 +41,16 @@ type FunctionParamCondition struct {
 	Condition
 	Predicate Predicate
 	Attribute string
+}
+
+type Predicate int
+
+const (
+	Eq Predicate = iota
+	BiggerThan
+	SmallerThan
+)
+
+func (p Predicate) String() string {
+	return [...]string{"Eq", "BiggerThan", "SmallerThan"}[p]
 }
