@@ -1,6 +1,8 @@
 package trigger
 
-import "testing"
+import (
+	"testing"
+)
 
 // Testing one Filter VS one Transaction, Basic Filters
 func TestValidateFilter(t *testing.T) {
@@ -58,4 +60,26 @@ func TestValidateTrigger(t *testing.T) {
 	if trig2 != nil || ok2 != false {
 		t.Error()
 	}
+}
+
+func TestValidateTrigger2(t *testing.T) {
+
+	block := getBlockFromFile("../resources/blocks/block1.json")
+	trigger := getTriggerFromFile("../resources/triggers/t2.json")
+
+	trig, ok := ValidateTrigger(*trigger, block.Transactions[6])
+	if trig.TriggerId != 102 || ok != true {
+		t.Error()
+	}
+
+	trig2, ok2 := ValidateTrigger(*trigger, block.Transactions[1])
+	if trig2 != nil || ok2 != false {
+		t.Error()
+	}
+
+	trig3, ok3 := ValidateTrigger(*trigger, block.Transactions[8])
+	if trig3.TriggerId != 102 || ok3 != true {
+		t.Error()
+	}
+
 }

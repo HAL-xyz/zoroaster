@@ -4,6 +4,7 @@ import (
 	"github.com/INFURA/go-libs/jsonrpc_client"
 	"github.com/ethereum/go-ethereum/common"
 	"log"
+	"math/big"
 )
 
 func ValidateTrigger(trigger Trigger, transaction jsonrpc_client.Transaction) (*Trigger, bool) {
@@ -47,20 +48,33 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 				return false
 			}
 
-			// extract params
+			// extract param
 			contractArg := funcArgs[f.ParameterName]
 			if contractArg == nil {
-				log.Println("Cannot find params in the function")
+				log.Printf("Cannot find param %s in the contract", f.ParameterName)
 				return false
 			}
 
 			// cast
-			if f.ParameterType == "Address" {
+			switch f.ParameterType {
+			case "address":
 				triggerAddress := common.HexToAddress(v.Attribute)
 				if triggerAddress == contractArg {
 					return true
 				}
-			} else {
+			case "uint256":
+				contractValue := contractArg.(*big.Int)
+				triggerValue := new(big.Int)
+				triggerValue.SetString(v.Attribute, 10)
+				switch v.Predicate {
+				case Eq:
+					return contractValue.Cmp(triggerValue) == 0
+				case SmallerThan:
+					return contractValue.Cmp(triggerValue) == -1
+				case BiggerThan:
+					return contractValue.Cmp(triggerValue) == 1
+				}
+			default:
 				log.Println("Parameter type not supported", f.ParameterType)
 			}
 		}

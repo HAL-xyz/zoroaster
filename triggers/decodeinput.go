@@ -11,7 +11,6 @@ func DecodeInputData(data string, tsABI string) (map[string]interface{}, error) 
 	// load contract ABI
 	abi, err := abi.JSON(strings.NewReader(tsABI))
 	if err != nil {
-		println("I fail here")
 		return nil, err
 	}
 
