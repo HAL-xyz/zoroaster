@@ -81,5 +81,16 @@ func TestValidateTrigger2(t *testing.T) {
 	if trig3.TriggerId != 102 || ok3 != true {
 		t.Error()
 	}
+}
+
+// Testing one Trigger vs one Block
+func TestMatchTrigger(t *testing.T) {
+	block := getBlockFromFile("../resources/blocks/block1.json")
+	trigger := getTriggerFromFile("../resources/triggers/t2.json")
+
+	matches := MatchTrigger(*trigger, block)
+	if len(matches) != 2 || matches[0].TriggerId != matches[1].TriggerId {
+		t.Error()
+	}
 
 }

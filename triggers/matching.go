@@ -7,6 +7,18 @@ import (
 	"math/big"
 )
 
+func MatchTrigger(trigger Trigger, block *jsonrpc_client.Block) []*Trigger {
+	var matchedTriggers []*Trigger
+	for _, trans := range block.Transactions {
+		_, ok := ValidateTrigger(trigger, trans)
+		if ok {
+			matchedTriggers = append(matchedTriggers, &trigger)
+		}
+	}
+	return matchedTriggers
+}
+
+// TODO profile memory usage for this; perhaps take a *Trigger instead
 func ValidateTrigger(trigger Trigger, transaction jsonrpc_client.Transaction) (*Trigger, bool) {
 	match := true
 	for _, f := range trigger.Filters {
