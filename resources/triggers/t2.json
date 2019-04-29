@@ -1,6 +1,6 @@
 {
   "TriggerId":102,
-  "TriggerName":"Basic + CheckFuncParam, correct ABI given",
+  "TriggerName":"Basic/To, FP/uint256",
   "TriggerType":"WatchTransactions",
   "CreatorId":223,
   "CreationDate":"2019-03-24 17:45:12",

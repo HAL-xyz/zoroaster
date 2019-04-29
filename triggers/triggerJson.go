@@ -88,6 +88,9 @@ func makeCondition(fjs FilterJson) (Conditioner, error) {
 
 	if fjs.FilterType == "BasicFilter" {
 		switch fjs.ParameterName {
+		case "From":
+			c := ConditionFrom{Condition{}, pred, fjs.Condition.Attribute}
+			return c, nil
 		case "To":
 			c := ConditionTo{Condition{}, pred, fjs.Condition.Attribute}
 			return c, nil

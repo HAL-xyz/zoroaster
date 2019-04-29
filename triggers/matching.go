@@ -37,6 +37,8 @@ func ValidateTrigger(trigger Trigger, transaction jsonrpc_client.Transaction) (*
 func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 
 	switch v := f.Condition.(type) {
+	case ConditionFrom:
+		return v.Attribute == ts.From
 	case ConditionTo:
 		return v.Attribute == *ts.To
 	case ConditionNonce:

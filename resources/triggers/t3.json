@@ -1,0 +1,18 @@
+{
+  "TriggerId":103,
+  "TriggerName":"Basic/From",
+  "TriggerType":"WatchTransactions",
+  "CreatorId":223,
+  "CreationDate":"2019-03-24 17:45:12",
+  "ContractABI":"",
+  "Filters":[
+    {
+      "FilterType":"BasicFilter",
+      "ParameterName":"From",
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"0x2f1233ec3a4930fd95874291db7da9e90dfb2f03"
+      }
+    }
+  ]
+}

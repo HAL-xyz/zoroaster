@@ -45,6 +45,21 @@ func TestValidateFilter2(t *testing.T) {
 	}
 }
 
+// BasicFilter / From
+func TestValidateFilter3(t *testing.T) {
+
+	block := getBlockFromFile("../resources/blocks/block1.json")
+	trigger := getTriggerFromFile("../resources/triggers/t3.json")
+
+	if ValidateFilter(block.Transactions[0], trigger.Filters[0], trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	if ValidateFilter(block.Transactions[5], trigger.Filters[0], trigger.ContractABI) != false {
+		t.Error()
+	}
+}
+
 // Testing one Trigger vs one Transaction
 func TestValidateTrigger(t *testing.T) {
 

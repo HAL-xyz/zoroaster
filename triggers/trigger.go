@@ -25,6 +25,12 @@ type Condition struct {
 
 func (Condition) I() {} // Implements Conditioner interface
 
+type ConditionFrom struct {
+	Condition
+	Predicate Predicate
+	Attribute string
+}
+
 type ConditionTo struct {
 	Condition
 	Predicate Predicate
