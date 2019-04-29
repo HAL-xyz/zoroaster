@@ -9,7 +9,6 @@
     {
       "FilterType":"BasicFilter",
       "ParameterName":"To",
-      "ParameterType":"address",
       "Condition":{
         "Predicate":"Eq",
         "Attribute":"0xe8663a64a96169ff4d95b4299e7ae9a76b905b31"
@@ -29,7 +28,6 @@
     {
       "FilterType":"BasicFilter",
       "ParameterName":"Nonce",
-      "ParameterType":"int",
       "Condition":{
         "Predicate":"BiggerThan",
         "Attribute": "1000"

@@ -9,7 +9,6 @@
     {
       "FilterType":"BasicFilter",
       "ParameterName":"To",
-      "ParameterType":"address",
       "Condition":{
         "Predicate":"Eq",
         "Attribute":"0x174bfa6600bf90c885c7c01c7031389ed1461ab9"
