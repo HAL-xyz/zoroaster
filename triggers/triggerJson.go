@@ -3,6 +3,7 @@ package trigger
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"strconv"
 )
 
@@ -81,32 +82,53 @@ func (fjs FilterJson) ToFilter() (*Filter, error) {
 // TODO implement all Filters
 func makeCondition(fjs FilterJson) (Conditioner, error) {
 
-	pred := unpackPredicate(fjs.Condition.Predicate)
-	if pred < 0 {
+	predicate := unpackPredicate(fjs.Condition.Predicate)
+	if predicate < 0 {
 		return nil, fmt.Errorf("unsupported predicate type %s", fjs.Condition.Predicate)
+	}
+	attribute := fjs.Condition.Attribute
+	if len(attribute) < 1 {
+		return nil, fmt.Errorf("unsupported attribute type %s", attribute)
 	}
 
 	if fjs.FilterType == "BasicFilter" {
 		switch fjs.ParameterName {
 		case "From":
-			c := ConditionFrom{Condition{}, pred, fjs.Condition.Attribute}
-			return c, nil
+			return ConditionFrom{Condition{}, predicate, attribute}, nil
 		case "To":
-			c := ConditionTo{Condition{}, pred, fjs.Condition.Attribute}
-			return c, nil
+			return ConditionTo{Condition{}, predicate, attribute}, nil
 		case "Nonce":
-			nonce, err := strconv.Atoi(fjs.Condition.Attribute)
+			nonce, err := strconv.Atoi(attribute)
 			if err != nil {
 				return nil, err
 			}
-			c := ConditionNonce{Condition{}, pred, nonce}
-			return c, nil
+			return ConditionNonce{Condition{}, predicate, nonce}, nil
+		case "Gas":
+			gas, err := strconv.Atoi(attribute)
+			if err != nil {
+				return nil, err
+			}
+			return ConditionGas{Condition{}, predicate, gas}, nil
+		case "GasPrice":
+			gasPrice := new(big.Int)
+			_, ok := gasPrice.SetString(attribute, 0)
+			if !ok {
+				return nil, fmt.Errorf("invalid gasPrice %v", attribute)
+			}
+			return ConditionGasPrice{Condition{}, predicate, gasPrice}, nil
+		case "Value":
+			value := new(big.Int)
+			_, ok := value.SetString(attribute, 0)
+			if !ok {
+				return nil, fmt.Errorf("invalid value %v", attribute)
+			}
+			return ConditionValue{Condition{}, predicate, value}, nil
 		default:
 			return nil, fmt.Errorf("parameter name not supported: %s", fjs.ParameterName)
 		}
 	}
 	if fjs.FilterType == "CheckFunctionParameter" {
-		c := FunctionParamCondition{Condition{}, pred, fjs.Condition.Attribute}
+		c := FunctionParamCondition{Condition{}, predicate, fjs.Condition.Attribute}
 		return c, nil
 	}
 	return nil, fmt.Errorf("unsupported filter type %s", fjs.FilterType)

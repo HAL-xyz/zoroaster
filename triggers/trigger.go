@@ -1,5 +1,7 @@
 package trigger
 
+import "math/big"
+
 type Trigger struct {
 	TriggerId   int
 	TriggerName string
@@ -41,6 +43,24 @@ type ConditionNonce struct {
 	Condition
 	Predicate Predicate
 	Attribute int
+}
+
+type ConditionGas struct {
+	Condition
+	Predicate Predicate
+	Attribute int
+}
+
+type ConditionGasPrice struct {
+	Condition
+	Predicate Predicate
+	Attribute *big.Int
+}
+
+type ConditionValue struct {
+	Condition
+	Predicate Predicate
+	Attribute *big.Int
 }
 
 type FunctionParamCondition struct {

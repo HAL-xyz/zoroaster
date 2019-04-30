@@ -42,14 +42,14 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 	case ConditionTo:
 		return v.Attribute == *ts.To
 	case ConditionNonce:
-		switch v.Predicate {
-		case Eq:
-			return v.Attribute == ts.Nonce
-		case BiggerThan:
-			return ts.Nonce > v.Attribute
-		case SmallerThan:
-			return ts.Nonce < v.Attribute
-		}
+		return validatePredInt(v.Predicate, ts.Nonce, v.Attribute)
+	case ConditionValue:
+		return validatePredBigInt(v.Predicate, ts.Value, v.Attribute)
+	case ConditionGas:
+		return validatePredInt(v.Predicate, ts.Gas, v.Attribute)
+	case ConditionGasPrice:
+		return validatePredBigInt(v.Predicate, ts.GasPrice, v.Attribute)
+
 	case FunctionParamCondition:
 
 		// check smart contract TO
@@ -80,18 +80,13 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 				contractValue := contractArg.(*big.Int)
 				triggerValue := new(big.Int)
 				triggerValue.SetString(v.Attribute, 10)
-				switch v.Predicate {
-				case Eq:
-					return contractValue.Cmp(triggerValue) == 0
-				case SmallerThan:
-					return contractValue.Cmp(triggerValue) == -1
-				case BiggerThan:
-					return contractValue.Cmp(triggerValue) == 1
-				}
+				return validatePredBigInt(v.Predicate, contractValue, triggerValue)
 			default:
 				log.Println("Parameter type not supported", f.ParameterType)
 			}
 		}
+	default:
+		log.Fatalf("filter not supported of type %T", f.Condition )
 	}
 	return false
 }

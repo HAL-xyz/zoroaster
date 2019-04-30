@@ -60,6 +60,41 @@ func TestValidateFilter3(t *testing.T) {
 	}
 }
 
+// BasicFilter / Value, Gas, GasPrice
+func TestValidateFilter4(t *testing.T) {
+
+	block := getBlockFromFile("../resources/blocks/block1.json")
+	trigger := getTriggerFromFile("../resources/triggers/t4.json")
+
+	// Value
+	if ValidateFilter(block.Transactions[2], trigger.Filters[0], trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	if ValidateFilter(block.Transactions[0], trigger.Filters[0], trigger.ContractABI) != false {
+		t.Error()
+	}
+
+	// Gas
+	if ValidateFilter(block.Transactions[0], trigger.Filters[1], trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	if ValidateFilter(block.Transactions[5], trigger.Filters[1], trigger.ContractABI) != false {
+		t.Error()
+	}
+
+	// GasPrice
+	if ValidateFilter(block.Transactions[7], trigger.Filters[2], trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	if ValidateFilter(block.Transactions[4], trigger.Filters[2], trigger.ContractABI) != false {
+		t.Error()
+	}
+
+}
+
 // Testing one Trigger vs one Transaction
 func TestValidateTrigger(t *testing.T) {
 
