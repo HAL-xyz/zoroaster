@@ -5,6 +5,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"log"
 	"math/big"
+	"regexp"
 )
 
 func MatchTrigger(trigger Trigger, block *jsonrpc_client.Block) []*Trigger {
@@ -51,12 +52,10 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 		return validatePredBigInt(v.Predicate, ts.GasPrice, v.Attribute)
 
 	case FunctionParamCondition:
-
 		if len(abi) == 0 {
 			log.Println("No ABI provided")
 			return false
 		}
-
 		// check smart contract TO
 		if f.ToContract == *ts.To {
 
@@ -74,7 +73,15 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 				return false
 			}
 
-			// cast
+			// cast static arrays of bytes1[] to bytes32[]
+			var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[\]`)
+			if bytesArrayRx.MatchString(f.ParameterType) {
+				arg := Decode2DBytesArray(contractArg)
+				contractValues := MultArrayToHex(arg)
+				return validatePredStringArray(v.Predicate, contractValues, v.Attribute)
+			}
+
+			// cast other types
 			switch f.ParameterType {
 			case "address":
 				triggerAddress := common.HexToAddress(v.Attribute)
@@ -100,3 +107,4 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 	}
 	return false
 }
+
