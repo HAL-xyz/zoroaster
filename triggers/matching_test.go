@@ -144,3 +144,15 @@ func TestMatchTrigger(t *testing.T) {
 	}
 
 }
+
+// Testing one Trigger vs one Block
+func TestMatchTrigger5(t *testing.T) {
+	block := getBlockFromFile("../resources/blocks/block2.json")
+	trigger := getTriggerFromFile("../resources/triggers/t5.json")
+
+	matches := MatchTrigger(*trigger, block)
+	if len(matches) != 1 {
+		t.Error()
+	}
+
+}
