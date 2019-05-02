@@ -52,6 +52,11 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 
 	case FunctionParamCondition:
 
+		if len(abi) == 0 {
+			log.Println("No ABI provided")
+			return false
+		}
+
 		// check smart contract TO
 		if f.ToContract == *ts.To {
 
@@ -81,6 +86,11 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 				triggerValue := new(big.Int)
 				triggerValue.SetString(v.Attribute, 10)
 				return validatePredBigInt(v.Predicate, contractValue, triggerValue)
+			case "uint256[]":
+				contractValues := contractArg.([]*big.Int)
+				triggerValue := new(big.Int)
+				triggerValue.SetString(v.Attribute, 10)
+				return validatePredBigIntArray(v.Predicate, contractValues, triggerValue)
 			default:
 				log.Println("Parameter type not supported", f.ParameterType)
 			}

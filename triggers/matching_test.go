@@ -95,6 +95,25 @@ func TestValidateFilter4(t *testing.T) {
 
 }
 
+// Function Params, uint256
+func TestValidateFilter5(t *testing.T) {
+
+	tx := getTransactionFromFile("../resources/transactions/tx1.json")
+	trigger := getTriggerFromFile("../resources/triggers/t5.json")
+
+	if ValidateFilter(*tx, trigger.Filters[0], trigger.ContractABI) != false {
+		t.Error()
+	}
+
+	if ValidateFilter(*tx, trigger.Filters[1], trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	if ValidateFilter(*tx, trigger.Filters[2], trigger.ContractABI) != false {
+		t.Error()
+	}
+}
+
 // Testing one Trigger vs one Transaction
 func TestValidateTrigger(t *testing.T) {
 
@@ -132,6 +151,7 @@ func TestValidateTrigger2(t *testing.T) {
 		t.Error()
 	}
 }
+
 
 // Testing one Trigger vs one Block
 func TestMatchTrigger(t *testing.T) {

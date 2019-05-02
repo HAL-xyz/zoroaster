@@ -75,6 +75,7 @@ const (
 	Eq Predicate = iota
 	BiggerThan
 	SmallerThan
+	IsIn
 )
 
 func (p Predicate) String() string {

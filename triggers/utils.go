@@ -7,6 +7,30 @@ import (
 	"log"
 )
 
+func JsonToTransaction(jsonTx string) (*jsonrpc_client.Transaction, error) {
+
+	var tx jsonrpc_client.Transaction
+	err := json.Unmarshal([]byte(jsonTx), &tx)
+	if err != nil {
+		return nil, err
+	}
+	return &tx, nil
+}
+
+func getTransactionFromFile(path string) *jsonrpc_client.Transaction {
+	txSrc, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tx, err := JsonToTransaction(string(txSrc))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return tx
+}
+
+
 func JsonToBlock(jsonBlock string) (*jsonrpc_client.Block, error) {
 
 	var block jsonrpc_client.Block

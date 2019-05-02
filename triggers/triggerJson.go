@@ -142,6 +142,8 @@ func unpackPredicate(p string) Predicate {
 		return BiggerThan
 	case "SmallerThan":
 		return SmallerThan
+	case "IsIn":
+		return IsIn
 	default:
 		return -1
 	}

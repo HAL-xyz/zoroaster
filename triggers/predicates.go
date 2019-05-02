@@ -10,8 +10,27 @@ func validatePredBigInt(p Predicate, cv *big.Int, tv *big.Int) bool {
 		return cv.Cmp(tv) == -1
 	case BiggerThan:
 		return cv.Cmp(tv) == 1
+	default:
+		return false
 	}
-	return false
+}
+
+func validatePredBigIntArray(p Predicate, cvs []*big.Int, tv *big.Int) bool {
+	switch p {
+	case SmallerThan:
+		return int64(len(cvs)) < tv.Int64()
+	case BiggerThan:
+		return int64(len(cvs)) > tv.Int64()
+	case IsIn:
+		for _, v := range cvs {
+			if v.Cmp(tv) == 0 {
+				return true
+			}
+		}
+		return false
+	default:
+		return false
+	}
 }
 
 func validatePredInt(p Predicate, cv int, tv int) bool {
