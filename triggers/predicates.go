@@ -1,6 +1,37 @@
 package trigger
 
-import "math/big"
+import (
+	"math/big"
+	"strconv"
+)
+
+// TODO return InvalidPredicateError instead of failing silently
+
+func validatePredStringArray(p Predicate, cv []string, tv string) bool {
+	switch p {
+	case IsIn:
+		for _, v := range cv {
+			if v == tv {
+				return true
+			}
+		}
+		return false
+	case SmallerThan:
+		v, err := strconv.Atoi(tv)
+		if err != nil {
+			return false
+		}
+		return len(cv) < v
+	case BiggerThan:
+		v, err := strconv.Atoi(tv)
+		if err != nil {
+			return false
+		}
+		return len(cv) > v
+	default:
+		return false
+	}
+}
 
 func validatePredBigInt(p Predicate, cv *big.Int, tv *big.Int) bool {
 	switch p {

@@ -1,6 +1,6 @@
 {
   "TriggerId":105,
-  "TriggerName":"FP/uint256[]",
+  "TriggerName":"FP/uint256[], bytes14[]",
   "TriggerType":"WatchTransactions",
   "CreatorId":223,
   "CreationDate":"2019-03-24 17:45:12",
@@ -37,6 +37,28 @@
       "Condition":{
         "Predicate":"BiggerThan",
         "Attribute":"5"
+      }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x097b3b7cb01945ba7e76804ddc2fdda2cce6ef43",
+      "FunctionName":"depositToken",
+      "ParameterName":"buy",
+      "ParameterType":"bytes14[]",
+      "Condition":{
+        "Predicate":"IsIn",
+        "Attribute":"11170bfa274328fcc100121d00ed"
+      }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x097b3b7cb01945ba7e76804ddc2fdda2cce6ef43",
+      "FunctionName":"depositToken",
+      "ParameterName":"buy",
+      "ParameterType":"bytes14[]",
+      "Condition":{
+        "Predicate":"SmallerThan",
+        "Attribute":"10"
       }
     }
   ]
