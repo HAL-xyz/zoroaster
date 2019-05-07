@@ -8,7 +8,7 @@ import (
 func TestDecode2DBytesArray(t *testing.T) {
 
 	// slice of static array
-	var data interface{} = [][4]uint8{{1,2,3,4},{0,0,0,255}}
+	var data interface{} = [][4]uint8{{1, 2, 3, 4}, {0, 0, 0, 255}}
 	dec := Decode2DBytesArray(data)
 
 	if len(dec) != 2 {
@@ -26,7 +26,7 @@ func TestDecode2DBytesArray(t *testing.T) {
 func TestDecode2DBytesArray2(t *testing.T) {
 
 	// array of arrays
-	var data interface{} = [2][4]uint8{{1,2,3,4},{0,0,0,255}}
+	var data interface{} = [2][4]uint8{{1, 2, 3, 4}, {0, 0, 0, 255}}
 	dec := Decode2DBytesArray(data)
 
 	if len(dec) != 2 {

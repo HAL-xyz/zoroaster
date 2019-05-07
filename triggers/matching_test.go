@@ -12,18 +12,18 @@ func TestValidateFilter(t *testing.T) {
 
 	// BasicFilter / To
 
-	if ValidateFilter(block.Transactions[0], trigger.Filters[0], trigger.ContractABI) != true {
+	if ValidateFilter(&block.Transactions[0], &trigger.Filters[0], &trigger.ContractABI) != true {
 		t.Error("Basic Filter / To should match")
 	}
-	if ValidateFilter(block.Transactions[1], trigger.Filters[0], trigger.ContractABI) != false {
+	if ValidateFilter(&block.Transactions[1], &trigger.Filters[0], &trigger.ContractABI) != false {
 		t.Error("Basic Filter / To should NOT match")
 	}
 
 	// BasicFilter / Nonce
-	if ValidateFilter(block.Transactions[0], trigger.Filters[2], trigger.ContractABI) != true {
+	if ValidateFilter(&block.Transactions[0], &trigger.Filters[2], &trigger.ContractABI) != true {
 		t.Error("Basic Filter / Nonce should match")
 	}
-	if ValidateFilter(block.Transactions[4], trigger.Filters[2], trigger.ContractABI) != false {
+	if ValidateFilter(&block.Transactions[4], &trigger.Filters[2], &trigger.ContractABI) != false {
 		t.Error("Basic Filter / Nonce should match")
 	}
 }
@@ -36,11 +36,11 @@ func TestValidateFilter2(t *testing.T) {
 
 	// FunctionParameter / Address
 
-	if ValidateFilter(block.Transactions[0], trigger.Filters[1], trigger.ContractABI) != true {
+	if ValidateFilter(&block.Transactions[0], &trigger.Filters[1], &trigger.ContractABI) != true {
 		t.Error("FuncParam should match")
 	}
 
-	if ValidateFilter(block.Transactions[1], trigger.Filters[1], trigger.ContractABI) != false {
+	if ValidateFilter(&block.Transactions[1], &trigger.Filters[1], &trigger.ContractABI) != false {
 		t.Error("FuncParam should NOT match")
 	}
 }
@@ -51,11 +51,11 @@ func TestValidateFilter3(t *testing.T) {
 	block := getBlockFromFile("../resources/blocks/block1.json")
 	trigger := getTriggerFromFile("../resources/triggers/t3.json")
 
-	if ValidateFilter(block.Transactions[0], trigger.Filters[0], trigger.ContractABI) != true {
+	if ValidateFilter(&block.Transactions[0], &trigger.Filters[0], &trigger.ContractABI) != true {
 		t.Error()
 	}
 
-	if ValidateFilter(block.Transactions[5], trigger.Filters[0], trigger.ContractABI) != false {
+	if ValidateFilter(&block.Transactions[5], &trigger.Filters[0], &trigger.ContractABI) != false {
 		t.Error()
 	}
 }
@@ -67,29 +67,29 @@ func TestValidateFilter4(t *testing.T) {
 	trigger := getTriggerFromFile("../resources/triggers/t4.json")
 
 	// Value
-	if ValidateFilter(block.Transactions[2], trigger.Filters[0], trigger.ContractABI) != true {
+	if ValidateFilter(&block.Transactions[2], &trigger.Filters[0], &trigger.ContractABI) != true {
 		t.Error()
 	}
 
-	if ValidateFilter(block.Transactions[0], trigger.Filters[0], trigger.ContractABI) != false {
+	if ValidateFilter(&block.Transactions[0], &trigger.Filters[0], &trigger.ContractABI) != false {
 		t.Error()
 	}
 
 	// Gas
-	if ValidateFilter(block.Transactions[0], trigger.Filters[1], trigger.ContractABI) != true {
+	if ValidateFilter(&block.Transactions[0], &trigger.Filters[1], &trigger.ContractABI) != true {
 		t.Error()
 	}
 
-	if ValidateFilter(block.Transactions[5], trigger.Filters[1], trigger.ContractABI) != false {
+	if ValidateFilter(&block.Transactions[5], &trigger.Filters[1], &trigger.ContractABI) != false {
 		t.Error()
 	}
 
 	// GasPrice
-	if ValidateFilter(block.Transactions[7], trigger.Filters[2], trigger.ContractABI) != true {
+	if ValidateFilter(&block.Transactions[7], &trigger.Filters[2], &trigger.ContractABI) != true {
 		t.Error()
 	}
 
-	if ValidateFilter(block.Transactions[4], trigger.Filters[2], trigger.ContractABI) != false {
+	if ValidateFilter(&block.Transactions[4], &trigger.Filters[2], &trigger.ContractABI) != false {
 		t.Error()
 	}
 
@@ -102,28 +102,27 @@ func TestValidateFilter5(t *testing.T) {
 	trigger := getTriggerFromFile("../resources/triggers/t5.json")
 
 	// uint256[]
-	if ValidateFilter(*tx, trigger.Filters[0], trigger.ContractABI) != false {
+	if ValidateFilter(tx, &trigger.Filters[0], &trigger.ContractABI) != false {
 		t.Error()
 	}
 
-	if ValidateFilter(*tx, trigger.Filters[1], trigger.ContractABI) != true {
+	if ValidateFilter(tx, &trigger.Filters[1], &trigger.ContractABI) != true {
 		t.Error()
 	}
 
-	if ValidateFilter(*tx, trigger.Filters[2], trigger.ContractABI) != false {
+	if ValidateFilter(tx, &trigger.Filters[2], &trigger.ContractABI) != false {
 		t.Error()
 	}
 
 	// bytes14[]
-	if ValidateFilter(*tx, trigger.Filters[3], trigger.ContractABI) != true {
+	if ValidateFilter(tx, &trigger.Filters[3], &trigger.ContractABI) != true {
 		t.Error()
 	}
 
-	if ValidateFilter(*tx, trigger.Filters[4], trigger.ContractABI) != true {
+	if ValidateFilter(tx, &trigger.Filters[4], &trigger.ContractABI) != true {
 		t.Error()
 	}
 }
-
 
 // Testing one Trigger vs one Transaction
 func TestValidateTrigger(t *testing.T) {
@@ -131,12 +130,12 @@ func TestValidateTrigger(t *testing.T) {
 	block := getBlockFromFile("../resources/blocks/block1.json")
 	trigger := getTriggerFromFile("../resources/triggers/t1.json")
 
-	trig, ok := ValidateTrigger(*trigger, block.Transactions[0])
+	trig, ok := ValidateTrigger(trigger, &block.Transactions[0])
 	if trig.TriggerId != 101 || ok != true {
 		t.Error()
 	}
 
-	trig2, ok2 := ValidateTrigger(*trigger, block.Transactions[1])
+	trig2, ok2 := ValidateTrigger(trigger, &block.Transactions[1])
 	if trig2 != nil || ok2 != false {
 		t.Error()
 	}
@@ -147,32 +146,30 @@ func TestValidateTrigger2(t *testing.T) {
 	block := getBlockFromFile("../resources/blocks/block1.json")
 	trigger := getTriggerFromFile("../resources/triggers/t2.json")
 
-	trig, ok := ValidateTrigger(*trigger, block.Transactions[6])
+	trig, ok := ValidateTrigger(trigger, &block.Transactions[6])
 	if trig.TriggerId != 102 || ok != true {
 		t.Error()
 	}
 
-	trig2, ok2 := ValidateTrigger(*trigger, block.Transactions[1])
+	trig2, ok2 := ValidateTrigger(trigger, &block.Transactions[1])
 	if trig2 != nil || ok2 != false {
 		t.Error()
 	}
 
-	trig3, ok3 := ValidateTrigger(*trigger, block.Transactions[8])
+	trig3, ok3 := ValidateTrigger(trigger, &block.Transactions[8])
 	if trig3.TriggerId != 102 || ok3 != true {
 		t.Error()
 	}
 }
-
 
 // Testing one Trigger vs one Block
 func TestMatchTrigger(t *testing.T) {
 	block := getBlockFromFile("../resources/blocks/block1.json")
 	trigger := getTriggerFromFile("../resources/triggers/t2.json")
 
-	matches := MatchTrigger(*trigger, block)
+	matches := MatchTrigger(trigger, block)
 	if len(matches) != 2 || matches[0].TriggerId != matches[1].TriggerId {
 		t.Error()
 	}
 
 }
-

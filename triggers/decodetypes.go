@@ -47,4 +47,3 @@ func MultArrayToHex(array [][]byte) []string {
 	}
 	return out
 }
-

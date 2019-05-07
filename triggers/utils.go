@@ -30,7 +30,6 @@ func getTransactionFromFile(path string) *jsonrpc_client.Transaction {
 	return tx
 }
 
-
 func JsonToBlock(jsonBlock string) (*jsonrpc_client.Block, error) {
 
 	var block jsonrpc_client.Block

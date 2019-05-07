@@ -8,26 +8,25 @@ import (
 	"regexp"
 )
 
-func MatchTrigger(trigger Trigger, block *jsonrpc_client.Block) []*Trigger {
+func MatchTrigger(trigger *Trigger, block *jsonrpc_client.Block) []*Trigger {
 	var matchedTriggers []*Trigger
 	for _, trans := range block.Transactions {
-		_, ok := ValidateTrigger(trigger, trans)
+		_, ok := ValidateTrigger(trigger, &trans)
 		if ok {
-			matchedTriggers = append(matchedTriggers, &trigger)
+			matchedTriggers = append(matchedTriggers, trigger)
 		}
 	}
 	return matchedTriggers
 }
 
-// TODO profile memory usage for this; perhaps take a *Trigger instead
-func ValidateTrigger(trigger Trigger, transaction jsonrpc_client.Transaction) (*Trigger, bool) {
+func ValidateTrigger(trigger *Trigger, transaction *jsonrpc_client.Transaction) (*Trigger, bool) {
 	match := true
 	for _, f := range trigger.Filters {
-		filterMatch := ValidateFilter(transaction, f, trigger.ContractABI)
+		filterMatch := ValidateFilter(transaction, &f, &trigger.ContractABI)
 		match = match && filterMatch // a Trigger matches if all filters match
 	}
 	if match {
-		return &trigger, true
+		return trigger, true
 	} else {
 		return nil, false
 	}
@@ -35,7 +34,7 @@ func ValidateTrigger(trigger Trigger, transaction jsonrpc_client.Transaction) (*
 
 // TODO return errors instead of logging?
 // TODO implement all Conditions and FunctionParamConditions
-func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
+func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool {
 
 	switch v := f.Condition.(type) {
 	case ConditionFrom:
@@ -52,7 +51,7 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 		return validatePredBigInt(v.Predicate, ts.GasPrice, v.Attribute)
 
 	case FunctionParamCondition:
-		if len(abi) == 0 {
+		if len(*abi) == 0 {
 			log.Println("No ABI provided")
 			return false
 		}
@@ -60,7 +59,7 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 		if f.ToContract == *ts.To {
 
 			// decode function arguments
-			funcArgs, err := DecodeInputData(ts.Input, abi)
+			funcArgs, err := DecodeInputData(ts.Input, *abi)
 			if err != nil {
 				log.Println("Cannot decode input data: ", err)
 				return false
@@ -103,8 +102,7 @@ func ValidateFilter(ts jsonrpc_client.Transaction, f Filter, abi string) bool {
 			}
 		}
 	default:
-		log.Fatalf("filter not supported of type %T", f.Condition )
+		log.Fatalf("filter not supported of type %T", f.Condition)
 	}
 	return false
 }
-
