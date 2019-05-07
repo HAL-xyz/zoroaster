@@ -33,7 +33,6 @@ func ValidateTrigger(trigger *Trigger, transaction *jsonrpc_client.Transaction) 
 }
 
 // TODO return errors instead of logging?
-// TODO implement all Conditions and FunctionParamConditions
 func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool {
 
 	switch v := f.Condition.(type) {
@@ -57,21 +56,18 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 		}
 		// check smart contract TO
 		if f.ToContract == *ts.To {
-
 			// decode function arguments
 			funcArgs, err := DecodeInputData(ts.Input, *abi)
 			if err != nil {
 				log.Println("Cannot decode input data: ", err)
 				return false
 			}
-
 			// extract param
 			contractArg := funcArgs[f.ParameterName]
 			if contractArg == nil {
 				log.Printf("Cannot find param %s in the contract", f.ParameterName)
 				return false
 			}
-
 			// cast static arrays of bytes1[] to bytes32[]
 			var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[\]`)
 			if bytesArrayRx.MatchString(f.ParameterType) {
@@ -79,7 +75,12 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 				contractValues := MultArrayToHex(arg)
 				return validatePredStringArray(v.Predicate, contractValues, v.Attribute)
 			}
-
+			// cast static arrays of address
+			var addressArrayRx = regexp.MustCompile(`address\[\d+]`)
+			if addressArrayRx.MatchString(f.ParameterType) {
+				contractValues := DecodeAddressArray(contractArg)
+				return validatePredStringArray(v.Predicate, contractValues, v.Attribute)
+			}
 			// cast other types
 			switch f.ParameterType {
 			case "address":

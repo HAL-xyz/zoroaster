@@ -3,11 +3,28 @@ package trigger
 import (
 	"math/big"
 	"strconv"
+	"strings"
 )
 
 // TODO return InvalidPredicateError instead of failing silently
 
 func validatePredStringArray(p Predicate, cv []string, tv string) bool {
+	// lowercase
+	tv = strings.ToLower(tv)
+	for i, v := range cv {
+		cv[i] = strings.ToLower(v)
+	}
+
+	// remove hex prefix
+	if strings.HasPrefix(tv, "0x") {
+		tv = tv[2:]
+	}
+	for i, v := range cv {
+		if strings.HasPrefix(v, "0x") {
+			cv[i] = v[2:]
+		}
+	}
+
 	switch p {
 	case IsIn:
 		for _, v := range cv {

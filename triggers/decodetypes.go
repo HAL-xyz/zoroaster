@@ -2,8 +2,21 @@ package trigger
 
 import (
 	"encoding/hex"
+	"github.com/ethereum/go-ethereum/common"
 	"reflect"
 )
+
+// decodes a static array of addresses casted as an interface back to a slice
+func DecodeAddressArray(array interface{}) []string {
+	a := reflect.ValueOf(array)
+	out := make([]string, a.Len())
+	for i := 0; i < a.Len(); i++ {
+		idxval := reflect.ValueOf(array).Index(i)
+		aidxval := idxval.Interface().(common.Address)
+		out[i] = aidxval.String()
+	}
+	return out
+}
 
 // decodes a static bytes array casted as an interface back to a slice
 func DecodeBytesArray(array interface{}, size int) []byte {
