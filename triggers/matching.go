@@ -81,6 +81,14 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 				contractValues := DecodeAddressArray(contractArg)
 				return validatePredStringArray(v.Predicate, contractValues, v.Attribute)
 			}
+			// cast static arrays of uint256[8]
+			var uintArrayRx = regexp.MustCompile(`uint256\[\d+\]`)
+			if uintArrayRx.MatchString(f.ParameterType) {
+				contractValues := DecodeUint256Array(contractArg)
+				triggerValue := new(big.Int)
+				triggerValue.SetString(v.Attribute, 10)
+				return validatePredBigIntArray(v.Predicate, contractValues, triggerValue)
+			}
 			// cast other types
 			switch f.ParameterType {
 			case "address":

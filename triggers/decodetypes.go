@@ -3,8 +3,21 @@ package trigger
 import (
 	"encoding/hex"
 	"github.com/ethereum/go-ethereum/common"
+	"math/big"
 	"reflect"
 )
+
+// decodes a static array of uint256 casted as an interface back to a slice
+func DecodeUint256Array(array interface{}) []*big.Int {
+	a := reflect.ValueOf(array)
+	out := make([]*big.Int, a.Len())
+	for i := 0; i < a.Len(); i++ {
+		idxval := reflect.Indirect(reflect.ValueOf(array).Index(i))
+		bidxval := idxval.Interface().(big.Int)
+		out[i] = &bidxval
+	}
+	return out
+}
 
 // decodes a static array of addresses casted as an interface back to a slice
 func DecodeAddressArray(array interface{}) []string {
@@ -14,17 +27,6 @@ func DecodeAddressArray(array interface{}) []string {
 		idxval := reflect.ValueOf(array).Index(i)
 		aidxval := idxval.Interface().(common.Address)
 		out[i] = aidxval.String()
-	}
-	return out
-}
-
-// decodes a static bytes array casted as an interface back to a slice
-func DecodeBytesArray(array interface{}, size int) []byte {
-	out := make([]byte, size)
-	for i := 0; i < size; i++ {
-		idxval := reflect.ValueOf(array).Index(i)
-		uidxval := uint8(idxval.Uint())
-		out[i] = uidxval
 	}
 	return out
 }

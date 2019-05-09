@@ -1,6 +1,6 @@
 {
   "TriggerId":105,
-  "TriggerName":"FP/uint256[], bytes14[]",
+  "TriggerName":"FP/address[4], uint256[8]",
   "TriggerType":"WatchTransactions",
   "CreatorId":223,
   "CreationDate":"2019-03-24 17:45:12",
@@ -15,6 +15,28 @@
       "Condition":{
         "Predicate":"IsIn",
         "Attribute":"7a18919f0b05fa5e91f3ef43afe8a72105c9d4b8"
+      }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208",
+      "FunctionName":"depositToken",
+      "ParameterName":"tradeValues",
+      "ParameterType":"uint256[8]",
+      "Condition":{
+        "Predicate":"IsIn",
+        "Attribute":"1109183411472245874"
+      }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208",
+      "FunctionName":"depositToken",
+      "ParameterName":"tradeValues",
+      "ParameterType":"uint256[8]",
+      "Condition":{
+        "Predicate":"SmallerThan",
+        "Attribute":"9"
       }
     }
   ]
