@@ -142,6 +142,22 @@ func TestValidateFilter6(t *testing.T) {
 	if ValidateFilter(tx, &trigger.Filters[2], &trigger.ContractABI) != true {
 		t.Error()
 	}
+}
+
+func TestValidateFilter7(t *testing.T) {
+
+	tx := getTransactionFromFile("../resources/transactions/tx3.json")
+	trigger := getTriggerFromFile("../resources/triggers/t7.json")
+
+	// uint256
+	if ValidateFilter(tx, &trigger.Filters[0], &trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	// bool
+	if ValidateFilter(tx, &trigger.Filters[1], &trigger.ContractABI) != true {
+		t.Error()
+	}
 
 }
 

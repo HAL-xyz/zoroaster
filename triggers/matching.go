@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"fmt"
 	"github.com/INFURA/go-libs/jsonrpc_client"
 	"github.com/ethereum/go-ethereum/common"
 	"log"
@@ -91,6 +92,8 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			}
 			// cast other types
 			switch f.ParameterType {
+			case "bool":
+				return validatePredBool(v.Predicate, contractArg.(bool), v.Attribute)
 			case "address":
 				triggerAddress := common.HexToAddress(v.Attribute)
 				if triggerAddress == contractArg {
@@ -100,6 +103,7 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 				contractValue := contractArg.(*big.Int)
 				triggerValue := new(big.Int)
 				triggerValue.SetString(v.Attribute, 10)
+				fmt.Println(contractValue)
 				return validatePredBigInt(v.Predicate, contractValue, triggerValue)
 			case "uint256[]":
 				contractValues := contractArg.([]*big.Int)

@@ -92,3 +92,14 @@ func validatePredInt(p Predicate, cv int, tv int) bool {
 	}
 	return false
 }
+
+func validatePredBool(p Predicate, cv bool, tv string) bool {
+	if p != Eq {
+		return false
+	}
+	ctVal := "false"
+	if cv {
+		ctVal = "true"
+	}
+	return strings.ToLower(tv) == ctVal
+}
