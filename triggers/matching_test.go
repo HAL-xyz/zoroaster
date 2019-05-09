@@ -159,6 +159,10 @@ func TestValidateFilter7(t *testing.T) {
 		t.Error()
 	}
 
+	// int128
+	if ValidateFilter(tx, &trigger.Filters[2], &trigger.ContractABI) != true {
+		t.Error()
+	}
 }
 
 // Testing one Trigger vs one Transaction

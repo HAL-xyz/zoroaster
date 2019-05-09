@@ -27,6 +27,17 @@
         "Predicate":"Eq",
         "Attribute":"false"
       }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x484f8d565f8198a6de7f3580d5a4d02564422d3c",
+      "FunctionName":"depositToken",
+      "ParameterName":"new_int128_var",
+      "ParameterType":"int128",
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"333"
+      }
     }
   ]
 }

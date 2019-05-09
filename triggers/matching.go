@@ -1,7 +1,6 @@
 package trigger
 
 import (
-	"fmt"
 	"github.com/INFURA/go-libs/jsonrpc_client"
 	"github.com/ethereum/go-ethereum/common"
 	"log"
@@ -69,6 +68,14 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 				log.Printf("Cannot find param %s in the contract", f.ParameterName)
 				return false
 			}
+
+			// cast single int/uint > 64 bits
+			if isValidBigInt(f.ParameterType) {
+				contractValue := contractArg.(*big.Int)
+				triggerValue := new(big.Int)
+				triggerValue.SetString(v.Attribute, 10)
+				return validatePredBigInt(v.Predicate, contractValue, triggerValue)
+			}
 			// cast static arrays of bytes1[] to bytes32[]
 			var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[\]`)
 			if bytesArrayRx.MatchString(f.ParameterType) {
@@ -99,12 +106,6 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 				if triggerAddress == contractArg {
 					return true
 				}
-			case "uint256":
-				contractValue := contractArg.(*big.Int)
-				triggerValue := new(big.Int)
-				triggerValue.SetString(v.Attribute, 10)
-				fmt.Println(contractValue)
-				return validatePredBigInt(v.Predicate, contractValue, triggerValue)
 			case "uint256[]":
 				contractValues := contractArg.([]*big.Int)
 				triggerValue := new(big.Int)

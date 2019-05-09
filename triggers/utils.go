@@ -5,10 +5,30 @@ import (
 	"github.com/INFURA/go-libs/jsonrpc_client"
 	"io/ioutil"
 	"log"
+	"strconv"
 )
 
-func JsonToTransaction(jsonTx string) (*jsonrpc_client.Transaction, error) {
+// checks if `s` is a valid int/uint > 64 bits in multiples of 8 bits
+func isValidBigInt(s string) bool {
+	supportedBigInts := makeBigIntsSet()
+	_, ok := supportedBigInts[s]
+	return ok
+}
 
+// the set of all valid int/uint > 64 bits in multiples of 8 bits
+func makeBigIntsSet() map[string]bool {
+	set := make(map[string]bool)
+	key := ""
+	for i := 64; i <= 256; i += 8 {
+		key = "int" + strconv.Itoa(i)
+		set[key] = true
+		key = "uint" + strconv.Itoa(i)
+		set[key] = true
+	}
+	return set
+}
+
+func JsonToTransaction(jsonTx string) (*jsonrpc_client.Transaction, error) {
 	var tx jsonrpc_client.Transaction
 	err := json.Unmarshal([]byte(jsonTx), &tx)
 	if err != nil {
@@ -31,7 +51,6 @@ func getTransactionFromFile(path string) *jsonrpc_client.Transaction {
 }
 
 func JsonToBlock(jsonBlock string) (*jsonrpc_client.Block, error) {
-
 	var block jsonrpc_client.Block
 	err := json.Unmarshal([]byte(jsonBlock), &block)
 	if err != nil {
