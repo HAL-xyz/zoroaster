@@ -54,66 +54,57 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			log.Println("No ABI provided")
 			return false
 		}
-		// check smart contract TO
-		if f.ToContract == *ts.To {
-			// decode function arguments
-			funcArgs, err := DecodeInputData(ts.Input, *abi)
-			if err != nil {
-				log.Println("Cannot decode input data: ", err)
-				return false
-			}
-			// extract param
-			contractArg := funcArgs[f.ParameterName]
-			if contractArg == nil {
-				log.Printf("Cannot find param %s in the contract", f.ParameterName)
-				return false
-			}
+		// when analyzing the function parameters, first thing we want
+		// to make sure we are matching against the right transaction
+		if !(f.ToContract == *ts.To) {
+			return false
+		}
+		// decode function arguments
+		funcArgs, err := DecodeInputData(ts.Input, *abi)
+		if err != nil {
+			log.Println("Cannot decode input data: ", err)
+			return false
+		}
+		// extract param
+		contractArg := funcArgs[f.ParameterName]
+		if contractArg == nil {
+			log.Printf("Cannot find param %s in the contract", f.ParameterName)
+			return false
+		}
 
-			// cast single int/uint > 64 bits
-			if isValidBigInt(f.ParameterType) {
-				contractValue := contractArg.(*big.Int)
-				triggerValue := new(big.Int)
-				triggerValue.SetString(v.Attribute, 10)
-				return validatePredBigInt(v.Predicate, contractValue, triggerValue)
-			}
-			// cast static arrays of bytes1[] to bytes32[]
-			var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[\]`)
-			if bytesArrayRx.MatchString(f.ParameterType) {
-				arg := Decode2DBytesArray(contractArg)
-				contractValues := MultArrayToHex(arg)
-				return validatePredStringArray(v.Predicate, contractValues, v.Attribute)
-			}
-			// cast static arrays of address
-			var addressArrayRx = regexp.MustCompile(`address\[\d+]`)
-			if addressArrayRx.MatchString(f.ParameterType) {
-				contractValues := DecodeAddressArray(contractArg)
-				return validatePredStringArray(v.Predicate, contractValues, v.Attribute)
-			}
-			// cast static arrays of uint256[8]
-			var uintArrayRx = regexp.MustCompile(`uint256\[\d+\]`)
-			if uintArrayRx.MatchString(f.ParameterType) {
-				contractValues := DecodeUint256Array(contractArg)
-				triggerValue := new(big.Int)
-				triggerValue.SetString(v.Attribute, 10)
-				return validatePredBigIntArray(v.Predicate, contractValues, triggerValue)
-			}
-			// cast other types
-			switch f.ParameterType {
-			case "bool":
-				return validatePredBool(v.Predicate, contractArg.(bool), v.Attribute)
-			case "address":
-				triggerAddress := common.HexToAddress(v.Attribute)
-				if triggerAddress == contractArg {
-					return true
-				}
-			case "uint256[]":
-				contractValues := contractArg.([]*big.Int)
-				triggerValue := new(big.Int)
-				triggerValue.SetString(v.Attribute, 10)
-				return validatePredBigIntArray(v.Predicate, contractValues, triggerValue)
-			default:
-				log.Println("Parameter type not supported", f.ParameterType)
-			}
+		// cast single int/uint > 64 bits
+		if isValidBigInt(f.ParameterType) {
+			ctVal := contractArg.(*big.Int)
+			return validatePredBigInt(v.Predicate, ctVal, makeBigInt(v.Attribute))
+		}
+		// cast static arrays of bytes1[] to bytes32[]
+		var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[\]`)
+		if bytesArrayRx.MatchString(f.ParameterType) {
+			arg := Decode2DBytesArray(contractArg)
+			return validatePredStringArray(v.Predicate, MultArrayToHex(arg), v.Attribute)
+		}
+		// cast static arrays of address
+		var addressArrayRx = regexp.MustCompile(`address\[\d+]`)
+		if addressArrayRx.MatchString(f.ParameterType) {
+			ctVals := DecodeAddressArray(contractArg)
+			return validatePredStringArray(v.Predicate, ctVals, v.Attribute)
+		}
+		// cast static arrays of uint256[8]
+		var uintArrayRx = regexp.MustCompile(`uint256\[\d+\]`)
+		if uintArrayRx.MatchString(f.ParameterType) {
+			ctVals := DecodeUint256Array(contractArg)
+			return validatePredBigIntArray(v.Predicate, ctVals, makeBigInt(v.Attribute))
+		}
+		// cast other types
+		switch f.ParameterType {
+		case "bool":
+			return validatePredBool(v.Predicate, contractArg.(bool), v.Attribute)
+		case "address":
+			return contractArg == common.HexToAddress(v.Attribute)
+		case "uint256[]":
+			return validatePredBigIntArray(v.Predicate, contractArg.([]*big.Int), makeBigInt(v.Attribute))
+		default:
+			log.Println("Parameter type not supported", f.ParameterType)
 		}
 	default:
 		log.Fatalf("filter not supported of type %T", f.Condition)

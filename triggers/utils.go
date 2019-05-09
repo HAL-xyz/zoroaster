@@ -1,8 +1,15 @@
 package trigger
 
 import (
+	"math/big"
 	"strconv"
 )
+
+func makeBigInt(s string) *big.Int {
+	ret := new(big.Int)
+	ret.SetString(s, 10)
+	return ret
+}
 
 // checks if `s` is a valid int/uint > 64 bits in multiples of 8 bits
 func isValidBigInt(s string) bool {
