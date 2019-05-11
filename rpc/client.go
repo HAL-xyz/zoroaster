@@ -32,7 +32,7 @@ func main() {
 	//js, _ := json2.Marshal(lastBlock)
 	//fmt.Println(string(js))
 
-	trans, _ := client.Eth_getTransactionByHash("0x83c283364249687c4d2d41fd1822c06fba9ed4fadeefb88e1ececf6e22598c82")
+	trans, _ := client.Eth_getTransactionByHash("0xbc97dcf387d7c891b8d3167595fd9f3547e45b8aa00f328ac8fbace2f9701711")
 	js2, _ := json2.Marshal(trans)
 	fmt.Println(string(js2))
 

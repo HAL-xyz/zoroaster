@@ -72,13 +72,18 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			return false
 		}
 
-		// cast single int/uint > 64 bits
+		// cast single int/uint{64-256}
 		if isValidBigInt(f.ParameterType) {
 			ctVal := contractArg.(*big.Int)
 			return validatePredBigInt(v.Predicate, ctVal, makeBigInt(v.Attribute))
 		}
+		// cast static array of int/uint{64-256}
+		if isValidBigIntArray(f.ParameterType) {
+			ctVals := DecodeBigIntArray(contractArg)
+			return validatePredBigIntArray(v.Predicate, ctVals, makeBigInt(v.Attribute))
+		}
 		// cast static arrays of bytes1[] to bytes32[]
-		var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[\]`)
+		var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[]`)
 		if bytesArrayRx.MatchString(f.ParameterType) {
 			arg := Decode2DBytesArray(contractArg)
 			return validatePredStringArray(v.Predicate, MultArrayToHex(arg), v.Attribute)
@@ -89,19 +94,13 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			ctVals := DecodeAddressArray(contractArg)
 			return validatePredStringArray(v.Predicate, ctVals, v.Attribute)
 		}
-		// cast static arrays of uint256[8]
-		var uintArrayRx = regexp.MustCompile(`uint256\[\d+\]`)
-		if uintArrayRx.MatchString(f.ParameterType) {
-			ctVals := DecodeUint256Array(contractArg)
-			return validatePredBigIntArray(v.Predicate, ctVals, makeBigInt(v.Attribute))
-		}
 		// cast other types
 		switch f.ParameterType {
 		case "bool":
 			return validatePredBool(v.Predicate, contractArg.(bool), v.Attribute)
 		case "address":
 			return contractArg == common.HexToAddress(v.Attribute)
-		case "uint256[]":
+		case "uint256[]": // TODO support any big int dynamic array
 			return validatePredBigIntArray(v.Predicate, contractArg.([]*big.Int), makeBigInt(v.Attribute))
 		default:
 			log.Println("Parameter type not supported", f.ParameterType)

@@ -7,8 +7,8 @@ import (
 	"reflect"
 )
 
-// decodes a static array of uint256 casted as an interface back to a slice
-func DecodeUint256Array(array interface{}) []*big.Int {
+// decodes a static array of u?int{64-256} casted as an interface back to a slice
+func DecodeBigIntArray(array interface{}) []*big.Int {
 	a := reflect.ValueOf(array)
 	out := make([]*big.Int, a.Len())
 	for i := 0; i < a.Len(); i++ {

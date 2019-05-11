@@ -2,7 +2,9 @@ package trigger
 
 import (
 	"math/big"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 func makeBigInt(s string) *big.Int {
@@ -11,7 +13,19 @@ func makeBigInt(s string) *big.Int {
 	return ret
 }
 
-// checks if `s` is a valid int/uint > 64 bits in multiples of 8 bits
+// check if `s` is a valid static array of int/uint in multiple of 8 bits,
+// e.g. uint128[4]
+func isValidBigIntArray(s string) bool {
+	r := regexp.MustCompile(`u?int\d+\[\d+]`)
+	if r.MatchString(s) {
+		ss := strings.Split(s, "[")
+		return isValidBigInt(ss[0])
+	}
+	return false
+}
+
+// checks if `s` is a valid int/uint > 64 bits in multiples of 8 bits,
+// e.g. uint256
 func isValidBigInt(s string) bool {
 	supportedBigInts := makeBigIntsSet()
 	_, ok := supportedBigInts[s]
