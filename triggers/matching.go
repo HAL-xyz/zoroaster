@@ -82,6 +82,10 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			ctVals := DecodeBigIntArray(contractArg)
 			return validatePredBigIntArray(v.Predicate, ctVals, makeBigInt(v.Attribute))
 		}
+		// cast dynamic array of int/uint{64-256}
+		if isValidDynamicBigIntArray(f.ParameterType) {
+			return validatePredBigIntArray(v.Predicate, contractArg.([]*big.Int), makeBigInt(v.Attribute))
+		}
 		// cast static arrays of bytes1[] to bytes32[]
 		var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[]`)
 		if bytesArrayRx.MatchString(f.ParameterType) {
@@ -100,8 +104,6 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			return validatePredBool(v.Predicate, contractArg.(bool), v.Attribute)
 		case "address":
 			return contractArg == common.HexToAddress(v.Attribute)
-		case "uint256[]": // TODO support any big int dynamic array
-			return validatePredBigIntArray(v.Predicate, contractArg.([]*big.Int), makeBigInt(v.Attribute))
 		default:
 			log.Println("Parameter type not supported", f.ParameterType)
 		}

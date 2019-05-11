@@ -13,6 +13,17 @@ func makeBigInt(s string) *big.Int {
 	return ret
 }
 
+// check if `s` is a valid dynamic array int/uint in multiple of 8 bits,
+// e.g. uint128[], plus int[] and uint[] which are aliases for u/int256
+func isValidDynamicBigIntArray(s string) bool {
+	r := regexp.MustCompile(`u?int\d{0,}\[\]`)
+	if r.MatchString(s) {
+		ss := strings.Split(s, "[")
+		return isValidBigInt(ss[0])
+	}
+	return false
+}
+
 // check if `s` is a valid static array of int/uint in multiple of 8 bits,
 // e.g. uint128[4], plus int[N] and uint[N] which are aliases for u/int256
 func isValidBigIntArray(s string) bool {
