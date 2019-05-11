@@ -129,7 +129,13 @@ func TestValidateFilter8(t *testing.T) {
 	tx := getTransactionFromFile("../resources/transactions/tx4.json")
 	trigger := getTriggerFromFile("../resources/triggers/t8.json")
 
+	// int128[N]
 	if ValidateFilter(tx, &trigger.Filters[0], &trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	// int[N]
+	if ValidateFilter(tx, &trigger.Filters[1], &trigger.ContractABI) != true {
 		t.Error()
 	}
 

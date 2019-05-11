@@ -16,6 +16,17 @@
         "Predicate":"IsIn",
         "Attribute":"854388884587"
       }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x38898f1f6e045217258ad6c34b148c149eaf745d",
+      "FunctionName":"depositToken",
+      "ParameterName":"new_int128_4_var",
+      "ParameterType":"int[4]",
+      "Condition":{
+        "Predicate":"IsIn",
+        "Attribute":"854388884587"
+      }
     }
   ]
 }

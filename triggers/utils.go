@@ -14,9 +14,9 @@ func makeBigInt(s string) *big.Int {
 }
 
 // check if `s` is a valid static array of int/uint in multiple of 8 bits,
-// e.g. uint128[4]
+// e.g. uint128[4], plus int[N] and uint[N] which are aliases for u/int256
 func isValidBigIntArray(s string) bool {
-	r := regexp.MustCompile(`u?int\d+\[\d+]`)
+	r := regexp.MustCompile(`u?int\d{0,}\[\d+]`)
 	if r.MatchString(s) {
 		ss := strings.Split(s, "[")
 		return isValidBigInt(ss[0])
@@ -42,5 +42,7 @@ func makeBigIntsSet() map[string]bool {
 		key = "uint" + strconv.Itoa(i)
 		set[key] = true
 	}
+	set["int"] = true  // alias for int256
+	set["uint"] = true // alias for uint256
 	return set
 }

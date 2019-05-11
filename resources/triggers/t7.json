@@ -11,7 +11,7 @@
       "ToContract":"0x484f8d565f8198a6de7f3580d5a4d02564422d3c",
       "FunctionName":"depositToken",
       "ParameterName":"new_wei_value_var",
-      "ParameterType":"uint256",
+      "ParameterType":"uint",
       "Condition":{
         "Predicate":"Eq",
         "Attribute":"2222222"
