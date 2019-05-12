@@ -8,28 +8,23 @@ import (
 	"regexp"
 )
 
-func MatchTrigger(trigger *Trigger, block *jsonrpc_client.Block) []*Trigger {
-	var matchedTriggers []*Trigger
+func MatchTrigger(trigger *Trigger, block *jsonrpc_client.Block) int {
+	matchedTriggers := 0
 	for _, trans := range block.Transactions {
-		_, ok := ValidateTrigger(trigger, &trans)
-		if ok {
-			matchedTriggers = append(matchedTriggers, trigger)
+		if ValidateTrigger(trigger, &trans) {
+			matchedTriggers += 1
 		}
 	}
 	return matchedTriggers
 }
 
-func ValidateTrigger(trigger *Trigger, transaction *jsonrpc_client.Transaction) (*Trigger, bool) {
+func ValidateTrigger(trigger *Trigger, transaction *jsonrpc_client.Transaction) bool {
 	match := true
 	for _, f := range trigger.Filters {
 		filterMatch := ValidateFilter(transaction, &f, &trigger.ContractABI)
 		match = match && filterMatch // a Trigger matches if all filters match
 	}
-	if match {
-		return trigger, true
-	} else {
-		return nil, false
-	}
+	return match
 }
 
 // TODO return errors instead of logging?
@@ -54,8 +49,7 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			log.Println("No ABI provided")
 			return false
 		}
-		// when analyzing the function parameters, first thing we want
-		// to make sure we are matching against the right transaction
+		// make sure we are matching against the right transaction
 		if !(f.ToContract == *ts.To) {
 			return false
 		}
@@ -65,7 +59,7 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			log.Println("Cannot decode input data: ", err)
 			return false
 		}
-		// extract param
+		// extract params
 		contractArg := funcArgs[f.ParameterName]
 		if contractArg == nil {
 			log.Printf("Cannot find param %s in the contract", f.ParameterName)
@@ -74,8 +68,7 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 
 		// cast single int/uint{64-256}
 		if isValidBigInt(f.ParameterType) {
-			ctVal := contractArg.(*big.Int)
-			return validatePredBigInt(v.Predicate, ctVal, makeBigInt(v.Attribute))
+			return validatePredBigInt(v.Predicate, contractArg.(*big.Int), makeBigInt(v.Attribute))
 		}
 		// cast static array of int/uint{64-256}
 		if isValidBigIntArray(f.ParameterType) {
@@ -89,8 +82,8 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 		// cast static arrays of bytes1[] to bytes32[]
 		var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[]`)
 		if bytesArrayRx.MatchString(f.ParameterType) {
-			arg := Decode2DBytesArray(contractArg)
-			return validatePredStringArray(v.Predicate, MultArrayToHex(arg), v.Attribute)
+			ctVals := Decode2DBytesArray(contractArg)
+			return validatePredStringArray(v.Predicate, MultArrayToHex(ctVals), v.Attribute)
 		}
 		// cast static arrays of address
 		var addressArrayRx = regexp.MustCompile(`address\[\d+]`)

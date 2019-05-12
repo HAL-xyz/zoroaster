@@ -188,13 +188,13 @@ func TestValidateTrigger(t *testing.T) {
 	block := getBlockFromFile("../resources/blocks/block1.json")
 	trigger := getTriggerFromFile("../resources/triggers/t1.json")
 
-	trig, ok := ValidateTrigger(trigger, &block.Transactions[0])
-	if trig.TriggerId != 101 || ok != true {
+	ok := ValidateTrigger(trigger, &block.Transactions[0])
+	if ok != true {
 		t.Error()
 	}
 
-	trig2, ok2 := ValidateTrigger(trigger, &block.Transactions[1])
-	if trig2 != nil || ok2 != false {
+	ok2 := ValidateTrigger(trigger, &block.Transactions[1])
+	if ok2 != false {
 		t.Error()
 	}
 }
@@ -204,18 +204,18 @@ func TestValidateTrigger2(t *testing.T) {
 	block := getBlockFromFile("../resources/blocks/block1.json")
 	trigger := getTriggerFromFile("../resources/triggers/t2.json")
 
-	trig, ok := ValidateTrigger(trigger, &block.Transactions[6])
-	if trig.TriggerId != 102 || ok != true {
+	ok := ValidateTrigger(trigger, &block.Transactions[6])
+	if ok != true {
 		t.Error()
 	}
 
-	trig2, ok2 := ValidateTrigger(trigger, &block.Transactions[1])
-	if trig2 != nil || ok2 != false {
+	ok2 := ValidateTrigger(trigger, &block.Transactions[1])
+	if ok2 != false {
 		t.Error()
 	}
 
-	trig3, ok3 := ValidateTrigger(trigger, &block.Transactions[8])
-	if trig3.TriggerId != 102 || ok3 != true {
+	ok3 := ValidateTrigger(trigger, &block.Transactions[8])
+	if ok3 != true {
 		t.Error()
 	}
 }
@@ -226,8 +226,7 @@ func TestMatchTrigger(t *testing.T) {
 	trigger := getTriggerFromFile("../resources/triggers/t2.json")
 
 	matches := MatchTrigger(trigger, block)
-	if len(matches) != 2 || matches[0].TriggerId != matches[1].TriggerId {
+	if matches != 2 {
 		t.Error()
 	}
-
 }
