@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/big"
 	"regexp"
+	"strconv"
 )
 
 func MatchTrigger(trigger *Trigger, block *jsonrpc_client.Block) int {
@@ -43,7 +44,6 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 		return validatePredInt(v.Predicate, ts.Gas, v.Attribute)
 	case ConditionGasPrice:
 		return validatePredBigInt(v.Predicate, ts.GasPrice, v.Attribute)
-
 	case FunctionParamCondition:
 		if len(*abi) == 0 {
 			log.Println("No ABI provided")
@@ -66,18 +66,32 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			return false
 		}
 
-		// cast single int/uint{64-256}
+		// cast single int/uint{40-256}
 		if isValidBigInt(f.ParameterType) {
 			return validatePredBigInt(v.Predicate, contractArg.(*big.Int), makeBigInt(v.Attribute))
 		}
-		// cast static array of int/uint{64-256}
+		// cast static array of int/uint{40-256}
 		if isValidBigIntArray(f.ParameterType) {
 			ctVals := DecodeBigIntArray(contractArg)
 			return validatePredBigIntArray(v.Predicate, ctVals, makeBigInt(v.Attribute))
 		}
-		// cast dynamic array of int/uint{64-256}
+		// cast dynamic array of int/uint{40-256}
 		if isValidDynamicBigIntArray(f.ParameterType) {
 			return validatePredBigIntArray(v.Predicate, contractArg.([]*big.Int), makeBigInt(v.Attribute))
+		}
+		// cast single int/uint{8-32}
+		if isValidInt(f.ParameterType) {
+			tgVal, err := strconv.Atoi(v.Attribute)
+			if err == nil {
+				return validatePredInt(v.Predicate, int(contractArg.(int32)), tgVal)
+			}
+		}
+		// cast dynamic array of int/uint{8-32}
+		if isValidDynamicIntArray(f.ParameterType) {
+			tgVal, err := strconv.Atoi(v.Attribute)
+			if err == nil {
+				return validatePredIntArray(v.Predicate, contractArg.([]int32), tgVal)
+			}
 		}
 		// cast static arrays of bytes1[] to bytes32[]
 		var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[]`)

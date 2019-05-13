@@ -93,6 +93,24 @@ func validatePredInt(p Predicate, cv int, tv int) bool {
 	return false
 }
 
+func validatePredIntArray(p Predicate, cvs []int32, tv int) bool {
+	switch p {
+	case SmallerThan:
+		return len(cvs) < tv
+	case BiggerThan:
+		return len(cvs) > tv
+	case IsIn:
+		for _, v := range cvs {
+			if int(v) == tv {
+				return true
+			}
+		}
+		return false
+	default:
+		return false
+	}
+}
+
 func validatePredBool(p Predicate, cv bool, tv string) bool {
 	if p != Eq {
 		return false

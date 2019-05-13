@@ -1,6 +1,6 @@
 {
   "TriggerId":107,
-  "TriggerName":"FP/bool, int128",
+  "TriggerName":"",
   "TriggerType":"WatchTransactions",
   "CreatorId":223,
   "CreationDate":"2019-03-24 17:45:12",
@@ -10,33 +10,22 @@
       "FilterType":"CheckFunctionParameter",
       "ToContract":"0x38898f1f6e045217258ad6c34b148c149eaf745d",
       "FunctionName":"depositToken",
-      "ParameterName":"new_int128_4_var",
-      "ParameterType":"int128[4]",
+      "ParameterName":"new_int32_var",
+      "ParameterType":"int32",
       "Condition":{
-        "Predicate":"IsIn",
-        "Attribute":"854388884587"
+        "Predicate":"Eq",
+        "Attribute":"4563456"
       }
     },
     {
       "FilterType":"CheckFunctionParameter",
       "ToContract":"0x38898f1f6e045217258ad6c34b148c149eaf745d",
       "FunctionName":"depositToken",
-      "ParameterName":"new_int128_4_var",
-      "ParameterType":"int[4]",
+      "ParameterName":"new_int32_din_var",
+      "ParameterType":"int32[]",
       "Condition":{
         "Predicate":"IsIn",
-        "Attribute":"854388884587"
-      }
-    },
-    {
-      "FilterType": "CheckFunctionParameter",
-      "ToContract": "0x38898f1f6e045217258ad6c34b148c149eaf745d",
-      "FunctionName": "depositToken",
-      "ParameterName": "new_int40_var",
-      "ParameterType": "int64",
-      "Condition": {
-        "Predicate": "Eq",
-        "Attribute": "290345823457"
+        "Attribute":"234"
       }
     }
   ]

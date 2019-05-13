@@ -11,7 +11,6 @@ func TestValidateFilter(t *testing.T) {
 	trigger := getTriggerFromFile("../resources/triggers/t1.json")
 
 	// BasicFilter / To
-
 	if ValidateFilter(&block.Transactions[0], &trigger.Filters[0], &trigger.ContractABI) != true {
 		t.Error("Basic Filter / To should match")
 	}
@@ -124,23 +123,6 @@ func TestValidateFilter5(t *testing.T) {
 	}
 }
 
-func TestValidateFilter8(t *testing.T) {
-
-	tx := getTransactionFromFile("../resources/transactions/tx4.json")
-	trigger := getTriggerFromFile("../resources/triggers/t8.json")
-
-	// int128[N]
-	if ValidateFilter(tx, &trigger.Filters[0], &trigger.ContractABI) != true {
-		t.Error()
-	}
-
-	// int[N]
-	if ValidateFilter(tx, &trigger.Filters[1], &trigger.ContractABI) != true {
-		t.Error()
-	}
-
-}
-
 func TestValidateFilter6(t *testing.T) {
 
 	tx := getTransactionFromFile("../resources/transactions/tx2.json")
@@ -178,6 +160,43 @@ func TestValidateFilter7(t *testing.T) {
 
 	// int128
 	if ValidateFilter(tx, &trigger.Filters[2], &trigger.ContractABI) != true {
+		t.Error()
+	}
+}
+
+func TestValidateFilter8(t *testing.T) {
+
+	tx := getTransactionFromFile("../resources/transactions/tx4.json")
+	trigger := getTriggerFromFile("../resources/triggers/t8.json")
+
+	// int128[N]
+	if ValidateFilter(tx, &trigger.Filters[0], &trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	// int[N]
+	if ValidateFilter(tx, &trigger.Filters[1], &trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	// int40
+	if ValidateFilter(tx, &trigger.Filters[2], &trigger.ContractABI) != true {
+		t.Error()
+	}
+}
+
+func TestValidateFilter9(t *testing.T) {
+
+	tx := getTransactionFromFile("../resources/transactions/tx5.json")
+	trigger := getTriggerFromFile("../resources/triggers/t9.json")
+
+	// int32
+	if ValidateFilter(tx, &trigger.Filters[0], &trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	// int32[]
+	if ValidateFilter(tx, &trigger.Filters[1], &trigger.ContractABI) != true {
 		t.Error()
 	}
 }
