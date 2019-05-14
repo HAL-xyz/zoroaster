@@ -66,54 +66,54 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			return false
 		}
 
-		// cast single int/uint{40-256}
+		// single int/uint{40-256}
 		if isValidBigInt(f.ParameterType) {
 			return validatePredBigInt(v.Predicate, contractArg.(*big.Int), makeBigInt(v.Attribute))
 		}
-		// cast static array of int/uint{40-256}
-		if isValidBigIntArray(f.ParameterType) {
+		// static array of int/uint{40-256}
+		if isValidArray(f.ParameterType, stArrayIntRx, isValidBigInt) {
 			ctVals := DecodeBigIntArray(contractArg)
 			return validatePredBigIntArray(v.Predicate, ctVals, makeBigInt(v.Attribute))
 		}
-		// cast dynamic array of int/uint{40-256}
-		if isValidDynamicBigIntArray(f.ParameterType) {
+		// dynamic array of int/uint{40-256}
+		if isValidArray(f.ParameterType, dyArrayIntRx, isValidBigInt) {
 			return validatePredBigIntArray(v.Predicate, contractArg.([]*big.Int), makeBigInt(v.Attribute))
 		}
-		// cast single int/uint{8-32}
+		// single int/uint{8-32}
 		if isValidInt(f.ParameterType) {
 			tgVal, err := strconv.Atoi(v.Attribute)
 			if err == nil {
 				return validatePredInt(v.Predicate, int(contractArg.(int32)), tgVal)
 			}
 		}
-		// cast static array of int/uint{8-32}
-		if isValidIntArray(f.ParameterType) {
+		// static array of int/uint{8-32}
+		if isValidArray(f.ParameterType, stArrayIntRx, isValidInt) {
 			ctVals := DecodeIntArray(contractArg)
 			tgVal, err := strconv.Atoi(v.Attribute)
 			if err == nil {
 				return validatePredIntArray(v.Predicate, ctVals, tgVal)
 			}
 		}
-		// cast dynamic array of int/uint{8-32}
-		if isValidDynamicIntArray(f.ParameterType) {
+		// dynamic array of int/uint{8-32}
+		if isValidArray(f.ParameterType, dyArrayIntRx, isValidInt) {
 			tgVal, err := strconv.Atoi(v.Attribute)
 			if err == nil {
 				return validatePredIntArray(v.Predicate, contractArg.([]int32), tgVal)
 			}
 		}
-		// cast static arrays of bytes1[] to bytes32[]
+		// static arrays of bytes1[] to bytes32[]
 		var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[]`)
 		if bytesArrayRx.MatchString(f.ParameterType) {
 			ctVals := Decode2DBytesArray(contractArg)
 			return validatePredStringArray(v.Predicate, MultArrayToHex(ctVals), v.Attribute)
 		}
-		// cast static arrays of address
+		// static arrays of address
 		var addressArrayRx = regexp.MustCompile(`address\[\d+]`)
 		if addressArrayRx.MatchString(f.ParameterType) {
 			ctVals := DecodeAddressArray(contractArg)
 			return validatePredStringArray(v.Predicate, ctVals, v.Attribute)
 		}
-		// cast other types
+		// other types
 		switch f.ParameterType {
 		case "bool":
 			return validatePredBool(v.Predicate, contractArg.(bool), v.Attribute)
