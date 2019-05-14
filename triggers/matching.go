@@ -86,6 +86,14 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 				return validatePredInt(v.Predicate, int(contractArg.(int32)), tgVal)
 			}
 		}
+		// cast static array of int/uint{8-32}
+		if isValidIntArray(f.ParameterType) {
+			ctVals := DecodeIntArray(contractArg)
+			tgVal, err := strconv.Atoi(v.Attribute)
+			if err == nil {
+				return validatePredIntArray(v.Predicate, ctVals, tgVal)
+			}
+		}
 		// cast dynamic array of int/uint{8-32}
 		if isValidDynamicIntArray(f.ParameterType) {
 			tgVal, err := strconv.Atoi(v.Attribute)

@@ -15,7 +15,7 @@ func makeBigInt(s string) *big.Int {
 
 // TODO refactor this ugly mess at some point
 
-// check if `s` is a valid dynamic array int/uint in multiple of 8 bits,
+// check if `s` is a valid dynamic array int/uint > 32 bits in multiple of 8 bits,
 // e.g. uint128[], plus int[] and uint[] which are aliases for u/int256
 func isValidDynamicBigIntArray(s string) bool {
 	r := regexp.MustCompile(`u?int\d{0,}\[]$`)
@@ -26,7 +26,7 @@ func isValidDynamicBigIntArray(s string) bool {
 	return false
 }
 
-// check if `s` is a valid static array of int/uint in multiple of 8 bits,
+// check if `s` is a valid static array of int/uint > 32 bits in multiple of 8 bits,
 // e.g. uint128[4], plus int[N] and uint[N] which are aliases for u/int256
 func isValidBigIntArray(s string) bool {
 	r := regexp.MustCompile(`u?int\d{0,}\[\d+]$`)
@@ -63,6 +63,16 @@ func makeBigIntSet() map[string]bool {
 // check if `s` is a valid dynamic array of int/uint <= 32 bits
 func isValidDynamicIntArray(s string) bool {
 	r := regexp.MustCompile(`u?int\d{0,}\[]$`)
+	if r.MatchString(s) {
+		ss := strings.Split(s, "[")
+		return isValidInt(ss[0])
+	}
+	return false
+}
+
+// check if `s` is a valid static array of int/uint <= 32 bits in multiple of 8 bits,
+func isValidIntArray(s string) bool {
+	r := regexp.MustCompile(`u?int\d{0,}\[\d+]$`)
 	if r.MatchString(s) {
 		ss := strings.Split(s, "[")
 		return isValidInt(ss[0])

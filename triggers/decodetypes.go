@@ -62,3 +62,15 @@ func MultArrayToHex(array [][]byte) []string {
 	}
 	return out
 }
+
+// decodes a static array of u/int <= 32 bits casted as an interface back to a slice
+func DecodeIntArray(array interface{}) []int32 {
+	a := reflect.ValueOf(array)
+	out := make([]int32, a.Len())
+	for i := 0; i < a.Len(); i++ {
+		idxval := reflect.ValueOf(array).Index(i)
+		iidxval := idxval.Interface().(int32)
+		out[i] = iidxval
+	}
+	return out
+}
