@@ -224,6 +224,11 @@ func TestValidateFilter10(t *testing.T) {
 	if ValidateFilter(tx, &trigger.Filters[5], &trigger.ContractABI) != true {
 		t.Error()
 	}
+
+	// string[]
+	if ValidateFilter(tx, &trigger.Filters[6], &trigger.ContractABI) != true {
+		t.Error()
+	}
 }
 
 // Testing one Trigger vs one Transaction

@@ -71,6 +71,17 @@
         "Predicate":"IsIn",
         "Attribute":"00"
       }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x38898f1f6e045217258ad6c34b148c149eaf745d",
+      "FunctionName":"depositToken",
+      "ParameterName":"new_string_din_var",
+      "ParameterType":"string[]",
+      "Condition":{
+        "Predicate":"IsIn",
+        "Attribute":"ccasd"
+      }
     }
   ]
 }

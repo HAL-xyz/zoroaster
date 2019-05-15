@@ -126,6 +126,8 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 				addresses[i] = a.String()
 			}
 			return validatePredStringArray(v.Predicate, addresses, v.Attribute)
+		case "string[]":
+			return validatePredStringArray(v.Predicate, contractArg.([]string), v.Attribute)
 		default:
 			log.Println("Parameter type not supported", f.ParameterType)
 		}
