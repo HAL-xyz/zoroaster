@@ -103,8 +103,7 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			}
 		}
 		// static arrays of bytes1[] to bytes32[]
-		var bytesArrayRx = regexp.MustCompile(`bytes\d{1,2}\[]`)
-		if bytesArrayRx.MatchString(f.ParameterType) {
+		if isValidArray(f.ParameterType, dyArrayBytesRx, isValidByte) {
 			ctVals := Decode2DBytesArray(contractArg)
 			return validatePredStringArray(v.Predicate, MultArrayToHex(ctVals), v.Attribute)
 		}
