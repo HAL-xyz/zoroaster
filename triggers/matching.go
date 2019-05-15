@@ -28,7 +28,8 @@ func ValidateTrigger(trigger *Trigger, transaction *jsonrpc_client.Transaction) 
 	return match
 }
 
-// TODO return errors instead of logging?
+// TODO return errors instead of logging
+// TODO unify matching API
 func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool {
 
 	switch v := f.Condition.(type) {
@@ -119,6 +120,13 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 			return validatePredBool(v.Predicate, contractArg.(bool), v.Attribute)
 		case "address":
 			return contractArg == common.HexToAddress(v.Attribute)
+		case "address[]":
+			byteAddresses := contractArg.([]common.Address)
+			addresses := make([]string, len(byteAddresses))
+			for i, a := range byteAddresses {
+				addresses[i] = a.String()
+			}
+			return validatePredStringArray(v.Predicate, addresses, v.Attribute)
 		default:
 			log.Println("Parameter type not supported", f.ParameterType)
 		}

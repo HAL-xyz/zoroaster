@@ -38,6 +38,28 @@
         "Predicate":"IsIn",
         "Attribute":"887"
       }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x38898f1f6e045217258ad6c34b148c149eaf745d",
+      "FunctionName":"depositToken",
+      "ParameterName":"new_address_din_var",
+      "ParameterType":"address[]",
+      "Condition":{
+        "Predicate":"IsIn",
+        "Attribute":"0x894cF868881a0781c20105b076adC644cB252203"
+      }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x38898f1f6e045217258ad6c34b148c149eaf745d",
+      "FunctionName":"depositToken",
+      "ParameterName":"new_address_din_var",
+      "ParameterType":"address[]",
+      "Condition":{
+        "Predicate":"BiggerThan",
+        "Attribute":"1"
+      }
     }
   ]
 }

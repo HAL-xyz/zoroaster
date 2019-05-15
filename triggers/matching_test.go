@@ -206,6 +206,21 @@ func TestValidateFilter9(t *testing.T) {
 	}
 }
 
+func TestValidateFilter10(t *testing.T) {
+
+	tx := getTransactionFromFile("../resources/transactions/tx6.json")
+	trigger := getTriggerFromFile("../resources/triggers/t9.json")
+
+	// address[]
+	if ValidateFilter(tx, &trigger.Filters[3], &trigger.ContractABI) != true {
+		t.Error()
+	}
+
+	if ValidateFilter(tx, &trigger.Filters[4], &trigger.ContractABI) != true {
+		t.Error()
+	}
+}
+
 // Testing one Trigger vs one Transaction
 func TestValidateTrigger(t *testing.T) {
 
