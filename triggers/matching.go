@@ -22,15 +22,18 @@ func MatchTrigger(trigger *Trigger, block *jsonrpc_client.Block) int {
 func ValidateTrigger(trigger *Trigger, transaction *jsonrpc_client.Transaction) bool {
 	match := true
 	for _, f := range trigger.Filters {
-		filterMatch := ValidateFilter(transaction, &f, &trigger.ContractABI)
+		filterMatch := ValidateFilter(transaction, &f, &trigger.ContractABI, trigger.TriggerId)
 		match = match && filterMatch // a Trigger matches if all filters match
 	}
 	return match
 }
 
-// TODO return errors instead of logging
-// TODO unify matching API
-func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool {
+func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string, tid int) bool {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Trigger %d panicked against tx %s: %s", 1, ts.Hash, r)
+		}
+	}()
 
 	switch v := f.Condition.(type) {
 	case ConditionFrom:
@@ -63,7 +66,7 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string) bool
 		// extract params
 		contractArg := funcArgs[f.ParameterName]
 		if contractArg == nil {
-			log.Printf("Cannot find param %s in the contract", f.ParameterName)
+			log.Printf("Cannot find param %s in contract %s", f.ParameterName, *ts.To)
 			return false
 		}
 
