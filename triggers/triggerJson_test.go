@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
 )
@@ -8,27 +9,28 @@ import (
 // Test Json serialization of Triggers
 
 func TestNewTriggerJson(t *testing.T) {
-
 	json, _ := ioutil.ReadFile("../resources/triggers/t1.json")
-
 	_, err := NewTriggerJson(string(json))
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
 }
 
-// TODO more tests
 func TestTriggerJson_ToTrigger(t *testing.T) {
-
 	json, _ := ioutil.ReadFile("../resources/triggers/t1.json")
 
 	tjs, _ := NewTriggerJson(string(json))
 	trig, err := tjs.ToTrigger()
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
+
 	_, ok := trig.Filters[0].Condition.(ConditionTo)
-	if ok != true {
-		t.Error("Expected type ConditionTo")
-	}
+	assert.True(t, ok)
+}
+
+func TestMalformedJsonTrigger(t *testing.T) {
+	// handle broken TriggerJson creation
+	_, ok := newTriggerFromJson("def not json")
+	assert.NotNil(t, ok)
+
+	// handle broken Trigger creation
+	_, ok2 := newTriggerFromFile("../resources/triggers/t11.json")
+	assert.NotNil(t, ok2)
 }

@@ -1,6 +1,9 @@
 package trigger
 
-import "math/big"
+import (
+	"fmt"
+	"math/big"
+)
 
 type Trigger struct {
 	TriggerId   int
@@ -80,4 +83,25 @@ const (
 
 func (p Predicate) String() string {
 	return [...]string{"Eq", "BiggerThan", "SmallerThan"}[p]
+}
+
+func newTriggerFromJson(json string) (*Trigger, error) {
+	tjs, err := NewTriggerJson(json)
+	if err != nil {
+		return nil, &triggerCreationError{"cannot parse json trigger:", err}
+	}
+	tg, err := tjs.ToTrigger()
+	if err != nil {
+		return nil, &triggerCreationError{"cannot convert TriggerJson to Trigger:", err}
+	}
+	return tg, nil
+}
+
+type triggerCreationError struct {
+	where string
+	err error
+}
+
+func (e *triggerCreationError) Error() string {
+	return fmt.Sprintf("%s error: %s", e.where, e.err)
 }

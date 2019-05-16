@@ -51,24 +51,11 @@ func getBlockFromFile(path string) *jsonrpc_client.Block {
 	return block
 }
 
-func getTriggerFromFile(path string) *Trigger {
+func newTriggerFromFile(path string) (*Trigger, error) {
 	triggerSrc, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return getTriggerFromJson(string(triggerSrc))
+	return newTriggerFromJson(string(triggerSrc))
 }
 
-func getTriggerFromJson(json string) *Trigger {
-	tjs, err := NewTriggerJson(json)
-	if err != nil {
-		log.Fatal("Cannot parse json trigger:", err)
-	}
-
-	tg, err := tjs.ToTrigger()
-	if err != nil {
-		log.Fatal("Cannot convert json trigger to type trigger:", err)
-	}
-	return tg
-}

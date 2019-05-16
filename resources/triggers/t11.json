@@ -1,0 +1,18 @@
+{
+  "TriggerId":111,
+  "TriggerName":"Malformed Json",
+  "TriggerType":"WatchTransactions",
+  "CreatorId":223,
+  "CreationDate":"2019-03-24 17:45:12",
+  "ContractABI":"",
+  "Filters":[
+    {
+      "FilterType":"BasicFilter",
+      "ParameterName":"Gas",
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"this should not be a string"
+      }
+    }
+  ]
+}
