@@ -60,6 +60,22 @@
         "Predicate":"SmallerThan",
         "Attribute":"10"
       }
+    },
+    {
+      "FilterType":"BasicFilter",
+      "ParameterName":"Gas",
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"79068"
+      }
+    },
+    {
+      "FilterType":"BasicFilter",
+      "ParameterName":"Nonce",
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"233172"
+      }
     }
   ]
 }

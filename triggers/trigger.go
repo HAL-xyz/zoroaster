@@ -99,7 +99,7 @@ func newTriggerFromJson(json string) (*Trigger, error) {
 
 type triggerCreationError struct {
 	where string
-	err error
+	err   error
 }
 
 func (e *triggerCreationError) Error() string {

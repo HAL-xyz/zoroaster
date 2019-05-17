@@ -1,15 +1,15 @@
 package trigger
 
 import (
-	"github.com/INFURA/go-libs/jsonrpc_client"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/onrik/ethrpc"
 	"log"
 	"math/big"
 	"regexp"
 	"strconv"
 )
 
-func MatchTrigger(trigger *Trigger, block *jsonrpc_client.Block) int {
+func MatchTrigger(trigger *Trigger, block *ethrpc.Block) int {
 	matchedTriggers := 0
 	for _, trans := range block.Transactions {
 		if ValidateTrigger(trigger, &trans) {
@@ -19,7 +19,7 @@ func MatchTrigger(trigger *Trigger, block *jsonrpc_client.Block) int {
 	return matchedTriggers
 }
 
-func ValidateTrigger(trigger *Trigger, transaction *jsonrpc_client.Transaction) bool {
+func ValidateTrigger(trigger *Trigger, transaction *ethrpc.Transaction) bool {
 	match := true
 	for _, f := range trigger.Filters {
 		filterMatch := ValidateFilter(transaction, &f, &trigger.ContractABI, trigger.TriggerId)
@@ -28,10 +28,10 @@ func ValidateTrigger(trigger *Trigger, transaction *jsonrpc_client.Transaction) 
 	return match
 }
 
-func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string, tid int) bool {
+func ValidateFilter(ts *ethrpc.Transaction, f *Filter, abi *string, tid int) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("Trigger %d panicked against tx %s: %s", 1, ts.Hash, r)
+			log.Printf("Trigger %d panicked against tx %s: %s", tid, ts.Hash, r)
 		}
 	}()
 
@@ -39,22 +39,22 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string, tid 
 	case ConditionFrom:
 		return v.Attribute == ts.From
 	case ConditionTo:
-		return v.Attribute == *ts.To
+		return v.Attribute == ts.To
 	case ConditionNonce:
 		return validatePredInt(v.Predicate, ts.Nonce, v.Attribute)
 	case ConditionValue:
-		return validatePredBigInt(v.Predicate, ts.Value, v.Attribute)
+		return validatePredBigInt(v.Predicate, &ts.Value, v.Attribute)
 	case ConditionGas:
 		return validatePredInt(v.Predicate, ts.Gas, v.Attribute)
 	case ConditionGasPrice:
-		return validatePredBigInt(v.Predicate, ts.GasPrice, v.Attribute)
+		return validatePredBigInt(v.Predicate, &ts.GasPrice, v.Attribute)
 	case FunctionParamCondition:
 		if len(*abi) == 0 {
 			log.Println("No ABI provided")
 			return false
 		}
 		// make sure we are matching against the right transaction
-		if !(f.ToContract == *ts.To) {
+		if !(f.ToContract == ts.To) {
 			return false
 		}
 		// decode function arguments
@@ -66,7 +66,7 @@ func ValidateFilter(ts *jsonrpc_client.Transaction, f *Filter, abi *string, tid 
 		// extract params
 		contractArg := funcArgs[f.ParameterName]
 		if contractArg == nil {
-			log.Printf("Cannot find param %s in contract %s", f.ParameterName, *ts.To)
+			log.Printf("Cannot find param %s in contract %s", f.ParameterName, ts.To)
 			return false
 		}
 

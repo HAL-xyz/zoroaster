@@ -2,49 +2,56 @@ package trigger
 
 import (
 	"encoding/json"
-	"github.com/INFURA/go-libs/jsonrpc_client"
+	"fmt"
+	"github.com/onrik/ethrpc"
 	"io/ioutil"
 	"log"
+	"strconv"
 )
 
-func JsonToTransaction(jsonTx string) (*jsonrpc_client.Transaction, error) {
-	var tx jsonrpc_client.Transaction
-	err := json.Unmarshal([]byte(jsonTx), &tx)
+func JsonToTransaction(jsonSrc []byte) (*ethrpc.Transaction, error) {
+	var tx ethrpc.Transaction
+	err := json.Unmarshal(jsonSrc, &tx)
 	if err != nil {
 		return nil, err
 	}
+	tx.Nonce = fixIntCasting(tx.Nonce)
+	tx.Gas = fixIntCasting(tx.Gas)
 	return &tx, nil
 }
 
-func getTransactionFromFile(path string) *jsonrpc_client.Transaction {
+func getTransactionFromFile(path string) *ethrpc.Transaction {
 	txSrc, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	tx, err := JsonToTransaction(string(txSrc))
+	tx, err := JsonToTransaction(txSrc)
 	if err != nil {
 		log.Fatal(err)
 	}
 	return tx
 }
 
-func JsonToBlock(jsonBlock string) (*jsonrpc_client.Block, error) {
-	var block jsonrpc_client.Block
-	err := json.Unmarshal([]byte(jsonBlock), &block)
+func JsonToBlock(jsonBlock []byte) (*ethrpc.Block, error) {
+	var block ethrpc.Block
+	err := json.Unmarshal(jsonBlock, &block)
 	if err != nil {
 		return nil, err
+	}
+	for i, t := range block.Transactions {
+		block.Transactions[i].Gas = fixIntCasting(t.Gas)
+		block.Transactions[i].Nonce = fixIntCasting(t.Nonce)
 	}
 	return &block, nil
 }
 
-func getBlockFromFile(path string) *jsonrpc_client.Block {
+func getBlockFromFile(path string) *ethrpc.Block {
 	blockSrc, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	block, err := JsonToBlock(string(blockSrc))
+	block, err := JsonToBlock(blockSrc)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,3 +66,16 @@ func newTriggerFromFile(path string) (*Trigger, error) {
 	return newTriggerFromJson(string(triggerSrc))
 }
 
+// ethrpc.Transaction expects Gas and Nonce to be hex values,
+// which is a pain for testing. E.g. if we have the int
+// 21000 in the tests it will be interpreted as an hex value,
+// and converted to the int 135168 when reading the Json file.
+// This function converts 135168 back to 21000.
+func fixIntCasting(v int) int {
+	s := fmt.Sprintf("%x", v)
+	ret, err := strconv.Atoi(s)
+	if err != nil {
+		log.Fatal("int fix casting failed:", err)
+	}
+	return ret
+}

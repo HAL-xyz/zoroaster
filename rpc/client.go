@@ -1,42 +1,32 @@
 package main
 
 import (
-	json2 "encoding/json"
 	"fmt"
-	"github.com/INFURA/go-libs/jsonrpc_client"
-)
-
-// TODO: require private secret
-const (
-	MAINNET_URL = "https://mainnet.infura.io/v3/"
-	RINKEBY_URL = "https://rinkeby.infura.io/v3/"
-	PROJECT_ID = "448136c4f7b5486995b34fb9e13f2a32"
-	ENDPOINT   = RINKEBY_URL + PROJECT_ID
+	"github.com/onrik/ethrpc"
+	"log"
 )
 
 func main() {
+	client := ethrpc.New("http://35.246.166.209:8545")
 
-	client := jsonrpc_client.EthereumClient{ENDPOINT}
+	n, err := client.EthBlockNumber()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Most recent block no: ", n)
 
-	//lastBlockNumber, err := client.Eth_blockNumber()
+	block, err := client.EthGetBlockByNumber(7535077, true)
+	//js2, _ := json.Marshal(block)
+	//fmt.Println(string(js2))
+	fmt.Println("gas ", block.Transactions[5].Gas)
+
+	//tx, err := client.EthGetTransactionByHash("0x0641bb18e73d9e874252d3de6993473d176200dc02f4482a64c6540749aecaff")
 	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//fmt.Println(lastBlockNumber)
-	//
-	//lastBlock, err := client.Eth_getBlockByNumber(lastBlockNumber, true)
-	//if err != nil {
-	//	fmt.Println(err)
+	//	log.Fatal(err)
 	//}
 	//
-	//js, _ := json2.Marshal(lastBlock)
-	//fmt.Println(string(js))
-
-	trans, _ := client.Eth_getTransactionByHash("0x3542bcab3b11612f5fcfc53aa6017253af114ba4b637974bb311aa8326917673")
-	js2, _ := json2.Marshal(trans)
-	fmt.Println(string(js2))
-
-
-
-
+	//js2, _ := json.Marshal(tx)
+	//fmt.Println(string(js2))
 }
+
+

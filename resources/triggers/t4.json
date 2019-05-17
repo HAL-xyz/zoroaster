@@ -29,6 +29,14 @@
         "Predicate":"SmallerThan",
         "Attribute":"5000000001"
       }
+    },
+    {
+      "FilterType":"BasicFilter",
+      "ParameterName":"Nonce",
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"134"
+      }
     }
   ]
 }

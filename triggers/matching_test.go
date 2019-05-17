@@ -62,6 +62,9 @@ func TestValidateFilter4(t *testing.T) {
 	// GasPrice
 	assert.Equal(t, ValidateFilter(&block.Transactions[7], &trigger.Filters[2], abi, tid), true)
 	assert.Equal(t, ValidateFilter(&block.Transactions[4], &trigger.Filters[2], abi, tid), false)
+
+	// Nonce
+	assert.Equal(t, ValidateFilter(&block.Transactions[5], &trigger.Filters[3], abi, tid), true)
 }
 
 func TestValidateFilter5(t *testing.T) {
@@ -77,6 +80,12 @@ func TestValidateFilter5(t *testing.T) {
 	// bytes14[]
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[3], abi, tid), true)
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[4], abi, tid), true)
+
+	// Gas
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[5], abi, tid), true)
+
+	// Nonce
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[6], abi, tid), true)
 }
 
 func TestValidateFilter6(t *testing.T) {
