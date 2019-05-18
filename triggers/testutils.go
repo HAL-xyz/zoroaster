@@ -63,7 +63,7 @@ func newTriggerFromFile(path string) (*Trigger, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return newTriggerFromJson(string(triggerSrc))
+	return NewTriggerFromJson(string(triggerSrc))
 }
 
 // ethrpc.Transaction expects Gas and Nonce to be hex values,

@@ -27,7 +27,7 @@ func TestTriggerJson_ToTrigger(t *testing.T) {
 
 func TestMalformedJsonTrigger(t *testing.T) {
 	// handle broken TriggerJson creation
-	_, ok := newTriggerFromJson("def not json")
+	_, ok := NewTriggerFromJson("def not json")
 	assert.NotNil(t, ok)
 
 	// handle broken Trigger creation

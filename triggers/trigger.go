@@ -85,7 +85,7 @@ func (p Predicate) String() string {
 	return [...]string{"Eq", "BiggerThan", "SmallerThan"}[p]
 }
 
-func newTriggerFromJson(json string) (*Trigger, error) {
+func NewTriggerFromJson(json string) (*Trigger, error) {
 	tjs, err := NewTriggerJson(json)
 	if err != nil {
 		return nil, &triggerCreationError{"cannot parse json trigger:", err}
