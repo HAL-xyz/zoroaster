@@ -1,4 +1,4 @@
-package main
+package aws
 
 import (
 	"database/sql"
@@ -11,20 +11,7 @@ import (
 
 var db *sql.DB
 
-func main() {
-	InitDB()
-	triggers, err := loadTriggersFromDB()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("I got %d triggers\n", len(triggers))
-	for _, v := range triggers {
-		fmt.Println(v.TriggerType)
-		fmt.Println(v.Filters)
-	}
-}
-
-func loadTriggersFromDB() ([]*trigger.Trigger, error) {
+func LoadTriggersFromDB() ([]*trigger.Trigger, error) {
 	rows, err := db.Query("SELECT trigger_data FROM trigger1;")
 	if err != nil {
 		return nil, err
@@ -56,10 +43,11 @@ func InitDB() {
 		dbEndpoint = "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com"
 		dbUser     = "triggersdb_test_admin"
 		dbName     = "triggers"
+		pwdEnv     = "ZORO_PASS"
 	)
-	pwd := os.Getenv("ZORO_PASS")
+	pwd := os.Getenv(pwdEnv)
 	if pwd == "" {
-		log.Fatal("No db password set in local env")
+		log.Fatal("No db password set in local env ", pwdEnv)
 	}
 
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
