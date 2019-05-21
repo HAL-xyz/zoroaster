@@ -33,4 +33,8 @@ func TestMalformedJsonTrigger(t *testing.T) {
 	// handle broken Trigger creation
 	_, ok2 := newTriggerFromFile("../resources/triggers/t11.json")
 	assert.NotNil(t, ok2)
+
+	// handle some valid but random json
+	_, ok3 := NewTriggerFromJson(`{ "hello": 1 }`)
+	assert.NotNil(t, ok3)
 }

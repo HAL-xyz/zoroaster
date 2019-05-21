@@ -41,6 +41,9 @@ func NewTriggerJson(input string) (*TriggerJson, error) {
 
 // converts a TriggerJson to a Trigger
 func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
+	if tjs.TriggerID == 0 {
+		return nil, fmt.Errorf("missing TriggerID")
+	}
 
 	trigger := Trigger{
 		TriggerId:   tjs.TriggerID,
