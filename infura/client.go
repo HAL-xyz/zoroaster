@@ -10,8 +10,8 @@ import (
 const (
 	MAINNET_URL = "https://mainnet.infura.io/v3/"
 	RINKEBY_URL = "https://rinkeby.infura.io/v3/"
-	PROJECT_ID = "448136c4f7b5486995b34fb9e13f2a32"
-	ENDPOINT   = MAINNET_URL + PROJECT_ID
+	PROJECT_ID  = "448136c4f7b5486995b34fb9e13f2a32"
+	ENDPOINT    = MAINNET_URL + PROJECT_ID
 )
 
 func main() {
@@ -36,8 +36,5 @@ func main() {
 	fmt.Println(trans)
 	js2, _ := json.Marshal(trans)
 	fmt.Println(string(js2))
-
-
-
 
 }

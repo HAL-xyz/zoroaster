@@ -28,5 +28,3 @@ func main() {
 	//js2, _ := json.Marshal(tx)
 	//fmt.Println(string(js2))
 }
-
-
