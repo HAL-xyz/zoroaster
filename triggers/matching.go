@@ -9,14 +9,14 @@ import (
 	"strconv"
 )
 
-func MatchTrigger(trigger *Trigger, block *ethrpc.Block) int {
-	matchedTriggers := 0
-	for _, trans := range block.Transactions {
+func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ethrpc.Transaction {
+	txs := make([]*ethrpc.Transaction, 0)
+	for i, trans := range block.Transactions {
 		if ValidateTrigger(trigger, &trans) {
-			matchedTriggers += 1
+			txs = append(txs, &block.Transactions[i])
 		}
 	}
-	return matchedTriggers
+	return txs
 }
 
 func ValidateTrigger(trigger *Trigger, transaction *ethrpc.Transaction) bool {
