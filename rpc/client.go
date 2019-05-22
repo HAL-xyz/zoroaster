@@ -18,12 +18,14 @@ func PollForLastBlock(c chan *ethrpc.Block) {
 	for range ticker.C {
 		n, err := client.EthBlockNumber()
 		if err != nil {
-			log.Fatal(err)
+			log.Println("WARN: failed to poll ETH node -> ", err)
+			continue
 		}
 		if n != mostRecentBlockNo {
 			block, err := client.EthGetBlockByNumber(n, true)
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("WARN: failed to get block %d -> %s", n, err)
+				continue
 			}
 			mostRecentBlockNo = n
 			c <- block
