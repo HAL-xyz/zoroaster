@@ -36,7 +36,7 @@ func main() {
 		for _, tg := range triggers {
 			txs := trigger.MatchTrigger(tg, block)
 			for _, tx := range txs {
-				log.Printf("\tTrigger %d matched transaction " +
+				log.Printf("\tTrigger %d matched transaction "+
 					"https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
 			}
 		}

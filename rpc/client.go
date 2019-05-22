@@ -11,24 +11,33 @@ const matteoNode = "https://nodether.com"
 
 func PollForLastBlock(c chan *ethrpc.Block) {
 
-	var mostRecentBlockNo int
+	var lastBlockProcessed int
 	client := ethrpc.New(matteoNode)
 
 	ticker := time.NewTicker(5 * time.Second)
 	for range ticker.C {
 		n, err := client.EthBlockNumber()
 		if err != nil {
-			log.Println("WARN: failed to poll ETH node -> ", err)
+			log.Println("\tWARN: failed to poll ETH node -> ", err)
 			continue
 		}
-		if n != mostRecentBlockNo {
+		if n != lastBlockProcessed {
 			block, err := client.EthGetBlockByNumber(n, true)
 			if err != nil {
-				log.Printf("WARN: failed to get block %d -> %s", n, err)
+				log.Printf("\tWARN: failed to get block %d -> %s", n, err)
 				continue
 			}
-			mostRecentBlockNo = n
+			logLostBlocks(lastBlockProcessed, n)
+			lastBlockProcessed = n
 			c <- block
 		}
 	}
+}
+
+func logLostBlocks(lastBlockProcessed int, lastBlockMined int) {
+	delta := lastBlockMined - lastBlockProcessed
+	if delta != 1 && lastBlockProcessed != 0 {
+		log.Printf("\tWARN: we lost %d block(s)", delta)
+	}
+	log.Flags()
 }
