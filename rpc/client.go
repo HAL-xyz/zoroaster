@@ -1,30 +1,32 @@
-package main
+package rpc
 
 import (
-	"fmt"
 	"github.com/onrik/ethrpc"
 	"log"
+	"time"
 )
 
-func main() {
-	client := ethrpc.New("http://35.246.166.209:8545")
+const maderoNode = "http://35.246.166.209:8545"
+const matteoNode = "https://nodether.com"
 
-	n, err := client.EthBlockNumber()
-	if err != nil {
-		log.Fatal(err)
+func PollForLastBlock(c chan *ethrpc.Block) {
+
+	var mostRecentBlockNo int
+	client := ethrpc.New(matteoNode)
+
+	ticker := time.NewTicker(5 * time.Second)
+	for range ticker.C {
+		n, err := client.EthBlockNumber()
+		if err != nil {
+			log.Fatal(err)
+		}
+		if n != mostRecentBlockNo {
+			block, err := client.EthGetBlockByNumber(n, true)
+			if err != nil {
+				log.Fatal(err)
+			}
+			mostRecentBlockNo = n
+			c <- block
+		}
 	}
-	fmt.Println("Most recent block no: ", n)
-
-	block, err := client.EthGetBlockByNumber(7535077, true)
-	//js2, _ := json.Marshal(block)
-	//fmt.Println(string(js2))
-	fmt.Println("gas ", block.Transactions[5].Gas)
-
-	//tx, err := client.EthGetTransactionByHash("0x0641bb18e73d9e874252d3de6993473d176200dc02f4482a64c6540749aecaff")
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//
-	//js2, _ := json.Marshal(tx)
-	//fmt.Println(string(js2))
 }
