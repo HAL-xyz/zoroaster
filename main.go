@@ -31,12 +31,13 @@ func main() {
 	// Main routine
 	for {
 		block := <-c
-		log.Println("=> Discovered new block: #", block.Number)
+		log.Println("New block: #", block.Number)
 
 		for _, tg := range triggers {
 			txs := trigger.MatchTrigger(tg, block)
 			for _, tx := range txs {
-				log.Printf("\tTrigger %d matched transaction %s", tg.TriggerId, tx.Hash)
+				log.Printf("\tTrigger %d matched transaction " +
+					"https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
 			}
 		}
 	}
