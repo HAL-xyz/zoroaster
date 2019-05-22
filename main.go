@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/onrik/ethrpc"
 	"log"
+	"os"
 	"zoroaster/aws"
 	"zoroaster/rpc"
 	"zoroaster/triggers"
@@ -10,13 +11,18 @@ import (
 
 func main() {
 
+	// Load table config
+	table := os.Getenv("DB_TABLE")
+	if table == "" {
+		table = "trigger1"
+	}
+
 	// Load triggers from DB
 	aws.InitDB()
-	triggers, err := aws.LoadTriggersFromDB()
+	triggers, err := aws.LoadTriggersFromDB(table)
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Printf("=> Loaded %d triggers from DB\n", len(triggers))
 
 	// Poll ETH node
 	c := make(chan *ethrpc.Block)

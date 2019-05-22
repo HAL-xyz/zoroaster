@@ -11,8 +11,9 @@ import (
 
 var db *sql.DB
 
-func LoadTriggersFromDB() ([]*trigger.Trigger, error) {
-	rows, err := db.Query("SELECT trigger_data FROM trigger1;")
+func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
+	sqlSt := fmt.Sprintf("SELECT trigger_data FROM %s", table)
+	rows, err := db.Query(sqlSt)
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +36,7 @@ func LoadTriggersFromDB() ([]*trigger.Trigger, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
+	log.Printf("=> Loaded %d triggers from table %s\n", len(triggers), table)
 	return triggers, nil
 }
 
