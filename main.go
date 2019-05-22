@@ -17,12 +17,8 @@ func main() {
 		table = "trigger1"
 	}
 
-	// Load triggers from DB
+	// Connect to triggers' DB
 	aws.InitDB()
-	triggers, err := aws.LoadTriggersFromDB(table)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	// Poll ETH node
 	c := make(chan *ethrpc.Block)
@@ -32,6 +28,11 @@ func main() {
 	for {
 		block := <-c
 		log.Println("New block: #", block.Number)
+
+		triggers, err := aws.LoadTriggersFromDB(table)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		for _, tg := range triggers {
 			txs := trigger.MatchTrigger(tg, block)

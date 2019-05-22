@@ -36,7 +36,6 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 	if err = rows.Err(); err != nil {
 		return nil, err
 	}
-	log.Printf("Loaded %d triggers from table %s\n", len(triggers), table)
 	return triggers, nil
 }
 
