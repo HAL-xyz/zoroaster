@@ -19,12 +19,14 @@ func PollForLastBlock(c chan *ethrpc.Block) {
 		n, err := client.EthBlockNumber()
 		if err != nil {
 			log.Println("\tWARN: failed to poll ETH node -> ", err)
+			time.Sleep(5 * time.Second)
 			continue
 		}
 		if n != lastBlockProcessed {
 			block, err := client.EthGetBlockByNumber(n, true)
 			if err != nil {
 				log.Printf("\tWARN: failed to get block %d -> %s", n, err)
+				time.Sleep(5 * time.Second)
 				continue
 			}
 			logLostBlocks(lastBlockProcessed, n)

@@ -15,7 +15,7 @@ func main() {
 	// Load table config
 	table := os.Getenv("DB_TABLE")
 	if table == "" {
-		table = "trigger1"
+		table = "trigger_default"
 	}
 
 	// Connect to triggers' DB
@@ -39,8 +39,9 @@ func main() {
 		for _, tg := range triggers {
 			txs := trigger.MatchTrigger(tg, block)
 			for _, tx := range txs {
-				log.Printf("\tTrigger %d matched transaction "+
-					"https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
+				log.Printf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
+				aws.LogMatch(tg, tx, table+"_log")
+
 			}
 		}
 		log.Printf("\tProcessed %d triggers in %s", len(triggers), time.Since(start))

@@ -46,7 +46,7 @@ func JsonToBlock(jsonBlock []byte) (*ethrpc.Block, error) {
 	return &block, nil
 }
 
-func getBlockFromFile(path string) *ethrpc.Block {
+func GetBlockFromFile(path string) *ethrpc.Block {
 	blockSrc, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)
@@ -58,7 +58,7 @@ func getBlockFromFile(path string) *ethrpc.Block {
 	return block
 }
 
-func newTriggerFromFile(path string) (*Trigger, error) {
+func NewTriggerFromFile(path string) (*Trigger, error) {
 	triggerSrc, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatal(err)

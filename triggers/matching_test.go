@@ -14,8 +14,8 @@ func TestMain(m *testing.M) {
 }
 
 func TestValidateFilter(t *testing.T) {
-	block := getBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t1.json")
+	block := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t1.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// BasicFilter / To
@@ -27,8 +27,8 @@ func TestValidateFilter(t *testing.T) {
 }
 
 func TestValidateFilter2(t *testing.T) {
-	block := getBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t1.json")
+	block := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t1.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// Address
@@ -37,8 +37,8 @@ func TestValidateFilter2(t *testing.T) {
 }
 
 func TestValidateFilter3(t *testing.T) {
-	block := getBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t3.json")
+	block := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t3.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// From
@@ -47,8 +47,8 @@ func TestValidateFilter3(t *testing.T) {
 }
 
 func TestValidateFilter4(t *testing.T) {
-	block := getBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t4.json")
+	block := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t4.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// Value
@@ -69,7 +69,7 @@ func TestValidateFilter4(t *testing.T) {
 
 func TestValidateFilter5(t *testing.T) {
 	tx := getTransactionFromFile("../resources/transactions/tx1.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t5.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t5.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// uint256[]
@@ -90,7 +90,7 @@ func TestValidateFilter5(t *testing.T) {
 
 func TestValidateFilter6(t *testing.T) {
 	tx := getTransactionFromFile("../resources/transactions/tx2.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t6.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t6.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// address[N]
@@ -103,7 +103,7 @@ func TestValidateFilter6(t *testing.T) {
 
 func TestValidateFilter7(t *testing.T) {
 	tx := getTransactionFromFile("../resources/transactions/tx3.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t7.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t7.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// uint256
@@ -118,7 +118,7 @@ func TestValidateFilter7(t *testing.T) {
 
 func TestValidateFilter8(t *testing.T) {
 	tx := getTransactionFromFile("../resources/transactions/tx4.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t8.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t8.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// int128[N]
@@ -133,7 +133,7 @@ func TestValidateFilter8(t *testing.T) {
 
 func TestValidateFilter9(t *testing.T) {
 	tx := getTransactionFromFile("../resources/transactions/tx5.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t9.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t9.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// int32
@@ -148,7 +148,7 @@ func TestValidateFilter9(t *testing.T) {
 
 func TestValidateFilter10(t *testing.T) {
 	tx := getTransactionFromFile("../resources/transactions/tx6.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t9.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t9.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// address[]
@@ -164,7 +164,7 @@ func TestValidateFilter10(t *testing.T) {
 
 func TestValidateFilter11(t *testing.T) {
 	tx := getTransactionFromFile("../resources/transactions/tx5.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t10.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t10.json")
 	tid, abi := trigger.TriggerId, &trigger.ContractABI
 
 	// wrong func param type - for now we're just happy to log and assume the filter didn't match
@@ -174,16 +174,16 @@ func TestValidateFilter11(t *testing.T) {
 
 // Testing one Trigger vs one Transaction
 func TestValidateTrigger(t *testing.T) {
-	block := getBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t1.json")
+	block := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t1.json")
 
 	assert.Equal(t, ValidateTrigger(trigger, &block.Transactions[0]), true)
 	assert.Equal(t, ValidateTrigger(trigger, &block.Transactions[1]), false)
 }
 
 func TestValidateTrigger2(t *testing.T) {
-	block := getBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t2.json")
+	block := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t2.json")
 
 	assert.Equal(t, ValidateTrigger(trigger, &block.Transactions[6]), true)
 	assert.Equal(t, ValidateTrigger(trigger, &block.Transactions[1]), false)
@@ -192,8 +192,8 @@ func TestValidateTrigger2(t *testing.T) {
 
 // Testing one Trigger vs one Block
 func TestMatchTrigger(t *testing.T) {
-	block := getBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := newTriggerFromFile("../resources/triggers/t2.json")
+	block := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t2.json")
 
 	txs := MatchTrigger(trigger, block)
 

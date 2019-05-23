@@ -4,12 +4,22 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
+	"github.com/onrik/ethrpc"
 	"log"
 	"os"
+	"time"
 	"zoroaster/triggers"
 )
 
 var db *sql.DB
+
+func LogMatch(tg *trigger.Trigger, tx *ethrpc.Transaction, logTable string) {
+	q := fmt.Sprintf(`INSERT INTO "%s" ("date", "trigger_id", "block_no", "tx_hash") VALUES($1, $2, $3, $4)`, logTable)
+	_, err := db.Exec(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.Hash)
+	if err != nil {
+		log.Printf("WARN: Cannot write trigger log match: %s", err)
+	}
+}
 
 func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 	sqlSt := fmt.Sprintf("SELECT trigger_data FROM %s", table)
