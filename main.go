@@ -4,6 +4,7 @@ import (
 	"github.com/onrik/ethrpc"
 	"log"
 	"os"
+	"time"
 	"zoroaster/aws"
 	"zoroaster/rpc"
 	"zoroaster/triggers"
@@ -27,6 +28,7 @@ func main() {
 	// Main routine
 	for {
 		block := <-c
+		start := time.Now()
 		log.Println("New block: #", block.Number)
 
 		triggers, err := aws.LoadTriggersFromDB(table)
@@ -41,6 +43,7 @@ func main() {
 					"https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
 			}
 		}
+		log.Printf("\tProcessed %d triggers in %s", len(triggers), time.Since(start))
 	}
 
 }
