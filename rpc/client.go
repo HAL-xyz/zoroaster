@@ -18,28 +18,19 @@ func PollForLastBlock(c chan *ethrpc.Block) {
 	for range ticker.C {
 		n, err := client.EthBlockNumber()
 		if err != nil {
-			log.Println("\tWARN: failed to poll ETH node -> ", err)
+			log.Println("WARN: failed to poll ETH node -> ", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}
 		if n != lastBlockProcessed {
 			block, err := client.EthGetBlockByNumber(n, true)
 			if err != nil {
-				log.Printf("\tWARN: failed to get block %d -> %s", n, err)
+				log.Printf("WARN: failed to get block %d -> %s", n, err)
 				time.Sleep(5 * time.Second)
 				continue
 			}
-			logLostBlocks(lastBlockProcessed, n)
 			lastBlockProcessed = n
 			c <- block
 		}
 	}
-}
-
-func logLostBlocks(lastBlockProcessed int, lastBlockMined int) {
-	delta := lastBlockMined - lastBlockProcessed
-	if delta != 1 && lastBlockProcessed != 0 {
-		log.Printf("\tWARN: we lost %d block(s)", delta)
-	}
-	log.Flags()
 }
