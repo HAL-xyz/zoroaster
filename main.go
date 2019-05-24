@@ -10,10 +10,18 @@ import (
 	"zoroaster/triggers"
 )
 
-const maderoNode = "http://35.246.166.209:8545"
-const matteoNode = "https://nodether.com"
-
 func main() {
+
+	const maderoNode = "http://35.246.166.209:8545"
+	const matteoNode = "https://nodether.com"
+
+	// Persist logs
+	f, err := os.OpenFile("zoro.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
 
 	// Load table config
 	table := os.Getenv("DB_TABLE")
@@ -64,3 +72,4 @@ func logLostBlocks(lastBlockProcessed int, lastBlockPolled int) {
 		log.Printf("WARN: we lost %d block(s)", delta-1)
 	}
 }
+
