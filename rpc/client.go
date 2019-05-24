@@ -8,6 +8,7 @@ import (
 
 const maderoNode = "http://35.246.166.209:8545"
 const matteoNode = "https://nodether.com"
+const K = 8 // next block to process is (last block mined - K)
 
 func PollForLastBlock(c chan *ethrpc.Block) {
 
@@ -22,14 +23,19 @@ func PollForLastBlock(c chan *ethrpc.Block) {
 			time.Sleep(5 * time.Second)
 			continue
 		}
-		if n != lastBlockProcessed {
-			block, err := client.EthGetBlockByNumber(n, true)
+		// program startup
+		if lastBlockProcessed == 0 {
+			lastBlockProcessed = n - K
+		}
+		if n - K > lastBlockProcessed {
+			block, err := client.EthGetBlockByNumber(lastBlockProcessed + 1, true)
 			if err != nil {
 				log.Printf("WARN: failed to get block %d -> %s", n, err)
 				time.Sleep(5 * time.Second)
 				continue
 			}
-			lastBlockProcessed = n
+			lastBlockProcessed += 1
+			log.Printf("\t(%d blocks behind)", n - lastBlockProcessed)
 			c <- block
 		}
 	}
