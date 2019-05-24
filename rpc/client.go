@@ -6,14 +6,11 @@ import (
 	"time"
 )
 
-const maderoNode = "http://35.246.166.209:8545"
-const matteoNode = "https://nodether.com"
 const K = 8 // next block to process is (last block mined - K)
 
-func PollForLastBlock(c chan *ethrpc.Block) {
+func PollForLastBlock(c chan *ethrpc.Block, client *ethrpc.EthRPC) {
 
 	var lastBlockProcessed int
-	client := ethrpc.New(matteoNode)
 
 	ticker := time.NewTicker(5 * time.Second)
 	for range ticker.C {

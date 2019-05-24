@@ -10,6 +10,9 @@ import (
 	"zoroaster/triggers"
 )
 
+const maderoNode = "http://35.246.166.209:8545"
+const matteoNode = "https://nodether.com"
+
 func main() {
 
 	// Load table config
@@ -21,9 +24,12 @@ func main() {
 	// Connect to triggers' DB
 	aws.InitDB()
 
+	// ETH client
+	client := ethrpc.New(matteoNode)
+
 	// Poll ETH node
 	c := make(chan *ethrpc.Block)
-	go rpc.PollForLastBlock(c)
+	go rpc.PollForLastBlock(c, client)
 
 	lastBlockProcessed := 0
 	// Main routine
