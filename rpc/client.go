@@ -4,15 +4,17 @@ import (
 	"github.com/onrik/ethrpc"
 	"log"
 	"time"
+	"zoroaster/aws"
+	"zoroaster/config"
 )
 
 const K = 8 // next block to process is (last block mined - K)
 
-func PollForLastBlock(c chan *ethrpc.Block, client *ethrpc.EthRPC) {
+func PollForLastBlock(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZConfiguration) {
 
-	var lastBlockProcessed int
+	lastBlockProcessed := aws.ReadLastBlockProcessed(zconf.TriggersDB.TableStats)
 
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(2500 * time.Millisecond)
 	for range ticker.C {
 		n, err := client.EthBlockNumber()
 		if err != nil {
@@ -20,7 +22,7 @@ func PollForLastBlock(c chan *ethrpc.Block, client *ethrpc.EthRPC) {
 			time.Sleep(5 * time.Second)
 			continue
 		}
-		// program startup
+		// this should only happen during dev
 		if lastBlockProcessed == 0 {
 			lastBlockProcessed = n - K
 		}

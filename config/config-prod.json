@@ -4,6 +4,7 @@
   "triggersDB": {
     "table": "ec2_trigger",
     "tableLogs": "ec2_trigger_log",
+    "tableStats": "ec2_trigger_stats",
     "endpoint": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
     "user": "triggersdb_test_admin",
     "name": "triggers",

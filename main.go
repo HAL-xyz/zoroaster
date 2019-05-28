@@ -32,7 +32,7 @@ func main() {
 
 	// Poll ETH node
 	c := make(chan *ethrpc.Block)
-	go rpc.PollForLastBlock(c, client)
+	go rpc.PollForLastBlock(c, client, zconf)
 
 	lastBlockProcessed := 0
 	// Main routine
@@ -57,6 +57,7 @@ func main() {
 		}
 		log.Printf("\tProcessed %d triggers in %s", len(triggers), time.Since(start))
 		lastBlockProcessed = block.Number
+		aws.SetLastBlockProcessed(zconf.TriggersDB.TableStats, lastBlockProcessed)
 	}
 
 }

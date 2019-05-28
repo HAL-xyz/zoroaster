@@ -4,6 +4,7 @@
   "triggersDB": {
     "table": "trigger_default",
     "tableLogs": "trigger_default_log",
+    "tableStats": "trigger_default_stats",
     "endpoint": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
     "user": "triggersdb_test_admin",
     "name": "triggers",

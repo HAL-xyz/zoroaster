@@ -16,13 +16,14 @@ type ZConfiguration struct {
 }
 
 type TriggersDB struct {
-	Table     string
-	TableLogs string
-	Endpoint  string
-	User      string
-	Name      string
-	Port      int
-	Password  string
+	Table      string
+	TableLogs  string
+	TableStats string
+	Endpoint   string
+	User       string
+	Name       string
+	Port       int
+	Password   string
 }
 
 func Load() *ZConfiguration {

@@ -13,6 +13,24 @@ import (
 
 var db *sql.DB
 
+func ReadLastBlockProcessed(table string) int {
+	var blockNo int
+	q := fmt.Sprintf("SELECT last_block_processed FROM %s", table)
+	err := db.QueryRow(q).Scan(&blockNo)
+	if err != nil {
+		log.Printf("ERROR: Cannot read last block processed: %s", err)
+	}
+	return blockNo
+}
+
+func SetLastBlockProcessed(table string, blockNo int) {
+	q := fmt.Sprintf(`UPDATE "%s" SET last_block_processed = $1, date = $2`, table)
+	_, err := db.Exec(q, blockNo, time.Now())
+	if err != nil {
+		log.Printf("ERROR: Cannot set last block processed: %s", err)
+	}
+}
+
 func LogMatch(tg *trigger.Trigger, tx *ethrpc.Transaction, logTable string) {
 	q := fmt.Sprintf(`INSERT INTO "%s" ("date", "trigger_id", "block_no", "tx_hash") VALUES($1, $2, $3, $4)`, logTable)
 	_, err := db.Exec(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.Hash)
@@ -22,8 +40,8 @@ func LogMatch(tg *trigger.Trigger, tx *ethrpc.Transaction, logTable string) {
 }
 
 func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
-	sqlSt := fmt.Sprintf("SELECT trigger_data FROM %s", table)
-	rows, err := db.Query(sqlSt)
+	q := fmt.Sprintf("SELECT trigger_data FROM %s", table)
+	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err
 	}
