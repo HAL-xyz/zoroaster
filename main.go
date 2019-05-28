@@ -6,34 +6,29 @@ import (
 	"os"
 	"time"
 	"zoroaster/aws"
+	"zoroaster/config"
 	"zoroaster/rpc"
 	"zoroaster/triggers"
 )
 
 func main() {
 
-	const maderoNode = "http://35.246.166.209:8545"
-	const matteoNode = "https://nodether.com"
+	// Load Config
+	zconf := config.Load()
 
 	// Persist logs
-	f, err := os.OpenFile("zoro.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	f, err := os.OpenFile(zconf.LogsFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 	log.SetOutput(f)
 
-	// Load table config
-	table := os.Getenv("DB_TABLE")
-	if table == "" {
-		table = "trigger_default"
-	}
-
 	// Connect to triggers' DB
-	aws.InitDB()
+	aws.InitDB(zconf)
 
 	// ETH client
-	client := ethrpc.New(matteoNode)
+	client := ethrpc.New(zconf.EthNode)
 
 	// Poll ETH node
 	c := make(chan *ethrpc.Block)
@@ -47,7 +42,7 @@ func main() {
 		log.Println("New block: #", block.Number)
 		logLostBlocks(lastBlockProcessed, block.Number)
 
-		triggers, err := aws.LoadTriggersFromDB(table)
+		triggers, err := aws.LoadTriggersFromDB(zconf.TriggersDB.Table)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -56,7 +51,7 @@ func main() {
 			txs := trigger.MatchTrigger(tg, block)
 			for _, tx := range txs {
 				log.Printf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
-				aws.LogMatch(tg, tx, table+"_log")
+				aws.LogMatch(tg, tx, zconf.TriggersDB.TableLogs)
 
 			}
 		}
@@ -72,4 +67,3 @@ func logLostBlocks(lastBlockProcessed int, lastBlockPolled int) {
 		log.Printf("WARN: we lost %d block(s)", delta-1)
 	}
 }
-

@@ -6,8 +6,8 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/onrik/ethrpc"
 	"log"
-	"os"
 	"time"
+	"zoroaster/config"
 	"zoroaster/triggers"
 )
 
@@ -49,20 +49,9 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 	return triggers, nil
 }
 
-func InitDB() {
-	const (
-		dbEndpoint = "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com"
-		dbUser     = "triggersdb_test_admin"
-		dbName     = "triggers"
-		pwdEnv     = "ZORO_PASS"
-	)
-	pwd := os.Getenv(pwdEnv)
-	if pwd == "" {
-		log.Fatal("No db password set in local env ", pwdEnv)
-	}
-
+func InitDB(c *config.ZConfiguration) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		dbEndpoint, 5432, dbUser, pwd, dbName)
+		c.TriggersDB.Endpoint, c.TriggersDB.Port, c.TriggersDB.User, c.TriggersDB.Password, c.TriggersDB.Name)
 
 	var err error
 	db, err = sql.Open("postgres", psqlInfo)

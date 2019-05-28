@@ -1,0 +1,12 @@
+{
+  "ethNode": "https://nodether.com",
+  "logsPath": "logs",
+  "triggersDB": {
+    "table": "trigger_default",
+    "tableLogs": "trigger_default_log",
+    "endpoint": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
+    "user": "triggersdb_test_admin",
+    "name": "triggers",
+    "port": 5432
+  }
+}

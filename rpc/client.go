@@ -24,15 +24,15 @@ func PollForLastBlock(c chan *ethrpc.Block, client *ethrpc.EthRPC) {
 		if lastBlockProcessed == 0 {
 			lastBlockProcessed = n - K
 		}
-		if n - K > lastBlockProcessed {
-			block, err := client.EthGetBlockByNumber(lastBlockProcessed + 1, true)
+		if n-K > lastBlockProcessed {
+			block, err := client.EthGetBlockByNumber(lastBlockProcessed+1, true)
 			if err != nil {
 				log.Printf("WARN: failed to get block %d -> %s", n, err)
 				time.Sleep(5 * time.Second)
 				continue
 			}
 			lastBlockProcessed += 1
-			log.Printf("\t(%d blocks behind)", n - lastBlockProcessed)
+			log.Printf("\t(%d blocks behind)", n-lastBlockProcessed)
 			c <- block
 		}
 	}
