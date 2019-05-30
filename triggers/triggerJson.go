@@ -27,6 +27,7 @@ type FilterJson struct {
 		Attribute string `json:"Attribute"`
 	} `json:"Condition"`
 	FunctionName string `json:"FunctionName,omitempty"`
+	Index        *int   `json:"Index"`
 }
 
 // creates a new TriggerJson from JSON
@@ -70,15 +71,14 @@ func (fjs FilterJson) ToFilter() (*Filter, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	f := Filter{
 		FilterType:    fjs.FilterType,
 		ToContract:    fjs.ToContract,
 		ParameterName: fjs.ParameterName,
 		ParameterType: fjs.ParameterType,
+		Index:         fjs.Index,
 		Condition:     condition,
 	}
-
 	return &f, nil
 }
 

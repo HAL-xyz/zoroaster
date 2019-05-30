@@ -82,6 +82,30 @@
         "Predicate":"IsIn",
         "Attribute":"ccasd"
       }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x38898f1f6e045217258ad6c34b148c149eaf745d",
+      "FunctionName":"depositToken",
+      "ParameterName":"new_int32_din_var",
+      "ParameterType":"int32[]",
+      "Index": 1,
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"887"
+      }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "ToContract":"0x38898f1f6e045217258ad6c34b148c149eaf745d",
+      "FunctionName":"depositToken",
+      "ParameterName":"new_int32_din_var",
+      "ParameterType":"int32[]",
+      "Index": 99,
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"887"
+      }
     }
   ]
 }

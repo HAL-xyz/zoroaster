@@ -2,16 +2,14 @@ package trigger
 
 import (
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
-	"log"
 	"testing"
 )
 
 // no logs when running tests
-func TestMain(m *testing.M) {
-	log.SetOutput(ioutil.Discard)
-	m.Run()
-}
+//func TestMain(m *testing.M) {
+//	log.SetOutput(ioutil.Discard)
+//	m.Run()
+//}
 
 func TestValidateFilter(t *testing.T) {
 	block := GetBlockFromFile("../resources/blocks/block1.json")
@@ -144,6 +142,10 @@ func TestValidateFilter9(t *testing.T) {
 
 	// int32[6]
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[2], abi, tid), true)
+
+	// Index int32[]
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[7], abi, tid), true)
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[8], abi, tid), false)
 }
 
 func TestValidateFilter10(t *testing.T) {
@@ -170,6 +172,20 @@ func TestValidateFilter11(t *testing.T) {
 	// wrong func param type - for now we're just happy to log and assume the filter didn't match
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[0], abi, tid), false)
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[1], abi, tid), false)
+}
+
+func TestValidateFilter12(t *testing.T) {
+	tx := getTransactionFromFile("../resources/transactions/tx2.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t12.json")
+	tid, abi := trigger.TriggerId, &trigger.ContractABI
+
+	// Index on bigInt[]
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[1], abi, tid), true)
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[2], abi, tid), false)
+
+	// Index on address[]
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[3], abi, tid), true)
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[4], abi, tid), false)
 }
 
 // Testing one Trigger vs one Transaction

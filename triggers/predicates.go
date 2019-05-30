@@ -8,23 +8,27 @@ import (
 
 // TODO return InvalidPredicateError instead of failing silently
 
-func validatePredStringArray(p Predicate, cv []string, tv string) bool {
+func validatePredStringArray(p Predicate, cv []string, tv string, index *int) bool {
 	// lowercase
 	tv = strings.ToLower(tv)
 	for i, v := range cv {
 		cv[i] = strings.ToLower(v)
 	}
-
 	// remove hex prefix
-	if strings.HasPrefix(tv, "0x") {
-		tv = tv[2:]
-	}
+	tv = strings.TrimPrefix(tv, "0x")
 	for i, v := range cv {
-		if strings.HasPrefix(v, "0x") {
-			cv[i] = v[2:]
+		cv[i] = strings.TrimPrefix(v, "0x")
+	}
+	if index != nil {
+		if *index > len(cv) {
+			return false
+		}
+		if p == Eq {
+			return cv[*index] == tv
+		} else {
+			return false
 		}
 	}
-
 	switch p {
 	case IsIn:
 		for _, v := range cv {
@@ -63,7 +67,13 @@ func validatePredBigInt(p Predicate, cv *big.Int, tv *big.Int) bool {
 	}
 }
 
-func validatePredBigIntArray(p Predicate, cvs []*big.Int, tv *big.Int) bool {
+func validatePredBigIntArray(p Predicate, cvs []*big.Int, tv *big.Int, index *int) bool {
+	if index != nil {
+		if *index > len(cvs) {
+			return false
+		}
+		return validatePredBigInt(p, cvs[*index], tv)
+	}
 	switch p {
 	case SmallerThan:
 		return int64(len(cvs)) < tv.Int64()
@@ -93,7 +103,13 @@ func validatePredInt(p Predicate, cv int, tv int) bool {
 	return false
 }
 
-func validatePredIntArray(p Predicate, cvs []int32, tv int) bool {
+func validatePredIntArray(p Predicate, cvs []int32, tv int, index *int) bool {
+	if index != nil {
+		if *index > len(cvs) {
+			return false
+		}
+		return validatePredInt(p, int(cvs[*index]), tv)
+	}
 	switch p {
 	case SmallerThan:
 		return len(cvs) < tv

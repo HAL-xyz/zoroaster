@@ -19,6 +19,7 @@ type Filter struct {
 	ParameterName string
 	ParameterType string // TODO use enum
 	Condition     Conditioner
+	Index         *int
 }
 
 type Conditioner interface {
