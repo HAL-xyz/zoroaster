@@ -59,6 +59,17 @@
         "Predicate":"Eq",
         "Attribute":"0x45A38dE98fD82c44669780D125D8C4141505Bd3D"
       }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "FunctionName":"trade",
+      "ParameterName":"tradeAddresses",
+      "ParameterType":"address[4]",
+      "Index": 2,
+      "Condition":{
+        "Predicate":"BiggerThan",
+        "Attribute":"0x45A38dE98fD82c44669780D125D8C4141505Bd3D"
+      }
     }
   ]
 }

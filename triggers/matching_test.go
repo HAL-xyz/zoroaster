@@ -162,6 +162,7 @@ func TestValidateFilter10(t *testing.T) {
 
 	// string[]
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[6], cnt, abi, tid), true)
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[9], cnt, abi, tid), false)
 }
 
 func TestValidateFilter11(t *testing.T) {
@@ -186,6 +187,7 @@ func TestValidateFilter12(t *testing.T) {
 	// Index on address[]
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[3], cnt, abi, tid), true)
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[4], cnt, abi, tid), false)
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[5], cnt, abi, tid), false)
 }
 
 // Testing one Trigger vs one Transaction

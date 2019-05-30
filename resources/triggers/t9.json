@@ -98,6 +98,16 @@
         "Predicate":"Eq",
         "Attribute":"887"
       }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "FunctionName":"depositToken",
+      "ParameterName":"new_address_din_var",
+      "ParameterType":"address[]",
+      "Condition":{
+        "Predicate":"IsIn",
+        "Attribute":"not there"
+      }
     }
   ]
 }
