@@ -18,6 +18,7 @@ type Filter struct {
 	FilterType    string // TODO use enum
 	ParameterName string
 	ParameterType string // TODO use enum
+	FunctionName  string
 	Condition     Conditioner
 	Index         *int
 }
@@ -68,6 +69,12 @@ type ConditionValue struct {
 }
 
 type ConditionFunctionParam struct {
+	Condition
+	Predicate Predicate
+	Attribute string
+}
+
+type ConditionFunctionCalled struct {
 	Condition
 	Predicate Predicate
 	Attribute string

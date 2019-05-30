@@ -76,6 +76,7 @@ func (fjs FilterJson) ToFilter() (*Filter, error) {
 		FilterType:    fjs.FilterType,
 		ParameterName: fjs.ParameterName,
 		ParameterType: fjs.ParameterType,
+		FunctionName:  fjs.FunctionName,
 		Index:         fjs.Index,
 		Condition:     condition,
 	}
@@ -85,11 +86,11 @@ func (fjs FilterJson) ToFilter() (*Filter, error) {
 func makeCondition(fjs FilterJson) (Conditioner, error) {
 
 	predicate := unpackPredicate(fjs.Condition.Predicate)
-	if predicate < 0 {
+	if predicate < 0 && fjs.FilterType != "CheckFunctionCalled" {
 		return nil, fmt.Errorf("unsupported predicate type %s", fjs.Condition.Predicate)
 	}
 	attribute := fjs.Condition.Attribute
-	if len(attribute) < 1 {
+	if len(attribute) < 1 && fjs.FilterType != "CheckFunctionCalled" {
 		return nil, fmt.Errorf("unsupported attribute type %s", attribute)
 	}
 
@@ -131,6 +132,10 @@ func makeCondition(fjs FilterJson) (Conditioner, error) {
 	}
 	if fjs.FilterType == "CheckFunctionParameter" {
 		c := ConditionFunctionParam{Condition{}, predicate, fjs.Condition.Attribute}
+		return c, nil
+	}
+	if fjs.FilterType == "CheckFunctionCalled" {
+		c := ConditionFunctionCalled{Condition{}, predicate, fjs.Condition.Attribute}
 		return c, nil
 	}
 	return nil, fmt.Errorf("unsupported filter type %s", fjs.FilterType)

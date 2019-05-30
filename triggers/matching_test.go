@@ -173,6 +173,9 @@ func TestValidateFilter11(t *testing.T) {
 	// wrong func param type - for now we're just happy to log and assume the filter didn't match
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[0], cnt, abi, tid), false)
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[1], cnt, abi, tid), false)
+
+	// checkFunctionCalled
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[2], cnt, abi, tid), true)
 }
 
 func TestValidateFilter12(t *testing.T) {
@@ -188,6 +191,9 @@ func TestValidateFilter12(t *testing.T) {
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[3], cnt, abi, tid), true)
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[4], cnt, abi, tid), false)
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[5], cnt, abi, tid), false)
+
+	// ConditionFunctionCalled
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[6], cnt, abi, tid), true)
 }
 
 // Testing one Trigger vs one Transaction

@@ -26,6 +26,10 @@
         "Predicate":"Eq",
         "Attribute":"4563456"
       }
+    },
+    {
+      "FilterType":"CheckFunctionCalled",
+      "FunctionName":"setter3"
     }
   ]
 }

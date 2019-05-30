@@ -49,12 +49,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 	case ConditionGasPrice:
 		return validatePredBigInt(v.Predicate, &ts.GasPrice, v.Attribute)
 	case ConditionFunctionParam:
-		if len(*abi) == 0 {
-			log.Println("No ABI provided")
-			return false
-		}
-		// make sure we are matching against the right transaction
-		if cnt != ts.To {
+		if !isValidContractAbi(abi, cnt, ts.To) {
 			return false
 		}
 		// decode function arguments
@@ -133,8 +128,29 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		default:
 			log.Println("Parameter type not supported", f.ParameterType)
 		}
+	case ConditionFunctionCalled:
+		if !isValidContractAbi(abi, cnt, ts.To) {
+			return false
+		}
+		methodName, err := DecodeInputMethod(&ts.Input, abi)
+		if err != nil {
+			log.Println("WARN: cannot decode input method", err)
+		}
+		return *methodName == f.FunctionName
 	default:
 		log.Fatalf("filter not supported of type %T", f.Condition)
 	}
 	return false
+}
+
+func isValidContractAbi(abi *string, cntAddress string, txTo string) bool {
+	if len(*abi) == 0 {
+		log.Println("No ABI provided")
+		return false
+	}
+	// make sure we are matching against the right transaction
+	if cntAddress != txTo {
+		return false
+	}
+	return true
 }

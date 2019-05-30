@@ -70,6 +70,10 @@
         "Predicate":"BiggerThan",
         "Attribute":"0x45A38dE98fD82c44669780D125D8C4141505Bd3D"
       }
+    },
+    {
+      "FilterType":"CheckFunctionCalled",
+      "FunctionName":"trade"
     }
   ]
 }
