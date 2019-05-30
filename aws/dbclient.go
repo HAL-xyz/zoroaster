@@ -31,7 +31,7 @@ func SetLastBlockProcessed(table string, blockNo int) {
 	}
 }
 
-func LogMatch(table string, tg *trigger.Trigger, tx *ethrpc.Transaction, blockTimestamp int) {
+func LogMatch(table string, triggerId int, tx *ethrpc.Transaction, blockTimestamp int) {
 	bdate := time.Unix(int64(blockTimestamp), 0)
 	q := fmt.Sprintf(
 		`INSERT INTO "%s" (
@@ -47,9 +47,8 @@ func LogMatch(table string, tg *trigger.Trigger, tx *ethrpc.Transaction, blockTi
 			"value",
 			"gas_price",
 			"gas",
-			"data",
-			"abi") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, table)
-	_, err := db.Exec(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From, tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input, tg.ContractABI)
+			"data") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, table)
+	_, err := db.Exec(q, time.Now(), triggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From, tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input)
 	if err != nil {
 		log.Printf("WARN: Cannot write trigger log match: %s", err)
 	}

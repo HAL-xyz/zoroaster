@@ -46,20 +46,17 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		for _, tg := range triggers {
 			txs := trigger.MatchTrigger(tg, block)
 			for _, tx := range txs {
 				log.Printf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
-				aws.LogMatch(zconf.TriggersDB.TableLogs, tg, tx, block.Timestamp)
-
+				aws.LogMatch(zconf.TriggersDB.TableLogs, tg.TriggerId, tx, block.Timestamp)
 			}
 		}
 		log.Printf("\tProcessed %d triggers in %s", len(triggers), time.Since(start))
 		lastBlockProcessed = block.Number
 		aws.SetLastBlockProcessed(zconf.TriggersDB.TableStats, lastBlockProcessed)
 	}
-
 }
 
 func logLostBlocks(lastBlockProcessed int, lastBlockPolled int) {
