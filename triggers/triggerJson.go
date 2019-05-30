@@ -14,12 +14,12 @@ type TriggerJson struct {
 	CreatorID    int          `json:"CreatorId"`
 	CreationDate string       `json:"CreationDate"`
 	ContractABI  string       `json:"ContractABI"`
+	ContractAdd  string       `json:"ContractAdd"`
 	Filters      []FilterJson `json:"Filters"`
 }
 
 type FilterJson struct {
 	FilterType    string `json:"FilterType"`
-	ToContract    string `json:"ToContract"`
 	ParameterName string `json:"ParameterName"`
 	ParameterType string `json:"ParameterType"`
 	Condition     struct {
@@ -51,6 +51,7 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 		TriggerName: tjs.TriggerName,
 		TriggerType: tjs.TriggerType,
 		ContractABI: tjs.ContractABI,
+		ContractAdd: tjs.ContractAdd,
 	}
 
 	// populate the filters in the trigger
@@ -73,7 +74,6 @@ func (fjs FilterJson) ToFilter() (*Filter, error) {
 	}
 	f := Filter{
 		FilterType:    fjs.FilterType,
-		ToContract:    fjs.ToContract,
 		ParameterName: fjs.ParameterName,
 		ParameterType: fjs.ParameterType,
 		Index:         fjs.Index,

@@ -10,12 +10,12 @@ type Trigger struct {
 	TriggerName string
 	TriggerType string // TODO use enum
 	ContractABI string
+	ContractAdd string
 	Filters     []Filter
 }
 
 type Filter struct {
 	FilterType    string // TODO use enum
-	ToContract    string
 	ParameterName string
 	ParameterType string // TODO use enum
 	Condition     Conditioner

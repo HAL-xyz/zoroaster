@@ -19,16 +19,16 @@ func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ethrpc.Transaction {
 	return txs
 }
 
-func ValidateTrigger(trigger *Trigger, transaction *ethrpc.Transaction) bool {
+func ValidateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {
 	match := true
-	for _, f := range trigger.Filters {
-		filterMatch := ValidateFilter(transaction, &f, &trigger.ContractABI, trigger.TriggerId)
+	for _, f := range tg.Filters {
+		filterMatch := ValidateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerId)
 		match = match && filterMatch // a Trigger matches if all filters match
 	}
 	return match
 }
 
-func ValidateFilter(ts *ethrpc.Transaction, f *Filter, abi *string, tid int) bool {
+func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tid int) bool {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("Trigger %d panicked against tx %s: %s", tid, ts.Hash, r)
@@ -54,7 +54,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, abi *string, tid int) boo
 			return false
 		}
 		// make sure we are matching against the right transaction
-		if !(f.ToContract == ts.To) {
+		if cnt != ts.To {
 			return false
 		}
 		// decode function arguments
