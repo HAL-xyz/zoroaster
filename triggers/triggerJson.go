@@ -130,7 +130,7 @@ func makeCondition(fjs FilterJson) (Conditioner, error) {
 		}
 	}
 	if fjs.FilterType == "CheckFunctionParameter" {
-		c := FunctionParamCondition{Condition{}, predicate, fjs.Condition.Attribute}
+		c := ConditionFunctionParam{Condition{}, predicate, fjs.Condition.Attribute}
 		return c, nil
 	}
 	return nil, fmt.Errorf("unsupported filter type %s", fjs.FilterType)

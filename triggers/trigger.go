@@ -67,7 +67,7 @@ type ConditionValue struct {
 	Attribute *big.Int
 }
 
-type FunctionParamCondition struct {
+type ConditionFunctionParam struct {
 	Condition
 	Predicate Predicate
 	Attribute string

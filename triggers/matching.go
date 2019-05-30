@@ -48,7 +48,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		return validatePredInt(v.Predicate, ts.Gas, v.Attribute)
 	case ConditionGasPrice:
 		return validatePredBigInt(v.Predicate, &ts.GasPrice, v.Attribute)
-	case FunctionParamCondition:
+	case ConditionFunctionParam:
 		if len(*abi) == 0 {
 			log.Println("No ABI provided")
 			return false
