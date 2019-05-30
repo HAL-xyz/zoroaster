@@ -9,7 +9,7 @@
   "Filters":[
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"trade",
       "ParameterName":"tradeAddresses",
       "ParameterType":"address[4]",
       "Condition":{
@@ -19,7 +19,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"trade",
       "ParameterName":"tradeValues",
       "ParameterType":"uint256[8]",
       "Condition":{
@@ -29,7 +29,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"trade",
       "ParameterName":"tradeValues",
       "ParameterType":"uint256[8]",
       "Condition":{

@@ -11,7 +11,7 @@ import (
 //	m.Run()
 //}
 
-func TestValidateFilter(t *testing.T) {
+func TestValidateFilter1(t *testing.T) {
 	block := GetBlockFromFile("../resources/blocks/block1.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t1.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd

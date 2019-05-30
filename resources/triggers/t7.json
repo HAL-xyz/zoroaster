@@ -9,7 +9,7 @@
   "Filters":[
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"update",
       "ParameterName":"new_wei_value_var",
       "ParameterType":"uint",
       "Condition":{
@@ -19,7 +19,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"update",
       "ParameterName":"new_bool_var",
       "ParameterType":"bool",
       "Condition":{
@@ -29,7 +29,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"update",
       "ParameterName":"new_int128_var",
       "ParameterType":"int128",
       "Condition":{

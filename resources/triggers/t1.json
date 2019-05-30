@@ -17,7 +17,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"transfer",
       "ParameterName":"_to",
       "ParameterType":"address",
       "Condition":{

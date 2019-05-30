@@ -9,7 +9,7 @@
   "Filters":[
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"setCompactData",
       "ParameterName":"indices",
       "ParameterType":"uint256[]",
       "Condition":{
@@ -19,7 +19,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"setCompactData",
       "ParameterName":"indices",
       "ParameterType":"uint256[]",
       "Condition":{
@@ -29,7 +29,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"setCompactData",
       "ParameterName":"indices",
       "ParameterType":"uint256[]",
       "Condition":{
@@ -39,7 +39,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"setCompactData",
       "ParameterName":"buy",
       "ParameterType":"bytes14[]",
       "Condition":{
@@ -49,7 +49,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"setCompactData",
       "ParameterName":"buy",
       "ParameterType":"bytes14[]",
       "Condition":{

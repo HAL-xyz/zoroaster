@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/onrik/ethrpc"
 	"log"
@@ -56,6 +57,12 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		funcArgs, err := DecodeInputData(ts.Input, *abi)
 		if err != nil {
 			log.Println("Cannot decode input data: ", err)
+			return false
+		}
+		// check FunctionName
+		ok, err := isCorrectFunctionName(abi, ts.Input, f.FunctionName)
+		if err != nil || ok != true {
+			fmt.Printf("WARN: incorrect FunctionName %s, error: %v", f.FunctionName, err)
 			return false
 		}
 		// extract params
@@ -132,11 +139,11 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if !isValidContractAbi(abi, cnt, ts.To) {
 			return false
 		}
-		methodName, err := DecodeInputMethod(&ts.Input, abi)
+		ok, err := isCorrectFunctionName(abi, ts.Input, f.FunctionName)
 		if err != nil {
-			log.Println("WARN: cannot decode input method", err)
+			return false
 		}
-		return *methodName == f.FunctionName
+		return ok
 	default:
 		log.Fatalf("filter not supported of type %T", f.Condition)
 	}
@@ -153,4 +160,14 @@ func isValidContractAbi(abi *string, cntAddress string, txTo string) bool {
 		return false
 	}
 	return true
+}
+
+// check the trigger's FunctionName value matches the transaction's method
+func isCorrectFunctionName(abi *string, inputData string, funcName string) (bool, error) {
+	methodName, err := DecodeInputMethod(&inputData, abi)
+	if err != nil {
+		log.Println("WARN: cannot decode input method", err)
+		return false, err
+	}
+	return *methodName == funcName, nil
 }

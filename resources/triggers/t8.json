@@ -9,7 +9,7 @@
   "Filters":[
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"setter4",
       "ParameterName":"new_int128_4_var",
       "ParameterType":"int128[4]",
       "Condition":{
@@ -19,7 +19,7 @@
     },
     {
       "FilterType":"CheckFunctionParameter",
-      "FunctionName":"depositToken",
+      "FunctionName":"setter4",
       "ParameterName":"new_int128_4_var",
       "ParameterType":"int[4]",
       "Condition":{
@@ -29,7 +29,7 @@
     },
     {
       "FilterType": "CheckFunctionParameter",
-      "FunctionName": "depositToken",
+      "FunctionName": "setter4",
       "ParameterName": "new_int40_var",
       "ParameterType": "int64",
       "Condition": {
