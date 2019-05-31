@@ -1,5 +1,4 @@
 {
-  "TriggerId":111,
   "TriggerName":"Malformed Json",
   "TriggerType":"WatchTransactions",
   "CreatorId":223,

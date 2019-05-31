@@ -1,5 +1,4 @@
 {
-  "TriggerId":107,
   "TriggerName":"FP/bool, int128",
   "TriggerType":"WatchTransactions",
   "CreatorId":223,

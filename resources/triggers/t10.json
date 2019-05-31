@@ -1,5 +1,4 @@
 {
-  "TriggerId":110,
   "TriggerName":"Wrong type func params",
   "TriggerType":"WatchTransactions",
   "CreatorId":223,

@@ -6,7 +6,7 @@ import (
 )
 
 type Trigger struct {
-	TriggerId   int
+	TriggerId   int // id comes from the db
 	TriggerName string
 	TriggerType string // TODO use enum
 	ContractABI string

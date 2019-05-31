@@ -1,5 +1,4 @@
 {
-  "TriggerId":105,
   "TriggerName":"FP/address[4], uint256[8]",
   "TriggerType":"WatchTransactions",
   "CreatorId":223,

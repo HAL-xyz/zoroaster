@@ -8,7 +8,6 @@ import (
 )
 
 type TriggerJson struct {
-	TriggerID    int          `json:"TriggerId"`
 	TriggerName  string       `json:"TriggerName"`
 	TriggerType  string       `json:"TriggerType"`
 	CreatorID    int          `json:"CreatorId"`
@@ -42,12 +41,14 @@ func NewTriggerJson(input string) (*TriggerJson, error) {
 
 // converts a TriggerJson to a Trigger
 func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
-	if tjs.TriggerID == 0 {
-		return nil, fmt.Errorf("missing TriggerID")
+	if tjs.TriggerName == "" {
+		return nil, fmt.Errorf("cannot read trigger: missing TriggerName")
+	}
+	if tjs.TriggerType == "" {
+		return nil, fmt.Errorf("cannot read trigger: missing TriggerType")
 	}
 
 	trigger := Trigger{
-		TriggerId:   tjs.TriggerID,
 		TriggerName: tjs.TriggerName,
 		TriggerType: tjs.TriggerType,
 		ContractABI: tjs.ContractABI,

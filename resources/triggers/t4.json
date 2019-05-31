@@ -1,5 +1,4 @@
 {
-  "TriggerId":104,
   "TriggerName":"Basic/Gas/GasPrice/Value",
   "TriggerType":"WatchTransactions",
   "CreatorId":223,

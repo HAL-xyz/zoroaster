@@ -23,16 +23,16 @@ func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ethrpc.Transaction {
 func ValidateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {
 	match := true
 	for _, f := range tg.Filters {
-		filterMatch := ValidateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerId)
+		filterMatch := ValidateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerName)
 		match = match && filterMatch // a Trigger matches if all filters match
 	}
 	return match
 }
 
-func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tid int) bool {
+func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgName string) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("Trigger %d panicked against tx %s: %s", tid, ts.Hash, r)
+			log.Printf("Trigger %s panicked against tx %s: %s", tgName, ts.Hash, r)
 		}
 	}()
 

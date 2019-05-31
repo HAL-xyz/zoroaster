@@ -1,6 +1,5 @@
 {
   "CreatorId":13,
-  "TriggerId":9001,
   "TriggerName":"Idex - More than 10 ZRX sold",
   "TriggerType":"WatchTransactions",
   "CreationDate":"2019-05-24 00:00:0",

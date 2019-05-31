@@ -55,7 +55,7 @@ func LogMatch(table string, triggerId int, tx *ethrpc.Transaction, blockTimestam
 }
 
 func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
-	q := fmt.Sprintf("SELECT trigger_data FROM %s", table)
+	q := fmt.Sprintf("SELECT id, trigger_data FROM %s", table)
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err
@@ -64,8 +64,9 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 
 	triggers := make([]*trigger.Trigger, 0)
 	for rows.Next() {
+		var id int
 		var tg string
-		err = rows.Scan(&tg)
+		err = rows.Scan(&id, &tg)
 		if err != nil {
 			panic(err)
 		}
@@ -73,6 +74,7 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 		if err != nil {
 			log.Println(err)
 		} else {
+			trig.TriggerId = id
 			triggers = append(triggers, trig)
 		}
 	}
