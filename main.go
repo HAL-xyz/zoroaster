@@ -50,7 +50,7 @@ func main() {
 			txs := trigger.MatchTrigger(tg, block)
 			for _, tx := range txs {
 				log.Printf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
-				aws.LogMatch(zconf.TriggersDB.TableLogs, tg.TriggerId, tx, block.Timestamp)
+				aws.LogMatch(zconf.TriggersDB.TableLogs, tg, tx, block.Timestamp)
 			}
 		}
 		log.Printf("\tProcessed %d triggers in %s", len(triggers), time.Since(start))

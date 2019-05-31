@@ -31,7 +31,7 @@ func SetLastBlockProcessed(table string, blockNo int) {
 	}
 }
 
-func LogMatch(table string, triggerId int, tx *ethrpc.Transaction, blockTimestamp int) {
+func LogMatch(table string, tg *trigger.Trigger, tx *ethrpc.Transaction, blockTimestamp int) {
 	bdate := time.Unix(int64(blockTimestamp), 0)
 	q := fmt.Sprintf(
 		`INSERT INTO "%s" (
@@ -47,15 +47,16 @@ func LogMatch(table string, triggerId int, tx *ethrpc.Transaction, blockTimestam
 			"value",
 			"gas_price",
 			"gas",
-			"data") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`, table)
-	_, err := db.Exec(q, time.Now(), triggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From, tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input)
+			"data",
+			"user_id") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, table)
+	_, err := db.Exec(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From, tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input, tg.UserId)
 	if err != nil {
 		log.Printf("WARN: Cannot write trigger log match: %s", err)
 	}
 }
 
 func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
-	q := fmt.Sprintf("SELECT id, trigger_data FROM %s", table)
+	q := fmt.Sprintf("SELECT id, trigger_data, user_id FROM %s", table)
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err
@@ -64,9 +65,10 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 
 	triggers := make([]*trigger.Trigger, 0)
 	for rows.Next() {
-		var id int
+		var triggerId int
+		var userId int
 		var tg string
-		err = rows.Scan(&id, &tg)
+		err = rows.Scan(&triggerId, &tg, &userId)
 		if err != nil {
 			panic(err)
 		}
@@ -74,7 +76,8 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 		if err != nil {
 			log.Println(err)
 		} else {
-			trig.TriggerId = id
+			trig.TriggerId = triggerId
+			trig.UserId = userId
 			triggers = append(triggers, trig)
 		}
 	}
