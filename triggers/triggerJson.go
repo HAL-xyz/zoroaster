@@ -10,7 +10,6 @@ import (
 type TriggerJson struct {
 	TriggerName  string       `json:"TriggerName"`
 	TriggerType  string       `json:"TriggerType"`
-	CreatorID    int          `json:"CreatorId"`
 	CreationDate string       `json:"CreationDate"`
 	ContractABI  string       `json:"ContractABI"`
 	ContractAdd  string       `json:"ContractAdd"`

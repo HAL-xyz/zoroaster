@@ -12,6 +12,7 @@ type Trigger struct {
 	ContractABI string
 	ContractAdd string
 	Filters     []Filter
+	UserId      int
 }
 
 type Filter struct {
