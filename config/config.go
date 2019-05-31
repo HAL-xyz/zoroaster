@@ -16,7 +16,7 @@ type ZConfiguration struct {
 }
 
 type TriggersDB struct {
-	Table      string
+	TableData  string
 	TableLogs  string
 	TableStats string
 	Endpoint   string

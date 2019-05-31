@@ -42,7 +42,7 @@ func main() {
 		log.Println("New block: #", block.Number)
 		logLostBlocks(lastBlockProcessed, block.Number)
 
-		triggers, err := aws.LoadTriggersFromDB(zconf.TriggersDB.Table)
+		triggers, err := aws.LoadTriggersFromDB(zconf.TriggersDB.TableData)
 		if err != nil {
 			log.Fatal(err)
 		}

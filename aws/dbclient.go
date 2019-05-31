@@ -65,8 +65,7 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 
 	triggers := make([]*trigger.Trigger, 0)
 	for rows.Next() {
-		var triggerId int
-		var userId int
+		var triggerId, userId int
 		var tg string
 		err = rows.Scan(&triggerId, &tg, &userId)
 		if err != nil {
@@ -76,8 +75,7 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 		if err != nil {
 			log.Println(err)
 		} else {
-			trig.TriggerId = triggerId
-			trig.UserId = userId
+			trig.TriggerId, trig.UserId = triggerId, userId
 			triggers = append(triggers, trig)
 		}
 	}

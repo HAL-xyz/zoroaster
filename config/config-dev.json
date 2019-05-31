@@ -2,8 +2,8 @@
   "ethNode": "https://nodether.com",
   "logsPath": "logs",
   "triggersDB": {
-    "table": "trigger_default",
-    "tableLogs": "trigger_default_log",
+    "tableData": "trigger_default_data",
+    "tableLogs": "trigger_default_history",
     "tableStats": "trigger_default_stats",
     "endpoint": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
     "user": "triggersdb_test_admin",
