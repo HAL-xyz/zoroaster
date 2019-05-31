@@ -106,6 +106,16 @@
         "Predicate":"IsIn",
         "Attribute":"not there"
       }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "FunctionName":"setter3",
+      "ParameterName":"new_int32_6_var",
+      "ParameterType":"int32[6]",
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"6"
+      }
     }
   ]
 }

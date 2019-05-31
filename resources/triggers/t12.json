@@ -73,6 +73,16 @@
     {
       "FilterType":"CheckFunctionCalled",
       "FunctionName":"trade"
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "FunctionName":"trade",
+      "ParameterName":"tradeAddresses",
+      "ParameterType":"address[4]",
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"4"
+      }
     }
   ]
 }

@@ -34,6 +34,16 @@
         "Predicate":"SmallerThan",
         "Attribute":"9"
       }
+    },
+    {
+      "FilterType":"CheckFunctionParameter",
+      "FunctionName":"trade",
+      "ParameterName":"tradeValues",
+      "ParameterType":"uint256[8]",
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"8"
+      }
     }
   ]
 }

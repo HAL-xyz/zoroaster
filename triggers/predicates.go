@@ -49,6 +49,12 @@ func validatePredStringArray(p Predicate, cv []string, tv string, index *int) bo
 			return false
 		}
 		return len(cv) > v
+	case Eq:
+		v, err := strconv.Atoi(tv)
+		if err != nil {
+			return false
+		}
+		return len(cv) == v
 	default:
 		return false
 	}
@@ -79,6 +85,8 @@ func validatePredBigIntArray(p Predicate, cvs []*big.Int, tv *big.Int, index *in
 		return int64(len(cvs)) < tv.Int64()
 	case BiggerThan:
 		return int64(len(cvs)) > tv.Int64()
+	case Eq:
+		return int64(len(cvs)) == tv.Int64()
 	case IsIn:
 		for _, v := range cvs {
 			if v.Cmp(tv) == 0 {
@@ -115,6 +123,8 @@ func validatePredIntArray(p Predicate, cvs []int32, tv int, index *int) bool {
 		return len(cvs) < tv
 	case BiggerThan:
 		return len(cvs) > tv
+	case Eq:
+		return len(cvs) == tv
 	case IsIn:
 		for _, v := range cvs {
 			if int(v) == tv {
