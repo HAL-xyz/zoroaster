@@ -32,7 +32,7 @@ func ValidateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {
 func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgName string) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("Trigger %s panicked against tx %s: %s", tgName, ts.Hash, r)
+			log.Printf("WARN: trigger %s panicked against tx %s: %s", tgName, ts.Hash, r)
 		}
 	}()
 
@@ -56,7 +56,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		// decode function arguments
 		funcArgs, err := DecodeInputData(ts.Input, *abi)
 		if err != nil {
-			log.Println("Cannot decode input data: ", err)
+			log.Println("WARN: cannot decode input data: ", err)
 			return false
 		}
 		// check FunctionName
@@ -68,7 +68,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		// extract params
 		contractArg := funcArgs[f.ParameterName]
 		if contractArg == nil {
-			log.Printf("Cannot find param %s in contract %s", f.ParameterName, ts.To)
+			log.Printf("WARN: cannot find param %s in contract %s", f.ParameterName, ts.To)
 			return false
 		}
 		// single int/uint{40-256}
@@ -133,7 +133,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		case "string[]":
 			return validatePredStringArray(v.Predicate, contractArg.([]string), v.Attribute, f.Index)
 		default:
-			log.Println("Parameter type not supported", f.ParameterType)
+			log.Println("WARN: parameter type not supported", f.ParameterType)
 		}
 	case ConditionFunctionCalled:
 		if !isValidContractAbi(abi, cnt, ts.To) {
@@ -145,14 +145,14 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		}
 		return ok
 	default:
-		log.Fatalf("filter not supported of type %T", f.Condition)
+		log.Fatalf("WARN: filter not supported of type %T", f.Condition)
 	}
 	return false
 }
 
 func isValidContractAbi(abi *string, cntAddress string, txTo string) bool {
 	if len(*abi) == 0 {
-		log.Println("No ABI provided")
+		log.Println("WARN: no ABI provided")
 		return false
 	}
 	// make sure we are matching against the right transaction

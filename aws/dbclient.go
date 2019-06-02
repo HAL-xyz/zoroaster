@@ -73,7 +73,7 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 		}
 		trig, err := trigger.NewTriggerFromJson(tg)
 		if err != nil {
-			log.Println(err)
+			log.Println("WARN:", err)
 		} else {
 			trig.TriggerId, trig.UserId = triggerId, userId
 			triggers = append(triggers, trig)
@@ -97,6 +97,6 @@ func InitDB(c *config.ZConfiguration) {
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal("Cannot connect to the DB -> ", err)
+		log.Fatal("ERROR: cannot connect to the DB -> ", err)
 	}
 }
