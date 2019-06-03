@@ -1,9 +1,9 @@
 package trigger
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/onrik/ethrpc"
+	log "github.com/sirupsen/logrus"
 	"math/big"
 	"regexp"
 	"strconv"
@@ -49,6 +49,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 	case ConditionGasPrice:
 		return validatePredBigInt(v.Predicate, &ts.GasPrice, v.Attribute)
 	case ConditionFunctionParam:
+		// check transaction and ABI
 		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
 			return false
 		}
@@ -58,11 +59,14 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			log.Debugf("(trigger %d) cannot decode input data: %v\n", tgId, err)
 			return false
 		}
-		// check FunctionName
-		ok, err := isCorrectFunctionName(abi, ts.Input, f.FunctionName)
-		if err != nil || ok != true {
-			log.Debugf("(trigger %d) wrong FunctionName %s, error: %v\n", tgId, f.FunctionName, err)
+		// check FunctionName matches the transaction's method
+		ok, err := matchesMethodName(abi, ts.Input, f.FunctionName)
+		if err != nil {
+			log.Debugf("(trigger %d) cannot decode input method %v\n", tgId, err)
 			return false
+		}
+		if !ok {
+			return false // tx called a different method name
 		}
 		// extract params
 		contractArg := funcArgs[f.ParameterName]
@@ -138,7 +142,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
 			return false
 		}
-		ok, err := isCorrectFunctionName(abi, ts.Input, f.FunctionName)
+		ok, err := matchesMethodName(abi, ts.Input, f.FunctionName)
 		if err != nil {
 			log.Debugf("(trigger %d) cannot decode input method %v\n", tgId, err)
 			return false
@@ -163,7 +167,7 @@ func isValidContractAbi(abi *string, cntAddress string, txTo string, tgId int) b
 }
 
 // check the trigger's FunctionName value matches the transaction's method
-func isCorrectFunctionName(abi *string, inputData string, funcName string) (bool, error) {
+func matchesMethodName(abi *string, inputData string, funcName string) (bool, error) {
 	methodName, err := DecodeInputMethod(&inputData, abi)
 	if err != nil {
 		return false, err

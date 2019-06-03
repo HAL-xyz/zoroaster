@@ -1,8 +1,8 @@
 package rpc
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/onrik/ethrpc"
+	log "github.com/sirupsen/logrus"
 	"time"
 	"zoroaster/aws"
 	"zoroaster/config"

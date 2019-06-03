@@ -1,8 +1,8 @@
 package main
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/onrik/ethrpc"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
 	"zoroaster/aws"

@@ -195,6 +195,20 @@ func TestValidateFilter12(t *testing.T) {
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[7], cnt, abi, tid), true)
 }
 
+func TestValidateFilter13(t *testing.T) {
+	tx := getTransactionFromFile("../resources/transactions/tx2.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t12.json")
+	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
+
+	// CheckFunctionParameter - different method name
+	trigger.Filters[7].FunctionName = "xxx"
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[7], cnt, abi, tid), false)
+
+	// ConditionFunctionCalled - wrong ABI
+	trigger.ContractABI = "xxx"
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[6], cnt, abi, tid), false)
+}
+
 // Testing one Trigger vs one Transaction
 func TestValidateTrigger(t *testing.T) {
 	block := GetBlockFromFile("../resources/blocks/block1.json")

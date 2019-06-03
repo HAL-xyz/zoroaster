@@ -3,9 +3,9 @@ package aws
 import (
 	"database/sql"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	_ "github.com/lib/pq"
 	"github.com/onrik/ethrpc"
+	log "github.com/sirupsen/logrus"
 	"time"
 	"zoroaster/config"
 	"zoroaster/triggers"
