@@ -1,10 +1,9 @@
 package trigger
 
 import (
-	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/onrik/ethrpc"
-	"log"
 	"math/big"
 	"regexp"
 	"strconv"
@@ -23,16 +22,16 @@ func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ethrpc.Transaction {
 func ValidateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {
 	match := true
 	for _, f := range tg.Filters {
-		filterMatch := ValidateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerName)
+		filterMatch := ValidateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerId)
 		match = match && filterMatch // a Trigger matches if all filters match
 	}
 	return match
 }
 
-func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgName string) bool {
+func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgId int) bool {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("WARN: trigger %s panicked against tx %s: %s", tgName, ts.Hash, r)
+			log.Debugf("trigger %d panicked against tx %s: %s\n", tgId, ts.Hash, r)
 		}
 	}()
 
@@ -50,25 +49,25 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 	case ConditionGasPrice:
 		return validatePredBigInt(v.Predicate, &ts.GasPrice, v.Attribute)
 	case ConditionFunctionParam:
-		if !isValidContractAbi(abi, cnt, ts.To) {
+		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
 			return false
 		}
 		// decode function arguments
 		funcArgs, err := DecodeInputData(ts.Input, *abi)
 		if err != nil {
-			log.Println("WARN: cannot decode input data: ", err)
+			log.Debugf("(trigger %d) cannot decode input data: %v\n", tgId, err)
 			return false
 		}
 		// check FunctionName
 		ok, err := isCorrectFunctionName(abi, ts.Input, f.FunctionName)
 		if err != nil || ok != true {
-			fmt.Printf("WARN: incorrect FunctionName %s, error: %v", f.FunctionName, err)
+			log.Debugf("(trigger %d) wrong FunctionName %s, error: %v\n", tgId, f.FunctionName, err)
 			return false
 		}
 		// extract params
 		contractArg := funcArgs[f.ParameterName]
 		if contractArg == nil {
-			log.Printf("WARN: cannot find param %s in contract %s", f.ParameterName, ts.To)
+			log.Debugf("(trigger %d) cannot find param %s in contract %s\n", tgId, f.ParameterName, ts.To)
 			return false
 		}
 		// single int/uint{40-256}
@@ -133,26 +132,27 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		case "string[]":
 			return validatePredStringArray(v.Predicate, contractArg.([]string), v.Attribute, f.Index)
 		default:
-			log.Println("WARN: parameter type not supported", f.ParameterType)
+			log.Debugf("(trigger %d) parameter type not supported %s\n", tgId, f.ParameterType)
 		}
 	case ConditionFunctionCalled:
-		if !isValidContractAbi(abi, cnt, ts.To) {
+		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
 			return false
 		}
 		ok, err := isCorrectFunctionName(abi, ts.Input, f.FunctionName)
 		if err != nil {
+			log.Debugf("(trigger %d) cannot decode input method %v\n", tgId, err)
 			return false
 		}
 		return ok
 	default:
-		log.Fatalf("WARN: filter not supported of type %T", f.Condition)
+		log.Debugf("(trigger %d) filter not supported of type %T\n", tgId, f.Condition)
 	}
 	return false
 }
 
-func isValidContractAbi(abi *string, cntAddress string, txTo string) bool {
+func isValidContractAbi(abi *string, cntAddress string, txTo string, tgId int) bool {
 	if len(*abi) == 0 {
-		log.Println("WARN: no ABI provided")
+		log.Debugf("(trigger %d) no ABI provided\n", tgId)
 		return false
 	}
 	// make sure we are matching against the right transaction
@@ -166,7 +166,6 @@ func isValidContractAbi(abi *string, cntAddress string, txTo string) bool {
 func isCorrectFunctionName(abi *string, inputData string, funcName string) (bool, error) {
 	methodName, err := DecodeInputMethod(&inputData, abi)
 	if err != nil {
-		log.Println("WARN: cannot decode input method", err)
 		return false, err
 	}
 	return *methodName == funcName, nil

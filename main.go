@@ -1,8 +1,8 @@
 package main
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/onrik/ethrpc"
-	"log"
 	"os"
 	"time"
 	"zoroaster/aws"
@@ -17,6 +17,12 @@ func main() {
 	zconf := config.Load()
 
 	// Persist logs
+	log.SetFormatter(&log.TextFormatter{
+		ForceColors:     true,
+		FullTimestamp:   true,
+		TimestampFormat: time.RFC822,
+	})
+	log.SetLevel(log.DebugLevel)
 	f, err := os.OpenFile(zconf.LogsFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
@@ -39,7 +45,7 @@ func main() {
 	for {
 		block := <-c
 		start := time.Now()
-		log.Println("New block: #", block.Number)
+		log.Info("New block: #", block.Number)
 		logLostBlocks(lastBlockProcessed, block.Number)
 
 		triggers, err := aws.LoadTriggersFromDB(zconf.TriggersDB.TableData)
@@ -49,11 +55,11 @@ func main() {
 		for _, tg := range triggers {
 			txs := trigger.MatchTrigger(tg, block)
 			for _, tx := range txs {
-				log.Printf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
+				log.Infof("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
 				aws.LogMatch(zconf.TriggersDB.TableLogs, tg, tx, block.Timestamp)
 			}
 		}
-		log.Printf("\tProcessed %d triggers in %s", len(triggers), time.Since(start))
+		log.Infof("\tProcessed %d triggers in %s", len(triggers), time.Since(start))
 		lastBlockProcessed = block.Number
 		aws.SetLastBlockProcessed(zconf.TriggersDB.TableStats, lastBlockProcessed)
 	}
@@ -62,6 +68,6 @@ func main() {
 func logLostBlocks(lastBlockProcessed int, lastBlockPolled int) {
 	delta := lastBlockPolled - lastBlockProcessed
 	if delta != 1 && lastBlockProcessed != 0 {
-		log.Printf("WARN: we lost %d block(s)", delta-1)
+		log.Warnf("we lost %d block(s)", delta-1)
 	}
 }

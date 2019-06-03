@@ -3,9 +3,9 @@ package aws
 import (
 	"database/sql"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	_ "github.com/lib/pq"
 	"github.com/onrik/ethrpc"
-	"log"
 	"time"
 	"zoroaster/config"
 	"zoroaster/triggers"
@@ -18,7 +18,7 @@ func ReadLastBlockProcessed(table string) int {
 	q := fmt.Sprintf("SELECT last_block_processed FROM %s", table)
 	err := db.QueryRow(q).Scan(&blockNo)
 	if err != nil {
-		log.Printf("ERROR: Cannot read last block processed: %s", err)
+		log.Errorf("cannot read last block processed: %s", err)
 	}
 	return blockNo
 }
@@ -27,7 +27,7 @@ func SetLastBlockProcessed(table string, blockNo int) {
 	q := fmt.Sprintf(`UPDATE "%s" SET last_block_processed = $1, date = $2`, table)
 	_, err := db.Exec(q, blockNo, time.Now())
 	if err != nil {
-		log.Printf("ERROR: Cannot set last block processed: %s", err)
+		log.Errorf("cannot set last block processed: %s", err)
 	}
 }
 
@@ -51,7 +51,7 @@ func LogMatch(table string, tg *trigger.Trigger, tx *ethrpc.Transaction, blockTi
 			"user_id") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, table)
 	_, err := db.Exec(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From, tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input, tg.UserId)
 	if err != nil {
-		log.Printf("WARN: Cannot write trigger log match: %s", err)
+		log.Errorf("cannot write trigger log match: %s", err)
 	}
 }
 
@@ -73,7 +73,7 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 		}
 		trig, err := trigger.NewTriggerFromJson(tg)
 		if err != nil {
-			log.Println("WARN:", err)
+			log.Debugf("(trigger id %d): %v", triggerId, err)
 		} else {
 			trig.TriggerId, trig.UserId = triggerId, userId
 			triggers = append(triggers, trig)
@@ -97,6 +97,6 @@ func InitDB(c *config.ZConfiguration) {
 
 	err = db.Ping()
 	if err != nil {
-		log.Fatal("ERROR: cannot connect to the DB -> ", err)
+		log.Fatal("cannot connect to the DB -> ", err)
 	}
 }
