@@ -29,9 +29,13 @@ func ValidateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {
 }
 
 func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgId int) bool {
+	cxtLog := log.WithFields(log.Fields{
+		"trigger_id": tgId,
+		"tx_hash":    ts.Hash,
+	})
 	defer func() {
 		if r := recover(); r != nil {
-			log.Debugf("trigger %d panicked against tx %s: %s\n", tgId, ts.Hash, r)
+			cxtLog.Debugf("panic: %s", r)
 		}
 	}()
 
@@ -56,13 +60,13 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		// decode function arguments
 		funcArgs, err := DecodeInputData(ts.Input, *abi)
 		if err != nil {
-			log.Debugf("(trigger %d) cannot decode input data: %v\n", tgId, err)
+			cxtLog.Debugf("cannot decode input data: %v\n", err)
 			return false
 		}
 		// check FunctionName matches the transaction's method
 		ok, err := matchesMethodName(abi, ts.Input, f.FunctionName)
 		if err != nil {
-			log.Debugf("(trigger %d) cannot decode input method %v\n", tgId, err)
+			cxtLog.Debugf("cannot decode input method %v\n", err)
 			return false
 		}
 		if !ok {
@@ -71,7 +75,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		// extract params
 		contractArg := funcArgs[f.ParameterName]
 		if contractArg == nil {
-			log.Debugf("(trigger %d) cannot find param %s in contract %s\n", tgId, f.ParameterName, ts.To)
+			cxtLog.Debugf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
 			return false
 		}
 		// single int/uint{40-256}
@@ -136,7 +140,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		case "string[]":
 			return validatePredStringArray(v.Predicate, contractArg.([]string), v.Attribute, f.Index)
 		default:
-			log.Debugf("(trigger %d) parameter type not supported %s\n", tgId, f.ParameterType)
+			cxtLog.Debugf("parameter type not supported %s\n", f.ParameterType)
 		}
 	case ConditionFunctionCalled:
 		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
@@ -144,12 +148,12 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		}
 		ok, err := matchesMethodName(abi, ts.Input, f.FunctionName)
 		if err != nil {
-			log.Debugf("(trigger %d) cannot decode input method %v\n", tgId, err)
+			cxtLog.Debugf("cannot decode input method %v\n", err)
 			return false
 		}
 		return ok
 	default:
-		log.Debugf("(trigger %d) filter not supported of type %T\n", tgId, f.Condition)
+		cxtLog.Debugf("filter not supported of type %T\n", f.Condition)
 	}
 	return false
 }
