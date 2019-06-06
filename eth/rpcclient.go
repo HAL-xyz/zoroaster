@@ -1,4 +1,4 @@
-package rpc
+package eth
 
 import (
 	"github.com/onrik/ethrpc"
@@ -10,7 +10,7 @@ import (
 
 const K = 8 // next block to process is (last block mined - K)
 
-func PollForLastBlock(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZConfiguration) {
+func BlocksPoller(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZConfiguration) {
 
 	lastBlockProcessed := aws.ReadLastBlockProcessed(zconf.TriggersDB.TableStats)
 
