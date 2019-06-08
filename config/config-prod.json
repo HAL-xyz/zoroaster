@@ -5,6 +5,7 @@
     "tableData": "ec2_trigger_data",
     "tableLogs": "ec2_trigger_history",
     "tableStats": "ec2_trigger_stats",
+    "tableActions": "ec2_trigger_actions",
     "endpoint": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
     "user": "triggersdb_test_admin",
     "name": "triggers",

@@ -5,6 +5,7 @@
     "tableData": "trigger_default_data",
     "tableLogs": "trigger_default_history",
     "tableStats": "trigger_default_stats",
+    "tableActions": "trigger_default_actions",
     "endpoint": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
     "user": "triggersdb_test_admin",
     "name": "triggers",

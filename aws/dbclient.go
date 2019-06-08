@@ -13,6 +13,33 @@ import (
 
 var db *sql.DB
 
+func GetActions(table string, tgId int, userId int) ([]string, error) {
+	q := fmt.Sprintf(
+		`SELECT action_data
+				FROM %s AS t
+				WHERE (t.action_data ->> 'TriggerId')::int = $1
+				AND (t.action_data ->> 'UserId')::int = $2`, table)
+	rows, err := db.Query(q, tgId, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	actionsRet := make([]string, 0)
+	for rows.Next() {
+		var action string
+		err = rows.Scan(&action)
+		if err != nil {
+			return nil, err
+		}
+		actionsRet = append(actionsRet, action)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return actionsRet, nil
+}
+
 func ReadLastBlockProcessed(table string) int {
 	var blockNo int
 	q := fmt.Sprintf("SELECT last_block_processed FROM %s", table)
@@ -69,11 +96,12 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 		var tg string
 		err = rows.Scan(&triggerId, &tg, &userId)
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 		trig, err := trigger.NewTriggerFromJson(tg)
 		if err != nil {
 			log.Debugf("(trigger id %d): %v", triggerId, err)
+			return nil, err
 		} else {
 			trig.TriggerId, trig.UserId = triggerId, userId
 			triggers = append(triggers, trig)

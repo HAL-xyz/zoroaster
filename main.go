@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -50,9 +51,23 @@ func main() {
 	for {
 		match := <-matchesChan
 		go func() {
-			log.Debugf("\tgot a match from %d", match.BlockNo)
-			time.Sleep(1 * time.Second)
-			// TODO: create an Action json to be sent to the Lambda
+			acts, err := aws.GetActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
+			if err != nil {
+				log.Warnf("cannot get actions from db: %v", err)
+			} else {
+				if len(acts) == 0 {
+					return
+				}
+				log.Debugf("\tMatched %d actions", len(acts))
+				event := ActionEvent{match.BlockNo, match.Tx, acts}
+				_, err := json.Marshal(event)
+				if err != nil {
+					log.Debug(err)
+				} else {
+					//fmt.Print(string(evJsn))
+					// TODO: send evJsn to Lambda
+				}
+			}
 		}()
 	}
 }
@@ -87,4 +102,10 @@ type Match struct {
 	BlockNo int
 	Tg      *trigger.Trigger
 	Tx      *ethrpc.Transaction
+}
+
+type ActionEvent struct {
+	BlockNo int
+	Tx      *ethrpc.Transaction
+	Actions []string
 }
