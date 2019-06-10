@@ -1,5 +1,5 @@
 {
-  "ethNode": "https://nodether.com",
+  "ethNode": "https://ethshared.bdnodes.net/?auth=_M92hYFzHxR4S1kNbYHfR6ResdtDRqvvLdnm3ZcdAXA",
   "logsPath": "logs",
   "triggersDB": {
     "tableData": "trigger_default_data",
