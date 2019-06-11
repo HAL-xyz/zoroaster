@@ -10,6 +10,7 @@ import (
 
 type ZConfiguration struct {
 	EthNode    string
+	HerculesEndpoint string
 	LogsPath   string
 	LogsFile   string
 	TriggersDB TriggersDB

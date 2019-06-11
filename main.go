@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net/http"
 	"os"
 	"time"
 	"zoroaster/aws"
@@ -60,12 +63,11 @@ func main() {
 				}
 				log.Debugf("\tMatched %d actions", len(acts))
 				event := ActionEvent{match.BlockNo, match.Tx, acts}
-				_, err := json.Marshal(event)
+				eventData, err := json.Marshal(event)
 				if err != nil {
 					log.Debug(err)
 				} else {
-					//fmt.Print(string(evJsn))
-					// TODO: send evJsn to Lambda
+					sendToHercules(eventData, zconf.HerculesEndpoint)
 				}
 			}
 		}()
@@ -108,4 +110,25 @@ type ActionEvent struct {
 	BlockNo int
 	Tx      *ethrpc.Transaction
 	Actions []string
+}
+
+func sendToHercules(data []byte, endpoint string) {
+
+	resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(data))
+	if err != nil {
+		log.Warn(err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		log.Warn(resp.Status)
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Warn(err)
+		} else {
+			log.Warn(string(body))
+		}
+	} else {
+		log.Debug("\tActionEvents successfully received :)")
+	}
 }
