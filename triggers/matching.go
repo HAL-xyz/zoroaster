@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ethrpc.Transaction {
@@ -41,9 +42,9 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 
 	switch v := f.Condition.(type) {
 	case ConditionFrom:
-		return v.Attribute == ts.From
+		return strings.ToLower(v.Attribute) == ts.From
 	case ConditionTo:
-		return v.Attribute == ts.To
+		return strings.ToLower(v.Attribute) == ts.To
 	case ConditionNonce:
 		return validatePredInt(v.Predicate, ts.Nonce, v.Attribute)
 	case ConditionValue:
@@ -129,7 +130,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		case "bool":
 			return validatePredBool(v.Predicate, contractArg.(bool), v.Attribute)
 		case "address":
-			return contractArg == common.HexToAddress(v.Attribute)
+			return contractArg.(common.Address).String() == common.HexToAddress(v.Attribute).String()
 		case "address[]":
 			byteAddresses := contractArg.([]common.Address)
 			addresses := make([]string, len(byteAddresses))
@@ -164,7 +165,7 @@ func isValidContractAbi(abi *string, cntAddress string, txTo string, tgId int) b
 		return false
 	}
 	// make sure we are matching against the right transaction
-	if cntAddress != txTo {
+	if strings.ToLower(cntAddress) != txTo {
 		return false
 	}
 	return true
