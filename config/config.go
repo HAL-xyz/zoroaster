@@ -9,11 +9,11 @@ import (
 )
 
 type ZConfiguration struct {
-	EthNode    string
+	EthNode          string
 	HerculesEndpoint string
-	LogsPath   string
-	LogsFile   string
-	TriggersDB TriggersDB
+	LogsPath         string
+	LogsFile         string
+	TriggersDB       TriggersDB
 }
 
 type TriggersDB struct {
