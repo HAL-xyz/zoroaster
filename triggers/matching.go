@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"encoding/json"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
@@ -10,14 +11,21 @@ import (
 	"strings"
 )
 
-func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ethrpc.Transaction {
-	txs := make([]*ethrpc.Transaction, 0)
-	for i, trans := range block.Transactions {
-		if ValidateTrigger(trigger, &trans) {
-			txs = append(txs, &block.Transactions[i])
+func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
+	ztxs := make([]*ZTransaction, 0)
+	for i, tx := range block.Transactions {
+		if ValidateTrigger(trigger, &tx) {
+			inputData, _ := DecodeInputData(tx.Input, trigger.ContractABI)
+			input, _ := json.Marshal(inputData)
+			zt := ZTransaction{
+				BlockTimestamp: block.Timestamp,
+				DecodedInput:   string(input),
+				Tx:             &block.Transactions[i],
+			}
+			ztxs = append(ztxs, &zt)
 		}
 	}
-	return txs
+	return ztxs
 }
 
 func ValidateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {

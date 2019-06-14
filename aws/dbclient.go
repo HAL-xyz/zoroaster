@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
-	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"time"
 	"zoroaster/config"
@@ -58,8 +57,10 @@ func SetLastBlockProcessed(table string, blockNo int) {
 	}
 }
 
-func LogMatch(table string, tg *trigger.Trigger, tx *ethrpc.Transaction, blockTimestamp int) {
-	bdate := time.Unix(int64(blockTimestamp), 0)
+func LogMatch(table string, match trigger.Match) {
+	bdate := time.Unix(int64(match.ZTx.BlockTimestamp), 0)
+	tx := match.ZTx.Tx
+	tg := match.Tg
 	q := fmt.Sprintf(
 		`INSERT INTO "%s" (
 			"date",

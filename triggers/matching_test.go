@@ -232,9 +232,9 @@ func TestMatchTrigger(t *testing.T) {
 	block := GetBlockFromFile("../resources/blocks/block1.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t2.json")
 
-	txs := MatchTrigger(trigger, block)
+	ztxs := MatchTrigger(trigger, block)
 
-	assert.Equal(t, len(txs), 2)
-	assert.Equal(t, *txs[0].TransactionIndex, 6)
-	assert.Equal(t, *txs[1].TransactionIndex, 8)
+	assert.Equal(t, len(ztxs), 2)
+	assert.Equal(t, *(ztxs[0].Tx.TransactionIndex), 6)
+	assert.Equal(t, *(ztxs[1].Tx.TransactionIndex), 8)
 }

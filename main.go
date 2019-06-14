@@ -42,7 +42,7 @@ func main() {
 
 	// Channels
 	blocksChan := make(chan *ethrpc.Block)
-	matchesChan := make(chan *Match)
+	matchesChan := make(chan *trigger.Match)
 
 	// Poll ETH node
 	go eth.BlocksPoller(blocksChan, client, zconf)
@@ -62,19 +62,14 @@ func main() {
 					return
 				}
 				log.Debugf("\tMatched %d actions", len(acts))
-				event := ActionEvent{match.BlockNo, match.Tx, acts}
-				eventData, err := json.Marshal(event)
-				if err != nil {
-					log.Debug(err)
-				} else {
-					sendToHercules(eventData, zconf.HerculesEndpoint)
-				}
+				event := trigger.ActionEvent{ZTx: match.ZTx, Actions: acts}
+				sendToHercules(event, zconf.HerculesEndpoint)
 			}
 		}()
 	}
 }
 
-func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *Match, zconf *config.ZConfiguration) {
+func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, zconf *config.ZConfiguration) {
 	for {
 		block := <-blocksChan
 		start := time.Now()
@@ -84,14 +79,12 @@ func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *Match, zconf *conf
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		for _, tg := range triggers {
-			matchingTxs := trigger.MatchTrigger(tg, block)
-			for _, tx := range matchingTxs {
-				log.Debugf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, tx.Hash)
-				aws.LogMatch(zconf.TriggersDB.TableLogs, tg, tx, block.Timestamp)
-
-				m := Match{block.Number, tg, tx}
+			matchingZTxs := trigger.MatchTrigger(tg, block)
+			for _, ztx := range matchingZTxs {
+				log.Debugf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, ztx.Tx.Hash)
+				m := trigger.Match{tg, ztx}
+				aws.LogMatch(zconf.TriggersDB.TableLogs, m)
 				matchesChan <- &m
 			}
 		}
@@ -100,27 +93,21 @@ func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *Match, zconf *conf
 	}
 }
 
-type Match struct {
-	BlockNo int
-	Tg      *trigger.Trigger
-	Tx      *ethrpc.Transaction
-}
-
-type ActionEvent struct {
-	BlockNo int
-	Tx      *ethrpc.Transaction
-	Actions []string
-}
-
-func sendToHercules(data []byte, endpoint string) {
-
+func sendToHercules(event trigger.ActionEvent, endpoint string) {
+	data, err := json.Marshal(event)
+	if err != nil {
+		log.Debug(err)
+		return
+	}
 	resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(data))
 	if err != nil {
 		log.Warn(err)
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode == 200 {
+		log.Debug("\tActionEvents successfully received :)")
+	} else {
 		log.Warn(resp.Status)
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
@@ -128,7 +115,5 @@ func sendToHercules(data []byte, endpoint string) {
 		} else {
 			log.Warn(string(body))
 		}
-	} else {
-		log.Debug("\tActionEvents successfully received :)")
 	}
 }
