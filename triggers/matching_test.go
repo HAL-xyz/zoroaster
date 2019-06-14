@@ -238,3 +238,19 @@ func TestMatchTrigger(t *testing.T) {
 	assert.Equal(t, *(ztxs[0].Tx.TransactionIndex), 6)
 	assert.Equal(t, *(ztxs[1].Tx.TransactionIndex), 8)
 }
+
+func TestJsonToTransaction(t *testing.T) {
+	tx := getTransactionFromFile("../resources/transactions/tx1.json")
+
+	assert.Equal(t, *tx.BlockNumber, 7669714)
+	assert.Equal(t, *tx.TransactionIndex, 4)
+	assert.Equal(t, tx.Gas, 79068)
+	assert.Equal(t, tx.Nonce, 233172)
+}
+
+func TestJsonToBlock(t *testing.T) {
+	block := GetBlockFromFile("../resources/blocks/block1.json")
+
+	assert.Equal(t, block.Number, 7535077)
+	assert.Equal(t, block.Size, 5392)
+}
