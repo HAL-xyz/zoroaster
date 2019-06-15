@@ -4,7 +4,8 @@ import "github.com/onrik/ethrpc"
 
 type ZTransaction struct {
 	BlockTimestamp int
-	DecodedInput   string
+	DecodedFnArgs  string
+	DecodedFnName  string
 	Tx             *ethrpc.Transaction
 }
 

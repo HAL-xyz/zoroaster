@@ -15,11 +15,18 @@ func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
 	ztxs := make([]*ZTransaction, 0)
 	for i, tx := range block.Transactions {
 		if ValidateTrigger(trigger, &tx) {
+			// we discard errors here bc not every match will have input data
 			inputData, _ := DecodeInputData(tx.Input, trigger.ContractABI)
 			input, _ := json.Marshal(inputData)
+			fnNamePtr, _ := DecodeInputMethod(&tx.Input, &trigger.ContractABI)
+			fnName := ""
+			if fnNamePtr != nil {
+				fnName = *fnNamePtr
+			}
 			zt := ZTransaction{
 				BlockTimestamp: block.Timestamp,
-				DecodedInput:   string(input),
+				DecodedFnArgs:  string(input),
+				DecodedFnName:  fnName,
 				Tx:             &block.Transactions[i],
 			}
 			ztxs = append(ztxs, &zt)
