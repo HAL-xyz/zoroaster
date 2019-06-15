@@ -4,8 +4,8 @@ import "github.com/onrik/ethrpc"
 
 type ZTransaction struct {
 	BlockTimestamp int
-	DecodedFnArgs  string
-	DecodedFnName  string
+	DecodedFnArgs  *string `json:"DecodedFnArgs,omitempty"`
+	DecodedFnName  *string `json:"DecodedFnName,omitempty"`
 	Tx             *ethrpc.Transaction
 }
 

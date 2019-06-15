@@ -237,6 +237,9 @@ func TestMatchTrigger(t *testing.T) {
 	assert.Equal(t, len(ztxs), 2)
 	assert.Equal(t, *(ztxs[0].Tx.TransactionIndex), 6)
 	assert.Equal(t, *(ztxs[1].Tx.TransactionIndex), 8)
+
+	assert.Equal(t, *(ztxs[0].DecodedFnName), "transfer")
+	assert.Equal(t, *(ztxs[0].DecodedFnArgs), `{"_to":"0xfea2f9433058cd555fd67cdde8efd7e6031e56c0","_value":4000000000000000000}`)
 }
 
 func TestJsonToTransaction(t *testing.T) {
