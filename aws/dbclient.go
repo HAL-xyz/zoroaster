@@ -77,8 +77,10 @@ func LogMatch(table string, match trigger.Match) {
 			"gas_price",
 			"gas",
 			"data",
-			"user_id") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`, table)
-	_, err := db.Exec(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From, tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input, tg.UserId)
+			"user_id",
+			"fn_name",
+			"fn_args") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`, table)
+	_, err := db.Exec(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From, tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input, tg.UserId, match.ZTx.DecodedFnName, match.ZTx.DecodedFnArgs)
 	if err != nil {
 		log.Errorf("cannot write trigger log match: %s", err)
 	}
