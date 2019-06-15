@@ -17,7 +17,8 @@ func GetActions(table string, tgId int, userId int) ([]string, error) {
 		`SELECT action_data
 				FROM %s AS t
 				WHERE (t.action_data ->> 'TriggerId')::int = $1
-				AND (t.action_data ->> 'UserId')::int = $2`, table)
+				AND (t.action_data ->> 'UserId')::int = $2
+				AND t.is_active = true`, table)
 	rows, err := db.Query(q, tgId, userId)
 	if err != nil {
 		return nil, err
