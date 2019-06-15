@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"sync"
 	"testing"
 	trig "zoroaster/triggers"
 )
@@ -34,26 +36,31 @@ func TestIntegration(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	doneChan := make(chan bool)
+	const MAX = 5
+	sem := make(chan int, MAX)
+	var wg sync.WaitGroup
+
 	for _, r := range allRules.Rules {
-		go Run(doneChan, client, r, t)
-	}
-	<-doneChan
-}
+		sem <- 1
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			trigger, err := trig.NewTriggerFromFile("triggers/" + r.TriggerFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+			block, err := client.EthGetBlockByNumber(r.BlockNo, true)
+			if err != nil {
+				log.Fatal(err)
+			}
+			txs := trig.MatchTrigger(trigger, block)
 
-func Run(done chan bool, client *ethrpc.EthRPC, r Rule, t *testing.T) {
-	trigger, err := trig.NewTriggerFromFile("triggers/" + r.TriggerFile)
-	if err != nil {
-		log.Fatal(err)
+			if len(txs) != r.Occurrences {
+				log.Warn("In ", r.Assert)
+				assert.Equal(t, len(txs), r.Occurrences)
+			}
+			<-sem
+		}()
 	}
-	block, err := client.EthGetBlockByNumber(r.BlockNo, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	txs := trig.MatchTrigger(trigger, block)
-
-	if len(txs) != r.Occurrences {
-		t.Error(r.Assert)
-	}
-	done <- true
+	wg.Wait()
 }
