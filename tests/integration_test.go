@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
-	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"sync"
 	"testing"
@@ -43,24 +42,24 @@ func TestIntegration(t *testing.T) {
 	for _, r := range allRules.Rules {
 		sem <- 1
 		wg.Add(1)
-		go func() {
+		go func(rule Rule) {
 			defer wg.Done()
-			trigger, err := trig.NewTriggerFromFile("triggers/" + r.TriggerFile)
+			trigger, err := trig.NewTriggerFromFile("triggers/" + rule.TriggerFile)
 			if err != nil {
 				log.Fatal(err)
 			}
-			block, err := client.EthGetBlockByNumber(r.BlockNo, true)
+			block, err := client.EthGetBlockByNumber(rule.BlockNo, true)
 			if err != nil {
 				log.Fatal(err)
 			}
 			txs := trig.MatchTrigger(trigger, block)
 
-			if len(txs) != r.Occurrences {
-				log.Warn("In ", r.Assert)
-				assert.Equal(t, len(txs), r.Occurrences)
+			if len(txs) != rule.Occurrences {
+				log.Errorf("%s failed (expected %d, got %d instead)\n", rule.Assert, rule.Occurrences, len(txs))
+				t.Error()
 			}
 			<-sem
-		}()
+		}(r)
 	}
 	wg.Wait()
 }
