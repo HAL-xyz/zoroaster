@@ -1,0 +1,15 @@
+{
+  "TriggerName": "Transaction with a nonce bigger than X",
+  "TriggerType": "WatchTransactions",
+  "CreationDate": "2019-06-01 00:00:00",
+  "Filters": [
+    {
+      "FilterType": "BasicFilter",
+      "ParameterName": "Nonce",
+      "Condition": {
+        "Predicate": "BiggerThan",
+        "Attribute": "50"
+      }
+    }
+  ]
+}
