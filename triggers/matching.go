@@ -19,7 +19,7 @@ func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
 			var fnArgs *string
 			fnArgsData, _ := DecodeInputData(tx.Input, trigger.ContractABI)
 			if fnArgsData != nil {
-				fnArgsBytes , _ := json.Marshal(fnArgsData)
+				fnArgsBytes, _ := json.Marshal(fnArgsData)
 				fnArgsString := string(fnArgsBytes)
 				fnArgs = &fnArgsString
 			}

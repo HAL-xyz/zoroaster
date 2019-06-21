@@ -1,14 +1,11 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
 	"os"
 	"time"
+	"zoroaster/actions"
 	"zoroaster/aws"
 	"zoroaster/config"
 	"zoroaster/eth"
@@ -50,23 +47,25 @@ func main() {
 	// Matching blocks and triggers
 	go Matcher(blocksChan, matchesChan, zconf)
 
-	// Main routine - send actions
+	// Main routine - process actions
 	for {
 		match := <-matchesChan
 		go func() {
-			acts, err := aws.GetActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
-			if err != nil {
-				log.Warnf("cannot get actions from db: %v", err)
-			} else {
-				if len(acts) == 0 {
-					return
-				}
-				log.Debugf("\tMatched %d actions", len(acts))
-				event := trigger.ActionEvent{ZTx: match.ZTx, Actions: acts}
-				sendToHercules(event, zconf.HerculesEndpoint)
-			}
+			acts := getActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
+			eventJson := actions.ActionEventJson{ZTx: match.ZTx, Actions: acts}
+			actions.HandleEvent(eventJson)
 		}()
 	}
+}
+
+func getActions(table string, tgid int, usrid int) []string {
+	var actions []string
+	actions, err := aws.GetActions(table, tgid, usrid)
+	if err != nil {
+		log.Warnf("cannot get actions from db: %v", err)
+	}
+	log.Debugf("\tMatched %d actions", len(actions))
+	return actions
 }
 
 func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, zconf *config.ZConfiguration) {
@@ -90,30 +89,5 @@ func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, zco
 		}
 		aws.SetLastBlockProcessed(zconf.TriggersDB.TableStats, block.Number)
 		log.Infof("\tProcessed %d triggers in %s", len(triggers), time.Since(start))
-	}
-}
-
-func sendToHercules(event trigger.ActionEvent, endpoint string) {
-	data, err := json.Marshal(event)
-	if err != nil {
-		log.Debug(err)
-		return
-	}
-	resp, err := http.Post(endpoint, "application/json", bytes.NewBuffer(data))
-	if err != nil {
-		log.Warn(err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 200 {
-		log.Debug("\tActionEvents successfully received :)")
-	} else {
-		log.Warn(resp.Status)
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Warn(err)
-		} else {
-			log.Warn(string(body))
-		}
 	}
 }

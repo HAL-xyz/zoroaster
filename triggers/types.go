@@ -13,8 +13,3 @@ type Match struct {
 	Tg  *Trigger
 	ZTx *ZTransaction
 }
-
-type ActionEvent struct {
-	ZTx     *ZTransaction
-	Actions []string
-}
