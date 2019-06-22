@@ -1,13 +1,12 @@
 {
   "ethNode": "https://ethshared.bdnodes.net/?auth=_M92hYFzHxR4S1kNbYHfR6ResdtDRqvvLdnm3ZcdAXA",
-  "herculesEndpoint": "https://47m9lw4fzj.execute-api.eu-central-1.amazonaws.com/default/Hercules",
   "logsPath": "logs",
   "triggersDB": {
-    "tableData": "trigger_default_data",
-    "tableLogs": "trigger_default_history",
-    "tableStats": "trigger_default_stats",
-    "tableActions": "trigger_default_actions",
-    "endpoint": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
+    "tableTriggers": "dev_triggers",
+    "tableMatches": "dev_matches",
+    "tableStats": "dev_stats",
+    "tableActions": "dev_actions",
+    "host": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
     "user": "triggersdb_test_admin",
     "name": "triggers",
     "port": 5432

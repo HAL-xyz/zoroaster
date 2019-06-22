@@ -119,7 +119,7 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 
 func InitDB(c *config.ZConfiguration) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		c.TriggersDB.Endpoint, c.TriggersDB.Port, c.TriggersDB.User, c.TriggersDB.Password, c.TriggersDB.Name)
+		c.TriggersDB.Host, c.TriggersDB.Port, c.TriggersDB.User, c.TriggersDB.Password, c.TriggersDB.Name)
 
 	var err error
 	db, err = sql.Open("postgres", psqlInfo)

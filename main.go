@@ -74,7 +74,7 @@ func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, zco
 		start := time.Now()
 		log.Info("New block: #", block.Number)
 
-		triggers, err := aws.LoadTriggersFromDB(zconf.TriggersDB.TableData)
+		triggers, err := aws.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -83,7 +83,7 @@ func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, zco
 			for _, ztx := range matchingZTxs {
 				log.Debugf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, ztx.Tx.Hash)
 				m := trigger.Match{tg, ztx}
-				aws.LogMatch(zconf.TriggersDB.TableLogs, m)
+				aws.LogMatch(zconf.TriggersDB.TableMatches, m)
 				matchesChan <- &m
 			}
 		}

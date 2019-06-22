@@ -9,23 +9,22 @@ import (
 )
 
 type ZConfiguration struct {
-	EthNode          string
-	HerculesEndpoint string
-	LogsPath         string
-	LogsFile         string
-	TriggersDB       TriggersDB
+	EthNode    string
+	LogsPath   string
+	LogsFile   string
+	TriggersDB TriggersDB
 }
 
 type TriggersDB struct {
-	TableData    string
-	TableLogs    string
-	TableStats   string
-	TableActions string
-	Endpoint     string
-	User         string
-	Name         string
-	Port         int
-	Password     string
+	TableTriggers string
+	TableMatches  string
+	TableStats    string
+	TableActions  string
+	Host          string
+	User          string
+	Name          string
+	Port          int
+	Password      string
 }
 
 func Load() *ZConfiguration {
