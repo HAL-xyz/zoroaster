@@ -53,7 +53,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 	})
 	defer func() {
 		if r := recover(); r != nil {
-			cxtLog.Debugf("panic: %s", r)
+			cxtLog.Warnf("panic: %s", r)
 		}
 	}()
 
@@ -109,11 +109,24 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if isValidArray(f.ParameterType, dyArrayIntRx, isValidBigInt) {
 			return validatePredBigIntArray(v.Predicate, contractArg.([]*big.Int), makeBigInt(v.Attribute), f.Index)
 		}
-		// single int/uint{8-32}
+		// int/uint{8,16,32}
 		if isValidInt(f.ParameterType) {
 			tgVal, err := strconv.Atoi(v.Attribute)
 			if err == nil {
-				return validatePredInt(v.Predicate, int(contractArg.(int32)), tgVal)
+				switch f.ParameterType {
+				case "int8":
+					return validatePredInt(v.Predicate, int(contractArg.(int8)), tgVal)
+				case "uint8":
+					return validatePredUInt(v.Predicate, uint(contractArg.(uint8)), uint(tgVal))
+				case "int16":
+					return validatePredInt(v.Predicate, int(contractArg.(int16)), int(tgVal))
+				case "uint16":
+					return validatePredUInt(v.Predicate, uint(contractArg.(uint16)), uint(tgVal))
+				case "int32":
+					return validatePredInt(v.Predicate, int(contractArg.(int32)), int(tgVal))
+				case "uint32":
+					return validatePredUInt(v.Predicate, uint(contractArg.(uint32)), uint(tgVal))
+				}
 			}
 		}
 		// static array of int/uint{8-32}

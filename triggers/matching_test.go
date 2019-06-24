@@ -209,6 +209,24 @@ func TestValidateFilter13(t *testing.T) {
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[6], cnt, abi, tid), false)
 }
 
+func TestValidateFilter14(t *testing.T) {
+	tx := getTransactionFromFile("../resources/transactions/tx7.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t13.json")
+	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
+
+	// uint32
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
+}
+
+func TestValidateFilter15(t *testing.T) {
+	tx := getTransactionFromFile("../resources/transactions/tx8.json")
+	trigger, _ := NewTriggerFromFile("../resources/triggers/t14.json")
+	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
+
+	// uint16
+	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
+}
+
 // Testing one Trigger vs one Transaction
 func TestValidateTrigger(t *testing.T) {
 	block := GetBlockFromFile("../resources/blocks/block1.json")

@@ -48,7 +48,7 @@ func makeBigIntSet() map[string]bool {
 	return set
 }
 
-// check if `s` is a valid int/uint <= 32 bits in multiples of 8 bits
+// check if `s` is a valid u/int <= 32 bits in multiples of 8 bits
 func isValidInt(s string) bool {
 	set := map[string]bool{
 		"int8":   true,

@@ -111,6 +111,18 @@ func validatePredInt(p Predicate, cv int, tv int) bool {
 	return false
 }
 
+func validatePredUInt(p Predicate, cv uint, tv uint) bool {
+	switch p {
+	case Eq:
+		return cv == tv
+	case SmallerThan:
+		return cv < tv
+	case BiggerThan:
+		return cv > tv
+	}
+	return false
+}
+
 func validatePredIntArray(p Predicate, cvs []int32, tv int, index *int) bool {
 	if index != nil {
 		if *index > len(cvs) {
