@@ -1,9 +1,14 @@
 package trigger
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
+
+func init() {
+	log.SetLevel(log.DebugLevel)
+}
 
 func TestValidateFilter1(t *testing.T) {
 	block := GetBlockFromFile("../resources/blocks/block1.json")
@@ -162,6 +167,9 @@ func TestValidateFilter10(t *testing.T) {
 }
 
 func TestValidateFilter11(t *testing.T) {
+	// mute logging just for these tests to reduce noise
+	log.SetLevel(log.WarnLevel)
+
 	tx := getTransactionFromFile("../resources/transactions/tx5.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t10.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
@@ -172,6 +180,8 @@ func TestValidateFilter11(t *testing.T) {
 
 	// checkFunctionCalled
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[2], cnt, abi, tid), true)
+
+	log.SetLevel(log.DebugLevel)
 }
 
 func TestValidateFilter12(t *testing.T) {
@@ -196,6 +206,9 @@ func TestValidateFilter12(t *testing.T) {
 }
 
 func TestValidateFilter13(t *testing.T) {
+	// mute logging just for these tests to reduce noise
+	log.SetLevel(log.WarnLevel)
+
 	tx := getTransactionFromFile("../resources/transactions/tx2.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t12.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
@@ -207,6 +220,8 @@ func TestValidateFilter13(t *testing.T) {
 	// ConditionFunctionCalled - wrong ABI
 	trigger.ContractABI = "xxx"
 	assert.Equal(t, ValidateFilter(tx, &trigger.Filters[6], cnt, abi, tid), false)
+
+	log.SetLevel(log.DebugLevel)
 }
 
 func TestValidateFilter14(t *testing.T) {

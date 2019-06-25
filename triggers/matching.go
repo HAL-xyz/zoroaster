@@ -51,7 +51,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 	})
 	defer func() {
 		if r := recover(); r != nil {
-			cxtLog.Warnf("panic: %s", r)
+			cxtLog.Errorf("panic: %s", r)
 		}
 	}()
 
@@ -76,7 +76,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		// check FunctionName matches the transaction's method
 		ok, err := matchesMethodName(abi, ts.Input, f.FunctionName)
 		if err != nil {
-			cxtLog.Warnf("cannot decode input method %v\n", err)
+			cxtLog.Debugf("cannot decode input method %v\n", err)
 			return false
 		}
 		if !ok {
@@ -85,20 +85,20 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		// decode input data
 		decodedData, err := DecodeInputDataToJsonMap(ts.Input, *abi)
 		if err != nil {
-			cxtLog.Warnf("cannot decode input data: %v\n", err)
+			cxtLog.Debugf("cannot decode input data: %v\n", err)
 			return false
 		}
 		// extract parameter
 		rawParam, ok := decodedData[f.ParameterName]
 		if !ok {
-			cxtLog.Warnf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
+			cxtLog.Debugf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
 			return false
 		}
 		// address
 		if f.ParameterType == "address" {
 			var param string
 			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Warn(err)
+				cxtLog.Debug(err)
 				return false
 			}
 			return strings.ToLower(param) == strings.ToLower(v.Attribute)
@@ -107,7 +107,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if f.ParameterType == "bool" {
 			var param bool
 			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Warn(err)
+				cxtLog.Debug(err)
 				return false
 			}
 			return validatePredBool(v.Predicate, param, v.Attribute)
@@ -117,7 +117,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if addressesRgx.MatchString(f.ParameterType) {
 			var param []string
 			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Warn(err)
+				cxtLog.Debug(err)
 				return false
 			}
 			return validatePredStringArray(v.Predicate, param, v.Attribute, f.Index)
@@ -127,7 +127,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if stringsRgx.MatchString(f.ParameterType) {
 			var param []string
 			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Warn(err)
+				cxtLog.Debug(err)
 				return false
 			}
 			return validatePredStringArray(v.Predicate, param, v.Attribute, f.Index)
@@ -137,7 +137,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if intRgx.MatchString(f.ParameterType) {
 			var param *big.Int
 			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Warn(err)
+				cxtLog.Debug(err)
 				return false
 			}
 			return validatePredBigInt(v.Predicate, param, makeBigInt(v.Attribute))
@@ -147,7 +147,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if arrayIntRgx.MatchString(f.ParameterType) {
 			var param []*big.Int
 			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Warn(err)
+				cxtLog.Debug(err)
 				return false
 			}
 			return validatePredBigIntArray(v.Predicate, param, makeBigInt(v.Attribute), f.Index)
@@ -157,7 +157,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if arrayByteRgx.MatchString(f.ParameterType) {
 			var param [][]byte
 			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Warn(err)
+				cxtLog.Debug(err)
 				return false
 			}
 			return validatePredStringArray(v.Predicate, ByteArraysToHex(param), v.Attribute, f.Index)
@@ -168,12 +168,12 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		}
 		ok, err := matchesMethodName(abi, ts.Input, f.FunctionName)
 		if err != nil {
-			cxtLog.Warnf("cannot decode input method %v\n", err)
+			cxtLog.Debugf("cannot decode input method %v\n", err)
 			return false
 		}
 		return ok
 	default:
-		cxtLog.Warnf("filter not supported of type %T\n", f.Condition)
+		cxtLog.Debugf("filter not supported of type %T\n", f.Condition)
 	}
 	return false
 }
