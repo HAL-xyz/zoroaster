@@ -6,8 +6,6 @@ import (
 	"strings"
 )
 
-// TODO return InvalidPredicateError instead of failing silently
-
 func validatePredStringArray(p Predicate, cv []string, tv string, index *int) bool {
 	// lowercase
 	tv = strings.ToLower(tv)
@@ -109,44 +107,6 @@ func validatePredInt(p Predicate, cv int, tv int) bool {
 		return cv > tv
 	}
 	return false
-}
-
-func validatePredUInt(p Predicate, cv uint, tv uint) bool {
-	switch p {
-	case Eq:
-		return cv == tv
-	case SmallerThan:
-		return cv < tv
-	case BiggerThan:
-		return cv > tv
-	}
-	return false
-}
-
-func validatePredIntArray(p Predicate, cvs []int32, tv int, index *int) bool {
-	if index != nil {
-		if *index > len(cvs) {
-			return false
-		}
-		return validatePredInt(p, int(cvs[*index]), tv)
-	}
-	switch p {
-	case SmallerThan:
-		return len(cvs) < tv
-	case BiggerThan:
-		return len(cvs) > tv
-	case Eq:
-		return len(cvs) == tv
-	case IsIn:
-		for _, v := range cvs {
-			if int(v) == tv {
-				return true
-			}
-		}
-		return false
-	default:
-		return false
-	}
 }
 
 func validatePredBool(p Predicate, cv bool, tv string) bool {

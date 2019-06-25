@@ -2,6 +2,7 @@ package trigger
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"strings"
 )
@@ -35,15 +36,31 @@ func DecodeInputData(data string, cntABI string) (map[string]interface{}, error)
 		return nil, err
 	}
 
-	getMap := map[string]interface{}{}
-
 	// unpack method inputs
+	getMap := map[string]interface{}{}
 	err = method.Inputs.UnpackIntoMap(getMap, decodedData)
 	if err != nil {
 		return nil, err
 	}
 
 	return getMap, nil
+}
+
+func DecodeInputDataToJsonMap(data string, cntABI string) (map[string]json.RawMessage, error) {
+	ifData, err := DecodeInputData(data, cntABI)
+	if err != nil {
+		return nil, err
+	}
+	jsonData, err := json.Marshal(ifData)
+	if err != nil {
+		return nil, err
+	}
+	out := map[string]json.RawMessage{}
+	err = json.Unmarshal(jsonData, &out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func DecodeInputMethod(data *string, cntABI *string) (*string, error) {

@@ -2,12 +2,10 @@ package trigger
 
 import (
 	"encoding/json"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"math/big"
 	"regexp"
-	"strconv"
 	"strings"
 )
 
@@ -75,103 +73,94 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
 			return false
 		}
-		// decode function arguments
-		funcArgs, err := DecodeInputData(ts.Input, *abi)
-		if err != nil {
-			cxtLog.Debugf("cannot decode input data: %v\n", err)
-			return false
-		}
 		// check FunctionName matches the transaction's method
 		ok, err := matchesMethodName(abi, ts.Input, f.FunctionName)
 		if err != nil {
-			cxtLog.Debugf("cannot decode input method %v\n", err)
+			cxtLog.Warnf("cannot decode input method %v\n", err)
 			return false
 		}
 		if !ok {
 			return false // tx called a different method name
 		}
-		// extract params
-		contractArg := funcArgs[f.ParameterName]
-		if contractArg == nil {
-			cxtLog.Debugf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
+		// decode input data
+		decodedData, err := DecodeInputDataToJsonMap(ts.Input, *abi)
+		if err != nil {
+			cxtLog.Warnf("cannot decode input data: %v\n", err)
 			return false
 		}
-		// single int/uint{40-256}
-		if isValidBigInt(f.ParameterType) {
-			return validatePredBigInt(v.Predicate, contractArg.(*big.Int), makeBigInt(v.Attribute))
+		// extract parameter
+		rawParam, ok := decodedData[f.ParameterName]
+		if !ok {
+			cxtLog.Warnf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
+			return false
 		}
-		// static array of int/uint{40-256}
-		if isValidArray(f.ParameterType, stArrayIntRx, isValidBigInt) {
-			ctVals := DecodeBigIntArray(contractArg)
-			return validatePredBigIntArray(v.Predicate, ctVals, makeBigInt(v.Attribute), f.Index)
-		}
-		// dynamic array of int/uint{40-256}
-		if isValidArray(f.ParameterType, dyArrayIntRx, isValidBigInt) {
-			return validatePredBigIntArray(v.Predicate, contractArg.([]*big.Int), makeBigInt(v.Attribute), f.Index)
-		}
-		// int/uint{8,16,32}
-		if isValidInt(f.ParameterType) {
-			tgVal, err := strconv.Atoi(v.Attribute)
-			if err == nil {
-				switch f.ParameterType {
-				case "int8":
-					return validatePredInt(v.Predicate, int(contractArg.(int8)), tgVal)
-				case "uint8":
-					return validatePredUInt(v.Predicate, uint(contractArg.(uint8)), uint(tgVal))
-				case "int16":
-					return validatePredInt(v.Predicate, int(contractArg.(int16)), int(tgVal))
-				case "uint16":
-					return validatePredUInt(v.Predicate, uint(contractArg.(uint16)), uint(tgVal))
-				case "int32":
-					return validatePredInt(v.Predicate, int(contractArg.(int32)), int(tgVal))
-				case "uint32":
-					return validatePredUInt(v.Predicate, uint(contractArg.(uint32)), uint(tgVal))
-				}
+		// address
+		if f.ParameterType == "address" {
+			var param string
+			if err = json.Unmarshal(rawParam, &param); err != nil {
+				cxtLog.Warn(err)
+				return false
 			}
+			return strings.ToLower(param) == strings.ToLower(v.Attribute)
 		}
-		// static array of int/uint{8-32}
-		if isValidArray(f.ParameterType, stArrayIntRx, isValidInt) {
-			ctVals := DecodeIntArray(contractArg)
-			tgVal, err := strconv.Atoi(v.Attribute)
-			if err == nil {
-				return validatePredIntArray(v.Predicate, ctVals, tgVal, f.Index)
+		// bool
+		if f.ParameterType == "bool" {
+			var param bool
+			if err = json.Unmarshal(rawParam, &param); err != nil {
+				cxtLog.Warn(err)
+				return false
 			}
+			return validatePredBool(v.Predicate, param, v.Attribute)
 		}
-		// dynamic array of int/uint{8-32}
-		if isValidArray(f.ParameterType, dyArrayIntRx, isValidInt) {
-			tgVal, err := strconv.Atoi(v.Attribute)
-			if err == nil {
-				return validatePredIntArray(v.Predicate, contractArg.([]int32), tgVal, f.Index)
+		// address[]
+		addressesRgx := regexp.MustCompile(`address\[\d*]$`)
+		if addressesRgx.MatchString(f.ParameterType) {
+			var param []string
+			if err = json.Unmarshal(rawParam, &param); err != nil {
+				cxtLog.Warn(err)
+				return false
 			}
+			return validatePredStringArray(v.Predicate, param, v.Attribute, f.Index)
 		}
-		// static arrays of bytes1[] to bytes32[]
-		if isValidArray(f.ParameterType, dyArrayBytesRx, isValidByte) {
-			ctVals := Decode2DBytesArray(contractArg)
-			return validatePredStringArray(v.Predicate, MultArrayToHex(ctVals), v.Attribute, f.Index)
-		}
-		// static arrays of address
-		var addressArrayRx = regexp.MustCompile(`address\[\d+]`)
-		if addressArrayRx.MatchString(f.ParameterType) {
-			ctVals := DecodeAddressArray(contractArg)
-			return validatePredStringArray(v.Predicate, ctVals, v.Attribute, f.Index)
-		}
-		// other types
-		switch f.ParameterType {
-		case "bool":
-			return validatePredBool(v.Predicate, contractArg.(bool), v.Attribute)
-		case "address":
-			return contractArg.(common.Address).String() == common.HexToAddress(v.Attribute).String()
-		case "address[]":
-			byteAddresses := contractArg.([]common.Address)
-			addresses := make([]string, len(byteAddresses))
-			for i, a := range byteAddresses {
-				addresses[i] = a.String()
+		// string[]
+		stringsRgx := regexp.MustCompile(`string\[\d*]$`)
+		if stringsRgx.MatchString(f.ParameterType) {
+			var param []string
+			if err = json.Unmarshal(rawParam, &param); err != nil {
+				cxtLog.Warn(err)
+				return false
 			}
-			return validatePredStringArray(v.Predicate, addresses, v.Attribute, f.Index)
-		case "string[]":
-			return validatePredStringArray(v.Predicate, contractArg.([]string), v.Attribute, f.Index)
-		default:
-			cxtLog.Debugf("parameter type not supported %s\n", f.ParameterType)
+			return validatePredStringArray(v.Predicate, param, v.Attribute, f.Index)
+		}
+		// int
+		intRgx := regexp.MustCompile(`u?int\d*$`)
+		if intRgx.MatchString(f.ParameterType) {
+			var param *big.Int
+			if err = json.Unmarshal(rawParam, &param); err != nil {
+				cxtLog.Warn(err)
+				return false
+			}
+			return validatePredBigInt(v.Predicate, param, makeBigInt(v.Attribute))
+		}
+		// int[]
+		arrayIntRgx := regexp.MustCompile(`u?int\d*\[\d*]$`)
+		if arrayIntRgx.MatchString(f.ParameterType) {
+			var param []*big.Int
+			if err = json.Unmarshal(rawParam, &param); err != nil {
+				cxtLog.Warn(err)
+				return false
+			}
+			return validatePredBigIntArray(v.Predicate, param, makeBigInt(v.Attribute), f.Index)
+		}
+		// byte[][]
+		arrayByteRgx := regexp.MustCompile(`bytes\d*\[\d*]$`)
+		if arrayByteRgx.MatchString(f.ParameterType) {
+			var param [][]byte
+			if err = json.Unmarshal(rawParam, &param); err != nil {
+				cxtLog.Warn(err)
+				return false
+			}
+			return validatePredStringArray(v.Predicate, ByteArraysToHex(param), v.Attribute, f.Index)
 		}
 	case ConditionFunctionCalled:
 		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
@@ -179,12 +168,12 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		}
 		ok, err := matchesMethodName(abi, ts.Input, f.FunctionName)
 		if err != nil {
-			cxtLog.Debugf("cannot decode input method %v\n", err)
+			cxtLog.Warnf("cannot decode input method %v\n", err)
 			return false
 		}
 		return ok
 	default:
-		cxtLog.Debugf("filter not supported of type %T\n", f.Condition)
+		cxtLog.Warnf("filter not supported of type %T\n", f.Condition)
 	}
 	return false
 }

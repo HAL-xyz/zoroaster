@@ -9,7 +9,7 @@
       "FilterType":"CheckFunctionParameter",
       "FunctionName":"setter3",
       "ParameterName":"new_int32_var",
-      "ParameterType":"int64",
+      "ParameterType":"string",
       "Condition":{
         "Predicate":"Eq",
         "Attribute":"4563456"

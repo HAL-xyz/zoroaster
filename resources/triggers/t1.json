@@ -20,7 +20,7 @@
       "ParameterType":"address",
       "Condition":{
         "Predicate":"Eq",
-        "Attribute":"0000000000000000000000007ABE49749989a53b8d9e584b0ee93bb773ca0b9e"
+        "Attribute":"0x7ABE49749989a53b8d9e584b0ee93bb773ca0b9e"
       }
     },
     {
