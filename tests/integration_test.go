@@ -20,6 +20,10 @@ type Rule struct {
 	TriggerFile string `json:"trigger_file"`
 }
 
+func init() {
+	log.SetLevel(log.DebugLevel)
+}
+
 func TestIntegration(t *testing.T) {
 
 	client := ethrpc.New("https://ethshared.bdnodes.net/?auth=_M92hYFzHxR4S1kNbYHfR6ResdtDRqvvLdnm3ZcdAXA")
