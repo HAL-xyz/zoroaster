@@ -28,7 +28,6 @@ type AttributeWebhookPost struct {
 }
 
 type AttributeEmail struct {
-	URI     string
 	From    string
 	To      string
 	Subject string
@@ -86,7 +85,6 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 		action.Attribute = AttributeWebhookPost{URI: ajs.Attributes.URI}
 	case "email":
 		action.Attribute = AttributeEmail{
-			URI:     ajs.Attributes.URI,
 			To:      ajs.Attributes.To,
 			Subject: ajs.Attributes.Subject,
 			Body:    ajs.Attributes.Body,

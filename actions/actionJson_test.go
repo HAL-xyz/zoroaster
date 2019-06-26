@@ -34,7 +34,6 @@ func TestAction_Email(t *testing.T) {
 	   "TriggerId":30,
 	   "ActionType":"email",
 	   "Attributes":{
-		  "URI":"https://webhook.site/202d0fac-4bfa-43f5-8ad0-c791cf051e5f",
 		  "To":"manlio.poltronieri@gmail.com",
 		  "Subject":"YO from Zoroaster",
 		  "Body":"yo yo yo and a bottle of rum"
