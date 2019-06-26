@@ -2,7 +2,6 @@ package aws
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"log"
@@ -18,8 +17,7 @@ func GetSESSession() *ses.SES {
 // AWS session
 func getSession() *session.Session {
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("eu-west-1"),
-		Credentials: credentials.NewSharedCredentials("", "atomic"),
+		Region: aws.String("eu-west-1"), // SES is only available in Ireland
 	})
 	_, err = sess.Config.Credentials.Get()
 	if err != nil {
