@@ -54,11 +54,9 @@ func handleWebHookPost(awp AttributeWebhookPost, ztx *trigger.ZTransaction) *tri
 }
 
 func handleEmail(sess *ses.SES, email AttributeEmail, ztx *trigger.ZTransaction) *trigger.Outcome {
+	body := FillEmailTemplate(email.Body, ztx)
 
-	// TODO: do all the replacements here; then:
-
-	result, err := sendEmail(sess, email.To, email.Subject, email.Body)
-
+	result, err := sendEmail(sess, email.To, email.Subject, body)
 	if err != nil {
 		return &trigger.Outcome{err.Error(), ""}
 	}

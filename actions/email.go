@@ -1,10 +1,14 @@
 package actions
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ses"
 	log "github.com/sirupsen/logrus"
+	"strings"
+	"zoroaster/triggers"
 )
 
 const (
@@ -69,4 +73,41 @@ func assembleEmail(recipient, subject, body string) *ses.SendEmailInput {
 		Source: aws.String(Sender),
 	}
 	return input
+}
+
+func FillEmailTemplate(template string, ztx *trigger.ZTransaction) string {
+	body := template
+
+	// standard fields
+	body = strings.ReplaceAll(body, "$BlockNumber", string(*ztx.Tx.BlockNumber))
+	body = strings.ReplaceAll(body, "$BlockHash", ztx.Tx.BlockHash)
+	body = strings.ReplaceAll(body, "$TransactionHash", ztx.Tx.Hash)
+	body = strings.ReplaceAll(body, "$BlockTimestamp", string(ztx.BlockTimestamp))
+	body = strings.ReplaceAll(body, "$From", ztx.Tx.From)
+	body = strings.ReplaceAll(body, "$To", ztx.Tx.To)
+	body = strings.ReplaceAll(body, "$Value", ztx.Tx.Value.String())
+	body = strings.ReplaceAll(body, "$Gas", string(ztx.Tx.Gas))
+	body = strings.ReplaceAll(body, "$GasPrice", ztx.Tx.GasPrice.String())
+	body = strings.ReplaceAll(body, "$Nonce", string(ztx.Tx.Nonce))
+
+	// function name
+	if ztx.DecodedFnName != nil {
+		body = strings.ReplaceAll(body, "!MethodName", *ztx.DecodedFnName)
+	}
+
+	// function params
+	if ztx.DecodedFnArgs != nil {
+		var args map[string]interface{}
+		err := json.Unmarshal([]byte(*ztx.DecodedFnArgs), &args)
+		if err != nil {
+			log.Error(err)
+			return body
+		}
+		for key, value := range args {
+			old := fmt.Sprintf("!%s", key)
+			new := fmt.Sprintf("%v", value)
+			body = strings.ReplaceAll(body, old, new)
+		}
+	}
+	return body
 }
