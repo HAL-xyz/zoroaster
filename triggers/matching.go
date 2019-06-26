@@ -1,11 +1,13 @@
 package trigger
 
 import (
+	"encoding/hex"
 	"encoding/json"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"math/big"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -94,6 +96,18 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			cxtLog.Debugf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
 			return false
 		}
+		// uint8
+		if f.ParameterType == "uint8[]" {
+			var param []uint8
+			if err = json.Unmarshal(rawParam, &param); err != nil {
+				cxtLog.Debug(err)
+				return false
+			}
+			tgVal, err := strconv.Atoi(v.Attribute)
+			if err == nil {
+				return validatePredUIntArray(v.Predicate, param, tgVal, f.Index)
+			}
+		}
 		// address
 		if f.ParameterType == "address" {
 			var param string
@@ -162,6 +176,15 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			}
 			return validatePredStringArray(v.Predicate, ByteArraysToHex(param), v.Attribute, f.Index)
 		}
+		if f.ParameterType == "bytes" {
+			var param []uint8
+			if err = json.Unmarshal(rawParam, &param); err != nil {
+				cxtLog.Debug(err)
+				return false
+			}
+			return hex.EncodeToString(param) == v.Attribute
+		}
+		cxtLog.Debug("parameter type not supported: ", f.ParameterType)
 	case ConditionFunctionCalled:
 		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
 			return false

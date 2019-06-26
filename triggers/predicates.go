@@ -119,3 +119,29 @@ func validatePredBool(p Predicate, cv bool, tv string) bool {
 	}
 	return strings.ToLower(tv) == ctVal
 }
+
+func validatePredUIntArray(p Predicate, cvs []uint8, tv int, index *int) bool {
+	if index != nil {
+		if *index > len(cvs) {
+			return false
+		}
+		return validatePredInt(p, int(cvs[*index]), tv)
+	}
+	switch p {
+	case SmallerThan:
+		return len(cvs) < tv
+	case BiggerThan:
+		return len(cvs) > tv
+	case Eq:
+		return len(cvs) == tv
+	case IsIn:
+		for _, v := range cvs {
+			if int(v) == tv {
+				return true
+			}
+		}
+		return false
+	default:
+		return false
+	}
+}

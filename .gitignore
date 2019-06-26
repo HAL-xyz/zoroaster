@@ -21,3 +21,4 @@ cover.html
 .idea
 *.csv
 *.log
+.DS_Store

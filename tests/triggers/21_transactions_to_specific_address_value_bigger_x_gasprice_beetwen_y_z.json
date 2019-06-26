@@ -1,0 +1,39 @@
+{
+  "TriggerName": "All transactions from a specif address and with a value bigger than X and a gas price beetwen X and Y",
+  "TriggerType": "WatchTransactions",
+  "CreationDate": "2019-06-01 00:00:00",
+  "Filters": [
+    {
+      "FilterType": "BasicFilter",
+      "ParameterName": "To",
+      "Condition": {
+        "Predicate": "Eq",
+        "Attribute": "0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208"
+      }
+    },
+    {
+      "FilterType": "BasicFilter",
+      "ParameterName": "Value",
+      "Condition": {
+        "Predicate": "BiggerThan",
+        "Attribute": "100000000000000000"
+      }
+    },
+    {
+      "FilterType": "BasicFilter",
+      "ParameterName": "GasPrice",
+      "Condition": {
+        "Predicate": "BiggerThan",
+        "Attribute": "10000000000"
+      }
+    },
+    {
+      "FilterType": "BasicFilter",
+      "ParameterName": "GasPrice",
+      "Condition": {
+        "Predicate": "SmallerThan",
+        "Attribute": "13000000000"
+      }
+    }
+  ]
+}

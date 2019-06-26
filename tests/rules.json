@@ -2,10 +2,352 @@
   "rules":
     [
       {
-        "assert": "169 transfer occurred in this block 7933746 for this contract 0x174bfa6600bf90c885c7c01c7031389ed1461ab9",
-        "occurrences": 169,
-        "block_no": 7933746,
-        "trigger_file": "00_CheckFunctionCalled.json"
+        "assert": "00 - 2 transactions occurred from the address 0xFBb1b73C4f0BDa4f67dcA266ce6Ef42f520fBB98 in the block 7956829",
+        "occurrences": 2,
+        "block_no": 7956829,
+        "trigger_file": "00_all_transactions_from_specific_address.json"
+      },
+      {
+        "assert": "01 - 37 transactions occurred to the address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 in the block 7956825",
+        "occurrences": 37,
+        "block_no": 7956825,
+        "trigger_file": "01_all_transactions_to_a_specific_address.json"
+      },
+      {
+        "assert": "02 - 1 transaction occurred with nonce equal to 50 in the block 7956828",
+        "occurrences": 1,
+        "block_no": 7956828,
+        "trigger_file": "02_transaction_with_specific_nonce.json"
+      },
+      {
+        "assert": "03 - 68 transactions occurred with nonce smaller than 50 in the block 7956828",
+        "occurrences": 68,
+        "block_no": 7956828,
+        "trigger_file": "03_transactions_with_nonce_smaller_than_x.json"
+      },
+      {
+        "assert": "04 - 84 transactions occurred with nonce bigger than 50 in the block 7956828",
+        "occurrences": 84,
+        "block_no": 7956828,
+        "trigger_file": "04_transactions_with_nonce_bigger_than_x.json"
+      },
+      {
+        "assert": "05 - 2 transactions occurred with nonce bigger than 10 and smaller 12 in the block 7956828",
+        "occurrences": 2,
+        "block_no": 7956828,
+        "trigger_file": "05_transactions_with_nonce_bigger_than_x_smaller_than_y.json"
+      },
+      {
+        "assert": "06 - A transaction occurred with value eq to 3000 ether in the block 7956821",
+        "occurrences": 1,
+        "block_no": 7956821,
+        "trigger_file": "06_all_transactions_with_value_equal_to_x.json"
+      },
+      {
+        "assert": "07 - 135 transactions occurred with value smaller than 500000000000000000 wei in the block 7956820",
+        "occurrences": 135,
+        "block_no": 7956820,
+        "trigger_file": "07_all_transactions_with_value_smaller_than_x.json"
+      },
+      {
+        "assert": "08 - 27 transactions occurred with value bigger than 500000000000000000 wei in the block 7956820",
+        "occurrences": 27,
+        "block_no": 7956820,
+        "trigger_file": "08_all_transactions_with_value_bigger_than_x.json"
+      },
+      {
+        "assert": "09 - 3 transactions occurred with value between 300000000000000000 and 500000000000000000 wei in the block 7956820",
+        "occurrences": 3,
+        "block_no": 7956820,
+        "trigger_file": "09_all_transactions_with_value_between_x_y.json"
+      },
+      {
+        "assert": "10 - 1 transaction occurred with gas equal to 25030 in the block 7956820",
+        "occurrences": 1,
+        "block_no": 7956820,
+        "trigger_file": "10_all_transactions_with_gas_equal_to_x.json"
+      },
+      {
+        "assert": "11 - 14 transactions occurred with gas smaller than 25030 in the block 7956829",
+        "occurrences": 14,
+        "block_no": 7956829,
+        "trigger_file": "11_all_transactions_with_gas_smaller_than_x.json"
+      },
+      {
+        "assert": "12 - 8 transactions occurred with gas bigger than 600000 in the block 7956829",
+        "occurrences": 8,
+        "block_no": 7956829,
+        "trigger_file": "12_all_transactions_with_gas_bigger_than_x.json"
+      },
+      {
+        "assert": "13 - 1 transaction occurred with gas between 500000 and 600000 in the block 7956829",
+        "occurrences": 1,
+        "block_no": 7956829,
+        "trigger_file": "13_all_transactions_with_gas_between_x_y.json"
+      },
+      {
+        "assert": "14 - 1 transaction occurred with gas price equal to 20000000000000 wei in the block 7956820",
+        "occurrences": 1,
+        "block_no": 7956820,
+        "trigger_file": "14_all_transactions_with_gas_equal_to_X.json"
+      },
+      {
+        "assert": "15 - 154 transactions occurred with gas price smaller than 52030600760 wei in the block 7956820",
+        "occurrences": 154,
+        "block_no": 7956820,
+        "trigger_file": "15_all_transactions_with_gas_smaller_than_X.json"
+      },
+      {
+        "assert": "16 - 16 transactions occurred with gas price bigger than 33333333333 wei in the block 7956827",
+        "occurrences": 16,
+        "block_no": 7956827,
+        "trigger_file": "16_all_transactions_with_gasprice_bigger_than_x.json"
+      },
+      {
+        "assert": "17 - 11 transactions occurred with gas price between 33100000000 and 50000000000 wei in the block 7956827",
+        "occurrences": 11,
+        "block_no": 7956827,
+        "trigger_file": "17_transactions_with_gasprice_between_x_y.json"
+      },
+      {
+        "assert": "18 - 1 transaction occurred from address 0x58321230a0A246CA94533D0917505D7877F0D61a with value bigger than 100000000000000000 in the block 7956827",
+        "occurrences": 1,
+        "block_no": 7956827,
+        "trigger_file": "18_all_transactions_from_specific_address_with_value_bigger_than_X.json"
+      },
+      {
+        "assert": "19 - 1 transaction occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 with value bigger than 100000000000000000 in the block 7956827",
+        "occurrences": 1,
+        "block_no": 7956827,
+        "trigger_file": "19_all_transactions_to_specific_address_with_value_bigger_than_X.json"
+      },
+      {
+        "assert": "20 - 1 transaction occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 with value bigger than 100000000000000000 and a gasprice bigger than 10000000000 in the block 7956827",
+        "occurrences": 1,
+        "block_no": 7956827,
+        "trigger_file": "20_all_trasnsactions_to_specific_address_value_bigger_than_x_gas_price_bigger_than_y.json"
+      },
+      {
+        "assert": "21 - 1 transaction occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 with value bigger than 100000000000000000 and a gasprice beetwen 10000000000 and 13000000000 in the block 7956827",
+        "occurrences": 1,
+        "block_no": 7956827,
+        "trigger_file": "21_transactions_to_specific_address_value_bigger_x_gasprice_beetwen_y_z.json"
+      },
+      {
+        "assert": "22 - 1 trade occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 for 3731092523360310000000 lition sold in the block 7956825",
+        "occurrences": 1,
+        "block_no": 7956825,
+        "trigger_file": "22_x_lition_sold.json"
+      },
+      {
+        "assert": "23 - 5 trades occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 for more than 3000000000000000000000 lition sold in the block 7956825",
+        "occurrences": 5,
+        "block_no": 7956825,
+        "trigger_file": "23_more_than_x_lition_sold.json"
+      },
+      {
+        "assert": "24 - 1 trade occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 for less than 80000000000000000000000 equal coind bought in the block 7956825",
+        "occurrences": 1,
+        "block_no": 7956825,
+        "trigger_file": "24_less_than_x_equal_bought.json"
+      },
+      {
+        "assert": "25 - 33 trades occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 for a limited array smaller than 6 in the block 7956825",
+        "occurrences": 33,
+        "block_no": 7956825,
+        "trigger_file": "25_less_than_addresses_in_array.json"
+      },
+      {
+        "assert": "26 - 33 trades occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 for a limited array bigger than 3 in the block 7956825",
+        "occurrences": 33,
+        "block_no": 7956825,
+        "trigger_file": "26_more_than_addresses_in_array.json"
+      },
+      {
+        "assert": "27 - 3 trades occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 for an the address 9b3f7df125a9d3493f80142c5e27fb71dffee832 in a limited array in the block 7956825",
+        "occurrences": 3,
+        "block_no": 7956825,
+        "trigger_file": "27_address_is_in_array.json"
+      },
+      {
+        "assert": "28 - 1 trade occurred to address 0xCBc6a023eb975a1e2630223a7959988948E664f3 with an array length smaller than 6 in the block 7956823",
+        "occurrences": 1,
+        "block_no": 7956823,
+        "trigger_file": "28_less_than_x_addresses_in_array.json"
+      },
+      {
+        "assert": "29 - 1 trade occurred to address 0xCBc6a023eb975a1e2630223a7959988948E664f3 with an array length bigger than 4 in the block 7956823",
+        "occurrences": 1,
+        "block_no": 7956823,
+        "trigger_file": "29_more_than_x_addresses_in_array.json"
+      },
+      {
+        "assert": "30 - 1 trade occurred to address 0x867fFB5a3871b500f65BdFafe0136f9667Deae06 with a specific address in an array in the block 7956820",
+        "occurrences": 1,
+        "block_no": 7956820,
+        "trigger_file": "30_address_in_array.json"
+      },
+      {
+        "assert": "31 - 1 trade occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 with a uint smaller than 3067647980000000014 the block 7956825",
+        "occurrences": 1,
+        "block_no": 7956825,
+        "trigger_file": "31_uint_smaller_than.json"
+      },
+      {
+        "assert": "32 - 1 trade occurred to address 0x2aF0F9B7d975d11507dEbA15405c846C5f1fB152 with a uint bigger than 20 in the block 7956823",
+        "occurrences": 1,
+        "block_no": 7956823,
+        "trigger_file": "32_uint_bigger_than.json"
+      },
+      {
+        "assert": "33 - 1 trade occurred to address 0x2aF0F9B7d975d11507dEbA15405c846C5f1fB152 with a uint bigger than 20 and smaller than 35 in the block 7956823",
+        "occurrences": 1,
+        "block_no": 7956823,
+        "trigger_file": "33_uint_inbetween.json"
+      },
+      {
+        "assert": "34 - 1 trade occurred to address 0x91f273b7A28F5169FD7B7995A54B767cA797BC63 with a uint array smaller than 10 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "34_int_array_smaller_than.json"
+      },
+      {
+        "assert": "35 - 1 trade occurred to address 0x91f273b7A28F5169FD7B7995A54B767cA797BC63 with a uint array equal to 3 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "35_int_array_equal.json"
+      },
+      {
+        "assert": "36 - 33 trades occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 for a limited array equal to 4 in the block 7956825",
+        "occurrences": 33,
+        "block_no": 7956825,
+        "trigger_file": "36_addresses_in_array_eq_to.json"
+      },
+      {
+        "assert": "37 - 1 trade occurred to address 0x91f273b7A28F5169FD7B7995A54B767cA797BC63 with a uint array bigger than 2 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "37_int_array_bigger_than.json"
+      },
+      {
+        "assert": "38 - 33 trades occurred to address 0x91f273b7A28F5169FD7B7995A54B767cA797BC63 with a uint array bigger than 2 in the block 7956825",
+        "occurrences": 33,
+        "block_no": 7956825,
+        "trigger_file": "38_addresses_in_array_in_between.json"
+      },
+      {
+        "assert": "39 - 1 trade occurred to address 0xCBc6a023eb975a1e2630223a7959988948E664f3 with an array length smaller than 6 and bigger than 2 in the block 7956823",
+        "occurrences": 1,
+        "block_no": 7956823,
+        "trigger_file": "39_addresses_in_array_in_between.json"
+      },
+      {
+        "assert": "40 - 1 trade occurred to address 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 with uint equal to 100000000000000000000000 in the block 8015292",
+        "occurrences": 1,
+        "block_no": 8015292,
+        "trigger_file": "40_uint_equal_to.json"
+      },
+      {
+        "assert": "41 - 1 trade occurred to address 0x91f273b7A28F5169FD7B7995A54B767cA797BC63 with the uint -2564502464 in an array in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "41_int_is_in_array.json"
+      },
+      {
+        "assert": "42 - 1 trade occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of uint length equale to 8 in the block 7956822",
+        "occurrences": 2,
+        "block_no": 7956822,
+        "trigger_file": "42_limited_array_uint_eq_to.json"
+      },
+      {
+        "assert": "43 - 1 trade occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of uint length smaller than 10 in the block 7956822",
+        "occurrences": 2,
+        "block_no": 7956822,
+        "trigger_file": "43_limited_array_uint_smaller_than.json"
+      },
+      {
+        "assert": "44 - 2 trades occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of uint length bigger than 10 in the block 7956822",
+        "occurrences": 2,
+        "block_no": 7956822,
+        "trigger_file": "44_limited_array_uint_bigger_than.json"
+      },
+      {
+        "assert": "45 - 2 trades occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of uint length between 20 and 10 in the block 7956822",
+        "occurrences": 2,
+        "block_no": 7956822,
+        "trigger_file": "45_limited_array_uint_in_between.json"
+      },
+      {
+        "assert": "46 - 1 trade occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of uint which contains 15426354382187922996011252678013602546456935814302787027991139074713469917153 in the block 7956822",
+        "occurrences": 1,
+        "block_no": 7956822,
+        "trigger_file": "46_limited_array_uint_contains_x.json"
+      },
+      {
+        "assert": "47 - 1 trade occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of bytes length smaller than 6 in the block 8016292",
+        "occurrences": 1,
+        "block_no": 8016292,
+        "trigger_file": "47_limited_array_bytes_smaller_than.json"
+      },
+      {
+        "assert": "48 - 1 trade occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of bytes length equal to 5 in the block 8016292",
+        "occurrences": 1,
+        "block_no": 8016292,
+        "trigger_file": "48_limited_array_bytes_equal_to.json"
+      },
+      {
+        "assert": "49 - 1 trade occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of bytes length bigger than 1 in the block 8016292",
+        "occurrences": 1,
+        "block_no": 8016292,
+        "trigger_file": "49_limited_array_bytes_bigger_than.json"
+      },
+      {
+        "assert": "50 - 1 trade occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of bytes length bigger than 2 and smaller than 6 in the block 8016292",
+        "occurrences": 1,
+        "block_no": 8016292,
+        "trigger_file": "50_limited_array_bytes_in between.json"
+      },
+      {
+        "assert": "51 - 1 trade occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with a limited array of bytes that contains 29c0a96c2794824d554a35cafac880391b7bb16f849dca456e1fe670aa05d753 in the block 8016292",
+        "occurrences": 1,
+        "block_no": 8016292,
+        "trigger_file": "51_limited_array_bytes_is_in.json"
+      },
+      {
+        "assert": "52 - 1 trade occurred to address 0x91f273b7A28F5169FD7B7995A54B767cA797BC63 with a uint array smaller than 10 and bigger than 2 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "52_array_int_length_between.json"
+      },
+      {
+        "assert": "53 - 1 trade occurred to address 0x7be8076f4ea4a4ad08075c2508e481d6c946d12b with two different byte called in the block 8016292",
+        "occurrences": 1,
+        "block_no": 8016292,
+        "trigger_file": "53_bytes_in_transaction.json"
+      },
+      {
+        "assert": "54 - 1 trade occurred to address 0x91f273b7a28f5169fd7b7995a54b767ca797bc63 with an array uint length smaller than 5 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "54_array_of_uint_length_smaller_than.json"
+      },
+      {
+        "assert": "55 - 1 trade occurred to address 0x91f273b7a28f5169fd7b7995a54b767ca797bc63 with an array uint length bigger than 2 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "55_array_of_uint_length_bigger_than.json"
+      },
+      {
+        "assert": "56 - 1 trade occurred to address 0x91f273b7a28f5169fd7b7995a54b767ca797bc63 with an array uint length bigger than 2 and smaller than 5 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "56_array_of_uint_length_in_between.json"
+      },
+      {
+        "assert": "57 - 1 trade occurred to address 0x91f273b7a28f5169fd7b7995a54b767ca797bc63 with an array uint that contains 28 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "57_array_of_uint_contain_a_value.json"
       }
     ]
 }
