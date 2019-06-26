@@ -6,6 +6,7 @@
     "tableMatches": "dev_matches",
     "tableStats": "dev_stats",
     "tableActions": "dev_actions",
+    "tableOutcomes": "dev_outcomes",
     "host": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
     "user": "triggersdb_test_admin",
     "name": "triggers",

@@ -20,6 +20,7 @@ type TriggersDB struct {
 	TableMatches  string
 	TableStats    string
 	TableActions  string
+	TableOutcomes string
 	Host          string
 	User          string
 	Name          string

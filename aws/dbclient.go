@@ -12,6 +12,20 @@ import (
 
 var db *sql.DB
 
+func LogOutcome(table string, outcome *trigger.Outcome, matchId int) {
+	q := fmt.Sprintf(
+		`INSERT INTO %s (
+			"match_id",
+			"payload",
+			"outcome",
+			"timestamp") VALUES ($1, $2, $3, $4)`, table)
+
+	_, err := db.Exec(q, matchId, outcome.Payload, outcome.Outcome, time.Now())
+	if err != nil {
+		log.Errorf("cannot log outcome: %s", err)
+	}
+}
+
 func GetActions(table string, tgId int, userId int) ([]string, error) {
 	q := fmt.Sprintf(
 		`SELECT action_data
@@ -58,7 +72,7 @@ func SetLastBlockProcessed(table string, blockNo int) {
 	}
 }
 
-func LogMatch(table string, match trigger.Match) {
+func LogMatch(table string, match trigger.Match) int {
 	bdate := time.Unix(int64(match.ZTx.BlockTimestamp), 0)
 	tx := match.ZTx.Tx
 	tg := match.Tg
@@ -79,11 +93,16 @@ func LogMatch(table string, match trigger.Match) {
 			"data",
 			"user_id",
 			"fn_name",
-			"fn_args") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`, table)
-	_, err := db.Exec(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From, tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input, tg.UserId, match.ZTx.DecodedFnName, match.ZTx.DecodedFnArgs)
+			"fn_args") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id`, table)
+
+	var lastId int
+	err := db.QueryRow(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From,
+		tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input, tg.UserId,
+		match.ZTx.DecodedFnName, match.ZTx.DecodedFnArgs).Scan(&lastId)
 	if err != nil {
 		log.Errorf("cannot write trigger log match: %s", err)
 	}
+	return lastId
 }
 
 func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {

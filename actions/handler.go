@@ -3,12 +3,13 @@ package actions
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"zoroaster/triggers"
 )
 
-func HandleEvent(evJson ActionEventJson) {
+func HandleEvent(evJson ActionEventJson) []*trigger.Outcome {
 	event := ActionEvent{}
 	event.ZTx = evJson.ZTx
 
@@ -22,27 +23,28 @@ func HandleEvent(evJson ActionEventJson) {
 		event.Actions = append(event.Actions, act)
 	}
 
-	for _, a := range event.Actions {
+	outcomes := make([]*trigger.Outcome, len(event.Actions))
+	for i, a := range event.Actions {
 		switch v := a.Attribute.(type) {
 		case AttributeWebhookPost:
-			handleWebHookPost(v, event.ZTx)
+			out := handleWebHookPost(v, event.ZTx)
+			outcomes[i] = out
 		default:
-			log.Warn("unsupported ActionType:", a.ActionType)
-			continue
+			out := &trigger.Outcome{fmt.Sprintf("unsupported ActionType: %s", a.ActionType), ""}
+			outcomes[i] = out
 		}
 	}
+	return outcomes
 }
 
-func handleWebHookPost(awp AttributeWebhookPost, ztx *trigger.ZTransaction) {
+func handleWebHookPost(awp AttributeWebhookPost, ztx *trigger.ZTransaction) *trigger.Outcome {
 	dataBytes, err := json.Marshal(*ztx)
 	if err != nil {
-		log.Warn(err)
-		return
+		return &trigger.Outcome{err.Error(), ""}
 	}
 	resp, err := http.Post(awp.URI, "application/json", bytes.NewBuffer(dataBytes))
 	if err != nil {
-		log.Warn(err)
-	} else {
-		log.Debugf("\tAction sent - %s", resp.Status)
+		return &trigger.Outcome{err.Error(), string(dataBytes)}
 	}
+	return &trigger.Outcome{resp.Status, string(dataBytes)}
 }

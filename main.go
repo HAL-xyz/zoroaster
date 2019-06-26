@@ -53,19 +53,23 @@ func main() {
 		go func() {
 			acts := getActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
 			eventJson := actions.ActionEventJson{ZTx: match.ZTx, Actions: acts}
-			actions.HandleEvent(eventJson)
+			outcomes := actions.HandleEvent(eventJson)
+			for _, out := range outcomes {
+				aws.LogOutcome(zconf.TriggersDB.TableOutcomes, out, match.MatchId)
+				log.Debug("\tLogged outcome for match id ", match.MatchId)
+			}
 		}()
 	}
 }
 
 func getActions(table string, tgid int, usrid int) []string {
-	var actions []string
-	actions, err := aws.GetActions(table, tgid, usrid)
+	var acts []string
+	acts, err := aws.GetActions(table, tgid, usrid)
 	if err != nil {
 		log.Warnf("cannot get actions from db: %v", err)
 	}
-	log.Debugf("\tMatched %d actions", len(actions))
-	return actions
+	log.Debugf("\tMatched %d actions", len(acts))
+	return acts
 }
 
 func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, zconf *config.ZConfiguration) {
@@ -82,8 +86,9 @@ func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, zco
 			matchingZTxs := trigger.MatchTrigger(tg, block)
 			for _, ztx := range matchingZTxs {
 				log.Debugf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, ztx.Tx.Hash)
-				m := trigger.Match{tg, ztx}
-				aws.LogMatch(zconf.TriggersDB.TableMatches, m)
+				m := trigger.Match{tg, ztx, 0}
+				matchId := aws.LogMatch(zconf.TriggersDB.TableMatches, m)
+				m.MatchId = matchId
 				matchesChan <- &m
 			}
 		}

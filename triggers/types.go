@@ -10,6 +10,12 @@ type ZTransaction struct {
 }
 
 type Match struct {
-	Tg  *Trigger
-	ZTx *ZTransaction
+	Tg      *Trigger
+	ZTx     *ZTransaction
+	MatchId int
+}
+
+type Outcome struct {
+	Outcome string
+	Payload string
 }
