@@ -27,6 +27,14 @@ type AttributeWebhookPost struct {
 	URI string
 }
 
+type AttributeEmail struct {
+	URI     string
+	From    string
+	To      string
+	Subject string
+	Body    string
+}
+
 // Implements the json.Unmarshaler interface
 func (a *Action) UnmarshalJSON(data []byte) error {
 	proxy, err := NewActionJson(data)
@@ -48,7 +56,10 @@ type ActionJson struct {
 	UserID     int    `json:"UserId"`
 	ActionType string `json:"ActionType"`
 	Attributes struct {
-		URI string `json:"URI"`
+		URI     string `json:"URI"`
+		To      string `json:"To"`
+		Subject string `json:"Subject"`
+		Body    string `json:"Body"`
 	} `json:"Attributes"`
 }
 
@@ -70,9 +81,17 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 		ActionType: ajs.ActionType,
 	}
 
-	if ajs.ActionType == "webhook_post" {
+	switch ajs.ActionType {
+	case "webhook_post":
 		action.Attribute = AttributeWebhookPost{URI: ajs.Attributes.URI}
-	} else {
+	case "email":
+		action.Attribute = AttributeEmail{
+			URI:     ajs.Attributes.URI,
+			To:      ajs.Attributes.To,
+			Subject: ajs.Attributes.Subject,
+			Body:    ajs.Attributes.Body,
+		}
+	default:
 		return nil, fmt.Errorf("invalid ActionType %s", ajs.ActionType)
 	}
 	return &action, nil
