@@ -1,0 +1,20 @@
+Standard fields:
+
+BlockNumber is 126194181
+BlockHash is 0xeff67a4d650d6f282f7b8bd74ab47c833a95b4f7dad07b89541c759ca44bf852
+TransactionHash is 0xad07416eb7c8344a385cf32db1377596601a093b15adea1dfc475f0781308912
+BlockTimestamp is 1559195951
+From is 0xa7a7899d944fe658c4b0a1803bab2f490bd3849e
+To is 0x2a0c0dbecc7e4d658f48e01e3fa353f44050c208
+Value is 333
+Gas is 4194304
+GasPrice is 21000000000
+Nonce is 53630737
+
+Function name is: trade
+
+Function params:
+
+Func param tradeAddresses[0] is "0x0df721639ca2f7ff0e1f618b918a65ffb199ac4e"
+Func param tradeValues is [2854124180013133621850,185809192367215025,10000,6764712445,2000000000000000000000,129,1000000000000000,34641086295351909]
+Func param tradeValues[2] is 10000

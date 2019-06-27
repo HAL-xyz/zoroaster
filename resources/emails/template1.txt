@@ -1,0 +1,20 @@
+Standard fields:
+
+BlockNumber is $BlockNumber$
+BlockHash is $BlockHash$
+TransactionHash is $TransactionHash$
+BlockTimestamp is $BlockTimestamp$
+From is $From$
+To is $To$
+Value is $Value$
+Gas is $Gas$
+GasPrice is $GasPrice$
+Nonce is $Nonce$
+
+Function name is: !MethodName
+
+Function params:
+
+Func param tradeAddresses[0] is !tradeAddresses[0]
+Func param tradeValues is !tradeValues
+Func param tradeValues[2] is !tradeValues[2]
