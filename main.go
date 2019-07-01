@@ -9,6 +9,7 @@ import (
 	"zoroaster/aws"
 	"zoroaster/config"
 	"zoroaster/eth"
+	"zoroaster/matcher"
 	"zoroaster/trigger"
 )
 
@@ -48,13 +49,17 @@ func main() {
 	go eth.BlocksPoller(blocksChan, client, zconf)
 
 	// Matching blocks and triggers
-	go Matcher(blocksChan, matchesChan, zconf)
+	go matcher.TxMatcher(blocksChan, matchesChan, zconf)
 
 	// Main routine - process actions
 	for {
 		match := <-matchesChan
 		go func() {
-			acts := getActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
+			acts, err := aws.GetActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
+			if err != nil {
+				log.Warnf("cannot get actions from db: %v", err)
+			}
+			log.Debugf("\tMatched %d actions", len(acts))
 			eventJson := action.ActionEventJson{ZTx: match.ZTx, Actions: acts}
 			outcomes := action.HandleEvent(eventJson, sesSession)
 			for _, out := range outcomes {
@@ -62,40 +67,5 @@ func main() {
 				log.Debug("\tLogged outcome for match id ", match.MatchId)
 			}
 		}()
-	}
-}
-
-func getActions(table string, tgid int, usrid int) []string {
-	var acts []string
-	acts, err := aws.GetActions(table, tgid, usrid)
-	if err != nil {
-		log.Warnf("cannot get actions from db: %v", err)
-	}
-	log.Debugf("\tMatched %d actions", len(acts))
-	return acts
-}
-
-func Matcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, zconf *config.ZConfiguration) {
-	for {
-		block := <-blocksChan
-		start := time.Now()
-		log.Info("New block: #", block.Number)
-
-		triggers, err := aws.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers)
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, tg := range triggers {
-			matchingZTxs := trigger.MatchTrigger(tg, block)
-			for _, ztx := range matchingZTxs {
-				log.Debugf("\tTrigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, ztx.Tx.Hash)
-				m := trigger.Match{tg, ztx, 0}
-				matchId := aws.LogMatch(zconf.TriggersDB.TableMatches, m)
-				m.MatchId = matchId
-				matchesChan <- &m
-			}
-		}
-		aws.SetLastBlockProcessed(zconf.TriggersDB.TableStats, block.Number)
-		log.Infof("\tProcessed %d triggers in %s", len(triggers), time.Since(start))
 	}
 }
