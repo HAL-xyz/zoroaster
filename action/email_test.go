@@ -1,11 +1,11 @@
-package actions
+package action
 
 import (
 	"encoding/json"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
-	"zoroaster/triggers"
+	"zoroaster/trigger"
 )
 
 func TestFillEmailTemplate(t *testing.T) {

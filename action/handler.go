@@ -1,4 +1,4 @@
-package actions
+package action
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	log "github.com/sirupsen/logrus"
 	"net/http"
-	"zoroaster/triggers"
+	"zoroaster/trigger"
 )
 
 func HandleEvent(evJson ActionEventJson, sess *ses.SES) []*trigger.Outcome {

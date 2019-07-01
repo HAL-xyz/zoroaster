@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"sync"
 	"testing"
-	trig "zoroaster/triggers"
+	trig "zoroaster/trigger"
 )
 
 type AllRules struct {

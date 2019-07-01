@@ -5,11 +5,11 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
-	"zoroaster/actions"
+	"zoroaster/action"
 	"zoroaster/aws"
 	"zoroaster/config"
 	"zoroaster/eth"
-	"zoroaster/triggers"
+	"zoroaster/trigger"
 )
 
 func main() {
@@ -55,8 +55,8 @@ func main() {
 		match := <-matchesChan
 		go func() {
 			acts := getActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
-			eventJson := actions.ActionEventJson{ZTx: match.ZTx, Actions: acts}
-			outcomes := actions.HandleEvent(eventJson, sesSession)
+			eventJson := action.ActionEventJson{ZTx: match.ZTx, Actions: acts}
+			outcomes := action.HandleEvent(eventJson, sesSession)
 			for _, out := range outcomes {
 				aws.LogOutcome(zconf.TriggersDB.TableOutcomes, out, match.MatchId)
 				log.Debug("\tLogged outcome for match id ", match.MatchId)

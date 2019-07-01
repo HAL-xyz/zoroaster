@@ -1,4 +1,4 @@
-package actions
+package action
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"zoroaster/triggers"
+	"zoroaster/trigger"
 )
 
 const (

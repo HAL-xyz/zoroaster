@@ -1,9 +1,9 @@
-package actions
+package action
 
 import (
 	"encoding/json"
 	"fmt"
-	"zoroaster/triggers"
+	"zoroaster/trigger"
 )
 
 type ActionEventJson struct {

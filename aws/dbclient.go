@@ -7,7 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"time"
 	"zoroaster/config"
-	"zoroaster/triggers"
+	"zoroaster/trigger"
 )
 
 var db *sql.DB
