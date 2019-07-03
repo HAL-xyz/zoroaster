@@ -13,19 +13,35 @@ type TriggerJson struct {
 	CreationDate string       `json:"CreationDate"`
 	ContractABI  string       `json:"ContractABI"`
 	ContractAdd  string       `json:"ContractAdd"`
+	MethodName   string       `json:"MethodName"`
 	Filters      []FilterJson `json:"Filters"`
+	Inputs       []InputJson  `json:"Inputs"`
+	Outputs      []OutputJson `json:"Outputs"`
 }
 
 type FilterJson struct {
-	FilterType    string `json:"FilterType"`
-	ParameterName string `json:"ParameterName"`
-	ParameterType string `json:"ParameterType"`
-	Condition     struct {
-		Predicate string `json:"Predicate"`
-		Attribute string `json:"Attribute"`
-	} `json:"Condition"`
-	FunctionName string `json:"FunctionName,omitempty"`
-	Index        *int   `json:"Index"`
+	FilterType    string        `json:"FilterType"`
+	ParameterName string        `json:"ParameterName"`
+	ParameterType string        `json:"ParameterType"`
+	FunctionName  string        `json:"FunctionName,omitempty"`
+	Index         *int          `json:"Index"`
+	Condition     ConditionJson `json:"Condition"`
+}
+
+type ConditionJson struct {
+	Predicate string `json:"Predicate"`
+	Attribute string `json:"Attribute"`
+}
+
+type InputJson struct {
+	FunctionName   string `json:"FunctionName"`
+	ParameterType  string `json:"ParameterType"`
+	ParameterValue string `json:"ParameterValue"`
+}
+
+type OutputJson struct {
+	ReturnType string        `json:"ReturnType"`
+	Condition  ConditionJson `json:"Condition"`
 }
 
 // creates a new TriggerJson from JSON
@@ -43,8 +59,8 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 	if tjs.TriggerName == "" {
 		return nil, fmt.Errorf("cannot read trigger: missing TriggerName")
 	}
-	if tjs.TriggerType == "" {
-		return nil, fmt.Errorf("cannot read trigger: missing TriggerType")
+	if !(tjs.TriggerType == "WatchTransactions" || tjs.TriggerType == "WatchContracts") {
+		return nil, fmt.Errorf("invalid trigger type: %s", tjs.TriggerType)
 	}
 
 	trigger := Trigger{
@@ -52,9 +68,21 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 		TriggerType: tjs.TriggerType,
 		ContractABI: tjs.ContractABI,
 		ContractAdd: tjs.ContractAdd,
+		MethodName:  tjs.MethodName,
 	}
 
-	// populate the filters in the trigger
+	// populate Input/Output for Watch a Contract
+	for _, inputJs := range tjs.Inputs {
+		in := Input{inputJs.ParameterType, inputJs.ParameterValue}
+		trigger.Inputs = append(trigger.Inputs, in)
+	}
+	for _, outputJs := range tjs.Outputs {
+		cond := ConditionOutput{Condition{}, unpackPredicate(outputJs.Condition.Predicate), outputJs.Condition.Attribute}
+		out := Output{outputJs.ReturnType, cond}
+		trigger.Outputs = append(trigger.Outputs, out)
+	}
+
+	// populate Filters for Watch a Transaction
 	for _, fjs := range tjs.Filters {
 		f, err := fjs.ToFilter()
 		if err != nil {

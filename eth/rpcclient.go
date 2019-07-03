@@ -1,16 +1,20 @@
 package eth
 
 import (
+	"bytes"
+	"encoding/json"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net/http"
 	"time"
 	"zoroaster/aws"
 	"zoroaster/config"
 )
 
-const K = 8 // next block to process is (last block mined - K)
-
 func BlocksPoller(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZConfiguration) {
+
+	const K = 8 // next block to process is (last block mined - K)
 
 	lastBlockProcessed := aws.ReadLastBlockProcessed(zconf.TriggersDB.TableStats)
 
@@ -38,4 +42,80 @@ func BlocksPoller(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZCo
 			c <- block
 		}
 	}
+}
+
+func GetModifiedAccounts(blockMinusOneNo, blockNo int) []string {
+
+	type ethRequest struct {
+		ID      int    `json:"id"`
+		JSONRPC string `json:"jsonrpc"`
+		Method  string `json:"method"`
+		Params  []int  `json:"params"`
+	}
+
+	p := []int{blockMinusOneNo, blockNo}
+
+	request := ethRequest{
+		ID:      1,
+		JSONRPC: "2.0",
+		Method:  "debug_getModifiedAccountsByNumber",
+		Params:  p,
+	}
+
+	body, err := json.Marshal(request)
+	if err != nil {
+		log.Error(err)
+		return nil
+	}
+
+	cxtLog := log.WithFields(log.Fields{
+		"request": string(body),
+	})
+
+	node := "https://reader:PVHCtb9AT4NzUY3ZpWs8nFTG2wJdKuju3Y3FPCf9YnULfsA4RTcfJBw2rfadhzeT@node-0.hal.xyz"
+
+	response, err := http.Post(node, "application/json", bytes.NewBuffer(body))
+
+	if response != nil {
+		defer response.Body.Close()
+	}
+	if err != nil {
+		cxtLog.Error(err)
+		return nil
+	}
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		cxtLog.Error(err)
+		return nil
+	}
+
+	if response.StatusCode != 200 {
+		cxtLog.Error(err)
+		return nil
+	}
+
+	// result be like
+	// {"jsonrpc":"2.0","id":1,"result":["0x31b93ca83b5ad17582e886c400667c6f698b8ccd",...]}
+
+	type ethResponse struct {
+		Result []string `json:"result"`
+		Error  struct {
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+
+	var ethResp ethResponse
+
+	err = json.Unmarshal(data, &ethResp)
+	if err != nil {
+		cxtLog.Error(err)
+		return nil
+	}
+
+	if ethResp.Error.Message != "" {
+		cxtLog.Error(ethResp.Error.Message)
+	}
+
+	return ethResp.Result
 }

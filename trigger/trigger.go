@@ -8,20 +8,33 @@ import (
 type Trigger struct {
 	TriggerId   int // id comes from the db
 	TriggerName string
-	TriggerType string // TODO use enum
+	TriggerType string
 	ContractABI string
 	ContractAdd string
 	Filters     []Filter
+	MethodName  string
+	Inputs      []Input
+	Outputs     []Output
 	UserId      int
 }
 
 type Filter struct {
-	FilterType    string // TODO use enum
+	FilterType    string
 	ParameterName string
-	ParameterType string // TODO use enum
+	ParameterType string
 	FunctionName  string
 	Condition     Conditioner
 	Index         *int
+}
+
+type Input struct {
+	ParameterType  string
+	ParameterValue string
+}
+
+type Output struct {
+	ReturnType string
+	Condition  Conditioner
 }
 
 type Conditioner interface {
@@ -76,6 +89,12 @@ type ConditionFunctionParam struct {
 }
 
 type ConditionFunctionCalled struct {
+	Condition
+	Predicate Predicate
+	Attribute string
+}
+
+type ConditionOutput struct {
 	Condition
 	Predicate Predicate
 	Attribute string

@@ -25,6 +25,17 @@ func TestTriggerJson_ToTrigger(t *testing.T) {
 	assert.True(t, ok)
 }
 
+func TestTriggerJson_ToTrigger2(t *testing.T) {
+	json, _ := ioutil.ReadFile("../resources/triggers/wac1.json")
+
+	tjs, _ := NewTriggerJson(string(json))
+	trig, err := tjs.ToTrigger()
+	assert.Nil(t, err)
+
+	_, ok := trig.Outputs[0].Condition.(ConditionOutput)
+	assert.True(t, ok)
+}
+
 func TestMalformedJsonTrigger(t *testing.T) {
 	// handle broken TriggerJson creation
 	_, ok := NewTriggerFromJson("def not json")
