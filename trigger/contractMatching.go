@@ -8,14 +8,14 @@ import (
 	"strconv"
 )
 
-func MatchContract(client *ethrpc.EthRPC, cntAddress string, tg *Trigger, blockNo int) bool {
+func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) bool {
 
 	methodId, err := EncodeMethod(tg.MethodName, tg.ContractABI, tg.Inputs)
 	if err != nil {
 		log.Debug("cannot encode method: ", err)
 		return false
 	}
-	result, err := makeEthRpcCall(client, cntAddress, methodId, blockNo)
+	result, err := makeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)
 	if err != nil {
 		log.Debug("rpc call failed: ", err)
 		return false

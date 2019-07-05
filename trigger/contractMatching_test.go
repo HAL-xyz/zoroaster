@@ -15,7 +15,7 @@ func TestMatchContract(t *testing.T) {
 	if err != nil {
 		t.Error(t)
 	}
-	assert.True(t, MatchContract(client, "0xbb9bc244d798123fde783fcc1c72d3bb8c189413", tg, 8081000))
+	assert.True(t, MatchContract(client, tg, 8081000))
 }
 
 func TestMatchContract2(t *testing.T) {
@@ -25,7 +25,7 @@ func TestMatchContract2(t *testing.T) {
 	if err != nil {
 		t.Error(t)
 	}
-	assert.True(t, MatchContract(client, "0xbb9bc244d798123fde783fcc1c72d3bb8c189413", tg, 8081000))
+	assert.True(t, MatchContract(client, tg, 8081000))
 }
 
 func TestMatchContract3(t *testing.T) {
@@ -35,5 +35,5 @@ func TestMatchContract3(t *testing.T) {
 	if err != nil {
 		t.Error(t)
 	}
-	assert.True(t, MatchContract(client, "0xbb9bc244d798123fde783fcc1c72d3bb8c189413", tg, 8081000))
+	assert.True(t, MatchContract(client, tg, 8081000))
 }

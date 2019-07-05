@@ -38,7 +38,7 @@ func BlocksPoller(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZCo
 				continue
 			}
 			lastBlockProcessed += 1
-			log.Infof("\t(%d blocks behind)", n-lastBlockProcessed)
+			log.Infof("(BlocksPoller is %d blocks behind)", n-lastBlockProcessed)
 			c <- block
 		}
 	}
