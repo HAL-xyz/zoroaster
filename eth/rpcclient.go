@@ -12,11 +12,11 @@ import (
 	"zoroaster/config"
 )
 
-func BlocksPoller(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZConfiguration) {
+func BlocksPoller(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZConfiguration, idb aws.IDB) {
 
 	const K = 8 // next block to process is (last block mined - K)
 
-	lastBlockProcessed := aws.ReadLastBlockProcessed(zconf.TriggersDB.TableStats)
+	lastBlockProcessed := idb.ReadLastBlockProcessed(zconf.TriggersDB.TableStats)
 
 	ticker := time.NewTicker(2500 * time.Millisecond)
 	for range ticker.C {

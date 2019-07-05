@@ -12,7 +12,9 @@ import (
 
 var db *sql.DB
 
-func LogOutcome(table string, outcome *trigger.Outcome, matchId int) {
+type PostgresClient struct{}
+
+func (cli PostgresClient) LogOutcome(table string, outcome *trigger.Outcome, matchId int) {
 	q := fmt.Sprintf(
 		`INSERT INTO %s (
 			"match_id",
@@ -26,7 +28,7 @@ func LogOutcome(table string, outcome *trigger.Outcome, matchId int) {
 	}
 }
 
-func GetActions(table string, tgId int, userId int) ([]string, error) {
+func (cli PostgresClient) GetActions(table string, tgId int, userId int) ([]string, error) {
 	q := fmt.Sprintf(
 		`SELECT action_data
 				FROM %s AS t
@@ -54,7 +56,7 @@ func GetActions(table string, tgId int, userId int) ([]string, error) {
 	return actionsRet, nil
 }
 
-func ReadLastBlockProcessed(table string) int {
+func (cli PostgresClient) ReadLastBlockProcessed(table string) int {
 	var blockNo int
 	q := fmt.Sprintf("SELECT last_block_processed FROM %s", table)
 	err := db.QueryRow(q).Scan(&blockNo)
@@ -64,7 +66,7 @@ func ReadLastBlockProcessed(table string) int {
 	return blockNo
 }
 
-func SetLastBlockProcessed(table string, blockNo int) {
+func (cli PostgresClient) SetLastBlockProcessed(table string, blockNo int) {
 	q := fmt.Sprintf(`UPDATE "%s" SET last_block_processed = $1, date = $2`, table)
 	_, err := db.Exec(q, blockNo, time.Now())
 	if err != nil {
@@ -72,7 +74,7 @@ func SetLastBlockProcessed(table string, blockNo int) {
 	}
 }
 
-func LogMatch(table string, match trigger.Match) int {
+func (cli PostgresClient) LogMatch(table string, match trigger.Match) int {
 	bdate := time.Unix(int64(match.ZTx.BlockTimestamp), 0)
 	tx := match.ZTx.Tx
 	tg := match.Tg
@@ -105,7 +107,7 @@ func LogMatch(table string, match trigger.Match) int {
 	return lastId
 }
 
-func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
+func (cli PostgresClient) LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 	q := fmt.Sprintf("SELECT id, trigger_data, user_id FROM %s", table)
 	rows, err := db.Query(q)
 	if err != nil {
@@ -136,7 +138,7 @@ func LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
 	return triggers, nil
 }
 
-func InitDB(c *config.ZConfiguration) {
+func (cli PostgresClient) InitDB(c *config.ZConfiguration) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		c.TriggersDB.Host, c.TriggersDB.Port, c.TriggersDB.User, c.TriggersDB.Password, c.TriggersDB.Name)
 

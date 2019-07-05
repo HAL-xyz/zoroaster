@@ -9,13 +9,17 @@ import (
 	"zoroaster/trigger"
 )
 
-func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, zconf *config.ZConfiguration) {
+func TxMatcher(
+	blocksChan chan *ethrpc.Block,
+	matchesChan chan *trigger.Match,
+	zconf *config.ZConfiguration,
+	idb aws.IDB) {
 	for {
 		block := <-blocksChan
 		start := time.Now()
 		log.Info("TxMatcher: Processing: #", block.Number)
 
-		triggers, err := aws.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers)
+		triggers, err := idb.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -24,12 +28,12 @@ func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan *trigger.Match, z
 			for _, ztx := range matchingZTxs {
 				log.Debugf("\tTxMatcher: Trigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, ztx.Tx.Hash)
 				m := trigger.Match{tg, ztx, 0}
-				matchId := aws.LogMatch(zconf.TriggersDB.TableMatches, m)
+				matchId := idb.LogMatch(zconf.TriggersDB.TableMatches, m)
 				m.MatchId = matchId
 				matchesChan <- &m
 			}
 		}
-		aws.SetLastBlockProcessed(zconf.TriggersDB.TableStats, block.Number)
+		idb.SetLastBlockProcessed(zconf.TriggersDB.TableStats, block.Number)
 		log.Infof("\tTxMatcher: Processed %d triggers in %s", len(triggers), time.Since(start))
 	}
 }

@@ -35,8 +35,9 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
-	// Connect to triggers' DB
-	aws.InitDB(zconf)
+	// Init Postgres DB client
+	psqlClient := aws.PostgresClient{}
+	psqlClient.InitDB(zconf)
 
 	// ETH client
 	client := ethrpc.New(zconf.EthNode)
@@ -46,16 +47,16 @@ func main() {
 	matchesChan := make(chan *trigger.Match)
 
 	// Poll ETH node
-	go eth.BlocksPoller(blocksChan, client, zconf)
+	go eth.BlocksPoller(blocksChan, client, zconf, psqlClient)
 
 	// Matching blocks and triggers
-	go matcher.TxMatcher(blocksChan, matchesChan, zconf)
+	go matcher.TxMatcher(blocksChan, matchesChan, zconf, psqlClient)
 
 	// Main routine - process actions
 	for {
 		match := <-matchesChan
 		go func() {
-			acts, err := aws.GetActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
+			acts, err := psqlClient.GetActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
 			if err != nil {
 				log.Warnf("cannot get actions from db: %v", err)
 			}
@@ -63,7 +64,7 @@ func main() {
 			eventJson := action.ActionEventJson{ZTx: match.ZTx, Actions: acts}
 			outcomes := action.HandleEvent(eventJson, sesSession)
 			for _, out := range outcomes {
-				aws.LogOutcome(zconf.TriggersDB.TableOutcomes, out, match.MatchId)
+				psqlClient.LogOutcome(zconf.TriggersDB.TableOutcomes, out, match.MatchId)
 				log.Debug("\tLogged outcome for match id ", match.MatchId)
 			}
 		}()
