@@ -14,9 +14,9 @@ type IDB interface {
 
 	GetActions(table string, tgId int, userId int) ([]string, error)
 
-	ReadLastBlockProcessed(table string) int
+	ReadLastBlockProcessed(table string, watOrWac string) int
 
-	SetLastBlockProcessed(table string, blockNo int)
+	SetLastBlockProcessed(table string, blockNo int, watOrWac string)
 
 	LogMatch(table string, match trigger.Match) int
 }

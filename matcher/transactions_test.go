@@ -26,11 +26,11 @@ func (db mockDB) GetActions(table string, tgId int, userId int) ([]string, error
 	panic("implement me")
 }
 
-func (db mockDB) ReadLastBlockProcessed(table string) int {
+func (db mockDB) ReadLastBlockProcessed(table string, watOrWac string) int {
 	panic("implement me")
 }
 
-func (db mockDB) SetLastBlockProcessed(table string, blockNo int) {
+func (db mockDB) SetLastBlockProcessed(table string, blockNo int, watOrWac string) {
 	panic("implement me")
 }
 
@@ -52,5 +52,7 @@ func TestMatchContractsForBlock(t *testing.T) {
 
 	var client = ethrpc.New("https://ethshared.bdnodes.net/?auth=_M92hYFzHxR4S1kNbYHfR6ResdtDRqvvLdnm3ZcdAXA")
 
-	MatchContractsForBlock(8081000, mockGetModAccounts, "dev_triggers", mockDB{}, client)
+	zconf := config.Load()
+
+	MatchContractsForBlock(8081000, mockGetModAccounts, zconf, mockDB{}, client)
 }

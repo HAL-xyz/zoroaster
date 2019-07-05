@@ -27,7 +27,8 @@ func main() {
 		FullTimestamp:   true,
 		TimestampFormat: time.Stamp,
 	})
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(log.InfoLevel)
+	//log.SetLevel(log.DebugLevel)
 	f, err := os.OpenFile(zconf.LogsFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
@@ -40,17 +41,22 @@ func main() {
 	psqlClient.InitDB(zconf)
 
 	// ETH client
-	client := ethrpc.New(zconf.EthNode)
+	ethClient := ethrpc.New(zconf.EthNode)
 
 	// Channels
-	blocksChan := make(chan *ethrpc.Block)
+	// WaC channel needs to be buffered because ContractMatcher is much slower than TxMatcher
+	txBlocksChan := make(chan *ethrpc.Block)
+	contractsBlocksChan := make(chan int, 100)
 	matchesChan := make(chan *trigger.Match)
 
 	// Poll ETH node
-	go eth.BlocksPoller(blocksChan, client, zconf, psqlClient)
+	go eth.BlocksPoller(txBlocksChan, contractsBlocksChan, ethClient, zconf, psqlClient)
 
-	// Matching blocks and triggers
-	go matcher.TxMatcher(blocksChan, matchesChan, zconf, psqlClient)
+	// Watch a Transaction
+	go matcher.TxMatcher(txBlocksChan, matchesChan, zconf, psqlClient)
+
+	// Watch a Contract
+	go matcher.ContractMatcher(contractsBlocksChan, matchesChan, zconf, eth.GetModifiedAccounts, psqlClient, ethClient)
 
 	// Main routine - process actions
 	for {

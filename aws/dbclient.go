@@ -56,9 +56,9 @@ func (cli PostgresClient) GetActions(table string, tgId int, userId int) ([]stri
 	return actionsRet, nil
 }
 
-func (cli PostgresClient) ReadLastBlockProcessed(table string) int {
+func (cli PostgresClient) ReadLastBlockProcessed(table string, watOrWac string) int {
 	var blockNo int
-	q := fmt.Sprintf("SELECT last_block_processed FROM %s", table)
+	q := fmt.Sprintf("SELECT %s_last_block_processed FROM %s", watOrWac, table)
 	err := db.QueryRow(q).Scan(&blockNo)
 	if err != nil {
 		log.Errorf("cannot read last block processed: %s", err)
@@ -66,8 +66,8 @@ func (cli PostgresClient) ReadLastBlockProcessed(table string) int {
 	return blockNo
 }
 
-func (cli PostgresClient) SetLastBlockProcessed(table string, blockNo int) {
-	q := fmt.Sprintf(`UPDATE "%s" SET last_block_processed = $1, date = $2`, table)
+func (cli PostgresClient) SetLastBlockProcessed(table string, blockNo int, watOrWac string) {
+	q := fmt.Sprintf(`UPDATE "%s" SET %s_last_block_processed = $1, %s_date = $2`, table, watOrWac, watOrWac)
 	_, err := db.Exec(q, blockNo, time.Now())
 	if err != nil {
 		log.Errorf("cannot set last block processed: %s", err)

@@ -12,11 +12,17 @@ import (
 	"zoroaster/config"
 )
 
-func BlocksPoller(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZConfiguration, idb aws.IDB) {
+func BlocksPoller(
+	txChan chan *ethrpc.Block,
+	cntChan chan int,
+	client *ethrpc.EthRPC,
+	zconf *config.ZConfiguration,
+	idb aws.IDB) {
 
 	const K = 8 // next block to process is (last block mined - K)
 
-	lastBlockProcessed := idb.ReadLastBlockProcessed(zconf.TriggersDB.TableStats)
+	txLastBlockProcessed := idb.ReadLastBlockProcessed(zconf.TriggersDB.TableStats, "wat")
+	cntLastBlockProcessed := idb.ReadLastBlockProcessed(zconf.TriggersDB.TableStats, "wac")
 
 	ticker := time.NewTicker(2500 * time.Millisecond)
 	for range ticker.C {
@@ -26,20 +32,31 @@ func BlocksPoller(c chan *ethrpc.Block, client *ethrpc.EthRPC, zconf *config.ZCo
 			time.Sleep(5 * time.Second)
 			continue
 		}
-		// this should only happen during dev
-		if lastBlockProcessed == 0 {
-			lastBlockProcessed = n - K
+
+		// this only happens during dev as a way to reset lastBlockProcessed
+		if txLastBlockProcessed == 0 {
+			txLastBlockProcessed = n - K
 		}
-		if n-K > lastBlockProcessed {
-			block, err := client.EthGetBlockByNumber(lastBlockProcessed+1, true)
+		if cntLastBlockProcessed == 0 {
+			cntLastBlockProcessed = n - K
+		}
+
+		// Watch a Transaction
+		if n-K > txLastBlockProcessed {
+			block, err := client.EthGetBlockByNumber(txLastBlockProcessed+1, true)
 			if err != nil {
 				log.Warnf("failed to get block %d -> %s", n, err)
 				time.Sleep(5 * time.Second)
 				continue
 			}
-			lastBlockProcessed += 1
-			log.Infof("(BlocksPoller is %d blocks behind)", n-lastBlockProcessed)
-			c <- block
+			txLastBlockProcessed += 1
+			txChan <- block
+		}
+
+		// Watch a Contract
+		if n-K > cntLastBlockProcessed {
+			cntLastBlockProcessed += 1
+			cntChan <- cntLastBlockProcessed // after increment
 		}
 	}
 }
