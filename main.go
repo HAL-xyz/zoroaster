@@ -16,7 +16,7 @@ import (
 func main() {
 
 	// Load Config
-	zconf := config.Load()
+	zconf := config.Load("config")
 
 	// Load AWS SES session
 	sesSession := aws.GetSESSession()

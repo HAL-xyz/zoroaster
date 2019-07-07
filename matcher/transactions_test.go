@@ -31,7 +31,7 @@ func (db mockDB) ReadLastBlockProcessed(table string, watOrWac string) int {
 }
 
 func (db mockDB) SetLastBlockProcessed(table string, blockNo int, watOrWac string) {
-	panic("implement me")
+
 }
 
 func (db mockDB) LogMatch(table string, match trigger.Match) int {
@@ -52,7 +52,7 @@ func TestMatchContractsForBlock(t *testing.T) {
 
 	var client = ethrpc.New("https://ethshared.bdnodes.net/?auth=_M92hYFzHxR4S1kNbYHfR6ResdtDRqvvLdnm3ZcdAXA")
 
-	zconf := config.Load()
+	zconf := config.Load("../config")
 
 	MatchContractsForBlock(8081000, mockGetModAccounts, zconf, mockDB{}, client)
 }

@@ -28,15 +28,15 @@ type TriggersDB struct {
 	Password      string
 }
 
-func Load() *ZConfiguration {
+func Load(dirpath string) *ZConfiguration {
 
 	var configFile string
 	stage := os.Getenv("STAGE")
 	switch stage {
 	case "DEV":
-		configFile = "config/config-dev.json"
+		configFile = fmt.Sprintf("%s/config-dev.json", dirpath)
 	case "PROD":
-		configFile = "config/config-prod.json"
+		configFile = fmt.Sprintf("%s/config-prod.json", dirpath)
 	default:
 		log.Fatal("local env STAGE must be DEV or PROD")
 	}
