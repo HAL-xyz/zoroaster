@@ -20,7 +20,7 @@ func TxMatcher(
 		start := time.Now()
 		log.Info("TX: new -> ", block.Number)
 
-		triggers, err := idb.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers)
+		triggers, err := idb.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers, "WatchTransactions")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -73,7 +73,7 @@ func MatchContractsForBlock(
 	}
 	log.Debug("\tmodified accounts: ", len(modAccounts))
 
-	triggers, err := idb.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers)
+	triggers, err := idb.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers, "WatchContracts")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,10 +81,8 @@ func MatchContractsForBlock(
 
 	var wacTriggers []*trigger.Trigger
 	for i, t := range triggers {
-		if t.TriggerType == "WatchContracts" {
-			if isIn(t.ContractAdd, modAccounts) {
-				wacTriggers = append(wacTriggers, triggers[i])
-			}
+		if isIn(t.ContractAdd, modAccounts) {
+			wacTriggers = append(wacTriggers, triggers[i])
 		}
 	}
 	log.Debug("\tmatching triggers: ", len(wacTriggers))

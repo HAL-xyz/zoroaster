@@ -107,8 +107,11 @@ func (cli PostgresClient) LogMatch(table string, match trigger.Match) int {
 	return lastId
 }
 
-func (cli PostgresClient) LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
-	q := fmt.Sprintf("SELECT id, trigger_data, user_id FROM %s", table)
+func (cli PostgresClient) LoadTriggersFromDB(table string, watOrWac string) ([]*trigger.Trigger, error) {
+	q := fmt.Sprintf(
+		`SELECT id, trigger_data, user_id
+				from %s as t
+				where (t.trigger_data ->> 'TriggerType')::text = '%s'`, table, watOrWac)
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err

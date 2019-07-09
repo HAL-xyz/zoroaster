@@ -38,7 +38,7 @@ func (db mockDB) LogMatch(table string, match trigger.Match) int {
 	panic("implement me")
 }
 
-func (db mockDB) LoadTriggersFromDB(table string) ([]*trigger.Trigger, error) {
+func (db mockDB) LoadTriggersFromDB(table string, watOrWac string) ([]*trigger.Trigger, error) {
 	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 	return []*trigger.Trigger{tg}, nil
 }
