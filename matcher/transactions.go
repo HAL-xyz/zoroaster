@@ -52,6 +52,9 @@ func ContractMatcher(
 		log.Info("CN: new -> ", blockNo)
 
 		MatchContractsForBlock(blockNo, getModifiedAccounts, zconf, idb, client)
+		// TODO: log matches, put matches to chan
+
+		idb.SetLastBlockProcessed(zconf.TriggersDB.TableStats, blockNo, "wac")
 	}
 }
 
@@ -60,7 +63,7 @@ func MatchContractsForBlock(
 	getModAccounts func(prevBlock, currBlock int) []string,
 	zconf *config.ZConfiguration,
 	idb aws.IDB,
-	client *ethrpc.EthRPC) {
+	client *ethrpc.EthRPC) []*trigger.CnMatch {
 
 	start := time.Now()
 
@@ -87,13 +90,16 @@ func MatchContractsForBlock(
 	}
 	log.Debug("\tmatching triggers: ", len(wacTriggers))
 
+	var cnMatches []*trigger.CnMatch
 	for _, tg := range wacTriggers {
-		if trigger.MatchContract(client, tg, blockNo) {
-			log.Infof("`\tCN: Trigger %d matched on block %d\n", tg.TriggerId, blockNo)
+		contractValue := trigger.MatchContract(client, tg, blockNo)
+		if contractValue != "" {
+			cnMatches = append(cnMatches, &trigger.CnMatch{blockNo, tg.TriggerId, contractValue})
+			log.Debugf("`\tCN: Trigger %d matched on block %d\n", tg.TriggerId, blockNo)
 		}
 	}
-	idb.SetLastBlockProcessed(zconf.TriggersDB.TableStats, blockNo, "wac")
 	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(wacTriggers), time.Since(start), blockNo)
+	return cnMatches
 }
 
 func isIn(a string, list []string) bool {

@@ -15,6 +15,12 @@ type Match struct {
 	MatchId int
 }
 
+type CnMatch struct {
+	BlockNo int
+	TgId    int
+	Value   string
+}
+
 type Outcome struct {
 	Outcome string
 	Payload string

@@ -3,6 +3,7 @@ package matcher
 import (
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"zoroaster/config"
 	"zoroaster/trigger"
@@ -54,5 +55,8 @@ func TestMatchContractsForBlock(t *testing.T) {
 
 	zconf := config.Load("../config")
 
-	MatchContractsForBlock(8081000, mockGetModAccounts, zconf, mockDB{}, client)
+	cnMatches := MatchContractsForBlock(8081000, mockGetModAccounts, zconf, mockDB{}, client)
+
+	assert.Equal(t, len(cnMatches), 1)
+	assert.Equal(t, cnMatches[0].BlockNo, 8081000)
 }

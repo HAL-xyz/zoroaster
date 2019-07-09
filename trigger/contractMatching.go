@@ -8,24 +8,25 @@ import (
 	"strconv"
 )
 
-func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) bool {
+// returns the string value of the contract call outcome in case of match, "" otherwise
+func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) string {
 
 	methodId, err := EncodeMethod(tg.MethodName, tg.ContractABI, tg.Inputs)
 	if err != nil {
 		log.Debug("cannot encode method: ", err)
-		return false
+		return ""
 	}
 	result, err := makeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)
 	if err != nil {
 		log.Debug("rpc call failed: ", err)
-		return false
+		return ""
 	}
 	log.Debug("result from call is -> ", result)
 
 	cond, ok := tg.Outputs[0].Condition.(ConditionOutput)
 	if ok != true {
 		log.Error("wrong wrong wrong")
-		return false
+		return ""
 	}
 
 	returnType := tg.Outputs[0].ReturnType
@@ -33,27 +34,33 @@ func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) bool {
 	if returnType == "Address" {
 		ctVal := common.HexToAddress(result)
 		tgVal := common.HexToAddress(cond.Attribute)
-		return ctVal == tgVal
+		if ctVal == tgVal {
+			return ctVal.String()
+		}
 	}
 	if returnType == "uint256" {
 		ctVal := makeBigInt16(result)
 		tgVal := makeBigInt(cond.Attribute)
-		return validatePredBigInt(cond.Predicate, ctVal, tgVal)
+		if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
+			return fmt.Sprintf("%v", ctVal)
+		}
 	}
 	if returnType == "bool" {
 		no, err := strconv.ParseInt(result[2:], 16, 32)
 		if err != nil {
 			log.Debug(err)
-			return false
+			return ""
 		}
 		ctVal := false
 		if no == 1 {
 			ctVal = true
 		}
-		return validatePredBool(cond.Predicate, ctVal, cond.Attribute)
+		if validatePredBool(cond.Predicate, ctVal, cond.Attribute) {
+			return fmt.Sprintf("%v", ctVal)
+		}
 	}
 	log.Debug("return type not supported:", returnType)
-	return false
+	return ""
 }
 
 func makeEthRpcCall(client *ethrpc.EthRPC, cntAddress, data string, blockNumber int) (string, error) {
