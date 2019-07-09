@@ -11,7 +11,7 @@ import (
 
 func TxMatcher(
 	blocksChan chan *ethrpc.Block,
-	matchesChan chan *trigger.Match,
+	matchesChan chan *trigger.TxMatch,
 	zconf *config.ZConfiguration,
 	idb aws.IDB) {
 
@@ -28,8 +28,8 @@ func TxMatcher(
 			matchingZTxs := trigger.MatchTrigger(tg, block)
 			for _, ztx := range matchingZTxs {
 				log.Debugf("\tTX: Trigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, ztx.Tx.Hash)
-				m := trigger.Match{tg, ztx, 0}
-				matchId := idb.LogMatch(zconf.TriggersDB.TableMatches, m)
+				m := trigger.TxMatch{0, tg, ztx}
+				matchId := idb.LogTxMatch(zconf.TriggersDB.TableTxMatches, m)
 				m.MatchId = matchId
 				matchesChan <- &m
 			}
@@ -41,7 +41,7 @@ func TxMatcher(
 
 func ContractMatcher(
 	blocksChan chan int,
-	matchesChan chan *trigger.Match,
+	matchesChan chan *trigger.CnMatch,
 	zconf *config.ZConfiguration,
 	getModifiedAccounts func(prevBlock, currBlock int) []string,
 	idb aws.IDB,
@@ -51,9 +51,13 @@ func ContractMatcher(
 		blockNo := <-blocksChan
 		log.Info("CN: new -> ", blockNo)
 
-		MatchContractsForBlock(blockNo, getModifiedAccounts, zconf, idb, client)
-		// TODO: log matches, put matches to chan
-
+		cnMatches := MatchContractsForBlock(blockNo, getModifiedAccounts, zconf, idb, client)
+		for _, m := range cnMatches {
+			matchId := idb.LogCnMatch(zconf.TriggersDB.TableCnMatches, *m)
+			m.MatchId = matchId
+			log.Debug("\tlogged one match with id ", matchId)
+			//matchesChan <- m
+		}
 		idb.SetLastBlockProcessed(zconf.TriggersDB.TableStats, blockNo, "wac")
 	}
 }
@@ -94,8 +98,8 @@ func MatchContractsForBlock(
 	for _, tg := range wacTriggers {
 		contractValue := trigger.MatchContract(client, tg, blockNo)
 		if contractValue != "" {
-			cnMatches = append(cnMatches, &trigger.CnMatch{blockNo, tg.TriggerId, contractValue})
-			log.Debugf("`\tCN: Trigger %d matched on block %d\n", tg.TriggerId, blockNo)
+			cnMatches = append(cnMatches, &trigger.CnMatch{0, blockNo, tg.TriggerId, contractValue})
+			log.Debugf("\tCN: Trigger %d matched on block %d\n", tg.TriggerId, blockNo)
 		}
 	}
 	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(wacTriggers), time.Since(start), blockNo)

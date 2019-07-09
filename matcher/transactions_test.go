@@ -35,7 +35,11 @@ func (db mockDB) SetLastBlockProcessed(table string, blockNo int, watOrWac strin
 
 }
 
-func (db mockDB) LogMatch(table string, match trigger.Match) int {
+func (db mockDB) LogTxMatch(table string, match trigger.TxMatch) int {
+	panic("implement me")
+}
+
+func (db mockDB) LogCnMatch(table string, match trigger.CnMatch) int {
 	panic("implement me")
 }
 

@@ -74,7 +74,21 @@ func (cli PostgresClient) SetLastBlockProcessed(table string, blockNo int, watOr
 	}
 }
 
-func (cli PostgresClient) LogMatch(table string, match trigger.Match) int {
+func (cli PostgresClient) LogCnMatch(table string, match trigger.CnMatch) int {
+	q := fmt.Sprintf(
+		`INSERT INTO "%s" (
+			"date", "trigger_id", "block_no", "call_value")
+			VALUES ($1, $2, $3, $4) RETURNING id`, table)
+	var lastId int
+	err := db.QueryRow(q, time.Now(), match.TgId, match.BlockNo, match.Value).Scan(&lastId)
+
+	if err != nil {
+		log.Errorf("cannot write contract log match: %s", err)
+	}
+	return lastId
+}
+
+func (cli PostgresClient) LogTxMatch(table string, match trigger.TxMatch) int {
 	bdate := time.Unix(int64(match.ZTx.BlockTimestamp), 0)
 	tx := match.ZTx.Tx
 	tg := match.Tg
@@ -102,7 +116,7 @@ func (cli PostgresClient) LogMatch(table string, match trigger.Match) int {
 		tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input, tg.UserId,
 		match.ZTx.DecodedFnName, match.ZTx.DecodedFnArgs).Scan(&lastId)
 	if err != nil {
-		log.Errorf("cannot write trigger log match: %s", err)
+		log.Errorf("cannot write transaction log match: %s", err)
 	}
 	return lastId
 }

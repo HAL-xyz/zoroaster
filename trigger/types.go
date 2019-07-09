@@ -9,13 +9,14 @@ type ZTransaction struct {
 	Tx             *ethrpc.Transaction
 }
 
-type Match struct {
+type TxMatch struct {
+	MatchId int
 	Tg      *Trigger
 	ZTx     *ZTransaction
-	MatchId int
 }
 
 type CnMatch struct {
+	MatchId int
 	BlockNo int
 	TgId    int
 	Value   string

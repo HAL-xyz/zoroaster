@@ -42,24 +42,24 @@ func main() {
 	// ETH client
 	ethClient := ethrpc.New(zconf.EthNode)
 
-	// Channels
-	// WaC channel needs to be buffered because ContractMatcher is much slower than TxMatcher
-	txBlocksChan := make(chan *ethrpc.Block)
+	// Channels are buffered because a) contracts is slower, and b) so I can run wac/wat independently for tests
+	txBlocksChan := make(chan *ethrpc.Block, 100)
 	contractsBlocksChan := make(chan int, 100)
-	matchesChan := make(chan *trigger.Match)
+	txMatchesChan := make(chan *trigger.TxMatch)
+	cnMatchesChan := make(chan *trigger.CnMatch)
 
 	// Poll ETH node
 	go eth.BlocksPoller(txBlocksChan, contractsBlocksChan, ethClient, zconf, psqlClient)
 
 	// Watch a Transaction
-	go matcher.TxMatcher(txBlocksChan, matchesChan, zconf, psqlClient)
+	go matcher.TxMatcher(txBlocksChan, txMatchesChan, zconf, psqlClient)
 
 	// Watch a Contract
-	go matcher.ContractMatcher(contractsBlocksChan, matchesChan, zconf, eth.GetModifiedAccounts, psqlClient, ethClient)
+	go matcher.ContractMatcher(contractsBlocksChan, cnMatchesChan, zconf, eth.GetModifiedAccounts, psqlClient, ethClient)
 
 	// Main routine - process actions
 	for {
-		match := <-matchesChan
+		match := <-txMatchesChan
 		go func() {
 			acts, err := psqlClient.GetActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
 			if err != nil {

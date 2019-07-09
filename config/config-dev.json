@@ -3,7 +3,8 @@
   "logsPath": "logs",
   "triggersDB": {
     "tableTriggers": "dev_triggers",
-    "tableMatches": "dev_matches",
+    "tableTxMatches": "dev_tx_matches",
+    "tableCnMatches": "dev_cn_matches",
     "tableStats": "dev_stats",
     "tableActions": "dev_actions",
     "tableOutcomes": "dev_outcomes",

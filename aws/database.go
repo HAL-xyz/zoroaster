@@ -18,5 +18,7 @@ type IDB interface {
 
 	SetLastBlockProcessed(table string, blockNo int, watOrWac string)
 
-	LogMatch(table string, match trigger.Match) int
+	LogTxMatch(table string, match trigger.TxMatch) int
+
+	LogCnMatch(table string, match trigger.CnMatch) int
 }
