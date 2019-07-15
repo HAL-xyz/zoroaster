@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"sync"
 	"testing"
+	"zoroaster/config"
 	trig "zoroaster/trigger"
 )
 
@@ -20,13 +21,15 @@ type Rule struct {
 	TriggerFile string `json:"trigger_file"`
 }
 
+var zconf = config.Load("../config")
+
 func init() {
 	log.SetLevel(log.DebugLevel)
 }
 
 func TestIntegration(t *testing.T) {
 
-	client := ethrpc.New("https://ethshared.bdnodes.net/?auth=_M92hYFzHxR4S1kNbYHfR6ResdtDRqvvLdnm3ZcdAXA")
+	var client = ethrpc.New(zconf.EthNode)
 
 	data, err := ioutil.ReadFile("rules.json")
 	if err != nil {

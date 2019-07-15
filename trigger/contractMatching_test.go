@@ -4,9 +4,11 @@ import (
 	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"zoroaster/config"
 )
 
-var client = ethrpc.New("https://ethshared.bdnodes.net/?auth=_M92hYFzHxR4S1kNbYHfR6ResdtDRqvvLdnm3ZcdAXA")
+var zconf = config.Load("../config")
+var client = ethrpc.New(zconf.EthNode)
 
 func TestMatchContract(t *testing.T) {
 

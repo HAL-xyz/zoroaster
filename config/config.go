@@ -9,6 +9,7 @@ import (
 )
 
 type ZConfiguration struct {
+	Stage      string
 	EthNode    string
 	LogsPath   string
 	LogsFile   string
@@ -31,13 +32,16 @@ type TriggersDB struct {
 
 func Load(dirpath string) *ZConfiguration {
 
+	var zconfig ZConfiguration
 	var configFile string
 	stage := os.Getenv("STAGE")
 	switch stage {
 	case "DEV":
 		configFile = fmt.Sprintf("%s/config-dev.json", dirpath)
+		zconfig.Stage = "DEV"
 	case "PROD":
 		configFile = fmt.Sprintf("%s/config-prod.json", dirpath)
+		zconfig.Stage = "PROD"
 	default:
 		log.Fatal("local env STAGE must be DEV or PROD")
 	}
@@ -47,7 +51,6 @@ func Load(dirpath string) *ZConfiguration {
 	if err != nil {
 		log.Fatalf("cannot open %s: %s", configFile, err)
 	}
-	var zconfig ZConfiguration
 	err = json.Unmarshal(f, &zconfig)
 	if err != nil {
 		log.Fatalf("cannot load %s: %s", configFile, err)

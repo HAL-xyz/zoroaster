@@ -19,6 +19,10 @@ func (db mockDB) InitDB(c *config.ZConfiguration) {
 	panic("implement me")
 }
 
+func (db mockDB) Close() {
+	panic("implement me")
+}
+
 func (db mockDB) LogOutcome(table string, outcome *trigger.Outcome, matchId int) {
 	panic("implement me")
 }
@@ -55,9 +59,8 @@ func TestMatchContractsForBlock(t *testing.T) {
 		return []string{"0xbb9bc244d798123fde783fcc1c72d3bb8c189413"}
 	}
 
-	var client = ethrpc.New("https://ethshared.bdnodes.net/?auth=_M92hYFzHxR4S1kNbYHfR6ResdtDRqvvLdnm3ZcdAXA")
-
 	zconf := config.Load("../config")
+	var client = ethrpc.New(zconf.EthNode)
 
 	cnMatches := MatchContractsForBlock(8081000, mockGetModAccounts, zconf, mockDB{}, client)
 

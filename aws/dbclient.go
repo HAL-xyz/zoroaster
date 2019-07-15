@@ -170,3 +170,10 @@ func (cli PostgresClient) InitDB(c *config.ZConfiguration) {
 		log.Fatal("cannot connect to the DB -> ", err)
 	}
 }
+
+func (cli PostgresClient) Close() {
+	err := db.Close()
+	if err != nil {
+		log.Error(err)
+	}
+}

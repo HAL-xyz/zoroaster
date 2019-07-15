@@ -8,6 +8,8 @@ import (
 type IDB interface {
 	InitDB(c *config.ZConfiguration)
 
+	Close()
+
 	LoadTriggersFromDB(table string, watOrWac string) ([]*trigger.Trigger, error)
 
 	LogOutcome(table string, outcome *trigger.Outcome, matchId int)
