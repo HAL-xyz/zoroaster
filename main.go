@@ -5,12 +5,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"time"
-	"zoroaster/action"
 	"zoroaster/aws"
 	"zoroaster/config"
 	"zoroaster/eth"
 	"zoroaster/matcher"
-	"zoroaster/trigger"
 )
 
 func main() {
@@ -45,33 +43,20 @@ func main() {
 	// Channels are buffered because a) contracts is slower, and b) so I can run wac/wat independently for tests
 	txBlocksChan := make(chan *ethrpc.Block, 100)
 	contractsBlocksChan := make(chan int, 100)
-	txMatchesChan := make(chan *trigger.TxMatch)
-	cnMatchesChan := make(chan *trigger.CnMatch)
+	matchesChan := make(chan interface{})
 
 	// Poll ETH node
 	go eth.BlocksPoller(txBlocksChan, contractsBlocksChan, ethClient, zconf, psqlClient)
 
 	// Watch a Transaction
-	go matcher.TxMatcher(txBlocksChan, txMatchesChan, zconf, psqlClient)
+	go matcher.TxMatcher(txBlocksChan, matchesChan, zconf, psqlClient)
 
 	// Watch a Contract
-	go matcher.ContractMatcher(contractsBlocksChan, cnMatchesChan, zconf, eth.GetModifiedAccounts, psqlClient, ethClient)
+	go matcher.ContractMatcher(contractsBlocksChan, matchesChan, zconf, eth.GetModifiedAccounts, psqlClient, ethClient)
 
-	// Main routine - process actions
+	// Main routine - process matches
 	for {
-		match := <-txMatchesChan
-		go func() {
-			acts, err := psqlClient.GetActions(zconf.TriggersDB.TableActions, match.Tg.TriggerId, match.Tg.UserId)
-			if err != nil {
-				log.Warnf("cannot get actions from db: %v", err)
-			}
-			log.Debugf("\tMatched %d actions", len(acts))
-			eventJson := action.ActionEventJson{ZTx: match.ZTx, Actions: acts}
-			outcomes := action.HandleEvent(eventJson, sesSession)
-			for _, out := range outcomes {
-				psqlClient.LogOutcome(zconf.TriggersDB.TableOutcomes, out, match.MatchId)
-				log.Debug("\tLogged outcome for match id ", match.MatchId)
-			}
-		}()
+		match := <-matchesChan
+		go matcher.ProcessMatch(match, psqlClient, zconf, sesSession)
 	}
 }

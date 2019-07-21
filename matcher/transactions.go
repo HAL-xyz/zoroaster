@@ -11,7 +11,7 @@ import (
 
 func TxMatcher(
 	blocksChan chan *ethrpc.Block,
-	matchesChan chan *trigger.TxMatch,
+	matchesChan chan interface{},
 	zconf *config.ZConfiguration,
 	idb aws.IDB) {
 
@@ -41,7 +41,7 @@ func TxMatcher(
 
 func ContractMatcher(
 	blocksChan chan int,
-	matchesChan chan *trigger.CnMatch,
+	matchesChan chan interface{},
 	zconf *config.ZConfiguration,
 	getModifiedAccounts func(prevBlock, currBlock int) []string,
 	idb aws.IDB,
@@ -56,7 +56,7 @@ func ContractMatcher(
 			matchId := idb.LogCnMatch(zconf.TriggersDB.TableCnMatches, *m)
 			m.MatchId = matchId
 			log.Debug("\tlogged one match with id ", matchId)
-			//matchesChan <- m
+			matchesChan <- m
 		}
 		idb.SetLastBlockProcessed(zconf.TriggersDB.TableStats, blockNo, "wac")
 	}
@@ -98,7 +98,7 @@ func MatchContractsForBlock(
 	for _, tg := range wacTriggers {
 		contractValue := trigger.MatchContract(client, tg, blockNo)
 		if contractValue != "" {
-			cnMatches = append(cnMatches, &trigger.CnMatch{0, blockNo, tg.TriggerId, contractValue})
+			cnMatches = append(cnMatches, &trigger.CnMatch{0, blockNo, tg.TriggerId, tg.UserId, contractValue})
 			log.Debugf("\tCN: Trigger %d matched on block %d\n", tg.TriggerId, blockNo)
 		}
 	}

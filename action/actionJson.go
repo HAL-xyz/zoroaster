@@ -3,18 +3,7 @@ package action
 import (
 	"encoding/json"
 	"fmt"
-	"zoroaster/trigger"
 )
-
-type ActionEventJson struct {
-	ZTx     *trigger.ZTransaction
-	Actions []string
-}
-
-type ActionEvent struct {
-	ZTx     *trigger.ZTransaction
-	Actions []Action
-}
 
 type Action struct {
 	TriggerID  int

@@ -4,35 +4,33 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/ses"
+	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"zoroaster/trigger"
 )
 
-func HandleEvent(evJson ActionEventJson, sess *ses.SES) []*trigger.Outcome {
-	event := ActionEvent{}
-	event.ZTx = evJson.ZTx
-
-	for _, a := range evJson.Actions {
+func ProcessActions(actionsString []string, payload interface{}, iemail sesiface.SESAPI) []*trigger.Outcome {
+	actions := make([]*Action, len(actionsString))
+	for i, a := range actionsString {
 		act := Action{}
 		err := json.Unmarshal([]byte(a), &act)
 		if err != nil {
 			log.Debug(err)
 			continue
 		}
-		event.Actions = append(event.Actions, act)
+		actions[i] = &act
 	}
 
-	outcomes := make([]*trigger.Outcome, len(event.Actions))
+	outcomes := make([]*trigger.Outcome, len(actions))
 	var out = &trigger.Outcome{}
 
-	for i, a := range event.Actions {
+	for i, a := range actions {
 		switch v := a.Attribute.(type) {
 		case AttributeWebhookPost:
-			out = handleWebHookPost(v, event.ZTx)
+			out = handleWebHookPost(v, payload)
 		case AttributeEmail:
-			out = handleEmail(sess, v, event.ZTx)
+			out = handleEmail(iemail, v, payload)
 		default:
 			out = &trigger.Outcome{fmt.Sprintf("unsupported ActionType: %s", a.ActionType), ""}
 		}
@@ -41,8 +39,8 @@ func HandleEvent(evJson ActionEventJson, sess *ses.SES) []*trigger.Outcome {
 	return outcomes
 }
 
-func handleWebHookPost(awp AttributeWebhookPost, ztx *trigger.ZTransaction) *trigger.Outcome {
-	dataBytes, err := json.Marshal(*ztx)
+func handleWebHookPost(awp AttributeWebhookPost, payload interface{}) *trigger.Outcome {
+	dataBytes, err := json.Marshal(payload)
 	if err != nil {
 		return &trigger.Outcome{err.Error(), ""}
 	}
@@ -53,10 +51,16 @@ func handleWebHookPost(awp AttributeWebhookPost, ztx *trigger.ZTransaction) *tri
 	return &trigger.Outcome{resp.Status, string(dataBytes)}
 }
 
-func handleEmail(sess *ses.SES, email AttributeEmail, ztx *trigger.ZTransaction) *trigger.Outcome {
-	body := FillEmailTemplate(email.Body, ztx)
+func handleEmail(iemail sesiface.SESAPI, email AttributeEmail, paylaod interface{}) *trigger.Outcome {
+	var body string
+	ztx, ok := paylaod.(*trigger.ZTransaction)
+	if ok {
+		body = FillEmailTemplate(email.Body, ztx)
+	} else {
+		body = email.Body
+	}
 
-	result, err := sendEmail(sess, email.To, email.Subject, body)
+	result, err := sendEmail(iemail, email.To, email.Subject, body)
 	if err != nil {
 		return &trigger.Outcome{err.Error(), ""}
 	}

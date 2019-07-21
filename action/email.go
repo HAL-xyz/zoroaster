@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ses"
+	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strconv"
@@ -18,12 +19,12 @@ const (
 	CharSet = "UTF-8"
 )
 
-func sendEmail(svc *ses.SES, recipient, subject, body string) (*ses.SendEmailOutput, error) {
+func sendEmail(iemail sesiface.SESAPI, recipient, subject, body string) (*ses.SendEmailOutput, error) {
 
 	input := assembleEmail(recipient, subject, body)
 
 	// Attempt to send the email.
-	result, err := svc.SendEmail(input)
+	result, err := iemail.SendEmail(input)
 
 	// Display error messages if they occur.
 	if err != nil {

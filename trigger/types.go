@@ -16,10 +16,11 @@ type TxMatch struct {
 }
 
 type CnMatch struct {
-	MatchId int
-	BlockNo int
-	TgId    int
-	Value   string
+	MatchId  int
+	BlockNo  int
+	TgId     int
+	TgUserId int
+	Value    string
 }
 
 type Outcome struct {
