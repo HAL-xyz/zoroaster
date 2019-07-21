@@ -11,20 +11,10 @@ import (
 )
 
 func ProcessActions(actionsString []string, payload interface{}, iemail sesiface.SESAPI) []*trigger.Outcome {
-	actions := make([]*Action, len(actionsString))
-	for i, a := range actionsString {
-		act := Action{}
-		err := json.Unmarshal([]byte(a), &act)
-		if err != nil {
-			log.Debug(err)
-			continue
-		}
-		actions[i] = &act
-	}
-
+	actions := getActionsFromString(actionsString)
 	outcomes := make([]*trigger.Outcome, len(actions))
-	var out = &trigger.Outcome{}
 
+	var out = &trigger.Outcome{}
 	for i, a := range actions {
 		switch v := a.Attribute.(type) {
 		case AttributeWebhookPost:
@@ -37,6 +27,20 @@ func ProcessActions(actionsString []string, payload interface{}, iemail sesiface
 		outcomes[i] = out
 	}
 	return outcomes
+}
+
+func getActionsFromString(actionsString []string) []*Action {
+	actions := make([]*Action, len(actionsString))
+	for i, a := range actionsString {
+		act := Action{}
+		err := json.Unmarshal([]byte(a), &act)
+		if err != nil {
+			log.Debug(err)
+			continue
+		}
+		actions[i] = &act
+	}
+	return actions
 }
 
 func handleWebHookPost(awp AttributeWebhookPost, payload interface{}) *trigger.Outcome {
