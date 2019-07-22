@@ -348,6 +348,114 @@
         "occurrences": 1,
         "block_no": 7956826,
         "trigger_file": "57_array_of_uint_contain_a_value.json"
+      },
+      {
+        "assert": "58 - 1 trade occurred to address 0x4Fc604536134Dc64718800361eCbca0df6cBfE08 with a int equal to 1 in the block 8033317",
+        "occurrences": 1,
+        "block_no": 8033317,
+        "trigger_file": "58_int_equal_to.json"
+      },
+      {
+        "assert": "59 - 1 trade occurred to address 0x4Fc604536134Dc64718800361eCbca0df6cBfE08 with a int smaller than 3 in the block 8034583",
+        "occurrences": 1,
+        "block_no": 8034583,
+        "trigger_file": "59_int_smaller_than.json"
+      },
+      {
+        "assert": "60 - 1 trade occurred to address 0x4Fc604536134Dc64718800361eCbca0df6cBfE08 with a int bigger than 1 in the block 8034583",
+        "occurrences": 1,
+        "block_no": 8034583,
+        "trigger_file": "60_int_bigger_than.json"
+      },
+      {
+        "assert": "61 - 1 trade occurred to address 0x4Fc604536134Dc64718800361eCbca0df6cBfE08 with a int bigger than 1 and smaller than 3 in the block 8034583",
+        "occurrences": 1,
+        "block_no": 8034583,
+        "trigger_file": "61_int_between.json"
+      },
+      {
+        "assert": "62 - 3 trades occurred to address 0x14FBCA95be7e99C15Cc2996c6C9d841e54B79425 with funcition offer in the block 6616923",
+        "occurrences": 3,
+        "block_no": 6616923,
+        "trigger_file": "62_more_than_one_funcion_with_same_name.json"
+      },
+      {
+        "assert": "63 - 1 trade occurred to address 0xFB80Bfa19CAE9E00F28B0f7e1023109deeb10483 with an array of int equal to 3 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "63_undefined_array_int_equal_to.json"
+      },
+      {
+        "assert": "64 - 1 trade occurred to address 0xFB80Bfa19CAE9E00F28B0f7e1023109deeb10483 with an array of int smaller than 5 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "64_array_int_smaller.json"
+      },
+      {
+        "assert": "65 - 1 trade occurred to address 0xFB80Bfa19CAE9E00F28B0f7e1023109deeb10483 with an array of int bigger than 2 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "65_array_int_bigger.json"
+      },
+      {
+        "assert": "66 - 1 trade occurred to address 0xFB80Bfa19CAE9E00F28B0f7e1023109deeb10483 with an array of int bigger than 2 and smaller than 5 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "66_array_int_in_between.json"
+      },
+      {
+        "assert": "67 - 1 trade occurred to address 0xFB80Bfa19CAE9E00F28B0f7e1023109deeb10483 with an array of int that contains -2564502464 in the block 7956826",
+        "occurrences": 1,
+        "block_no": 7956826,
+        "trigger_file": "67_array_int_isin.json"
+      },
+      {
+        "assert": "68 - 1 trade occurred to address 0x867fFB5a3871b500f65BdFafe0136f9667Deae06 with an array of bytes equal to 2 in the block 6616906",
+        "occurrences": 1,
+        "block_no": 6616906,
+        "trigger_file": "68_array_bytes_equal.json"
+      },
+      {
+        "assert": "69 - 1 trade occurred to address 0x867fFB5a3871b500f65BdFafe0136f9667Deae06 with an array of bytes smaller than 5 in the block 6616906",
+        "occurrences": 1,
+        "block_no": 6616906,
+        "trigger_file": "69_array_bytes_smaller_than.json"
+      },
+      {
+        "assert": "70 - 1 trade occurred to address 0x867fFB5a3871b500f65BdFafe0136f9667Deae06 with an array of bytes bigger than 1 in the block 6616906",
+        "occurrences": 1,
+        "block_no": 6616906,
+        "trigger_file": "70_array_bytes_bigger_than.json"
+      },
+      {
+        "assert": "71 - 1 trade occurred to address 0x867fFB5a3871b500f65BdFafe0136f9667Deae06 with an array of bytes bigger than 1 and smaller than 5 in the block 6616906",
+        "occurrences": 1,
+        "block_no": 6616906,
+        "trigger_file": "71_array_bytes_in_between.json"
+      },
+      {
+        "assert": "72 - 1 trade occurred to address 0x867fFB5a3871b500f65BdFafe0136f9667Deae06 with an array of bytes that contains 16e87016a0414a14bf471f36dd4ff265 in the block 6616906",
+        "occurrences": 1,
+        "block_no": 6616906,
+        "trigger_file": "72_array_bytes_is_in.json"
+      },
+      {
+        "assert": "73 - 1 trade occurred to address 0x2af47a65da8CD66729b4209C22017d6A5C2d2400 with bool equal to false in the block 8028338",
+        "occurrences": 1,
+        "block_no": 8028338,
+        "trigger_file": "73_bool.json"
+      },
+      {
+        "assert": "74 - 1 trade occurred to address 0x2af47a65da8CD66729b4209C22017d6A5C2d2400 with bool equal to true in the block 8033578",
+        "occurrences": 1,
+        "block_no": 8033578,
+        "trigger_file": "74_bool.json"
+      },
+      {
+        "assert": "75 - 1 trade occurred to address 0x61958A8C7aCCf7018F023Ee1ee3065A8Ce71387F with string equal to 74253B465430100 in the block 8025889",
+        "occurrences": 1,
+        "block_no": 8025889,
+        "trigger_file": "75_string_eq.json"
       }
     ]
 }
