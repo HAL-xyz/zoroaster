@@ -23,4 +23,8 @@ type IDB interface {
 	LogTxMatch(table string, match trigger.TxMatch) int
 
 	LogCnMatch(table string, match trigger.CnMatch) int
+
+	UpdateMatchingTriggers(table string, triggerIds []int)
+
+	UpdateNonMatchingTriggers(table string, triggerIds []int)
 }

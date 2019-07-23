@@ -3,6 +3,7 @@ package aws
 import (
 	"database/sql"
 	"fmt"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -13,6 +14,32 @@ import (
 var db *sql.DB
 
 type PostgresClient struct{}
+
+func (cli PostgresClient) UpdateNonMatchingTriggers(table string, triggerIds []int) {
+	q := fmt.Sprintf(
+		`UPDATE %s
+			SET triggered = false
+			WHERE id = ANY($1) AND triggered = true`, table)
+
+	_, err := db.Exec(q, pq.Array(triggerIds))
+
+	if err != nil {
+		log.Errorf("cannot update non-matching triggers: %s", err)
+	}
+}
+
+func (cli PostgresClient) UpdateMatchingTriggers(table string, triggerIds []int) {
+	q := fmt.Sprintf(
+		`UPDATE %s
+			SET triggered = true
+			WHERE id = ANY($1) AND triggered = false`, table)
+
+	_, err := db.Exec(q, pq.Array(triggerIds))
+
+	if err != nil {
+		log.Errorf("cannot update matching triggers: %s", err)
+	}
+}
 
 func (cli PostgresClient) LogOutcome(table string, outcome *trigger.Outcome, matchId int) {
 	q := fmt.Sprintf(

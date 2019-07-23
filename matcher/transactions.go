@@ -92,7 +92,7 @@ func MatchContractsForBlock(
 			wacTriggers = append(wacTriggers, triggers[i])
 		}
 	}
-	log.Debug("\tmatching triggers: ", len(wacTriggers))
+	log.Debug("\ttriggers pointing to a modified account: ", len(wacTriggers))
 
 	var cnMatches []*trigger.CnMatch
 	for _, tg := range wacTriggers {
@@ -102,8 +102,60 @@ func MatchContractsForBlock(
 			log.Debugf("\tCN: Trigger %d matched on block %d\n", tg.TriggerId, blockNo)
 		}
 	}
+
+	updateStatusForMatchingTriggers(idb, zconf.TriggersDB.TableTriggers, cnMatches)
+	updateStatusForNonMatchingTriggers(idb, zconf.TriggersDB.TableTriggers, cnMatches, wacTriggers)
+
 	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(wacTriggers), time.Since(start), blockNo)
 	return cnMatches
+}
+
+// set triggered flag to true for all matching 'false' triggers
+func updateStatusForMatchingTriggers(idb aws.IDB, table string, matches []*trigger.CnMatch) {
+	var matchingTriggersIds []int
+	for _, m := range matches {
+		matchingTriggersIds = append(matchingTriggersIds, m.TgId)
+	}
+	idb.UpdateMatchingTriggers(table, matchingTriggersIds)
+}
+
+// set triggered flag to false for all non-matching 'true' triggers
+func updateStatusForNonMatchingTriggers(idb aws.IDB, table string, matches []*trigger.CnMatch, allTriggers []*trigger.Trigger) {
+	setAll := make(map[int]struct{})
+	setMatches := make(map[int]struct{})
+
+	for _, t := range allTriggers {
+		setAll[t.TriggerId] = struct{}{}
+	}
+	for _, m := range matches {
+		setMatches[m.TgId] = struct{}{}
+	}
+
+	nonMatchingTriggersIds := getSliceFromIntSet(setDifference(setAll, setMatches))
+
+	idb.UpdateNonMatchingTriggers(table, nonMatchingTriggersIds)
+}
+
+func getSliceFromIntSet(set map[int]struct{}) []int {
+	out := make([]int, len(set))
+	i := 0
+	for k := range set {
+		out[i] = k
+		i++
+	}
+	return out
+}
+
+func setDifference(s1 map[int]struct{}, s2 map[int]struct{}) map[int]struct{} {
+	diff := make(map[int]struct{})
+	for v := range s1 {
+		_, ok := s2[v]
+		if ok {
+			continue
+		}
+		diff[v] = struct{}{}
+	}
+	return diff
 }
 
 func isIn(a string, list []string) bool {

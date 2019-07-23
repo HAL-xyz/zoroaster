@@ -52,6 +52,12 @@ func (db mockDB) LoadTriggersFromDB(table string, watOrWac string) ([]*trigger.T
 	return []*trigger.Trigger{tg}, nil
 }
 
+func (db mockDB) UpdateMatchingTriggers(table string, triggerIds []int) {
+}
+
+func (db mockDB) UpdateNonMatchingTriggers(table string, triggerIds []int) {
+}
+
 func TestMatchContractsForBlock(t *testing.T) {
 
 	// mocks
