@@ -13,13 +13,15 @@ import (
 
 var db *sql.DB
 
-type PostgresClient struct{}
+type PostgresClient struct {
+	conf *config.TriggersDB
+}
 
-func (cli PostgresClient) UpdateNonMatchingTriggers(table string, triggerIds []int) {
+func (cli PostgresClient) UpdateNonMatchingTriggers(triggerIds []int) {
 	q := fmt.Sprintf(
 		`UPDATE %s
 			SET triggered = false
-			WHERE id = ANY($1) AND triggered = true`, table)
+			WHERE id = ANY($1) AND triggered = true`, cli.conf.TableTriggers)
 
 	_, err := db.Exec(q, pq.Array(triggerIds))
 
@@ -28,11 +30,11 @@ func (cli PostgresClient) UpdateNonMatchingTriggers(table string, triggerIds []i
 	}
 }
 
-func (cli PostgresClient) UpdateMatchingTriggers(table string, triggerIds []int) {
+func (cli PostgresClient) UpdateMatchingTriggers(triggerIds []int) {
 	q := fmt.Sprintf(
 		`UPDATE %s
 			SET triggered = true
-			WHERE id = ANY($1) AND triggered = false`, table)
+			WHERE id = ANY($1) AND triggered = false`, cli.conf.TableTriggers)
 
 	_, err := db.Exec(q, pq.Array(triggerIds))
 
@@ -41,13 +43,13 @@ func (cli PostgresClient) UpdateMatchingTriggers(table string, triggerIds []int)
 	}
 }
 
-func (cli PostgresClient) LogOutcome(table string, outcome *trigger.Outcome, matchId int) {
+func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchId int) {
 	q := fmt.Sprintf(
 		`INSERT INTO %s (
 			"match_id",
 			"payload",
 			"outcome",
-			"timestamp") VALUES ($1, $2, $3, $4)`, table)
+			"timestamp") VALUES ($1, $2, $3, $4)`, cli.conf.TableOutcomes)
 
 	_, err := db.Exec(q, matchId, outcome.Payload, outcome.Outcome, time.Now())
 	if err != nil {
@@ -55,13 +57,13 @@ func (cli PostgresClient) LogOutcome(table string, outcome *trigger.Outcome, mat
 	}
 }
 
-func (cli PostgresClient) GetActions(table string, tgId int, userId int) ([]string, error) {
+func (cli PostgresClient) GetActions(tgId int, userId int) ([]string, error) {
 	q := fmt.Sprintf(
 		`SELECT action_data
 				FROM %s AS t
 				WHERE (t.action_data ->> 'TriggerId')::int = $1
 				AND (t.action_data ->> 'UserId')::int = $2
-				AND t.is_active = true`, table)
+				AND t.is_active = true`, cli.conf.TableActions)
 	rows, err := db.Query(q, tgId, userId)
 	if err != nil {
 		return nil, err
@@ -83,9 +85,9 @@ func (cli PostgresClient) GetActions(table string, tgId int, userId int) ([]stri
 	return actionsRet, nil
 }
 
-func (cli PostgresClient) ReadLastBlockProcessed(table string, watOrWac string) int {
+func (cli PostgresClient) ReadLastBlockProcessed(watOrWac string) int {
 	var blockNo int
-	q := fmt.Sprintf("SELECT %s_last_block_processed FROM %s", watOrWac, table)
+	q := fmt.Sprintf("SELECT %s_last_block_processed FROM %s", watOrWac, cli.conf.TableStats)
 	err := db.QueryRow(q).Scan(&blockNo)
 	if err != nil {
 		log.Errorf("cannot read last block processed: %s", err)
@@ -93,19 +95,19 @@ func (cli PostgresClient) ReadLastBlockProcessed(table string, watOrWac string) 
 	return blockNo
 }
 
-func (cli PostgresClient) SetLastBlockProcessed(table string, blockNo int, watOrWac string) {
-	q := fmt.Sprintf(`UPDATE "%s" SET %s_last_block_processed = $1, %s_date = $2`, table, watOrWac, watOrWac)
+func (cli PostgresClient) SetLastBlockProcessed(blockNo int, watOrWac string) {
+	q := fmt.Sprintf(`UPDATE "%s" SET %s_last_block_processed = $1, %s_date = $2`, cli.conf.TableStats, watOrWac, watOrWac)
 	_, err := db.Exec(q, blockNo, time.Now())
 	if err != nil {
 		log.Errorf("cannot set last block processed: %s", err)
 	}
 }
 
-func (cli PostgresClient) LogCnMatch(table string, match trigger.CnMatch) int {
+func (cli PostgresClient) LogCnMatch(match trigger.CnMatch) int {
 	q := fmt.Sprintf(
 		`INSERT INTO "%s" (
 			"date", "trigger_id", "block_no", "call_value")
-			VALUES ($1, $2, $3, $4) RETURNING id`, table)
+			VALUES ($1, $2, $3, $4) RETURNING id`, cli.conf.TableCnMatches)
 	var lastId int
 	err := db.QueryRow(q, time.Now(), match.TgId, match.BlockNo, match.Value).Scan(&lastId)
 
@@ -115,7 +117,7 @@ func (cli PostgresClient) LogCnMatch(table string, match trigger.CnMatch) int {
 	return lastId
 }
 
-func (cli PostgresClient) LogTxMatch(table string, match trigger.TxMatch) int {
+func (cli PostgresClient) LogTxMatch(match trigger.TxMatch) int {
 	bdate := time.Unix(int64(match.ZTx.BlockTimestamp), 0)
 	tx := match.ZTx.Tx
 	tg := match.Tg
@@ -136,7 +138,7 @@ func (cli PostgresClient) LogTxMatch(table string, match trigger.TxMatch) int {
 			"data",
 			"user_id",
 			"fn_name",
-			"fn_args") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id`, table)
+			"fn_args") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id`, cli.conf.TableTxMatches)
 
 	var lastId int
 	err := db.QueryRow(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From,
@@ -148,11 +150,11 @@ func (cli PostgresClient) LogTxMatch(table string, match trigger.TxMatch) int {
 	return lastId
 }
 
-func (cli PostgresClient) LoadTriggersFromDB(table string, watOrWac string) ([]*trigger.Trigger, error) {
+func (cli PostgresClient) LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error) {
 	q := fmt.Sprintf(
 		`SELECT id, trigger_data, user_id
 				from %s as t
-				where (t.trigger_data ->> 'TriggerType')::text = '%s'`, table, watOrWac)
+				where (t.trigger_data ->> 'TriggerType')::text = '%s'`, cli.conf.TableTriggers, watOrWac)
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err
@@ -182,7 +184,7 @@ func (cli PostgresClient) LoadTriggersFromDB(table string, watOrWac string) ([]*
 	return triggers, nil
 }
 
-func (cli PostgresClient) InitDB(c *config.ZConfiguration) {
+func (cli *PostgresClient) InitDB(c *config.ZConfiguration) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		c.TriggersDB.Host, c.TriggersDB.Port, c.TriggersDB.User, c.TriggersDB.Password, c.TriggersDB.Name)
 
@@ -196,6 +198,8 @@ func (cli PostgresClient) InitDB(c *config.ZConfiguration) {
 	if err != nil {
 		log.Fatal("cannot connect to the DB -> ", err)
 	}
+
+	cli.conf = &c.TriggersDB
 }
 
 func (cli PostgresClient) Close() {

@@ -10,21 +10,21 @@ type IDB interface {
 
 	Close()
 
-	LoadTriggersFromDB(table string, watOrWac string) ([]*trigger.Trigger, error)
+	LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error)
 
-	LogOutcome(table string, outcome *trigger.Outcome, matchId int)
+	LogOutcome(outcome *trigger.Outcome, matchId int)
 
-	GetActions(table string, tgId int, userId int) ([]string, error)
+	GetActions(tgId int, userId int) ([]string, error)
 
-	ReadLastBlockProcessed(table string, watOrWac string) int
+	ReadLastBlockProcessed(watOrWac string) int
 
-	SetLastBlockProcessed(table string, blockNo int, watOrWac string)
+	SetLastBlockProcessed(blockNo int, watOrWac string)
 
-	LogTxMatch(table string, match trigger.TxMatch) int
+	LogTxMatch(match trigger.TxMatch) int
 
-	LogCnMatch(table string, match trigger.CnMatch) int
+	LogCnMatch(match trigger.CnMatch) int
 
-	UpdateMatchingTriggers(table string, triggerIds []int)
+	UpdateMatchingTriggers(triggerIds []int)
 
-	UpdateNonMatchingTriggers(table string, triggerIds []int)
+	UpdateNonMatchingTriggers(triggerIds []int)
 }

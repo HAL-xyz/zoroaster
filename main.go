@@ -46,17 +46,17 @@ func main() {
 	matchesChan := make(chan interface{})
 
 	// Poll ETH node
-	go eth.BlocksPoller(txBlocksChan, contractsBlocksChan, ethClient, zconf, psqlClient)
+	go eth.BlocksPoller(txBlocksChan, contractsBlocksChan, ethClient, &psqlClient)
 
 	// Watch a Transaction
-	go matcher.TxMatcher(txBlocksChan, matchesChan, zconf, psqlClient)
+	go matcher.TxMatcher(txBlocksChan, matchesChan, &psqlClient)
 
 	// Watch a Contract
-	go matcher.ContractMatcher(contractsBlocksChan, matchesChan, zconf, eth.GetModifiedAccounts, psqlClient, ethClient)
+	go matcher.ContractMatcher(contractsBlocksChan, matchesChan, eth.GetModifiedAccounts, &psqlClient, ethClient)
 
 	// Main routine - process matches
 	for {
 		match := <-matchesChan
-		go matcher.ProcessMatch(match, psqlClient, zconf, sesSession)
+		go matcher.ProcessMatch(match, &psqlClient, sesSession)
 	}
 }

@@ -9,20 +9,18 @@ import (
 	"net/http"
 	"time"
 	"zoroaster/aws"
-	"zoroaster/config"
 )
 
 func BlocksPoller(
 	txChan chan *ethrpc.Block,
 	cntChan chan int,
 	client *ethrpc.EthRPC,
-	zconf *config.ZConfiguration,
 	idb aws.IDB) {
 
 	const K = 8 // next block to process is (last block mined - K)
 
-	txLastBlockProcessed := idb.ReadLastBlockProcessed(zconf.TriggersDB.TableStats, "wat")
-	cntLastBlockProcessed := idb.ReadLastBlockProcessed(zconf.TriggersDB.TableStats, "wac")
+	txLastBlockProcessed := idb.ReadLastBlockProcessed("wat")
+	cntLastBlockProcessed := idb.ReadLastBlockProcessed("wac")
 
 	ticker := time.NewTicker(2500 * time.Millisecond)
 	for range ticker.C {

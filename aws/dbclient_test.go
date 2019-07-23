@@ -24,10 +24,10 @@ func TestPostgresClient_All(t *testing.T) {
 	defer psqlClient.Close()
 
 	m := trigger.CnMatch{1, 8888, 10, 0, "xxx xxx xxx"}
-	psqlClient.LogCnMatch(zconf.TriggersDB.TableCnMatches, m)
+	psqlClient.LogCnMatch(m)
 
-	//psqlClient.UpdateMatchingTriggers(zconf.TriggersDB.TableTriggers, []int{21, 31})
+	psqlClient.UpdateMatchingTriggers([]int{21, 31})
 
-	psqlClient.UpdateNonMatchingTriggers(zconf.TriggersDB.TableTriggers, []int{21, 31})
+	psqlClient.UpdateNonMatchingTriggers([]int{21, 31})
 
 }

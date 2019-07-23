@@ -5,22 +5,17 @@ import (
 	log "github.com/sirupsen/logrus"
 	"time"
 	"zoroaster/aws"
-	"zoroaster/config"
 	"zoroaster/trigger"
 )
 
-func TxMatcher(
-	blocksChan chan *ethrpc.Block,
-	matchesChan chan interface{},
-	zconf *config.ZConfiguration,
-	idb aws.IDB) {
+func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan interface{}, idb aws.IDB) {
 
 	for {
 		block := <-blocksChan
 		start := time.Now()
 		log.Info("TX: new -> ", block.Number)
 
-		triggers, err := idb.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers, "WatchTransactions")
+		triggers, err := idb.LoadTriggersFromDB("WatchTransactions")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -29,12 +24,12 @@ func TxMatcher(
 			for _, ztx := range matchingZTxs {
 				log.Debugf("\tTX: Trigger %d matched transaction https://etherscan.io/tx/%s", tg.TriggerId, ztx.Tx.Hash)
 				m := trigger.TxMatch{0, tg, ztx}
-				matchId := idb.LogTxMatch(zconf.TriggersDB.TableTxMatches, m)
+				matchId := idb.LogTxMatch(m)
 				m.MatchId = matchId
 				matchesChan <- &m
 			}
 		}
-		idb.SetLastBlockProcessed(zconf.TriggersDB.TableStats, block.Number, "wat")
+		idb.SetLastBlockProcessed(block.Number, "wat")
 		log.Infof("\tTX: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)
 	}
 }
@@ -42,7 +37,6 @@ func TxMatcher(
 func ContractMatcher(
 	blocksChan chan int,
 	matchesChan chan interface{},
-	zconf *config.ZConfiguration,
 	getModifiedAccounts func(prevBlock, currBlock int) []string,
 	idb aws.IDB,
 	client *ethrpc.EthRPC) {
@@ -51,21 +45,20 @@ func ContractMatcher(
 		blockNo := <-blocksChan
 		log.Info("CN: new -> ", blockNo)
 
-		cnMatches := MatchContractsForBlock(blockNo, getModifiedAccounts, zconf, idb, client)
+		cnMatches := MatchContractsForBlock(blockNo, getModifiedAccounts, idb, client)
 		for _, m := range cnMatches {
-			matchId := idb.LogCnMatch(zconf.TriggersDB.TableCnMatches, *m)
+			matchId := idb.LogCnMatch(*m)
 			m.MatchId = matchId
 			log.Debug("\tlogged one match with id ", matchId)
 			matchesChan <- m
 		}
-		idb.SetLastBlockProcessed(zconf.TriggersDB.TableStats, blockNo, "wac")
+		idb.SetLastBlockProcessed(blockNo, "wac")
 	}
 }
 
 func MatchContractsForBlock(
 	blockNo int,
 	getModAccounts func(prevBlock, currBlock int) []string,
-	zconf *config.ZConfiguration,
 	idb aws.IDB,
 	client *ethrpc.EthRPC) []*trigger.CnMatch {
 
@@ -80,7 +73,7 @@ func MatchContractsForBlock(
 	}
 	log.Debug("\tmodified accounts: ", len(modAccounts))
 
-	triggers, err := idb.LoadTriggersFromDB(zconf.TriggersDB.TableTriggers, "WatchContracts")
+	triggers, err := idb.LoadTriggersFromDB("WatchContracts")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -103,24 +96,24 @@ func MatchContractsForBlock(
 		}
 	}
 
-	updateStatusForMatchingTriggers(idb, zconf.TriggersDB.TableTriggers, cnMatches)
-	updateStatusForNonMatchingTriggers(idb, zconf.TriggersDB.TableTriggers, cnMatches, wacTriggers)
+	updateStatusForMatchingTriggers(idb, cnMatches)
+	updateStatusForNonMatchingTriggers(idb, cnMatches, wacTriggers)
 
 	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(wacTriggers), time.Since(start), blockNo)
 	return cnMatches
 }
 
 // set triggered flag to true for all matching 'false' triggers
-func updateStatusForMatchingTriggers(idb aws.IDB, table string, matches []*trigger.CnMatch) {
+func updateStatusForMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch) {
 	var matchingTriggersIds []int
 	for _, m := range matches {
 		matchingTriggersIds = append(matchingTriggersIds, m.TgId)
 	}
-	idb.UpdateMatchingTriggers(table, matchingTriggersIds)
+	idb.UpdateMatchingTriggers(matchingTriggersIds)
 }
 
 // set triggered flag to false for all non-matching 'true' triggers
-func updateStatusForNonMatchingTriggers(idb aws.IDB, table string, matches []*trigger.CnMatch, allTriggers []*trigger.Trigger) {
+func updateStatusForNonMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch, allTriggers []*trigger.Trigger) {
 	setAll := make(map[int]struct{})
 	setMatches := make(map[int]struct{})
 
@@ -133,7 +126,7 @@ func updateStatusForNonMatchingTriggers(idb aws.IDB, table string, matches []*tr
 
 	nonMatchingTriggersIds := getSliceFromIntSet(setDifference(setAll, setMatches))
 
-	idb.UpdateNonMatchingTriggers(table, nonMatchingTriggersIds)
+	idb.UpdateNonMatchingTriggers(nonMatchingTriggersIds)
 }
 
 func getSliceFromIntSet(set map[int]struct{}) []int {

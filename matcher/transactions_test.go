@@ -23,39 +23,39 @@ func (db mockDB) Close() {
 	panic("implement me")
 }
 
-func (db mockDB) LogOutcome(table string, outcome *trigger.Outcome, matchId int) {
+func (db mockDB) LogOutcome(outcome *trigger.Outcome, matchId int) {
 	panic("implement me")
 }
 
-func (db mockDB) GetActions(table string, tgId int, userId int) ([]string, error) {
+func (db mockDB) GetActions(tgId int, userId int) ([]string, error) {
 	panic("implement me")
 }
 
-func (db mockDB) ReadLastBlockProcessed(table string, watOrWac string) int {
+func (db mockDB) ReadLastBlockProcessed(watOrWac string) int {
 	panic("implement me")
 }
 
-func (db mockDB) SetLastBlockProcessed(table string, blockNo int, watOrWac string) {
+func (db mockDB) SetLastBlockProcessed(blockNo int, watOrWac string) {
 
 }
 
-func (db mockDB) LogTxMatch(table string, match trigger.TxMatch) int {
+func (db mockDB) LogTxMatch(match trigger.TxMatch) int {
 	panic("implement me")
 }
 
-func (db mockDB) LogCnMatch(table string, match trigger.CnMatch) int {
+func (db mockDB) LogCnMatch(match trigger.CnMatch) int {
 	panic("implement me")
 }
 
-func (db mockDB) LoadTriggersFromDB(table string, watOrWac string) ([]*trigger.Trigger, error) {
+func (db mockDB) LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error) {
 	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 	return []*trigger.Trigger{tg}, nil
 }
 
-func (db mockDB) UpdateMatchingTriggers(table string, triggerIds []int) {
+func (db mockDB) UpdateMatchingTriggers(triggerIds []int) {
 }
 
-func (db mockDB) UpdateNonMatchingTriggers(table string, triggerIds []int) {
+func (db mockDB) UpdateNonMatchingTriggers(triggerIds []int) {
 }
 
 func TestMatchContractsForBlock(t *testing.T) {
@@ -68,7 +68,7 @@ func TestMatchContractsForBlock(t *testing.T) {
 	zconf := config.Load("../config")
 	var client = ethrpc.New(zconf.EthNode)
 
-	cnMatches := MatchContractsForBlock(8081000, mockGetModAccounts, zconf, mockDB{}, client)
+	cnMatches := MatchContractsForBlock(8081000, mockGetModAccounts, mockDB{}, client)
 
 	assert.Equal(t, len(cnMatches), 1)
 	assert.Equal(t, cnMatches[0].BlockNo, 8081000)
