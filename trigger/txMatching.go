@@ -108,8 +108,8 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 				return validatePredUIntArray(v.Predicate, param, tgVal, f.Index)
 			}
 		}
-		// address
-		if f.ParameterType == "address" {
+		// single address or string
+		if f.ParameterType == "address" || f.ParameterType == "string" {
 			var param string
 			if err = json.Unmarshal(rawParam, &param); err != nil {
 				cxtLog.Debug(err)
