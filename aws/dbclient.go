@@ -43,13 +43,19 @@ func (cli PostgresClient) UpdateMatchingTriggers(triggerIds []int) {
 	}
 }
 
-func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchId int) {
+func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchId int, watOrWac string) {
+	var table string
+	if watOrWac == "wat" {
+		table = cli.conf.TableTxOutcomes
+	} else {
+		table = cli.conf.TableCnOutcomes
+	}
 	q := fmt.Sprintf(
 		`INSERT INTO %s (
 			"match_id",
 			"payload",
 			"outcome",
-			"timestamp") VALUES ($1, $2, $3, $4)`, cli.conf.TableOutcomes)
+			"timestamp") VALUES ($1, $2, $3, $4)`, table)
 
 	_, err := db.Exec(q, matchId, outcome.Payload, outcome.Outcome, time.Now())
 	if err != nil {

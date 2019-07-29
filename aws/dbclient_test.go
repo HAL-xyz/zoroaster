@@ -30,4 +30,9 @@ func TestPostgresClient_All(t *testing.T) {
 
 	psqlClient.UpdateNonMatchingTriggers([]int{21, 31})
 
+	o1 := trigger.Outcome{"TX outcome", "TX payload"}
+	o2 := trigger.Outcome{"CN outcome", "CN payload"}
+	psqlClient.LogOutcome(&o1, 1, "wat")
+	psqlClient.LogOutcome(&o2, 1, "wac")
+
 }

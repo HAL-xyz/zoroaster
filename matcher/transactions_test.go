@@ -23,7 +23,7 @@ func (db mockDB) Close() {
 	panic("implement me")
 }
 
-func (db mockDB) LogOutcome(outcome *trigger.Outcome, matchId int) {
+func (db mockDB) LogOutcome(outcome *trigger.Outcome, matchId int, watOrWac string) {
 	panic("implement me")
 }
 

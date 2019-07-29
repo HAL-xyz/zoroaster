@@ -21,7 +21,7 @@ func ProcessMatch(match interface{}, idb aws.IDB, iemail sesiface.SESAPI) {
 
 		outcomes := action.ProcessActions(acts, m.ZTx, iemail)
 		for _, out := range outcomes {
-			idb.LogOutcome(out, m.MatchId)
+			idb.LogOutcome(out, m.MatchId, "wat")
 			log.Debug("\tLogged outcome for match id ", m.MatchId)
 		}
 	case *trigger.CnMatch:
@@ -34,7 +34,7 @@ func ProcessMatch(match interface{}, idb aws.IDB, iemail sesiface.SESAPI) {
 
 		outcomes := action.ProcessActions(acts, m.Value, iemail)
 		for _, out := range outcomes {
-			idb.LogOutcome(out, m.MatchId)
+			idb.LogOutcome(out, m.MatchId, "wac")
 			log.Debug("\tLogged outcome for match id ", m.MatchId)
 		}
 	default:
