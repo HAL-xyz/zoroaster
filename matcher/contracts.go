@@ -9,29 +9,30 @@ import (
 )
 
 func ContractMatcher(
-	blocksChan chan int,
+	blocksChan chan *ethrpc.Block,
 	matchesChan chan interface{},
 	getModifiedAccounts func(prevBlock, currBlock int) []string,
 	idb aws.IDB,
 	client *ethrpc.EthRPC) {
 
 	for {
-		blockNo := <-blocksChan
-		log.Info("CN: new -> ", blockNo)
+		block := <-blocksChan
+		log.Info("CN: new -> ", block.Number)
 
-		cnMatches := matchContractsForBlock(blockNo, getModifiedAccounts, idb, client)
+		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, getModifiedAccounts, idb, client)
 		for _, m := range cnMatches {
 			matchId := idb.LogCnMatch(*m)
 			m.MatchId = matchId
 			log.Debug("\tlogged one match with id ", matchId)
 			matchesChan <- m
 		}
-		idb.SetLastBlockProcessed(blockNo, "wac")
+		idb.SetLastBlockProcessed(block.Number, "wac")
 	}
 }
 
 func matchContractsForBlock(
 	blockNo int,
+	blockTimestamp int,
 	getModAccounts func(prevBlock, currBlock int) []string,
 	idb aws.IDB,
 	client *ethrpc.EthRPC) []*trigger.CnMatch {
@@ -65,7 +66,15 @@ func matchContractsForBlock(
 	for _, tg := range wacTriggers {
 		contractValue := trigger.MatchContract(client, tg, blockNo)
 		if contractValue != "" {
-			cnMatches = append(cnMatches, &trigger.CnMatch{0, blockNo, tg.TriggerId, tg.UserId, contractValue})
+			match := &trigger.CnMatch{
+				MatchId:        0,
+				BlockNo:        blockNo,
+				TgId:           tg.TriggerId,
+				TgUserId:       tg.UserId,
+				Value:          contractValue,
+				BlockTimestamp: blockTimestamp,
+			}
+			cnMatches = append(cnMatches, match)
 			log.Debugf("\tCN: Trigger %d matched on block %d\n", tg.TriggerId, blockNo)
 		}
 	}

@@ -23,7 +23,7 @@ func TestPostgresClient_All(t *testing.T) {
 	// closing the connection only once, at the end.
 	defer psqlClient.Close()
 
-	m := trigger.CnMatch{1, 8888, 10, 0, "xxx xxx xxx"}
+	m := trigger.CnMatch{1, 8888, 10, 0, "xxx xxx xxx", 1554828248}
 	psqlClient.LogCnMatch(m)
 
 	psqlClient.UpdateMatchingTriggers([]int{21, 31})

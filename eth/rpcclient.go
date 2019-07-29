@@ -13,7 +13,7 @@ import (
 
 func BlocksPoller(
 	txChan chan *ethrpc.Block,
-	cntChan chan int,
+	cntChan chan *ethrpc.Block,
 	client *ethrpc.EthRPC,
 	idb aws.IDB) {
 
@@ -53,8 +53,14 @@ func BlocksPoller(
 
 		// Watch a Contract
 		if n-K > cntLastBlockProcessed {
+			block, err := client.EthGetBlockByNumber(cntLastBlockProcessed+1, false)
+			if err != nil {
+				log.Warnf("failed to get block %d -> %s", n, err)
+				time.Sleep(5 * time.Second)
+				continue
+			}
 			cntLastBlockProcessed += 1
-			cntChan <- cntLastBlockProcessed // after increment
+			cntChan <- block
 		}
 	}
 }

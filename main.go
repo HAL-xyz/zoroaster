@@ -42,7 +42,7 @@ func main() {
 
 	// Channels are buffered because a) contracts is slower, and b) so I can run wac/wat independently for tests
 	txBlocksChan := make(chan *ethrpc.Block, 100)
-	contractsBlocksChan := make(chan int, 100)
+	contractsBlocksChan := make(chan *ethrpc.Block, 100)
 	matchesChan := make(chan interface{})
 
 	// Poll ETH node

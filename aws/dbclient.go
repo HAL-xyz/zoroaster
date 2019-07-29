@@ -110,12 +110,14 @@ func (cli PostgresClient) SetLastBlockProcessed(blockNo int, watOrWac string) {
 }
 
 func (cli PostgresClient) LogCnMatch(match trigger.CnMatch) int {
+	bdate := time.Unix(int64(match.BlockTimestamp), 0)
+
 	q := fmt.Sprintf(
 		`INSERT INTO "%s" (
-			"date", "trigger_id", "block_no", "call_value")
-			VALUES ($1, $2, $3, $4) RETURNING id`, cli.conf.TableCnMatches)
+			"date", "trigger_id", "block_no", "return_value", "block_time")
+			VALUES ($1, $2, $3, $4, $5) RETURNING id`, cli.conf.TableCnMatches)
 	var lastId int
-	err := db.QueryRow(q, time.Now(), match.TgId, match.BlockNo, match.Value).Scan(&lastId)
+	err := db.QueryRow(q, time.Now(), match.TgId, match.BlockNo, match.Value, bdate).Scan(&lastId)
 
 	if err != nil {
 		log.Errorf("cannot write contract log match: %s", err)
