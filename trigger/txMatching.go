@@ -14,16 +14,16 @@ import (
 func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
 	ztxs := make([]*ZTransaction, 0)
 	for i, tx := range block.Transactions {
-		if ValidateTrigger(trigger, &tx) {
+		if validateTrigger(trigger, &tx) {
 			// we discard errors here bc not every match will have input data
 			var fnArgs *string
-			fnArgsData, _ := DecodeInputData(tx.Input, trigger.ContractABI)
+			fnArgsData, _ := decodeInputData(tx.Input, trigger.ContractABI)
 			if fnArgsData != nil {
 				fnArgsBytes, _ := json.Marshal(fnArgsData)
 				fnArgsString := string(fnArgsBytes)
 				fnArgs = &fnArgsString
 			}
-			fnName, _ := DecodeInputMethod(&tx.Input, &trigger.ContractABI)
+			fnName, _ := decodeInputMethod(&tx.Input, &trigger.ContractABI)
 
 			zt := ZTransaction{
 				BlockTimestamp: block.Timestamp,
@@ -37,16 +37,16 @@ func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
 	return ztxs
 }
 
-func ValidateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {
+func validateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {
 	match := true
 	for _, f := range tg.Filters {
-		filterMatch := ValidateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerId)
+		filterMatch := validateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerId)
 		match = match && filterMatch // a Trigger matches if all filters match
 	}
 	return match
 }
 
-func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgId int) bool {
+func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgId int) bool {
 	cxtLog := log.WithFields(log.Fields{
 		"trigger_id": tgId,
 		"tx_hash":    ts.Hash,
@@ -85,7 +85,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			return false // tx called a different method name
 		}
 		// decode input data
-		decodedData, err := DecodeInputDataToJsonMap(ts.Input, *abi)
+		decodedData, err := decodeInputDataToJsonMap(ts.Input, *abi)
 		if err != nil {
 			cxtLog.Debugf("cannot decode input data: %v\n", err)
 			return false
@@ -174,7 +174,7 @@ func ValidateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 				cxtLog.Debug(err)
 				return false
 			}
-			return validatePredStringArray(v.Predicate, ByteArraysToHex(param), v.Attribute, f.Index)
+			return validatePredStringArray(v.Predicate, byteArraysToHex(param), v.Attribute, f.Index)
 		}
 		if f.ParameterType == "bytes" {
 			var param []uint8
@@ -215,7 +215,7 @@ func isValidContractAbi(abi *string, cntAddress string, txTo string, tgId int) b
 
 // check the trigger's FunctionName value matches the transaction's method
 func matchesMethodName(abi *string, inputData string, funcName string) (bool, error) {
-	methodName, err := DecodeInputMethod(&inputData, abi)
+	methodName, err := decodeInputMethod(&inputData, abi)
 	if err != nil {
 		return false, err
 	}

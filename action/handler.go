@@ -59,7 +59,7 @@ func handleEmail(iemail sesiface.SESAPI, email AttributeEmail, paylaod interface
 	var body string
 	ztx, ok := paylaod.(*trigger.ZTransaction)
 	if ok {
-		body = FillEmailTemplate(email.Body, ztx)
+		body = fillEmailTemplate(email.Body, ztx)
 	} else {
 		body = email.Body
 	}

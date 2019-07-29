@@ -78,7 +78,7 @@ func assembleEmail(recipient, subject, body string) *ses.SendEmailInput {
 	return input
 }
 
-func FillEmailTemplate(template string, ztx *trigger.ZTransaction) string {
+func fillEmailTemplate(template string, ztx *trigger.ZTransaction) string {
 	body := template
 
 	// standard fields

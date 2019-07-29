@@ -42,7 +42,7 @@ func TestFillEmailTemplate(t *testing.T) {
 		t.Error(err)
 	}
 
-	body := FillEmailTemplate(string(template), &ztx)
+	body := fillEmailTemplate(string(template), &ztx)
 
 	expected, err := ioutil.ReadFile("../resources/emails/expected1.txt")
 	if err != nil {

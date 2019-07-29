@@ -11,7 +11,7 @@ import (
 // returns the string value of the contract call outcome in case of match, "" otherwise
 func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) string {
 
-	methodId, err := EncodeMethod(tg.MethodName, tg.ContractABI, tg.Inputs)
+	methodId, err := encodeMethod(tg.MethodName, tg.ContractABI, tg.Inputs)
 	if err != nil {
 		log.Debug("cannot encode method: ", err)
 		return ""

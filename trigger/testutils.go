@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func JsonToTransaction(jsonSrc []byte) (*ethrpc.Transaction, error) {
+func jsonToTransaction(jsonSrc []byte) (*ethrpc.Transaction, error) {
 	var tx ethrpc.Transaction
 	err := json.Unmarshal(jsonSrc, &tx)
 	if err != nil {
@@ -25,14 +25,14 @@ func getTransactionFromFile(path string) *ethrpc.Transaction {
 		log.Error(err)
 	}
 
-	tx, err := JsonToTransaction(txSrc)
+	tx, err := jsonToTransaction(txSrc)
 	if err != nil {
 		log.Error(err)
 	}
 	return tx
 }
 
-func JsonToBlock(jsonBlock []byte) (*ethrpc.Block, error) {
+func jsonToBlock(jsonBlock []byte) (*ethrpc.Block, error) {
 	var block ethrpc.Block
 	err := json.Unmarshal(jsonBlock, &block)
 	if err != nil {
@@ -49,7 +49,7 @@ func GetBlockFromFile(path string) *ethrpc.Block {
 	if err != nil {
 		log.Error(err)
 	}
-	block, err := JsonToBlock(blockSrc)
+	block, err := jsonToBlock(blockSrc)
 	if err != nil {
 		log.Error(err)
 	}
