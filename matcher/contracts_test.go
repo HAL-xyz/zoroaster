@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"zoroaster/aws"
 	"zoroaster/config"
 	"zoroaster/trigger"
 )
@@ -13,38 +14,12 @@ func init() {
 	log.SetLevel(log.DebugLevel)
 }
 
-type mockDB struct{}
-
-func (db mockDB) InitDB(c *config.ZConfiguration) {
-	panic("implement me")
-}
-
-func (db mockDB) Close() {
-	panic("implement me")
-}
-
-func (db mockDB) LogOutcome(outcome *trigger.Outcome, matchId int, watOrWac string) {
-	panic("implement me")
-}
-
-func (db mockDB) GetActions(tgId int, userId int) ([]string, error) {
-	panic("implement me")
-}
-
-func (db mockDB) ReadLastBlockProcessed(watOrWac string) int {
-	panic("implement me")
+type mockDB struct {
+	aws.IDB
 }
 
 func (db mockDB) SetLastBlockProcessed(blockNo int, watOrWac string) {
-
-}
-
-func (db mockDB) LogTxMatch(match trigger.TxMatch) int {
-	panic("implement me")
-}
-
-func (db mockDB) LogCnMatch(match trigger.CnMatch) int {
-	panic("implement me")
+	// void
 }
 
 func (db mockDB) LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error) {
@@ -53,9 +28,11 @@ func (db mockDB) LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error)
 }
 
 func (db mockDB) UpdateMatchingTriggers(triggerIds []int) {
+	// void
 }
 
 func (db mockDB) UpdateNonMatchingTriggers(triggerIds []int) {
+	// void
 }
 
 func TestMatchContractsForBlock(t *testing.T) {

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 	"os"
 	"time"
 	"zoroaster/aws"
@@ -37,6 +38,9 @@ func main() {
 	psqlClient := aws.PostgresClient{}
 	psqlClient.InitDB(zconf)
 
+	// HTTP client
+	httpClient := http.Client{}
+
 	// ETH client
 	ethClient := ethrpc.New(zconf.EthNode)
 
@@ -57,6 +61,6 @@ func main() {
 	// Main routine - process matches
 	for {
 		match := <-matchesChan
-		go matcher.ProcessMatch(match, &psqlClient, sesSession)
+		go matcher.ProcessMatch(match, &psqlClient, sesSession, &httpClient)
 	}
 }
