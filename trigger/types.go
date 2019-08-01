@@ -9,11 +9,19 @@ type ZTransaction struct {
 	Tx             *ethrpc.Transaction
 }
 
+// IMatch is an interface to fake IMatch as a sum type {TxMatch, CnMatch}
+type IMatch interface {
+	isMatch()
+}
+
 type TxMatch struct {
 	MatchId int
 	Tg      *Trigger
 	ZTx     *ZTransaction
 }
+
+// Implements IMatch interface
+func (TxMatch) isMatch() {}
 
 type CnMatch struct {
 	MatchId        int
@@ -23,6 +31,9 @@ type CnMatch struct {
 	Value          string
 	BlockTimestamp int
 }
+
+// Implements IMatch interface
+func (CnMatch) isMatch() {}
 
 type Outcome struct {
 	Outcome string

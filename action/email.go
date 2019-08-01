@@ -78,9 +78,34 @@ func assembleEmail(recipient, subject, body string) *ses.SendEmailInput {
 	return input
 }
 
-func fillEmailTemplate(template string, ztx *trigger.ZTransaction) string {
-	body := template
+func fillEmailTemplate(body string, payload trigger.IMatch) string {
+	switch m := payload.(type) {
+	case *trigger.TxMatch:
+		return templateTransaction(body, m.ZTx)
+	case *trigger.CnMatch:
+		return templateContract(body, m)
+	default:
+		return body
+	}
+}
 
+func templateContract(body string, match *trigger.CnMatch) string {
+	// standard fields
+	blockNumber := fmt.Sprintf("%v", match.BlockNo)
+	blockTimestamp := fmt.Sprintf("%v", match.BlockTimestamp)
+
+	body = strings.ReplaceAll(body, "$BlockNumber$", blockNumber)
+	body = strings.ReplaceAll(body, "$BlockTimestamp$", blockTimestamp)
+
+	// return value
+	body = strings.ReplaceAll(body, "$ReturnValues$", match.Value)
+
+	// TODO: support array indexing
+
+	return body
+}
+
+func templateTransaction(body string, ztx *trigger.ZTransaction) string {
 	// standard fields
 	blockNumber := fmt.Sprintf("%v", *ztx.Tx.BlockNumber)
 	blockTimestamp := fmt.Sprintf("%v", ztx.BlockTimestamp)

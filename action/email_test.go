@@ -37,14 +37,42 @@ func TestFillEmailTemplate(t *testing.T) {
 		t.Error(err)
 	}
 
+	match := trigger.TxMatch{0, nil, &ztx}
+
 	template, err := ioutil.ReadFile("../resources/emails/template1.txt")
 	if err != nil {
 		t.Error(err)
 	}
 
-	body := fillEmailTemplate(string(template), &ztx)
+	body := fillEmailTemplate(string(template), &match)
 
 	expected, err := ioutil.ReadFile("../resources/emails/expected1.txt")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, body, string(expected))
+}
+
+func TestFillEmailTemplate2(t *testing.T) {
+
+	match := trigger.CnMatch{
+		MatchId:        1,
+		BlockNo:        88888,
+		TgId:           1,
+		TgUserId:       1,
+		Value:          "0xfffffffffff",
+		BlockTimestamp: 123456,
+	}
+
+	template, err := ioutil.ReadFile("../resources/emails/template2.txt")
+	if err != nil {
+		t.Error(err)
+	}
+
+	body := fillEmailTemplate(string(template), &match)
+
+	expected, err := ioutil.ReadFile("../resources/emails/expected2.txt")
 	if err != nil {
 		t.Error(err)
 	}

@@ -10,7 +10,7 @@ import (
 
 func ContractMatcher(
 	blocksChan chan *ethrpc.Block,
-	matchesChan chan interface{},
+	matchesChan chan trigger.IMatch,
 	getModifiedAccounts func(prevBlock, currBlock int) []string,
 	idb aws.IDB,
 	client *ethrpc.EthRPC) {

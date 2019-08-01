@@ -10,6 +10,7 @@ import (
 	"zoroaster/config"
 	"zoroaster/eth"
 	"zoroaster/matcher"
+	"zoroaster/trigger"
 )
 
 func main() {
@@ -47,7 +48,7 @@ func main() {
 	// Channels are buffered because a) contracts is slower, and b) so I can run wac/wat independently for tests
 	txBlocksChan := make(chan *ethrpc.Block, 100)
 	contractsBlocksChan := make(chan *ethrpc.Block, 100)
-	matchesChan := make(chan interface{})
+	matchesChan := make(chan trigger.IMatch)
 
 	// Poll ETH node
 	go eth.BlocksPoller(txBlocksChan, contractsBlocksChan, ethClient, &psqlClient)

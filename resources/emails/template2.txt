@@ -1,0 +1,6 @@
+Standard fields:
+
+BlockNumber is $BlockNumber$
+BlockTimestamp is $BlockTimestamp$
+
+Return value is $ReturnValues$

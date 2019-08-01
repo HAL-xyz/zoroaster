@@ -8,7 +8,7 @@ import (
 	"zoroaster/trigger"
 )
 
-func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan interface{}, idb aws.IDB) {
+func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, idb aws.IDB) {
 
 	for {
 		block := <-blocksChan

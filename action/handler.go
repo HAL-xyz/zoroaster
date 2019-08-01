@@ -12,7 +12,7 @@ import (
 
 func ProcessActions(
 	actionsString []string,
-	payload interface{},
+	payload trigger.IMatch,
 	iEmail sesiface.SESAPI,
 	httpCli aws.IHttpClient) []*trigger.Outcome {
 
@@ -48,10 +48,14 @@ func getActionsFromString(actionsString []string) []*Action {
 	return actions
 }
 
-func handleWebHookPost(awp AttributeWebhookPost, payload interface{}, httpCli aws.IHttpClient) *trigger.Outcome {
-	m, ok := payload.(*trigger.CnMatch)
+func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
+	var payload interface{}
+
+	m, ok := match.(*trigger.CnMatch)
 	if ok {
 		payload = toCnPostData(m)
+	} else {
+		payload = match
 	}
 
 	dataBytes, err := json.Marshal(payload)
@@ -65,20 +69,14 @@ func handleWebHookPost(awp AttributeWebhookPost, payload interface{}, httpCli aw
 	return &trigger.Outcome{resp.Status, string(dataBytes)}
 }
 
-func handleEmail(email AttributeEmail, paylaod interface{}, iemail sesiface.SESAPI) *trigger.Outcome {
-	var body string
-	ztx, ok := paylaod.(*trigger.ZTransaction)
-	if ok {
-		body = fillEmailTemplate(email.Body, ztx)
-	} else {
-		body = email.Body
-	}
+func handleEmail(email AttributeEmail, payload trigger.IMatch, iemail sesiface.SESAPI) *trigger.Outcome {
+	body := fillEmailTemplate(email.Body, payload)
 
 	result, err := sendEmail(iemail, email.To, email.Subject, body)
 	if err != nil {
 		return &trigger.Outcome{err.Error(), ""}
 	}
-	return &trigger.Outcome{result.String(), email.Body}
+	return &trigger.Outcome{result.String(), body}
 }
 
 // In the web hook POST we don't want to expose TgId and TgUserId

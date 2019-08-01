@@ -8,7 +8,7 @@ import (
 	"zoroaster/trigger"
 )
 
-func ProcessMatch(match interface{}, idb aws.IDB, iEmail sesiface.SESAPI, httpCli aws.IHttpClient) []*trigger.Outcome {
+func ProcessMatch(match trigger.IMatch, idb aws.IDB, iEmail sesiface.SESAPI, httpCli aws.IHttpClient) []*trigger.Outcome {
 
 	var userId, triggerId, matchId int
 
