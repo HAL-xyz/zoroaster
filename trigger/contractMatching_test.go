@@ -64,3 +64,36 @@ func TestMatchContract5(t *testing.T) {
 	value := MatchContract(client, tg, 8387102)
 	assert.Equal(t, value, "0x02ca0dfabf5285b0b9d09dfaa241167013355c35")
 }
+
+func TestValidateContractReturnValue(t *testing.T) {
+
+	// test the decoding of different types returned when invoking a contract
+
+	// Address
+	res := validateContractReturnValue(
+		"Address",
+		"0x000000000000000000000000f06e8ac2d2d449f5cf3605d8b33f736a28d512c4",
+		ConditionOutput{Condition{}, Eq, "0x000000000000000000000000f06e8ac2d2d449f5cf3605d8b33f736a28d512c4"})
+	assert.Equal(t, res, "0xf06e8ac2d2d449f5cf3605d8b33f736a28d512c4")
+
+	// string
+	res2 := validateContractReturnValue(
+		"string",
+		"0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000642617a6161720000000000000000000000000000000000000000000000000000",
+		ConditionOutput{Condition{}, Eq, "Bazaar"})
+	assert.Equal(t, res2, "Bazaar")
+
+	res3 := validateContractReturnValue(
+		"string",
+		"0x0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000c5265736561726368204c61620000000000000000000000000000000000000000",
+		ConditionOutput{Condition{}, Eq, "Research Lab"})
+	assert.Equal(t, res3, "Research Lab")
+
+	// uint32
+	res4 := validateContractReturnValue(
+		"uint32",
+		"0x0000000000000000000000000000000000000000000000000000000000007530",
+		ConditionOutput{Condition{}, Eq, "30000"})
+	assert.Equal(t, res4, "30000")
+
+}

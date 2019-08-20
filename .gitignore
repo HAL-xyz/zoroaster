@@ -22,3 +22,6 @@ cover.html
 *.csv
 *.log
 .DS_Store
+
+# Experiments
+exp

@@ -1,10 +1,13 @@
 package trigger
 
 import (
+	"bytes"
+	"encoding/hex"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -36,19 +39,21 @@ func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) string {
 }
 
 func validateContractReturnValue(cnReturnType string, contractValue string, cond ConditionOutput) string {
+	// all single u/integers
+	intRgx := regexp.MustCompile(`u?int\d*$`)
+	if intRgx.MatchString(cnReturnType) {
+		ctVal := makeBigIntFromHex(contractValue)
+		tgVal := makeBigInt(cond.Attribute)
+		if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
+			return fmt.Sprintf("%v", ctVal)
+		}
+	}
 	switch cnReturnType {
 	case "Address":
 		ctVal := common.HexToAddress(contractValue)
 		tgVal := common.HexToAddress(cond.Attribute)
 		if ctVal == tgVal {
 			return strings.ToLower(ctVal.String())
-		}
-	// TODO: I'm pretty sure this can be used for every int type
-	case "uint256":
-		ctVal := makeBigIntFromHex(contractValue)
-		tgVal := makeBigInt(cond.Attribute)
-		if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
-			return fmt.Sprintf("%v", ctVal)
 		}
 	case "bool":
 		no, err := strconv.ParseInt(contractValue[2:], 16, 32)
@@ -62,6 +67,17 @@ func validateContractReturnValue(cnReturnType string, contractValue string, cond
 		}
 		if validatePredBool(cond.Predicate, ctVal, cond.Attribute) {
 			return fmt.Sprintf("%v", ctVal)
+		}
+	case "string":
+		s, err := hex.DecodeString(strings.Replace(contractValue, "0x", "", 1))
+		if err != nil {
+			log.Debug(err)
+			return ""
+		}
+		s = bytes.Replace(s, []byte("\x00"), []byte{}, -1)
+		ss := stripCtlAndExtFromUTF8(string(s))[1:] // remove some this and a space (??)
+		if ss == cond.Attribute {
+			return ss
 		}
 	default:
 		log.Debug("return type not supported: ", cnReturnType)
