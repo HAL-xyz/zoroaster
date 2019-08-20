@@ -21,7 +21,7 @@ func makeBigInt(s string) *big.Int {
 	return ret
 }
 
-func makeBigInt16(s string) *big.Int {
+func makeBigIntFromHex(s string) *big.Int {
 	s = strings.Replace(s, "0x", "", 1)
 	ret := new(big.Int)
 	ret.SetString(s, 16)

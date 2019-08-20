@@ -1,5 +1,5 @@
 {
-  "ethNode": "https://ethshared.bdnodes.net/?auth=VOV5PB7LCYHwzsIfZQ5H4jWTGf5xbPs6Y3DHnyYVdMs",
+  "ethNode": "https://ethshared.bdnodes.net/?auth=88h79-QJjNSLayKUGEchg5aSxcZi1iLgJdv3huM7qnU",
   "logsPath": "logs",
   "triggersDB": {
     "tableTriggers": "dev_triggers",

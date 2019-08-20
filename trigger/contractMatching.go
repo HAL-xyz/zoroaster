@@ -6,9 +6,12 @@ import (
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"strconv"
+	"strings"
 )
 
-// returns the string value of the contract call outcome in case of match, "" otherwise
+// returns:
+// - the string value of the contract call in case of match
+// - "" otherwise
 func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) string {
 
 	methodId, err := encodeMethod(tg.MethodName, tg.ContractABI, tg.Inputs)
@@ -28,25 +31,27 @@ func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) string {
 		log.Error("wrong wrong wrong")
 		return ""
 	}
+	return validateContractReturnValue(tg.Outputs[0].ReturnType, result, cond)
 
-	returnType := tg.Outputs[0].ReturnType
+}
 
-	if returnType == "Address" {
-		ctVal := common.HexToAddress(result)
+func validateContractReturnValue(cnReturnType string, contractValue string, cond ConditionOutput) string {
+	switch cnReturnType {
+	case "Address":
+		ctVal := common.HexToAddress(contractValue)
 		tgVal := common.HexToAddress(cond.Attribute)
 		if ctVal == tgVal {
-			return ctVal.String()
+			return strings.ToLower(ctVal.String())
 		}
-	}
-	if returnType == "uint256" {
-		ctVal := makeBigInt16(result)
+	// TODO: I'm pretty sure this can be used for every int type
+	case "uint256":
+		ctVal := makeBigIntFromHex(contractValue)
 		tgVal := makeBigInt(cond.Attribute)
 		if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
 			return fmt.Sprintf("%v", ctVal)
 		}
-	}
-	if returnType == "bool" {
-		no, err := strconv.ParseInt(result[2:], 16, 32)
+	case "bool":
+		no, err := strconv.ParseInt(contractValue[2:], 16, 32)
 		if err != nil {
 			log.Debug(err)
 			return ""
@@ -58,8 +63,9 @@ func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) string {
 		if validatePredBool(cond.Predicate, ctVal, cond.Attribute) {
 			return fmt.Sprintf("%v", ctVal)
 		}
+	default:
+		log.Debug("return type not supported: ", cnReturnType)
 	}
-	log.Debug("return type not supported:", returnType)
 	return ""
 }
 
