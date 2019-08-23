@@ -33,6 +33,7 @@ type Input struct {
 }
 
 type Output struct {
+	Index      *int
 	ReturnType string
 	Condition  Conditioner
 }

@@ -34,11 +34,43 @@ func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) string {
 		log.Error("wrong wrong wrong")
 		return ""
 	}
-	return validateContractReturnValue(tg.Outputs[0].ReturnType, result, cond)
+	return validateContractReturnValue(tg.Outputs[0].ReturnType, result, cond, tg.Outputs[0].Index)
 
 }
 
-func validateContractReturnValue(cnReturnType string, contractValue string, cond ConditionOutput) string {
+func validateContractReturnValue(cnReturnType string, contractValue string, cond ConditionOutput, index *int) string {
+	contractValue = strings.TrimPrefix(contractValue, "0x")
+
+	// multiple int values, like (int128, int128, int128) and static arrays of numbers, like uint32[3]
+	multIntValuesRgx := regexp.MustCompile(`\(u?int`)
+	arraySizeRgx := regexp.MustCompile(`u?int\d*\[\d+]$`)
+
+	if multIntValuesRgx.MatchString(cnReturnType) || arraySizeRgx.MatchString(cnReturnType) {
+		values := splitStringByLength(contractValue, 64)
+		if index != nil && *index <= len(values) {
+			ctVal := makeBigIntFromHex(values[*index])
+			tgVal := makeBigInt(cond.Attribute)
+			if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
+				return fmt.Sprintf("%v", ctVal)
+			}
+		}
+		return ""
+	}
+	// static arrays of Addresses
+	addressRgx := regexp.MustCompile(`address\[\d+]$`)
+	if addressRgx.MatchString(cnReturnType) {
+		addresses := splitStringByLength(strings.TrimPrefix(contractValue, "0x"), 64)
+		if index != nil && *index <= len(addresses) {
+			ctVal := common.HexToAddress(addresses[*index])
+			tgVal := common.HexToAddress(cond.Attribute)
+			if ctVal == tgVal {
+				return strings.ToLower(ctVal.String())
+			}
+		}
+	}
+
+	// static arrays of Strings
+
 	// all single u/integers
 	intRgx := regexp.MustCompile(`u?int\d*$`)
 	if intRgx.MatchString(cnReturnType) {
@@ -47,6 +79,7 @@ func validateContractReturnValue(cnReturnType string, contractValue string, cond
 		if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
 			return fmt.Sprintf("%v", ctVal)
 		}
+		return ""
 	}
 	switch cnReturnType {
 	case "Address":
@@ -56,7 +89,7 @@ func validateContractReturnValue(cnReturnType string, contractValue string, cond
 			return strings.ToLower(ctVal.String())
 		}
 	case "bool":
-		no, err := strconv.ParseInt(contractValue[2:], 16, 32)
+		no, err := strconv.ParseInt(contractValue, 16, 32)
 		if err != nil {
 			log.Debug(err)
 			return ""
@@ -69,7 +102,7 @@ func validateContractReturnValue(cnReturnType string, contractValue string, cond
 			return fmt.Sprintf("%v", ctVal)
 		}
 	case "string":
-		s, err := hex.DecodeString(strings.Replace(contractValue, "0x", "", 1))
+		s, err := hex.DecodeString(contractValue)
 		if err != nil {
 			log.Debug(err)
 			return ""

@@ -2,7 +2,9 @@ package trigger
 
 import (
 	"encoding/hex"
+	"fmt"
 	"math/big"
+	"regexp"
 	"strings"
 )
 
@@ -28,11 +30,29 @@ func makeBigIntFromHex(s string) *big.Int {
 	return ret
 }
 
-func stripCtlAndExtFromUTF8(str string) string {
+func stripCtlAndExtFromUTF8(s string) string {
 	return strings.Map(func(r rune) rune {
 		if r >= 32 && r < 127 {
 			return r
 		}
 		return -1
-	}, str)
+	}, s)
+}
+
+func getOnlyNumbers(s string) string {
+	re := regexp.MustCompile("[0-9]+")
+	return re.FindString(s)
+}
+
+func splitStringByLength(s string, length int) []string {
+	regexs := fmt.Sprintf(`(\S{%d})`, length)
+	re := regexp.MustCompile(regexs)
+	return re.FindAllString(s, -1)
+}
+
+func removeUntil(s string, until rune) string {
+	if idx := strings.IndexRune(s, until); idx >= 0 {
+		return s[idx:]
+	}
+	return s
 }
