@@ -59,7 +59,9 @@ func (mockDB2) GetActions(tgId int, userId int) ([]string, error) {
   		"TriggerId": 30,
   		"ActionType": "email",
   		"Attributes": {
-    		"To": "hello@gmail.com",
+    		"To": [
+				"hello@gmail.com"
+			],
     		"Body": "From tx $TransactionHash$",
     		"Subject": "Trigger 30"
   		}

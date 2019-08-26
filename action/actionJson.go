@@ -18,7 +18,7 @@ type AttributeWebhookPost struct {
 
 type AttributeEmail struct {
 	From    string
-	To      string
+	To      []string
 	Subject string
 	Body    string
 }
@@ -44,10 +44,10 @@ type ActionJson struct {
 	UserID     int    `json:"UserId"`
 	ActionType string `json:"ActionType"`
 	Attributes struct {
-		URI     string `json:"URI"`
-		To      string `json:"To"`
-		Subject string `json:"Subject"`
-		Body    string `json:"Body"`
+		URI     string   `json:"URI"`
+		To      []string `json:"To"`
+		Subject string   `json:"Subject"`
+		Body    string   `json:"Body"`
 	} `json:"Attributes"`
 }
 

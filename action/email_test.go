@@ -79,3 +79,19 @@ func TestFillEmailTemplate2(t *testing.T) {
 
 	assert.Equal(t, body, string(expected))
 }
+
+
+// Actually send an email. Commented out bc we only want
+// to run it manually
+//func TestSendEmail(t *testing.T) {
+//
+//	sesSession := aws.GetSESSession()
+//	to := []string{"manlio.poltronieri@gmail.com", "marco@atomic.eu.com"}
+//	subject := "hello from Zoroaster to both of you :)"
+//	body := "bla bla"
+//	res, err := sendEmail(sesSession, to, subject, body)
+//	if err != nil {
+//		t.Error(err)
+//	}
+//	fmt.Println(res)
+//}

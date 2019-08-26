@@ -19,7 +19,7 @@ const (
 	CharSet = "UTF-8"
 )
 
-func sendEmail(iemail sesiface.SESAPI, recipient, subject, body string) (*ses.SendEmailOutput, error) {
+func sendEmail(iemail sesiface.SESAPI, recipient []string, subject, body string) (*ses.SendEmailOutput, error) {
 
 	input := assembleEmail(recipient, subject, body)
 
@@ -49,13 +49,17 @@ func sendEmail(iemail sesiface.SESAPI, recipient, subject, body string) (*ses.Se
 	return result, nil
 }
 
-func assembleEmail(recipient, subject, body string) *ses.SendEmailInput {
+func assembleEmail(recipients []string, subject, body string) *ses.SendEmailInput {
+
+	toAddresses := make([]*string, len(recipients))
+	for i := range recipients {
+		toAddresses[i] = aws.String(recipients[i])
+	}
+
 	input := &ses.SendEmailInput{
 		Destination: &ses.Destination{
 			CcAddresses: []*string{},
-			ToAddresses: []*string{
-				aws.String(recipient),
-			},
+			ToAddresses: toAddresses,
 		},
 		Message: &ses.Message{
 			Body: &ses.Body{

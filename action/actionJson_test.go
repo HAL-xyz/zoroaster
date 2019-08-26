@@ -29,12 +29,15 @@ func TestAction_Webhook(t *testing.T) {
 
 func TestAction_Email(t *testing.T) {
 	var s = `
-	{
+	{  
 	   "UserId":1,
 	   "TriggerId":30,
 	   "ActionType":"email",
-	   "Attributes":{
-		  "To":"manlio.poltronieri@gmail.com",
+	   "Attributes":{  
+		  "To":[  
+			 "manlio.poltronieri@gmail.com",
+			 "marco@atomic.eu.com"
+		  ],
 		  "Subject":"YO from Zoroaster",
 		  "Body":"yo yo yo and a bottle of rum"
 	   }
