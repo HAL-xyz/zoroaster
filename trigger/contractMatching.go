@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"zoroaster/utils"
 )
 
 func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) (string, []string) {
@@ -51,10 +52,10 @@ func validateContractReturnValue(
 	arraySizeRgx := regexp.MustCompile(`u?int\d*\[\d+]$`)
 
 	if multIntValuesRgx.MatchString(cnReturnType) || arraySizeRgx.MatchString(cnReturnType) {
-		values := splitStringByLength(contractValue, 64)
+		values := utils.SplitStringByLength(contractValue, 64)
 		if index != nil && *index <= len(values) {
-			ctVal := makeBigIntFromHex(values[*index])
-			tgVal := makeBigInt(cond.Attribute)
+			ctVal := utils.MakeBigIntFromHex(values[*index])
+			tgVal := utils.MakeBigInt(cond.Attribute)
 			if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
 				return fmt.Sprintf("%v", ctVal), values
 			}
@@ -64,7 +65,7 @@ func validateContractReturnValue(
 	// static arrays of Addresses
 	addressRgx := regexp.MustCompile(`address\[\d+]$`)
 	if addressRgx.MatchString(cnReturnType) {
-		addresses := splitStringByLength(strings.TrimPrefix(contractValue, "0x"), 64)
+		addresses := utils.SplitStringByLength(strings.TrimPrefix(contractValue, "0x"), 64)
 		if index != nil && *index <= len(addresses) {
 			ctVal := common.HexToAddress(addresses[*index])
 			tgVal := common.HexToAddress(cond.Attribute)
@@ -79,8 +80,8 @@ func validateContractReturnValue(
 	// all single u/integers
 	intRgx := regexp.MustCompile(`u?int\d*$`)
 	if intRgx.MatchString(cnReturnType) {
-		ctVal := makeBigIntFromHex(contractValue)
-		tgVal := makeBigInt(cond.Attribute)
+		ctVal := utils.MakeBigIntFromHex(contractValue)
+		tgVal := utils.MakeBigInt(cond.Attribute)
 		if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
 			return fmt.Sprintf("%v", ctVal), nil
 		}
@@ -113,7 +114,7 @@ func validateContractReturnValue(
 			return "", nil
 		}
 		s = bytes.Replace(s, []byte("\x00"), []byte{}, -1)
-		ss := stripCtlAndExtFromUTF8(string(s))[1:] // remove some this and a space (??)
+		ss := utils.StripCtlAndExtFromUTF8(string(s))[1:] // remove some this and a space (??)
 		if ss == cond.Attribute {
 			return ss, nil
 		}

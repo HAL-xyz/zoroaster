@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"zoroaster/trigger"
+	"zoroaster/utils"
 )
 
 const (
@@ -114,7 +115,7 @@ func templateContract(body string, match *trigger.CnMatch) string {
 	fmt.Println(indexedValues)
 
 	for _, e := range indexedValues {
-		index := getOnlyNumbers(e)
+		index := utils.GetOnlyNumbers(e)
 		position, _ := strconv.Atoi(index)
 		if position < len(indexedValues) {
 			body = strings.ReplaceAll(body, e, match.AllValues[position])
@@ -173,15 +174,15 @@ func templateTransaction(body string, ztx *trigger.ZTransaction) string {
 
 		arrayRgx := regexp.MustCompile(`]\[\d*]`)
 		for _, param := range indexedParams {
-			array := arrayRgx.FindString(param)   // matches ...][N]
-			array = removeCharacters(array, "[]") // N
+			array := arrayRgx.FindString(param)         // matches ...][N]
+			array = utils.RemoveCharacters(array, "[]") // N
 			index, err := strconv.Atoi(array)
 			if err != nil {
 				return body
 			}
 			splitElements := strings.Split(param, ",")
 			for i, e := range splitElements {
-				splitElements[i] = removeCharacters(e, "[]")
+				splitElements[i] = utils.RemoveCharacters(e, "[]")
 			}
 			if index < len(splitElements) {
 				body = strings.Replace(body, param, splitElements[index], 1)
@@ -189,19 +190,4 @@ func templateTransaction(body string, ztx *trigger.ZTransaction) string {
 		}
 	}
 	return body
-}
-
-func removeCharacters(input string, characters string) string {
-	filter := func(r rune) rune {
-		if strings.IndexRune(characters, r) < 0 {
-			return r
-		}
-		return -1
-	}
-	return strings.Map(filter, input)
-}
-
-func getOnlyNumbers(s string) string {
-	re := regexp.MustCompile("[0-9]+")
-	return re.FindString(s)
 }

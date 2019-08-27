@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"zoroaster/utils"
 )
 
 func encodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
@@ -37,7 +38,7 @@ func encodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
 		}
 		intRgx := regexp.MustCompile(`u?int\d*$`) // all big int > 32 bits
 		if intRgx.MatchString(in.ParameterType) {
-			args[i] = makeBigInt(in.ParameterValue)
+			args[i] = utils.MakeBigInt(in.ParameterValue)
 			continue
 		}
 	}

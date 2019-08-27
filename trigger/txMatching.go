@@ -9,6 +9,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"zoroaster/utils"
 )
 
 func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
@@ -154,7 +155,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 				cxtLog.Debug(err)
 				return false
 			}
-			return validatePredBigInt(v.Predicate, param, makeBigInt(v.Attribute))
+			return validatePredBigInt(v.Predicate, param, utils.MakeBigInt(v.Attribute))
 		}
 		// int[]
 		arrayIntRgx := regexp.MustCompile(`u?int\d*\[\d*]$`)
@@ -164,7 +165,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 				cxtLog.Debug(err)
 				return false
 			}
-			return validatePredBigIntArray(v.Predicate, param, makeBigInt(v.Attribute), f.Index)
+			return validatePredBigIntArray(v.Predicate, param, utils.MakeBigInt(v.Attribute), f.Index)
 		}
 		// byte[][]
 		arrayByteRgx := regexp.MustCompile(`bytes\d*\[\d*]$`)
@@ -174,7 +175,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 				cxtLog.Debug(err)
 				return false
 			}
-			return validatePredStringArray(v.Predicate, byteArraysToHex(param), v.Attribute, f.Index)
+			return validatePredStringArray(v.Predicate, utils.ByteArraysToHex(param), v.Attribute, f.Index)
 		}
 		if f.ParameterType == "bytes" {
 			var param []uint8
