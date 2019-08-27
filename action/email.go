@@ -101,10 +101,25 @@ func templateContract(body string, match *trigger.CnMatch) string {
 	body = strings.ReplaceAll(body, "$BlockNumber$", blockNumber)
 	body = strings.ReplaceAll(body, "$BlockTimestamp$", blockTimestamp)
 
-	// return value
-	body = strings.ReplaceAll(body, "$ReturnValues$", match.Value)
+	// all values
+	body = strings.ReplaceAll(body, "$AllValues$", fmt.Sprintf("%s", match.AllValues))
 
-	// TODO: support array indexing
+	// matched value
+	body = strings.ReplaceAll(body, "$MatchedValue$", fmt.Sprintf("%s", match.Value))
+
+	// array indexing
+	indexedValueRgx := regexp.MustCompile(`!AllValues\[\d+]`)
+	indexedValues := indexedValueRgx.FindAllString(body, -1)
+
+	fmt.Println(indexedValues)
+
+	for _, e := range indexedValues {
+		index := getOnlyNumbers(e)
+		position, _ := strconv.Atoi(index)
+		if position < len(indexedValues) {
+			body = strings.ReplaceAll(body, e, match.AllValues[position])
+		}
+	}
 
 	return body
 }
@@ -184,4 +199,9 @@ func removeCharacters(input string, characters string) string {
 		return -1
 	}
 	return strings.Map(filter, input)
+}
+
+func getOnlyNumbers(s string) string {
+	re := regexp.MustCompile("[0-9]+")
+	return re.FindString(s)
 }

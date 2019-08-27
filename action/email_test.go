@@ -61,8 +61,9 @@ func TestFillEmailTemplate2(t *testing.T) {
 		BlockNo:        88888,
 		TgId:           1,
 		TgUserId:       1,
-		Value:          "0xfffffffffff",
+		Value:          "0000000000000000000000004fed1fc4144c223ae3c1553be203cdfcbd38c581",
 		BlockTimestamp: 123456,
+		AllValues:      []string{"0000000000000000000000004fed1fc4144c223ae3c1553be203cdfcbd38c581", "00000000000000000000000065d21616594825a738bcd08a5227358593a9aaf2", "000000000000000000000000d76f7d7d2ede0631ad23e4a01176c0e59878abda"},
 	}
 
 	template, err := ioutil.ReadFile("../resources/emails/template2.txt")
@@ -79,7 +80,6 @@ func TestFillEmailTemplate2(t *testing.T) {
 
 	assert.Equal(t, body, string(expected))
 }
-
 
 // Actually send an email. Commented out bc we only want
 // to run it manually

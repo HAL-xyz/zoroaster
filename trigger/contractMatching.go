@@ -12,33 +12,38 @@ import (
 	"strings"
 )
 
-// returns:
-// - the string value of the contract call in case of match
-// - "" otherwise
-func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) string {
+func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) (string, []string) {
 
 	methodId, err := encodeMethod(tg.MethodName, tg.ContractABI, tg.Inputs)
 	if err != nil {
 		log.Debug("cannot encode method: ", err)
-		return ""
+		return "", nil
 	}
 	result, err := makeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)
 	if err != nil {
 		log.Debug("rpc call failed: ", err)
-		return ""
+		return "", nil
 	}
 	log.Debug("result from call is -> ", result)
 
 	cond, ok := tg.Outputs[0].Condition.(ConditionOutput)
 	if ok != true {
 		log.Error("wrong wrong wrong")
-		return ""
+		return "", nil
 	}
 	return validateContractReturnValue(tg.Outputs[0].ReturnType, result, cond, tg.Outputs[0].Index)
 
 }
 
-func validateContractReturnValue(cnReturnType string, contractValue string, cond ConditionOutput, index *int) string {
+// returns:
+// - in case of a match: a tuple (value_matched, all_values)
+//   (all_values is nil in case of a single value)
+// - in case of no match: a tuple ("", nil)
+func validateContractReturnValue(
+	cnReturnType string,
+	contractValue string,
+	cond ConditionOutput,
+	index *int) (string, []string) {
 	contractValue = strings.TrimPrefix(contractValue, "0x")
 
 	// multiple int values, like (int128, int128, int128) and static arrays of numbers, like uint32[3]
@@ -51,10 +56,10 @@ func validateContractReturnValue(cnReturnType string, contractValue string, cond
 			ctVal := makeBigIntFromHex(values[*index])
 			tgVal := makeBigInt(cond.Attribute)
 			if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
-				return fmt.Sprintf("%v", ctVal)
+				return fmt.Sprintf("%v", ctVal), values
 			}
 		}
-		return ""
+		return "", nil
 	}
 	// static arrays of Addresses
 	addressRgx := regexp.MustCompile(`address\[\d+]$`)
@@ -64,7 +69,7 @@ func validateContractReturnValue(cnReturnType string, contractValue string, cond
 			ctVal := common.HexToAddress(addresses[*index])
 			tgVal := common.HexToAddress(cond.Attribute)
 			if ctVal == tgVal {
-				return strings.ToLower(ctVal.String())
+				return strings.ToLower(ctVal.String()), addresses
 			}
 		}
 	}
@@ -77,45 +82,45 @@ func validateContractReturnValue(cnReturnType string, contractValue string, cond
 		ctVal := makeBigIntFromHex(contractValue)
 		tgVal := makeBigInt(cond.Attribute)
 		if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
-			return fmt.Sprintf("%v", ctVal)
+			return fmt.Sprintf("%v", ctVal), nil
 		}
-		return ""
+		return "", nil
 	}
 	switch cnReturnType {
 	case "Address":
 		ctVal := common.HexToAddress(contractValue)
 		tgVal := common.HexToAddress(cond.Attribute)
 		if ctVal == tgVal {
-			return strings.ToLower(ctVal.String())
+			return strings.ToLower(ctVal.String()), nil
 		}
 	case "bool":
 		no, err := strconv.ParseInt(contractValue, 16, 32)
 		if err != nil {
 			log.Debug(err)
-			return ""
+			return "", nil
 		}
 		ctVal := false
 		if no == 1 {
 			ctVal = true
 		}
 		if validatePredBool(cond.Predicate, ctVal, cond.Attribute) {
-			return fmt.Sprintf("%v", ctVal)
+			return fmt.Sprintf("%v", ctVal), nil
 		}
 	case "string":
 		s, err := hex.DecodeString(contractValue)
 		if err != nil {
 			log.Debug(err)
-			return ""
+			return "", nil
 		}
 		s = bytes.Replace(s, []byte("\x00"), []byte{}, -1)
 		ss := stripCtlAndExtFromUTF8(string(s))[1:] // remove some this and a space (??)
 		if ss == cond.Attribute {
-			return ss
+			return ss, nil
 		}
 	default:
 		log.Debug("return type not supported: ", cnReturnType)
 	}
-	return ""
+	return "", nil
 }
 
 func makeEthRpcCall(client *ethrpc.EthRPC, cntAddress, data string, blockNumber int) (string, error) {

@@ -29,6 +29,7 @@ type CnMatch struct {
 	TgId           int
 	TgUserId       int
 	Value          string
+	AllValues      []string
 	BlockTimestamp int
 }
 

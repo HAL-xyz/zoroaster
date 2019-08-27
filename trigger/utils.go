@@ -39,11 +39,6 @@ func stripCtlAndExtFromUTF8(s string) string {
 	}, s)
 }
 
-func getOnlyNumbers(s string) string {
-	re := regexp.MustCompile("[0-9]+")
-	return re.FindString(s)
-}
-
 func splitStringByLength(s string, length int) []string {
 	regexs := fmt.Sprintf(`(\S{%d})`, length)
 	re := regexp.MustCompile(regexs)

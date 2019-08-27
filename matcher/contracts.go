@@ -64,14 +64,15 @@ func matchContractsForBlock(
 
 	var cnMatches []*trigger.CnMatch
 	for _, tg := range wacTriggers {
-		contractValue := trigger.MatchContract(client, tg, blockNo)
-		if contractValue != "" {
+		matchedValue, allValues := trigger.MatchContract(client, tg, blockNo)
+		if matchedValue != "" {
 			match := &trigger.CnMatch{
 				MatchId:        0,
 				BlockNo:        blockNo,
 				TgId:           tg.TriggerId,
 				TgUserId:       tg.UserId,
-				Value:          contractValue,
+				Value:          matchedValue,
+				AllValues:      allValues,
 				BlockTimestamp: blockTimestamp,
 			}
 			cnMatches = append(cnMatches, match)
