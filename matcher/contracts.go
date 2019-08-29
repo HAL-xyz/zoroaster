@@ -11,7 +11,7 @@ import (
 func ContractMatcher(
 	blocksChan chan *ethrpc.Block,
 	matchesChan chan trigger.IMatch,
-	getModifiedAccounts func(prevBlock, currBlock int) []string,
+	getModifiedAccounts func(prevBlock, currBlock int, nodeURI string) []string,
 	idb aws.IDB,
 	client *ethrpc.EthRPC) {
 
@@ -33,18 +33,18 @@ func ContractMatcher(
 func matchContractsForBlock(
 	blockNo int,
 	blockTimestamp int,
-	getModAccounts func(prevBlock, currBlock int) []string,
+	getModAccounts func(prevBlock, currBlock int, nodeURI string) []string,
 	idb aws.IDB,
 	client *ethrpc.EthRPC) []*trigger.CnMatch {
 
 	start := time.Now()
 
 	log.Debug("\t...getting modified accounts...")
-	modAccounts := getModAccounts(blockNo-1, blockNo)
+	modAccounts := getModAccounts(blockNo-1, blockNo, client.URL())
 	for len(modAccounts) == 0 {
 		log.Warn("\tdidn't get any modified accounts, retrying in a few seconds")
 		time.Sleep(10 * time.Second)
-		modAccounts = getModAccounts(blockNo-1, blockNo)
+		modAccounts = getModAccounts(blockNo-1, blockNo, client.URL())
 	}
 	log.Debug("\tmodified accounts: ", len(modAccounts))
 

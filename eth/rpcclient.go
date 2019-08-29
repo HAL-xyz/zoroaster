@@ -65,7 +65,7 @@ func BlocksPoller(
 	}
 }
 
-func GetModifiedAccounts(blockMinusOneNo, blockNo int) []string {
+func GetModifiedAccounts(blockMinusOneNo, blockNo int, nodeURI string) []string {
 
 	type ethRequest struct {
 		ID      int    `json:"id"`
@@ -93,9 +93,7 @@ func GetModifiedAccounts(blockMinusOneNo, blockNo int) []string {
 		"request": string(body),
 	})
 
-	node := "https://reader:PVHCtb9AT4NzUY3ZpWs8nFTG2wJdKuju3Y3FPCf9YnULfsA4RTcfJBw2rfadhzeT@node-0.hal.xyz"
-
-	response, err := http.Post(node, "application/json", bytes.NewBuffer(body))
+	response, err := http.Post(nodeURI, "application/json", bytes.NewBuffer(body))
 
 	if response != nil {
 		defer response.Body.Close()
