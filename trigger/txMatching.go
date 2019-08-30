@@ -1,15 +1,11 @@
 package trigger
 
 import (
-	"encoding/hex"
 	"encoding/json"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
-	"math/big"
-	"regexp"
-	"strconv"
 	"strings"
-	"zoroaster/utils"
+	"zoroaster/abidec"
 )
 
 func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
@@ -18,13 +14,13 @@ func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
 		if validateTrigger(trigger, &tx) {
 			// we discard errors here bc not every match will have input data
 			var fnArgs *string
-			fnArgsData, _ := decodeInputData(tx.Input, trigger.ContractABI)
+			fnArgsData, _ := abidec.DecodeInputData(tx.Input, trigger.ContractABI)
 			if fnArgsData != nil {
 				fnArgsBytes, _ := json.Marshal(fnArgsData)
 				fnArgsString := string(fnArgsBytes)
 				fnArgs = &fnArgsString
 			}
-			fnName, _ := decodeInputMethod(&tx.Input, &trigger.ContractABI)
+			fnName, _ := abidec.DecodeInputMethod(&tx.Input, &trigger.ContractABI)
 
 			zt := ZTransaction{
 				BlockTimestamp: block.Timestamp,
@@ -86,7 +82,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			return false // tx called a different method name
 		}
 		// decode input data
-		decodedData, err := decodeInputDataToJsonMap(ts.Input, *abi)
+		decodedData, err := abidec.DecodeInputDataToJsonMap(ts.Input, *abi)
 		if err != nil {
 			cxtLog.Debugf("cannot decode input data: %v\n", err)
 			return false
@@ -97,95 +93,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			cxtLog.Debugf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
 			return false
 		}
-		// uint8
-		if f.ParameterType == "uint8[]" {
-			var param []uint8
-			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Debug(err)
-				return false
-			}
-			tgVal, err := strconv.Atoi(v.Attribute)
-			if err == nil {
-				return validatePredUIntArray(v.Predicate, param, tgVal, f.Index)
-			}
-		}
-		// single address or string
-		if f.ParameterType == "address" || f.ParameterType == "string" {
-			var param string
-			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Debug(err)
-				return false
-			}
-			return strings.ToLower(param) == strings.ToLower(v.Attribute)
-		}
-		// bool
-		if f.ParameterType == "bool" {
-			var param bool
-			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Debug(err)
-				return false
-			}
-			return validatePredBool(v.Predicate, param, v.Attribute)
-		}
-		// address[]
-		addressesRgx := regexp.MustCompile(`address\[\d*]$`)
-		if addressesRgx.MatchString(f.ParameterType) {
-			var param []string
-			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Debug(err)
-				return false
-			}
-			return validatePredStringArray(v.Predicate, param, v.Attribute, f.Index)
-		}
-		// string[]
-		stringsRgx := regexp.MustCompile(`string\[\d*]$`)
-		if stringsRgx.MatchString(f.ParameterType) {
-			var param []string
-			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Debug(err)
-				return false
-			}
-			return validatePredStringArray(v.Predicate, param, v.Attribute, f.Index)
-		}
-		// int
-		intRgx := regexp.MustCompile(`u?int\d*$`)
-		if intRgx.MatchString(f.ParameterType) {
-			var param *big.Int
-			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Debug(err)
-				return false
-			}
-			return validatePredBigInt(v.Predicate, param, utils.MakeBigInt(v.Attribute))
-		}
-		// int[]
-		arrayIntRgx := regexp.MustCompile(`u?int\d*\[\d*]$`)
-		if arrayIntRgx.MatchString(f.ParameterType) {
-			var param []*big.Int
-			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Debug(err)
-				return false
-			}
-			return validatePredBigIntArray(v.Predicate, param, utils.MakeBigInt(v.Attribute), f.Index)
-		}
-		// byte[][]
-		arrayByteRgx := regexp.MustCompile(`bytes\d*\[\d*]$`)
-		if arrayByteRgx.MatchString(f.ParameterType) {
-			var param [][]byte
-			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Debug(err)
-				return false
-			}
-			return validatePredStringArray(v.Predicate, utils.ByteArraysToHex(param), v.Attribute, f.Index)
-		}
-		if f.ParameterType == "bytes" {
-			var param []uint8
-			if err = json.Unmarshal(rawParam, &param); err != nil {
-				cxtLog.Debug(err)
-				return false
-			}
-			return hex.EncodeToString(param) == v.Attribute
-		}
-		cxtLog.Debug("parameter type not supported: ", f.ParameterType)
+		return ValidateParam(rawParam, f.ParameterType, v.Attribute, v.Predicate, f.Index)
 	case ConditionFunctionCalled:
 		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
 			return false
@@ -216,7 +124,7 @@ func isValidContractAbi(abi *string, cntAddress string, txTo string, tgId int) b
 
 // check the trigger's FunctionName value matches the transaction's method
 func matchesMethodName(abi *string, inputData string, funcName string) (bool, error) {
-	methodName, err := decodeInputMethod(&inputData, abi)
+	methodName, err := abidec.DecodeInputMethod(&inputData, abi)
 	if err != nil {
 		return false, err
 	}

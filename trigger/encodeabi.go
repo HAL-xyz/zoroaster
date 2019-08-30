@@ -20,7 +20,7 @@ func encodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
 	args := make([]interface{}, len(inputs))
 	for i, in := range inputs {
 		switch in.ParameterType {
-		case "Address":
+		case "address":
 			args[i] = common.HexToAddress(in.ParameterValue)
 			continue
 		case "uint32":

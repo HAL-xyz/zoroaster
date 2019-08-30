@@ -7,7 +7,7 @@
   "MethodName": "balanceOf",
   "Inputs": [
     {
-      "ParameterType":"Address",
+      "ParameterType":"address",
       "ParameterValue": "0xda4a4626d3e16e094de3225a751aab7128e96526"
     }
   ],

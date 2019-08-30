@@ -1,4 +1,4 @@
-package trigger
+package abidec
 
 import (
 	"encoding/hex"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func decodeInputData(data string, cntABI string) (map[string]interface{}, error) {
+func DecodeInputData(data string, cntABI string) (map[string]interface{}, error) {
 
 	// load contract ABI
 	xabi, err := abi.JSON(strings.NewReader(cntABI))
@@ -46,8 +46,8 @@ func decodeInputData(data string, cntABI string) (map[string]interface{}, error)
 	return getMap, nil
 }
 
-func decodeInputDataToJsonMap(data string, cntABI string) (map[string]json.RawMessage, error) {
-	ifData, err := decodeInputData(data, cntABI)
+func DecodeInputDataToJsonMap(data string, cntABI string) (map[string]json.RawMessage, error) {
+	ifData, err := DecodeInputData(data, cntABI)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +63,7 @@ func decodeInputDataToJsonMap(data string, cntABI string) (map[string]json.RawMe
 	return out, nil
 }
 
-func decodeInputMethod(data *string, cntABI *string) (*string, error) {
+func DecodeInputMethod(data *string, cntABI *string) (*string, error) {
 
 	xabi, err := abi.JSON(strings.NewReader(*cntABI))
 	if err != nil {

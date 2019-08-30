@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"regexp"
@@ -65,4 +66,14 @@ func RemoveCharacters(input string, characters string) string {
 func GetOnlyNumbers(s string) string {
 	re := regexp.MustCompile("[0-9]+")
 	return re.FindString(s)
+}
+
+func GetValuesFromMap(m map[string]json.RawMessage) []json.RawMessage {
+	v := make([]json.RawMessage, len(m), len(m))
+	idx := 0
+	for _, value := range m {
+		v[idx] = value
+		idx++
+	}
+	return v
 }

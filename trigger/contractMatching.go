@@ -1,15 +1,12 @@
 package trigger
 
 import (
-	"bytes"
-	"encoding/hex"
+	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
-	"regexp"
-	"strconv"
 	"strings"
+	"zoroaster/abidec"
 	"zoroaster/utils"
 )
 
@@ -32,7 +29,7 @@ func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) (string, []s
 		log.Error("wrong wrong wrong")
 		return "", nil
 	}
-	return validateContractReturnValue(tg.Outputs[0].ReturnType, result, cond, tg.Outputs[0].Index)
+	return validateContractReturnValue(tg.Outputs[0].ReturnType, result, cond, tg.Outputs[0].Index, tg.ContractABI, tg.MethodName)
 
 }
 
@@ -44,82 +41,36 @@ func validateContractReturnValue(
 	cnReturnType string,
 	contractValue string,
 	cond ConditionOutput,
-	index *int) (string, []string) {
+	index *int,
+	abi string,
+	methodName string) (string, []string) {
+
 	contractValue = strings.TrimPrefix(contractValue, "0x")
 
-	// multiple int values, like (int128, int128, int128) and static arrays of numbers, like uint32[3]
-	multIntValuesRgx := regexp.MustCompile(`\(u?int`)
-	arraySizeRgx := regexp.MustCompile(`u?int\d*\[\d+]$`)
-
-	if multIntValuesRgx.MatchString(cnReturnType) || arraySizeRgx.MatchString(cnReturnType) {
-		values := utils.SplitStringByLength(contractValue, 64)
-		if index != nil && *index <= len(values) {
-			ctVal := utils.MakeBigIntFromHex(values[*index])
-			tgVal := utils.MakeBigInt(cond.Attribute)
-			if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
-				return fmt.Sprintf("%v", ctVal), values
-			}
-		}
+	rawJsParamsMap, err := abidec.DecodeParamsToJsonMap(contractValue, abi, methodName)
+	if err != nil {
+		log.Debug(err)
 		return "", nil
 	}
-	// static arrays of Addresses
-	addressRgx := regexp.MustCompile(`address\[\d+]$`)
-	if addressRgx.MatchString(cnReturnType) {
-		addresses := utils.SplitStringByLength(strings.TrimPrefix(contractValue, "0x"), 64)
-		if index != nil && *index <= len(addresses) {
-			ctVal := common.HexToAddress(addresses[*index])
-			tgVal := common.HexToAddress(cond.Attribute)
-			if ctVal == tgVal {
-				return strings.ToLower(ctVal.String()), addresses
-			}
-		}
-	}
+	rawJsParamsList := utils.GetValuesFromMap(rawJsParamsMap)
 
-	// static arrays of Strings
-
-	// all single u/integers
-	intRgx := regexp.MustCompile(`u?int\d*$`)
-	if intRgx.MatchString(cnReturnType) {
-		ctVal := utils.MakeBigIntFromHex(contractValue)
-		tgVal := utils.MakeBigInt(cond.Attribute)
-		if validatePredBigInt(cond.Predicate, ctVal, tgVal) {
-			return fmt.Sprintf("%v", ctVal), nil
-		}
-		return "", nil
+	// in case of multiple return values, like (int128, []uint8, string)
+	// we want to select the right param from the list, as well as the right type
+	var rawParam json.RawMessage
+	if len(rawJsParamsMap) > 1 && index != nil && *index < len(rawJsParamsMap) {
+		rawParam = rawJsParamsList[*index]
+		allTypes := strings.Split(cnReturnType, ",")
+		indexedType := allTypes[*index]
+		cnReturnType = utils.RemoveCharacters(indexedType, "() ")
+	} else {
+		rawParam = rawJsParamsList[0]
 	}
-	switch cnReturnType {
-	case "Address":
-		ctVal := common.HexToAddress(contractValue)
-		tgVal := common.HexToAddress(cond.Attribute)
-		if ctVal == tgVal {
-			return strings.ToLower(ctVal.String()), nil
+	if ValidateParam(rawParam, cnReturnType, cond.Attribute, cond.Predicate, index) {
+		out := make([]string, len(rawJsParamsList))
+		for i, elem := range rawJsParamsList {
+			out[i] = fmt.Sprintf("%s", elem)
 		}
-	case "bool":
-		no, err := strconv.ParseInt(contractValue, 16, 32)
-		if err != nil {
-			log.Debug(err)
-			return "", nil
-		}
-		ctVal := false
-		if no == 1 {
-			ctVal = true
-		}
-		if validatePredBool(cond.Predicate, ctVal, cond.Attribute) {
-			return fmt.Sprintf("%v", ctVal), nil
-		}
-	case "string":
-		s, err := hex.DecodeString(contractValue)
-		if err != nil {
-			log.Debug(err)
-			return "", nil
-		}
-		s = bytes.Replace(s, []byte("\x00"), []byte{}, -1)
-		ss := utils.StripCtlAndExtFromUTF8(string(s))[1:] // remove some this and a space (??)
-		if ss == cond.Attribute {
-			return ss, nil
-		}
-	default:
-		log.Debug("return type not supported: ", cnReturnType)
+		return cond.Attribute, out
 	}
 	return "", nil
 }
