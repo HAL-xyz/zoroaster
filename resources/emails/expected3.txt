@@ -1,0 +1,6 @@
+All values: 4 sailor moon
+
+Indexed:
+4
+sailor
+moon

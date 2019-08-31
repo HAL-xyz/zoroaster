@@ -103,25 +103,42 @@ func templateContract(body string, match *trigger.CnMatch) string {
 	body = strings.ReplaceAll(body, "$BlockTimestamp$", blockTimestamp)
 
 	// all values
-	body = strings.ReplaceAll(body, "$AllValues$", fmt.Sprintf("%s", match.AllValues))
+	cleanAllValues := strings.ReplaceAll(match.AllValues, "#END#", "")
+	cleanAllValues = strings.TrimPrefix(cleanAllValues, "[")
+	cleanAllValues = strings.TrimSuffix(cleanAllValues, "]")
+	cleanAllValues = strings.ReplaceAll(cleanAllValues, "\"", "")
+	body = strings.ReplaceAll(body, "$AllValues$", fmt.Sprintf("%s", cleanAllValues))
 
 	// matched value
 	body = strings.ReplaceAll(body, "$MatchedValue$", fmt.Sprintf("%s", match.Value))
 
 	// array indexing
+
+	// Arrays are split by commas, multiple returns objects by #END# token
+	var allValues []string
+	if strings.HasPrefix(match.AllValues, "[[") {
+		allValues = strings.Split(match.AllValues, ",")
+	} else {
+		allValues = strings.Split(fmt.Sprintf(";;%s;;", match.AllValues), "#END# ")
+	}
+	for i := range allValues {
+		allValues[i] = strings.ReplaceAll(allValues[i], "[[", "")
+		allValues[i] = strings.ReplaceAll(allValues[i], "]]", "")
+		allValues[i] = strings.ReplaceAll(allValues[i], ";;[", "")
+		allValues[i] = strings.ReplaceAll(allValues[i], "];;", "")
+		allValues[i] = strings.ReplaceAll(allValues[i], "\"", "")
+	}
+
+	// figure out the positions, like [!AllValues[0], AllValues[1]...]
 	indexedValueRgx := regexp.MustCompile(`!AllValues\[\d+]`)
 	indexedValues := indexedValueRgx.FindAllString(body, -1)
-
-	fmt.Println(indexedValues)
-
 	for _, e := range indexedValues {
 		index := utils.GetOnlyNumbers(e)
 		position, _ := strconv.Atoi(index)
-		if position < len(indexedValues) {
-			body = strings.ReplaceAll(body, e, match.AllValues[position])
+		if position < len(allValues) {
+			body = strings.ReplaceAll(body, e, allValues[position])
 		}
 	}
-
 	return body
 }
 

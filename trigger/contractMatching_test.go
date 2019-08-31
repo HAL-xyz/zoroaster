@@ -97,7 +97,7 @@ func TestMatchContract7(t *testing.T) {
 	}
 	value, allValues := MatchContract(cli, tg, 4974958)
 	assert.Equal(t, value, "4")
-	assert.Equal(t, fmt.Sprint(allValues), "[4 8 12]")
+	assert.Equal(t, fmt.Sprint(allValues), "[4#END# 8#END# 12]")
 }
 
 func TestMatchContract8(t *testing.T) {
@@ -111,5 +111,5 @@ func TestMatchContract8(t *testing.T) {
 	}
 	value, allValues := MatchContract(cli, tg, 4974958)
 	assert.Equal(t, value, "moon")
-	assert.Equal(t, fmt.Sprint(allValues), "[4 \"sailor\" \"moon\"]")
+	assert.Equal(t, fmt.Sprint(allValues), "[4#END# \"sailor\"#END# \"moon\"]")
 }

@@ -61,11 +61,10 @@ func TestFillEmailTemplate2(t *testing.T) {
 		BlockNo:        88888,
 		TgId:           1,
 		TgUserId:       1,
-		Value:          "0000000000000000000000004fed1fc4144c223ae3c1553be203cdfcbd38c581",
+		Value:          "4",
 		BlockTimestamp: 123456,
-		AllValues:      []string{"0000000000000000000000004fed1fc4144c223ae3c1553be203cdfcbd38c581", "00000000000000000000000065d21616594825a738bcd08a5227358593a9aaf2", "000000000000000000000000d76f7d7d2ede0631ad23e4a01176c0e59878abda"},
+		AllValues:      "[[4,8,12]]",
 	}
-
 	template, err := ioutil.ReadFile("../resources/emails/template2.txt")
 	if err != nil {
 		t.Error(err)
@@ -79,6 +78,50 @@ func TestFillEmailTemplate2(t *testing.T) {
 	}
 
 	assert.Equal(t, body, string(expected))
+}
+
+func TestFillEmailTemplate3(t *testing.T) {
+
+	match := trigger.CnMatch{
+		MatchId:        1,
+		BlockNo:        88888,
+		TgId:           1,
+		TgUserId:       1,
+		Value:          "4",
+		BlockTimestamp: 123456,
+		AllValues:      "[4#END# \"sailor\"#END# \"moon\"]",
+	}
+	template, err := ioutil.ReadFile("../resources/emails/template3.txt")
+	if err != nil {
+		t.Error(err)
+	}
+
+	body := fillEmailTemplate(string(template), &match)
+
+	expected, err := ioutil.ReadFile("../resources/emails/expected3.txt")
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, body, string(expected))
+}
+
+func TestFillEmailTemplate4(t *testing.T) {
+
+	match := trigger.CnMatch{
+		MatchId:        1,
+		BlockNo:        88888,
+		TgId:           1,
+		TgUserId:       1,
+		Value:          "4",
+		BlockTimestamp: 123456,
+		AllValues:      "[\"0x4a574510c7014e4ae985403536074abe582adfc8\"]",
+	}
+
+	template := "$AllValues$"
+	body := fillEmailTemplate(template, &match)
+
+	assert.Equal(t, body, "0x4a574510c7014e4ae985403536074abe582adfc8")
 }
 
 // Actually send an email. Commented out bc we only want

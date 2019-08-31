@@ -10,24 +10,24 @@ import (
 	"zoroaster/utils"
 )
 
-func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) (string, []string) {
+func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) (string, string) {
 
 	methodId, err := encodeMethod(tg.MethodName, tg.ContractABI, tg.Inputs)
 	if err != nil {
 		log.Debug("cannot encode method: ", err)
-		return "", nil
+		return "", ""
 	}
 	result, err := makeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)
 	if err != nil {
 		log.Debug("rpc call failed: ", err)
-		return "", nil
+		return "", ""
 	}
 	log.Debug("result from call is -> ", result)
 
 	cond, ok := tg.Outputs[0].Condition.(ConditionOutput)
 	if ok != true {
 		log.Error("wrong wrong wrong")
-		return "", nil
+		return "", ""
 	}
 	return validateContractReturnValue(tg.Outputs[0].ReturnType, result, cond, tg.Outputs[0].Index, tg.ContractABI, tg.MethodName)
 
@@ -35,22 +35,21 @@ func MatchContract(client *ethrpc.EthRPC, tg *Trigger, blockNo int) (string, []s
 
 // returns:
 // - in case of a match: a tuple (value_matched, all_values)
-//   (all_values is nil in case of a single value)
-// - in case of no match: a tuple ("", nil)
+// - in case of no match, error or whatever: a tuple ("", "")
 func validateContractReturnValue(
 	cnReturnType string,
 	contractValue string,
 	cond ConditionOutput,
 	index *int,
 	abi string,
-	methodName string) (string, []string) {
+	methodName string) (string, string) {
 
 	contractValue = strings.TrimPrefix(contractValue, "0x")
 
 	rawJsParamsMap, err := abidec.DecodeParamsToJsonMap(contractValue, abi, methodName)
 	if err != nil {
 		log.Debug(err)
-		return "", nil
+		return "", ""
 	}
 	rawJsParamsList := utils.GetValuesFromMap(rawJsParamsMap)
 
@@ -65,14 +64,19 @@ func validateContractReturnValue(
 	} else {
 		rawParam = rawJsParamsList[0]
 	}
+	// Yes this whole templating thing is beyond shit but hey.
 	if ValidateParam(rawParam, cnReturnType, cond.Attribute, cond.Predicate, index) {
 		out := make([]string, len(rawJsParamsList))
 		for i, elem := range rawJsParamsList {
-			out[i] = fmt.Sprintf("%s", elem)
+			out[i] = fmt.Sprintf("%s"+"#END#", elem)
 		}
-		return cond.Attribute, out
+		// remove the last #END# from the string.
+		s := utils.Reverse(fmt.Sprintf("%s", out))
+		s = strings.Replace(s, "#DNE#", "", 1)
+		s = utils.Reverse(s)
+		return cond.Attribute, s
 	}
-	return "", nil
+	return "", ""
 }
 
 func makeEthRpcCall(client *ethrpc.EthRPC, cntAddress, data string, blockNumber int) (string, error) {

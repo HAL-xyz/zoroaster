@@ -3,10 +3,10 @@ Standard fields:
 BlockNumber is 88888
 BlockTimestamp is 123456
 
-The matched value is 0000000000000000000000004fed1fc4144c223ae3c1553be203cdfcbd38c581
+The matched value is 4
 
-All values returned from contract call: [0000000000000000000000004fed1fc4144c223ae3c1553be203cdfcbd38c581 00000000000000000000000065d21616594825a738bcd08a5227358593a9aaf2 000000000000000000000000d76f7d7d2ede0631ad23e4a01176c0e59878abda]
+All values returned from contract call: [4,8,12]
 
-The first element is: 0000000000000000000000004fed1fc4144c223ae3c1553be203cdfcbd38c581
-The second element is: 000000000000000000000000d76f7d7d2ede0631ad23e4a01176c0e59878abda
-The 4th element does not exist: !AllValues[3]
+The first element is: 4
+The second element is: 8
+This does not exist: !AllValues[333]

@@ -8,5 +8,5 @@ The matched value is $MatchedValue$
 All values returned from contract call: $AllValues$
 
 The first element is: !AllValues[0]
-The second element is: !AllValues[2]
-The 4th element does not exist: !AllValues[3]
+The second element is: !AllValues[1]
+This does not exist: !AllValues[333]

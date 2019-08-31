@@ -1,0 +1,6 @@
+All values: $AllValues$
+
+Indexed:
+!AllValues[0]
+!AllValues[1]
+!AllValues[2]
