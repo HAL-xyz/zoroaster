@@ -49,7 +49,7 @@ func TestMatchContract3(t *testing.T) {
 
 func TestMatchContract4(t *testing.T) {
 
-	// uint256 -> Address
+	// uint256 -> address
 	tg, err := NewTriggerFromFile("../resources/triggers/wac4.json")
 	if err != nil {
 		t.Error(t)
@@ -112,4 +112,18 @@ func TestMatchContract8(t *testing.T) {
 	value, allValues := MatchContract(cli, tg, 4974958)
 	assert.Equal(t, value, "moon")
 	assert.Equal(t, fmt.Sprint(allValues), "[4#END# \"sailor\"#END# \"moon\"]")
+}
+
+func TestMatchContract9(t *testing.T) {
+
+	cli := ethrpc.New("https://rinkebyshared.bdnodes.net?auth=dKvc9d7tXrOdmnKK9nsfl119I19PH4GZPbACnbH-QW0")
+
+	// () -> string[3]
+	tg, err := NewTriggerFromFile("../resources/triggers/wac9.json")
+	if err != nil {
+		t.Error(t)
+	}
+	value, allValues := MatchContract(cli, tg, 4974958)
+	assert.Equal(t, value, "ciao")
+	assert.Equal(t, fmt.Sprint(allValues), "[[\"ciao\",\"come\",\"stai\"]]")
 }
