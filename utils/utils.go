@@ -94,3 +94,12 @@ func Reverse(s string) string {
 	// Convert back to UTF-8.
 	return string(rune)
 }
+
+func IsIn(a string, list []string) bool {
+	for _, x := range list {
+		if x == a {
+			return true
+		}
+	}
+	return false
+}

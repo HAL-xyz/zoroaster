@@ -6,6 +6,7 @@ import (
 	"time"
 	"zoroaster/aws"
 	"zoroaster/trigger"
+	"zoroaster/utils"
 )
 
 func ContractMatcher(
@@ -56,7 +57,7 @@ func matchContractsForBlock(
 
 	var wacTriggers []*trigger.Trigger
 	for i, t := range triggers {
-		if isIn(t.ContractAdd, modAccounts) {
+		if utils.IsIn(t.ContractAdd, modAccounts) {
 			wacTriggers = append(wacTriggers, triggers[i])
 		}
 	}
@@ -133,13 +134,4 @@ func setDifference(s1 map[int]struct{}, s2 map[int]struct{}) map[int]struct{} {
 		diff[v] = struct{}{}
 	}
 	return diff
-}
-
-func isIn(a string, list []string) bool {
-	for _, x := range list {
-		if x == a {
-			return true
-		}
-	}
-	return false
 }

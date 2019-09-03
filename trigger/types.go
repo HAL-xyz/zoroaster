@@ -36,7 +36,14 @@ type CnMatch struct {
 // Implements IMatch interface
 func (CnMatch) isMatch() {}
 
+// Outcome is the result of executing an Action;
+// the Payload field can be a json struct
 type Outcome struct {
 	Outcome string
 	Payload string
+}
+
+type EmailPayload struct {
+	Recipients []string
+	Body       string
 }

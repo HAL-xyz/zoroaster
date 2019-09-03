@@ -83,34 +83,35 @@ func assembleEmail(recipients []string, subject, body string) *ses.SendEmailInpu
 	return input
 }
 
-func fillEmailTemplate(body string, payload trigger.IMatch) string {
+func fillEmailTemplate(text string, payload trigger.IMatch) string {
 	switch m := payload.(type) {
 	case *trigger.TxMatch:
-		return templateTransaction(body, m.ZTx)
+		return templateTransaction(text, m.ZTx)
 	case *trigger.CnMatch:
-		return templateContract(body, m)
+		return templateContract(text, m)
 	default:
-		return body
+		log.Warnf("Invalid match type %T", payload)
+		return text
 	}
 }
 
-func templateContract(body string, match *trigger.CnMatch) string {
+func templateContract(text string, match *trigger.CnMatch) string {
 	// standard fields
 	blockNumber := fmt.Sprintf("%v", match.BlockNo)
 	blockTimestamp := fmt.Sprintf("%v", match.BlockTimestamp)
 
-	body = strings.ReplaceAll(body, "$BlockNumber$", blockNumber)
-	body = strings.ReplaceAll(body, "$BlockTimestamp$", blockTimestamp)
+	text = strings.ReplaceAll(text, "$BlockNumber$", blockNumber)
+	text = strings.ReplaceAll(text, "$BlockTimestamp$", blockTimestamp)
 
 	// all values
 	cleanAllValues := strings.ReplaceAll(match.AllValues, "#END#", "")
 	cleanAllValues = strings.TrimPrefix(cleanAllValues, "[")
 	cleanAllValues = strings.TrimSuffix(cleanAllValues, "]")
 	cleanAllValues = strings.ReplaceAll(cleanAllValues, "\"", "")
-	body = strings.ReplaceAll(body, "$AllValues$", fmt.Sprintf("%s", cleanAllValues))
+	text = strings.ReplaceAll(text, "$AllValues$", fmt.Sprintf("%s", cleanAllValues))
 
 	// matched value
-	body = strings.ReplaceAll(body, "$MatchedValue$", fmt.Sprintf("%s", match.Value))
+	text = strings.ReplaceAll(text, "$MatchedValue$", fmt.Sprintf("%s", match.Value))
 
 	// array indexing
 
@@ -131,18 +132,18 @@ func templateContract(body string, match *trigger.CnMatch) string {
 
 	// figure out the positions, like [!AllValues[0], AllValues[1]...]
 	indexedValueRgx := regexp.MustCompile(`!AllValues\[\d+]`)
-	indexedValues := indexedValueRgx.FindAllString(body, -1)
+	indexedValues := indexedValueRgx.FindAllString(text, -1)
 	for _, e := range indexedValues {
 		index := utils.GetOnlyNumbers(e)
 		position, _ := strconv.Atoi(index)
 		if position < len(allValues) {
-			body = strings.ReplaceAll(body, e, allValues[position])
+			text = strings.ReplaceAll(text, e, allValues[position])
 		}
 	}
-	return body
+	return text
 }
 
-func templateTransaction(body string, ztx *trigger.ZTransaction) string {
+func templateTransaction(text string, ztx *trigger.ZTransaction) string {
 	// standard fields
 	blockNumber := fmt.Sprintf("%v", *ztx.Tx.BlockNumber)
 	blockTimestamp := fmt.Sprintf("%v", ztx.BlockTimestamp)
@@ -150,20 +151,20 @@ func templateTransaction(body string, ztx *trigger.ZTransaction) string {
 	gasPrice := fmt.Sprintf("%v", &ztx.Tx.GasPrice)
 	nonce := fmt.Sprintf("%v", ztx.Tx.Nonce)
 
-	body = strings.ReplaceAll(body, "$BlockNumber$", blockNumber)
-	body = strings.ReplaceAll(body, "$BlockHash$", ztx.Tx.BlockHash)
-	body = strings.ReplaceAll(body, "$TransactionHash$", ztx.Tx.Hash)
-	body = strings.ReplaceAll(body, "$BlockTimestamp$", blockTimestamp)
-	body = strings.ReplaceAll(body, "$From$", ztx.Tx.From)
-	body = strings.ReplaceAll(body, "$To$", ztx.Tx.To)
-	body = strings.ReplaceAll(body, "$Value$", ztx.Tx.Value.String())
-	body = strings.ReplaceAll(body, "$Gas$", gas)
-	body = strings.ReplaceAll(body, "$GasPrice$", gasPrice)
-	body = strings.ReplaceAll(body, "$Nonce$", nonce)
+	text = strings.ReplaceAll(text, "$BlockNumber$", blockNumber)
+	text = strings.ReplaceAll(text, "$BlockHash$", ztx.Tx.BlockHash)
+	text = strings.ReplaceAll(text, "$TransactionHash$", ztx.Tx.Hash)
+	text = strings.ReplaceAll(text, "$BlockTimestamp$", blockTimestamp)
+	text = strings.ReplaceAll(text, "$From$", ztx.Tx.From)
+	text = strings.ReplaceAll(text, "$To$", ztx.Tx.To)
+	text = strings.ReplaceAll(text, "$Value$", ztx.Tx.Value.String())
+	text = strings.ReplaceAll(text, "$Gas$", gas)
+	text = strings.ReplaceAll(text, "$GasPrice$", gasPrice)
+	text = strings.ReplaceAll(text, "$Nonce$", nonce)
 
 	// function name
 	if ztx.DecodedFnName != nil {
-		body = strings.ReplaceAll(body, "!MethodName", *ztx.DecodedFnName)
+		text = strings.ReplaceAll(text, "!MethodName", *ztx.DecodedFnName)
 	}
 
 	// function params
@@ -172,14 +173,14 @@ func templateTransaction(body string, ztx *trigger.ZTransaction) string {
 		err := json.Unmarshal([]byte(*ztx.DecodedFnArgs), &args)
 		if err != nil {
 			log.Error(err)
-			return body
+			return text
 		}
 
 		// replace !functionParams
 		for key, rawJson := range args {
 			old := fmt.Sprintf("!%s", key)
 			new := fmt.Sprintf("%s", rawJson)
-			body = strings.ReplaceAll(body, old, new)
+			text = strings.ReplaceAll(text, old, new)
 		}
 
 		// replace a function parameter with its indexed value, e.g. given
@@ -187,7 +188,7 @@ func templateTransaction(body string, ztx *trigger.ZTransaction) string {
 		// "0x0df721639ca2f7ff0e1f618b918a65ffb199ac4e"
 
 		indexedRgx := regexp.MustCompile(`\[\S*]\[\d*]`)
-		indexedParams := indexedRgx.FindAllString(body, -1)
+		indexedParams := indexedRgx.FindAllString(text, -1)
 
 		arrayRgx := regexp.MustCompile(`]\[\d*]`)
 		for _, param := range indexedParams {
@@ -195,16 +196,16 @@ func templateTransaction(body string, ztx *trigger.ZTransaction) string {
 			array = utils.RemoveCharacters(array, "[]") // N
 			index, err := strconv.Atoi(array)
 			if err != nil {
-				return body
+				return text
 			}
 			splitElements := strings.Split(param, ",")
 			for i, e := range splitElements {
 				splitElements[i] = utils.RemoveCharacters(e, "[]")
 			}
 			if index < len(splitElements) {
-				body = strings.Replace(body, param, splitElements[index], 1)
+				text = strings.Replace(text, param, splitElements[index], 1)
 			}
 		}
 	}
-	return body
+	return text
 }

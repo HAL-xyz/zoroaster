@@ -82,19 +82,18 @@ func TestProcessMatch(t *testing.T) {
 
 	outcomes := ProcessMatch(&match, mockDB2{}, &mockSESClient{}, &mockHttpClient{})
 
-	expectedPayload := `{"MatchId":1,"BlockNo":999,"ReturnValue":"0xfffffffffffff","BlockTimestamp":1554828248}`
-	expectedOutcome := "200 OK"
-
 	// web hook
-	assert.Equal(t, outcomes[0].Payload, expectedPayload)
-	assert.Equal(t, outcomes[0].Outcome, expectedOutcome)
+	webHookPayload := `{"MatchId":1,"BlockNo":999,"ReturnValue":"0xfffffffffffff","BlockTimestamp":1554828248}`
+	webHookOutcome := "200 OK"
+
+	assert.Equal(t, outcomes[0].Payload, webHookPayload)
+	assert.Equal(t, outcomes[0].Outcome, webHookOutcome)
 
 	// email
-	expPayload := "999"
-	expOutcome := `{
+	emailPayload := "{\"Recipients\":[\"hello@gmail.com\"],\"Body\":\"999\"}"
+	emailOutcome := `{
   MessageId: "mock email success"
 }`
-
-	assert.Equal(t, outcomes[1].Payload, expPayload)
-	assert.Equal(t, outcomes[1].Outcome, expOutcome)
+	assert.Equal(t, outcomes[1].Payload, emailPayload)
+	assert.Equal(t, outcomes[1].Outcome, emailOutcome)
 }
