@@ -152,7 +152,7 @@ func toCnPostData(m *trigger.CnMatch) *ContractPostData {
 	return &ContractPostData{
 		MatchId:        m.MatchId,
 		BlockNo:        m.BlockNo,
-		ReturnValue:    m.Value,
+		ReturnValue:    m.MatchedValues,
 		BlockTimestamp: m.BlockTimestamp,
 	}
 }

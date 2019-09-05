@@ -111,7 +111,7 @@ func templateContract(text string, match *trigger.CnMatch) string {
 	text = strings.ReplaceAll(text, "$AllValues$", fmt.Sprintf("%s", cleanAllValues))
 
 	// matched value
-	text = strings.ReplaceAll(text, "$MatchedValue$", fmt.Sprintf("%s", match.Value))
+	text = strings.ReplaceAll(text, "$MatchedValue$", fmt.Sprintf("%s", match.MatchedValues))
 
 	// array indexing
 

@@ -77,7 +77,7 @@ func TestProcessMatch(t *testing.T) {
 		BlockTimestamp: 1554828248,
 		TgId:           1,
 		TgUserId:       1,
-		Value:          "0xfffffffffffff",
+		MatchedValues:  "0xfffffffffffff",
 	}
 
 	outcomes := ProcessMatch(&match, mockDB2{}, &mockSESClient{}, &mockHttpClient{})

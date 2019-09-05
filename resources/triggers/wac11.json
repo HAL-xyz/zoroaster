@@ -1,0 +1,27 @@
+{
+  "TriggerName":"wac 11",
+  "TriggerType":"WatchContracts",
+  "CreationDate":"2019-03-24 17:45:12",
+  "ContractAdd":"0xb867b4fc70802615ab3969c1701ec96f2e1dab68",
+  "ContractABI":"[{\"constant\":true,\"inputs\":[{\"name\":\"input\",\"type\":\"int8[]\"}],\"name\":\"g_int8arrdinamico_string\",\"outputs\":[{\"name\":\"res\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"g_address\",\"outputs\":[{\"name\":\"res\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"g_int256_3\",\"outputs\":[{\"name\":\"res\",\"type\":\"int256[3]\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"mult_int_int_int\",\"outputs\":[{\"name\":\"r1\",\"type\":\"int128\"},{\"name\":\"r2\",\"type\":\"int128\"},{\"name\":\"r3\",\"type\":\"int128\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"g_string\",\"outputs\":[{\"name\":\"res\",\"type\":\"string[]\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"input\",\"type\":\"int8\"}],\"name\":\"g_int8_string\",\"outputs\":[{\"name\":\"res\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"g_string_3\",\"outputs\":[{\"name\":\"res\",\"type\":\"string[3]\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"g_int256\",\"outputs\":[{\"name\":\"res\",\"type\":\"int256[]\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"mult_int_str_str\",\"outputs\":[{\"name\":\"r1\",\"type\":\"int128\"},{\"name\":\"r2\",\"type\":\"string\"},{\"name\":\"r3\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"g_address_3\",\"outputs\":[{\"name\":\"res\",\"type\":\"address[3]\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"mult_int_address\",\"outputs\":[{\"name\":\"r1\",\"type\":\"int128\"},{\"name\":\"r2\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"input\",\"type\":\"int8[3]\"}],\"name\":\"g_int8arr3_string\",\"outputs\":[{\"name\":\"res\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"}]",
+  "MethodName": "g_address_3",
+  "Inputs": [
+  ],
+  "Outputs":[
+    {
+      "ReturnType":"address[3]",
+      "Condition":{
+        "Predicate":"SmallerThan",
+        "Attribute":"10"
+      }
+    },
+    {
+      "ReturnType":"address[3]",
+      "Index": 0,
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"0x000000000000000000000000000000"
+      }
+    }
+  ]
+}

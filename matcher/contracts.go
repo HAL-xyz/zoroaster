@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"fmt"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -65,14 +66,14 @@ func matchContractsForBlock(
 
 	var cnMatches []*trigger.CnMatch
 	for _, tg := range wacTriggers {
-		matchedValue, allValues := trigger.MatchContract(client, tg, blockNo)
-		if matchedValue != "" {
+		isMatch, matchedValues, allValues := trigger.MatchContract(client, tg, blockNo)
+		if isMatch {
 			match := &trigger.CnMatch{
 				MatchId:        0,
 				BlockNo:        blockNo,
 				TgId:           tg.TriggerId,
 				TgUserId:       tg.UserId,
-				Value:          matchedValue,
+				MatchedValues:  fmt.Sprint(matchedValues),
 				AllValues:      allValues,
 				BlockTimestamp: blockTimestamp,
 			}

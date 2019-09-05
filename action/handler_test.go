@@ -32,7 +32,7 @@ func TestHandleEmail1(t *testing.T) {
 		BlockNo:        1,
 		TgId:           1,
 		TgUserId:       1,
-		Value:          "",
+		MatchedValues:  "",
 		AllValues:      "[\"marco@atomic.eu.com\"",
 		BlockTimestamp: 123,
 	}
@@ -55,7 +55,7 @@ func TestHandleEmail2(t *testing.T) {
 		BlockNo:        1,
 		TgId:           1,
 		TgUserId:       1,
-		Value:          "",
+		MatchedValues:  "",
 		AllValues:      "[[\"marco@atomic.eu.com\",\"matteo@atomic.eu.com\",\"not and address\"]]",
 		BlockTimestamp: 123,
 	}
@@ -78,7 +78,7 @@ func TestHandleEmail3(t *testing.T) {
 		BlockNo:        1,
 		TgId:           1,
 		TgUserId:       1,
-		Value:          "",
+		MatchedValues:  "",
 		AllValues:      "[4#END# \"manlio.poltronieri@gmail.com\"#END# \"hello@world.com\"]",
 		BlockTimestamp: 123,
 	}

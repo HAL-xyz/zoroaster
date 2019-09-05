@@ -28,7 +28,7 @@ type CnMatch struct {
 	BlockNo        int
 	TgId           int
 	TgUserId       int
-	Value          string
+	MatchedValues  string
 	AllValues      string
 	BlockTimestamp int
 }

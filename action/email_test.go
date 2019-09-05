@@ -8,7 +8,7 @@ import (
 	"zoroaster/trigger"
 )
 
-func TestFillEmailTemplate(t *testing.T) {
+func TestFillEmailTemplate1(t *testing.T) {
 
 	input :=
 		`
@@ -61,7 +61,7 @@ func TestFillEmailTemplate2(t *testing.T) {
 		BlockNo:        88888,
 		TgId:           1,
 		TgUserId:       1,
-		Value:          "4",
+		MatchedValues:  "4",
 		BlockTimestamp: 123456,
 		AllValues:      "[[4,8,12]]",
 	}
@@ -87,7 +87,7 @@ func TestFillEmailTemplate3(t *testing.T) {
 		BlockNo:        88888,
 		TgId:           1,
 		TgUserId:       1,
-		Value:          "4",
+		MatchedValues:  "4",
 		BlockTimestamp: 123456,
 		AllValues:      "[4#END# \"sailor\"#END# \"moon\"]",
 	}
@@ -113,7 +113,7 @@ func TestFillEmailTemplate4(t *testing.T) {
 		BlockNo:        88888,
 		TgId:           1,
 		TgUserId:       1,
-		Value:          "4",
+		MatchedValues:  "4",
 		BlockTimestamp: 123456,
 		AllValues:      "[\"0x4a574510c7014e4ae985403536074abe582adfc8\"]",
 	}
