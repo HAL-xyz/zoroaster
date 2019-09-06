@@ -10,6 +10,7 @@ import (
 
 var zconf = config.Load("../config")
 var client = ethrpc.New(zconf.EthNode)
+var cliRinkeby = ethrpc.New("https://rinkebyshared.bdnodes.net?auth=dKvc9d7tXrOdmnKK9nsfl119I19PH4GZPbACnbH-QW0")
 
 func TestMatchContract1(t *testing.T) {
 
@@ -84,9 +85,7 @@ func TestMatchContract6(t *testing.T) {
 		t.Error(t)
 	}
 
-	cli := ethrpc.New("https://rinkebyshared.bdnodes.net?auth=dKvc9d7tXrOdmnKK9nsfl119I19PH4GZPbACnbH-QW0")
-
-	isMatch, matchingVals, returnedVals := MatchContract(cli, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
 	assert.True(t, isMatch)
 	assert.Equal(t, matchingVals[0], "12")
 	assert.Equal(t, fmt.Sprint(returnedVals), "[[4,8,12]]")
@@ -94,14 +93,12 @@ func TestMatchContract6(t *testing.T) {
 
 func TestMatchContract7(t *testing.T) {
 
-	cli := ethrpc.New("https://rinkebyshared.bdnodes.net?auth=dKvc9d7tXrOdmnKK9nsfl119I19PH4GZPbACnbH-QW0")
-
 	// () -> (int128, int128, int128)
 	tg, err := NewTriggerFromFile("../resources/triggers/wac7.json")
 	if err != nil {
 		t.Error(t)
 	}
-	isMatch, matchingVals, returnedVals := MatchContract(cli, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
 	assert.True(t, isMatch)
 	assert.Equal(t, matchingVals[0], "4")
 	assert.Equal(t, fmt.Sprint(returnedVals), "[4#END# 8#END# 12]")
@@ -109,14 +106,12 @@ func TestMatchContract7(t *testing.T) {
 
 func TestMatchContract8(t *testing.T) {
 
-	cli := ethrpc.New("https://rinkebyshared.bdnodes.net?auth=dKvc9d7tXrOdmnKK9nsfl119I19PH4GZPbACnbH-QW0")
-
 	// () -> (int128, string, string)
 	tg, err := NewTriggerFromFile("../resources/triggers/wac8.json")
 	if err != nil {
 		t.Error(t)
 	}
-	isMatch, matchingVals, returnedVals := MatchContract(cli, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
 	assert.True(t, isMatch)
 	assert.Equal(t, matchingVals[0], "moon")
 	assert.Equal(t, fmt.Sprint(returnedVals), "[4#END# \"sailor\"#END# \"moon\"]")
@@ -124,14 +119,12 @@ func TestMatchContract8(t *testing.T) {
 
 func TestMatchContract9(t *testing.T) {
 
-	cli := ethrpc.New("https://rinkebyshared.bdnodes.net?auth=dKvc9d7tXrOdmnKK9nsfl119I19PH4GZPbACnbH-QW0")
-
 	// () -> string[3]
 	tg, err := NewTriggerFromFile("../resources/triggers/wac9.json")
 	if err != nil {
 		t.Error(t)
 	}
-	isMatch, matchingVals, returnedVals := MatchContract(cli, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
 	assert.True(t, isMatch)
 	assert.Equal(t, matchingVals[0], "ciao")
 	assert.Equal(t, fmt.Sprint(returnedVals), "[[\"ciao\",\"come\",\"stai\"]]")
@@ -139,14 +132,12 @@ func TestMatchContract9(t *testing.T) {
 
 func TestMatchContract10(t *testing.T) {
 
-	cli := ethrpc.New("https://rinkebyshared.bdnodes.net?auth=dKvc9d7tXrOdmnKK9nsfl119I19PH4GZPbACnbH-QW0")
-
 	// () -> string[3]
 	tg, err := NewTriggerFromFile("../resources/triggers/wac10.json")
 	if err != nil {
 		t.Error(t)
 	}
-	isMatch, matchingVals, returnedVals := MatchContract(cli, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, len(matchingVals), 2)
@@ -157,14 +148,12 @@ func TestMatchContract10(t *testing.T) {
 
 func TestMatchContract11(t *testing.T) {
 
-	cli := ethrpc.New("https://rinkebyshared.bdnodes.net?auth=dKvc9d7tXrOdmnKK9nsfl119I19PH4GZPbACnbH-QW0")
-
 	// () -> string[3]
 	tg, err := NewTriggerFromFile("../resources/triggers/wac11.json")
 	if err != nil {
 		t.Error(t)
 	}
-	isMatch, matchingVals, returnedVals := MatchContract(cli, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
 
 	assert.False(t, isMatch)
 	assert.Equal(t, matchingVals[0], "10")
