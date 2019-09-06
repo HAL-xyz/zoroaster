@@ -160,3 +160,14 @@ func TestMatchContract11(t *testing.T) {
 	assert.Equal(t, matchingVals[1], "")
 	assert.Equal(t, returnedVals, `[["0x4fed1fc4144c223ae3c1553be203cdfcbd38c581","0x65d21616594825a738bcd08a5227358593a9aaf2","0xd76f7d7d2ede0631ad23e4a01176c0e59878abda"]]`)
 }
+
+func TestMatchContractUniswap(t *testing.T) {
+
+	tg, err := NewTriggerFromFile("../resources/triggers/wac-uniswap.json")
+	if err != nil {
+		t.Error(t)
+	}
+
+	// TODO: why is this returning 0x?
+	_, _, _ = MatchContract(client, tg, 8496486)
+}
