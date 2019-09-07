@@ -97,7 +97,10 @@ func makeEthRpcCall(client *ethrpc.EthRPC, cntAddress, data string, blockNumber 
 
 	params := ethrpc.T{
 		To:   cntAddress,
-		From: cntAddress,
+		// the from field is a random hardcoded address
+		// because the ethrpc library for now doesn't support
+		// an empty from field :(
+		From: "0x2e34c46ad2f08a66bc9ff2e9fe5918590551e958",
 		Data: data,
 	}
 

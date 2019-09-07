@@ -168,6 +168,6 @@ func TestMatchContractUniswap(t *testing.T) {
 		t.Error(t)
 	}
 
-	// TODO: why is this returning 0x?
-	_, _, _ = MatchContract(client, tg, 8496486)
+	isMatch, _, _ := MatchContract(client, tg, 8496486)
+	assert.True(t, isMatch)
 }
