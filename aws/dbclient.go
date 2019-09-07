@@ -21,7 +21,7 @@ func (cli PostgresClient) UpdateNonMatchingTriggers(triggerIds []int) {
 	q := fmt.Sprintf(
 		`UPDATE %s
 			SET triggered = false
-			WHERE id = ANY($1) AND triggered = true`, cli.conf.TableTriggers)
+			WHERE id = ANY($1) AND (triggered = true OR triggered IS NULL)`, cli.conf.TableTriggers)
 
 	_, err := db.Exec(q, pq.Array(triggerIds))
 
@@ -34,7 +34,7 @@ func (cli PostgresClient) UpdateMatchingTriggers(triggerIds []int) {
 	q := fmt.Sprintf(
 		`UPDATE %s
 			SET triggered = true
-			WHERE id = ANY($1) AND triggered = false`, cli.conf.TableTriggers)
+			WHERE id = ANY($1) AND (triggered = false OR triggered IS NULL)`, cli.conf.TableTriggers)
 
 	_, err := db.Exec(q, pq.Array(triggerIds))
 
