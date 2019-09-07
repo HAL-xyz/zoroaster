@@ -115,7 +115,7 @@ func (cli PostgresClient) LogCnMatch(match trigger.CnMatch) int {
 	q := fmt.Sprintf(
 		`INSERT INTO "%s" (
 			"date", "trigger_id", "block_no", "matched_values", "block_time", "returned_values")
-			VALUES ($1, $2, $3, $4, $5) RETURNING id`, cli.conf.TableCnMatches)
+			VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`, cli.conf.TableCnMatches)
 	var lastId int
 	err := db.QueryRow(q, time.Now(), match.TgId, match.BlockNo, match.MatchedValues, bdate, match.AllValues).Scan(&lastId)
 
