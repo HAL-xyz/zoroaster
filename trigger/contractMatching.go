@@ -96,7 +96,7 @@ func validateContractReturnValue(
 func makeEthRpcCall(client *ethrpc.EthRPC, cntAddress, data string, blockNumber int) (string, error) {
 
 	params := ethrpc.T{
-		To:   cntAddress,
+		To: cntAddress,
 		// the from field is a random hardcoded address
 		// because the ethrpc library for now doesn't support
 		// an empty from field :(

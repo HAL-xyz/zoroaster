@@ -158,11 +158,13 @@ func (cli PostgresClient) LogTxMatch(match trigger.TxMatch) int {
 	return lastId
 }
 
+// TODO: need to make `watOrWac` its own type cuz I never remember what to plug in there otherwise
 func (cli PostgresClient) LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error) {
 	q := fmt.Sprintf(
 		`SELECT id, trigger_data, user_id
-				from %s as t
-				where (t.trigger_data ->> 'TriggerType')::text = '%s'`, cli.conf.TableTriggers, watOrWac)
+				FROM %s AS t
+				WHERE (t.trigger_data ->> 'TriggerType')::text = '%s'
+				AND t.is_active = true`, cli.conf.TableTriggers, watOrWac)
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err
