@@ -2,6 +2,7 @@ package aws
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
@@ -109,51 +110,38 @@ func (cli PostgresClient) SetLastBlockProcessed(blockNo int, watOrWac string) {
 	}
 }
 
-func (cli PostgresClient) LogCnMatch(match trigger.CnMatch) int {
-	bdate := time.Unix(int64(match.BlockTimestamp), 0)
+func (cli PostgresClient) LogMatch(match trigger.IMatch) int {
+	var matchData []byte
+	var trigId int
+	var err error
 
-	q := fmt.Sprintf(
-		`INSERT INTO "%s" (
-			"date", "trigger_id", "block_no", "matched_values", "block_time", "returned_values")
-			VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`, cli.conf.TableCnMatches)
-	var lastId int
-	err := db.QueryRow(q, time.Now(), match.TgId, match.BlockNo, match.MatchedValues, bdate, match.AllValues).Scan(&lastId)
-
-	if err != nil {
-		log.Errorf("cannot write contract log match: %s", err)
+	switch m := match.(type) {
+	case trigger.CnMatch:
+		matchData, err = json.Marshal(m.ToPersistent())
+		if err != nil {
+			log.Errorf("cannot marshall match into json")
+			return -1
+		}
+		trigId = m.TgId
+	case trigger.TxMatch:
+		matchData, err = json.Marshal(m.ZTx)
+		if err != nil {
+			log.Errorf("cannot marshall match into json")
+			return -1
+		}
+		trigId = m.Tg.TriggerId
+	default:
+		log.Errorf("unsupported match type: %T", m)
+		return -1
 	}
-	return lastId
-}
-
-func (cli PostgresClient) LogTxMatch(match trigger.TxMatch) int {
-	bdate := time.Unix(int64(match.ZTx.BlockTimestamp), 0)
-	tx := match.ZTx.Tx
-	tg := match.Tg
 	q := fmt.Sprintf(
 		`INSERT INTO "%s" (
-			"date",
-			"trigger_id",
-			"block_no",
-			"block_hash",
-			"block_time",
-			"tx_hash",
-			"from",
-			"to",
-			"nonce",
-			"value",
-			"gas_price",
-			"gas",
-			"data",
-			"user_id",
-			"fn_name",
-			"fn_args") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id`, cli.conf.TableTxMatches)
-
+			"trigger_id", "match_data", "created_at")
+			VALUES ($1, $2, $3) RETURNING id`, cli.conf.TableMatches)
 	var lastId int
-	err := db.QueryRow(q, time.Now(), tg.TriggerId, *tx.BlockNumber, tx.BlockHash, bdate, tx.Hash, tx.From,
-		tx.To, tx.Nonce, tx.Value.String(), tx.GasPrice.String(), tx.Gas, tx.Input, tg.UserId,
-		match.ZTx.DecodedFnName, match.ZTx.DecodedFnArgs).Scan(&lastId)
+	err = db.QueryRow(q, trigId, matchData, time.Now()).Scan(&lastId)
 	if err != nil {
-		log.Errorf("cannot write transaction log match: %s", err)
+		log.Errorf("cannot write log iMatch: %s", err)
 	}
 	return lastId
 }

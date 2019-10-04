@@ -23,7 +23,7 @@ func ContractMatcher(
 
 		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, getModifiedAccounts, idb, client)
 		for _, m := range cnMatches {
-			matchId := idb.LogCnMatch(*m)
+			matchId := idb.LogMatch(*m)
 			m.MatchId = matchId
 			log.Debug("\tlogged one match with id ", matchId)
 			matchesChan <- m

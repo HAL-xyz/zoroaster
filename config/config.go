@@ -18,8 +18,7 @@ type ZConfiguration struct {
 
 type TriggersDB struct {
 	TableTriggers   string
-	TableTxMatches  string
-	TableCnMatches  string
+	TableMatches    string
 	TableTxOutcomes string
 	TableCnOutcomes string
 	TableStats      string

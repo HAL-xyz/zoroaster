@@ -30,9 +30,26 @@ func TestPostgresClient_All(t *testing.T) {
 
 	defer psqlClient.Close()
 
+	// Log Tx Match
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/t1.json")
+	tx := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
+	fnArgs := "{}"
+	ztx := trigger.ZTransaction{
+		BlockTimestamp: 1554828248,
+		DecodedFnName:  &fnArgs,
+		DecodedFnArgs:  &fnArgs,
+		Tx:             tx,
+	}
+	txMatch := trigger.TxMatch{
+		MatchId: 1,
+		Tg:      tg,
+		ZTx:     &ztx,
+	}
+	psqlClient.LogMatch(txMatch)
+
 	// Log Contract Match
-	m := trigger.CnMatch{1, 8888, 10, 0, "matched values", "all values", 1554828248}
-	psqlClient.LogCnMatch(m)
+	cnMatch := trigger.CnMatch{1, 8888, 10, 0, "matched values", "all values", 1554828248}
+	psqlClient.LogMatch(cnMatch)
 
 	// Update Matching Triggers
 	psqlClient.UpdateMatchingTriggers([]int{21, 31})

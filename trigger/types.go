@@ -36,6 +36,23 @@ type CnMatch struct {
 // Implements IMatch interface
 func (CnMatch) isMatch() {}
 
+// The CnMatch data we save in the jsonb data field on DB
+type PersistentCnMatch struct {
+	BlockNo        int
+	BlockTimestamp int
+	MatchedValues  string
+	AllValues      string
+}
+
+func (m CnMatch) ToPersistent() *PersistentCnMatch {
+	return &PersistentCnMatch{
+		BlockNo:        m.BlockNo,
+		BlockTimestamp: m.BlockTimestamp,
+		MatchedValues:  m.MatchedValues,
+		AllValues:      m.AllValues,
+	}
+}
+
 // Outcome is the result of executing an Action;
 // the Payload field can be a json struct
 type Outcome struct {

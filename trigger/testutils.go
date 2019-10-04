@@ -19,7 +19,7 @@ func jsonToTransaction(jsonSrc []byte) (*ethrpc.Transaction, error) {
 	return &tx, nil
 }
 
-func getTransactionFromFile(path string) *ethrpc.Transaction {
+func GetTransactionFromFile(path string) *ethrpc.Transaction {
 	txSrc, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Error(err)

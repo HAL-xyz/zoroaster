@@ -65,7 +65,7 @@ func TestValidateFilter4(t *testing.T) {
 }
 
 func TestValidateFilter5(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx1.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx1.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t5.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -86,7 +86,7 @@ func TestValidateFilter5(t *testing.T) {
 }
 
 func TestValidateFilter6(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx2.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx2.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t6.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -100,7 +100,7 @@ func TestValidateFilter6(t *testing.T) {
 }
 
 func TestValidateFilter7(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx3.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx3.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t7.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -115,7 +115,7 @@ func TestValidateFilter7(t *testing.T) {
 }
 
 func TestValidateFilter8(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx4.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx4.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t8.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -130,7 +130,7 @@ func TestValidateFilter8(t *testing.T) {
 }
 
 func TestValidateFilter9(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx5.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx5.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t9.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -150,7 +150,7 @@ func TestValidateFilter9(t *testing.T) {
 }
 
 func TestValidateFilter10(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx6.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx6.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t9.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -170,7 +170,7 @@ func TestValidateFilter11(t *testing.T) {
 	// mute logging just for these tests to reduce noise
 	log.SetLevel(log.WarnLevel)
 
-	tx := getTransactionFromFile("../resources/transactions/tx5.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx5.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t10.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -185,7 +185,7 @@ func TestValidateFilter11(t *testing.T) {
 }
 
 func TestValidateFilter12(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx2.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx2.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t12.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -209,7 +209,7 @@ func TestValidateFilter13(t *testing.T) {
 	// mute logging just for these tests to reduce noise
 	log.SetLevel(log.WarnLevel)
 
-	tx := getTransactionFromFile("../resources/transactions/tx2.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx2.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t12.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -225,7 +225,7 @@ func TestValidateFilter13(t *testing.T) {
 }
 
 func TestValidateFilter14(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx7.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx7.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t13.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -234,7 +234,7 @@ func TestValidateFilter14(t *testing.T) {
 }
 
 func TestValidateFilter15(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx8.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx8.json")
 	trigger, _ := NewTriggerFromFile("../resources/triggers/t14.json")
 	tid, abi, cnt := trigger.TriggerId, &trigger.ContractABI, trigger.ContractAdd
 
@@ -276,7 +276,7 @@ func TestMatchTrigger(t *testing.T) {
 }
 
 func TestJsonToTransaction(t *testing.T) {
-	tx := getTransactionFromFile("../resources/transactions/tx1.json")
+	tx := GetTransactionFromFile("../resources/transactions/tx1.json")
 
 	assert.Equal(t, *tx.BlockNumber, 7669714)
 	assert.Equal(t, *tx.TransactionIndex, 4)
