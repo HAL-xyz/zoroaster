@@ -13,10 +13,10 @@ func ProcessMatch(match trigger.IMatch, idb aws.IDB, iEmail sesiface.SESAPI, htt
 	var userId, triggerId, matchId int
 
 	switch m := match.(type) {
-	case *trigger.TxMatch:
+	case trigger.TxMatch:
 		log.Debug("Got a Tx Match")
 		userId, triggerId, matchId = m.Tg.UserId, m.Tg.TriggerId, m.MatchId
-	case *trigger.CnMatch:
+	case trigger.CnMatch:
 		log.Debug("Got a Contract Match")
 		userId, triggerId, matchId = m.TgUserId, m.TgId, m.MatchId
 	default:
@@ -31,7 +31,7 @@ func ProcessMatch(match trigger.IMatch, idb aws.IDB, iEmail sesiface.SESAPI, htt
 
 	outcomes := action.ProcessActions(acts, match, iEmail, httpCli)
 	for _, out := range outcomes {
-		idb.LogOutcome(out, matchId, "wac")
+		idb.LogOutcome(out, matchId)
 		log.Debug("\tLogged outcome for match id ", matchId)
 	}
 	return outcomes

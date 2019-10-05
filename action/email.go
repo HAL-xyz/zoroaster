@@ -85,9 +85,9 @@ func assembleEmail(recipients []string, subject, body string) *ses.SendEmailInpu
 
 func fillEmailTemplate(text string, payload trigger.IMatch) string {
 	switch m := payload.(type) {
-	case *trigger.TxMatch:
+	case trigger.TxMatch:
 		return templateTransaction(text, m.ZTx)
-	case *trigger.CnMatch:
+	case trigger.CnMatch:
 		return templateContract(text, m)
 	default:
 		log.Warnf("Invalid match type %T", payload)
@@ -95,7 +95,7 @@ func fillEmailTemplate(text string, payload trigger.IMatch) string {
 	}
 }
 
-func templateContract(text string, match *trigger.CnMatch) string {
+func templateContract(text string, match trigger.CnMatch) string {
 	// standard fields
 	blockNumber := fmt.Sprintf("%v", match.BlockNo)
 	blockTimestamp := fmt.Sprintf("%v", match.BlockTimestamp)

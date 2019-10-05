@@ -58,10 +58,10 @@ func TestPostgresClient_All(t *testing.T) {
 	psqlClient.UpdateNonMatchingTriggers([]int{21, 31})
 
 	// Log Outcomes
-	o1 := trigger.Outcome{"TX outcome", "TX payload"}
-	o2 := trigger.Outcome{"CN outcome", "CN payload"}
-	psqlClient.LogOutcome(&o1, 1, "wat")
-	psqlClient.LogOutcome(&o2, 1, "wac")
+	payload := `{"BlockNo":8888,"BlockTimestamp":1554828248,"ReturnedValue":"matched values","AllValues":"all values"}`
+	outcome := `{"StatusCode":200}`
+	o1 := trigger.Outcome{payload, outcome}
+	psqlClient.LogOutcome(&o1, 1)
 
 	// Load all the active triggers
 	_, err := psqlClient.LoadTriggersFromDB("WatchTransactions")

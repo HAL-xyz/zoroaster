@@ -54,10 +54,34 @@ func (m CnMatch) ToPersistent() *PersistentCnMatch {
 }
 
 // Outcome is the result of executing an Action;
-// the Payload field can be a json struct
+// it includes a payload (the body of the action request)
+// and the actual outcome of that request.
+// Both fields are represented as a json struct.
 type Outcome struct {
-	Outcome string
 	Payload string
+	Outcome string
+}
+
+// A json version of this is what we send via web hook;
+// it is also what gets stored in the db under `outcomes.payload`.
+type ContractPostData struct {
+	BlockNo        int
+	BlockTimestamp int
+	ReturnedValue  string
+	AllValues      string
+}
+
+func (m *CnMatch) ToCnPostData() *ContractPostData {
+	return &ContractPostData{
+		BlockNo:        m.BlockNo,
+		BlockTimestamp: m.BlockTimestamp,
+		ReturnedValue:  m.MatchedValues,
+		AllValues:      m.AllValues,
+	}
+}
+
+type WebhookResponse struct {
+	StatusCode int
 }
 
 type EmailPayload struct {

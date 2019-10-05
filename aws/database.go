@@ -12,7 +12,7 @@ type IDB interface {
 
 	LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error)
 
-	LogOutcome(outcome *trigger.Outcome, matchId int, watOrWac string)
+	LogOutcome(outcome *trigger.Outcome, matchId int)
 
 	GetActions(tgId int, userId int) ([]string, error)
 

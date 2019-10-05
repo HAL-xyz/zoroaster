@@ -54,22 +54,27 @@ func getActionsFromString(actionsString []string) []*Action {
 func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
 	var payload interface{}
 
-	m, ok := match.(*trigger.CnMatch)
+	// TODO if I pass a *CnMatch or *TxMatch the code compiles but the type
+	// assertion fails, which is scary. Need to ask on SO how to properly handle this.
+	m, ok := match.(trigger.CnMatch)
 	if ok {
-		payload = toCnPostData(m)
+		payload = m.ToCnPostData()
 	} else {
 		payload = match
 	}
 
-	dataBytes, err := json.Marshal(payload)
+	postData, err := json.Marshal(payload)
 	if err != nil {
-		return &trigger.Outcome{err.Error(), ""}
+		return &trigger.Outcome{fmt.Sprintf("%v", payload), err.Error()}
 	}
-	resp, err := httpCli.Post(awp.URI, "application/json", bytes.NewBuffer(dataBytes))
+	resp, err := httpCli.Post(awp.URI, "application/json", bytes.NewBuffer(postData))
 	if err != nil {
-		return &trigger.Outcome{err.Error(), string(dataBytes)}
+		return &trigger.Outcome{string(postData), err.Error()}
 	}
-	return &trigger.Outcome{resp.Status, string(dataBytes)}
+
+	responseCode := trigger.WebhookResponse{resp.StatusCode}
+	jsonRespCode, _ := json.Marshal(responseCode)
+	return &trigger.Outcome{string(postData), string(jsonRespCode)}
 }
 
 func handleEmail(email AttributeEmail, payload trigger.IMatch, iemail sesiface.SESAPI) *trigger.Outcome {
@@ -118,14 +123,14 @@ func handleEmail(email AttributeEmail, payload trigger.IMatch, iemail sesiface.S
 	}
 	emailPayloadString, err := json.Marshal(emailPayload)
 	if err != nil {
-		return &trigger.Outcome{err.Error(), ""}
+		return &trigger.Outcome{fmt.Sprintf("%s", emailPayload), err.Error()}
 	}
 
 	result, err := sendEmail(iemail, allRecipients, email.Subject, body)
 	if err != nil {
-		return &trigger.Outcome{err.Error(), ""}
+		return &trigger.Outcome{string(emailPayloadString), err.Error()}
 	}
-	return &trigger.Outcome{result.String(), string(emailPayloadString)}
+	return &trigger.Outcome{string(emailPayloadString), result.String()}
 }
 
 func validateEmails(emails []string) []string {
@@ -137,22 +142,4 @@ func validateEmails(emails []string) []string {
 		}
 	}
 	return validEmails
-}
-
-// In the web hook POST we don't want to expose TgId and TgUserId
-// so we send this instead of a full CnMatch
-type ContractPostData struct {
-	MatchId        int
-	BlockNo        int
-	ReturnValue    string
-	BlockTimestamp int
-}
-
-func toCnPostData(m *trigger.CnMatch) *ContractPostData {
-	return &ContractPostData{
-		MatchId:        m.MatchId,
-		BlockNo:        m.BlockNo,
-		ReturnValue:    m.MatchedValues,
-		BlockTimestamp: m.BlockTimestamp,
-	}
 }

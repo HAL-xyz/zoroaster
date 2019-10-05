@@ -4,8 +4,7 @@
   "triggersDB": {
     "tableTriggers": "prod_triggers",
     "tableMatches": "prod_matches",
-    "tableTxOutcomes": "prod_tx_outcomes",
-    "tableCnOutcomes": "prod_cn_outcomes",
+    "tableOutcomes": "prod_outcomes",
     "tableStats": "prod_stats",
     "tableActions": "prod_actions",
     "host": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",

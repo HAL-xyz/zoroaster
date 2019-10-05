@@ -44,7 +44,7 @@ func TestFillEmailTemplate1(t *testing.T) {
 		t.Error(err)
 	}
 
-	body := fillEmailTemplate(string(template), &match)
+	body := fillEmailTemplate(string(template), match)
 
 	expected, err := ioutil.ReadFile("../resources/emails/expected1.txt")
 	if err != nil {
@@ -70,7 +70,7 @@ func TestFillEmailTemplate2(t *testing.T) {
 		t.Error(err)
 	}
 
-	body := fillEmailTemplate(string(template), &match)
+	body := fillEmailTemplate(string(template), match)
 
 	expected, err := ioutil.ReadFile("../resources/emails/expected2.txt")
 	if err != nil {
@@ -96,7 +96,7 @@ func TestFillEmailTemplate3(t *testing.T) {
 		t.Error(err)
 	}
 
-	body := fillEmailTemplate(string(template), &match)
+	body := fillEmailTemplate(string(template), match)
 
 	expected, err := ioutil.ReadFile("../resources/emails/expected3.txt")
 	if err != nil {
@@ -119,7 +119,7 @@ func TestFillEmailTemplate4(t *testing.T) {
 	}
 
 	template := "$AllValues$"
-	body := fillEmailTemplate(template, &match)
+	body := fillEmailTemplate(template, match)
 
 	assert.Equal(t, body, "0x4a574510c7014e4ae985403536074abe582adfc8")
 }
