@@ -61,11 +61,13 @@ func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchId int) {
 func (cli PostgresClient) GetActions(tgId int, userId int) ([]string, error) {
 	q := fmt.Sprintf(
 		`SELECT action_data
-				FROM %s AS t
-				WHERE (t.action_data ->> 'TriggerId')::int = $1
-				AND (t.action_data ->> 'UserId')::int = $2
-				AND t.is_active = true`, cli.conf.TableActions)
-	rows, err := db.Query(q, tgId, userId)
+				FROM %s AS tg_table, %s AS act_table
+				WHERE tg_table.user_id = $1
+				AND tg_table.id = act_table.trigger_id
+				AND tg_table.id = $2
+				AND tg_table.is_active = true`,
+				cli.conf.TableTriggers, cli.conf.TableActions)
+	rows, err := db.Query(q, userId, tgId)
 	if err != nil {
 		return nil, err
 	}

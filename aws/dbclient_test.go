@@ -22,11 +22,11 @@ func TestPostgresClient_All(t *testing.T) {
 	// for now I can't be bothered and I'll fit everything in one test,
 	// closing the connection only once, at the end.
 
-	// Also note that these tests aren't asserting anything at the moment.
+	// Also note that these tests they are, at best, asserting for non-errors.
 	// The way I'm using them is to run them as a stand-alone module and see
-	// if they log any error (they shouldn't).
-	// In the future it would be nice to have some real assertions,
-	// perhaps with a system that populates from scratch a table.
+	// what they return.
+	// In the future it would be nice to have some real assertions;
+	// we would need to populate a database and have asserts on the returned values.
 
 	defer psqlClient.Close()
 
@@ -69,4 +69,9 @@ func TestPostgresClient_All(t *testing.T) {
 		t.Error(err)
 	}
 
+	// Get all the active actions
+	_, err = psqlClient.GetActions(34, 1)
+	if err != nil {
+		t.Error(err)
+	}
 }
