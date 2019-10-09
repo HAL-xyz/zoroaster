@@ -21,7 +21,17 @@ func (m mockHttpClient) Post(url, contentType string, body io.Reader) (*http.Res
 func TestHandleWebHookPost(t *testing.T) {
 
 	url := AttributeWebhookPost{URI: "https://hal.xyz"}
-	cnMatch := trigger.CnMatch{1, 8888, 10, 0, "matched values", "all values", 1554828248}
+	cnMatch := trigger.CnMatch{
+		8888,
+		1554828248,
+		"0x",
+		10,
+		0,
+		1,
+		"0x",
+		"fn()",
+		"matched values",
+		"all values"}
 
 	outcome := handleWebHookPost(url, cnMatch, mockHttpClient{})
 

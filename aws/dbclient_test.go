@@ -48,7 +48,18 @@ func TestPostgresClient_All(t *testing.T) {
 	psqlClient.LogMatch(txMatch)
 
 	// Log Contract Match
-	cnMatch := trigger.CnMatch{1, 8888, 10, 0, "matched values", "all values", 1554828248}
+	cnMatch := trigger.CnMatch{
+		1,
+		8888,
+		"0x",
+		10,
+		0,
+		10,
+		"0x",
+		"fn()",
+		"{}",
+		"{}",
+	}
 	psqlClient.LogMatch(cnMatch)
 
 	// Update Matching Triggers

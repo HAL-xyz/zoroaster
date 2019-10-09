@@ -45,7 +45,7 @@ func TestMatchContractsForBlock(t *testing.T) {
 	zconf := config.Load("../config")
 	var client = ethrpc.New(zconf.EthNode)
 
-	cnMatches := matchContractsForBlock(8081000, 1554828248, mockGetModAccounts, mockDB{}, client)
+	cnMatches := matchContractsForBlock(8081000, 1554828248, "0x", mockGetModAccounts, mockDB{}, client)
 
 	assert.Equal(t, len(cnMatches), 1)
 	assert.Equal(t, cnMatches[0].BlockNo, 8081000)

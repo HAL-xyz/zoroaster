@@ -66,7 +66,7 @@ func (cli PostgresClient) GetActions(tgId int, userId int) ([]string, error) {
 				AND tg_table.id = act_table.trigger_id
 				AND tg_table.id = $2
 				AND tg_table.is_active = true`,
-				cli.conf.TableTriggers, cli.conf.TableActions)
+		cli.conf.TableTriggers, cli.conf.TableActions)
 	rows, err := db.Query(q, userId, tgId)
 	if err != nil {
 		return nil, err
@@ -107,27 +107,9 @@ func (cli PostgresClient) SetLastBlockProcessed(blockNo int, watOrWac string) {
 }
 
 func (cli PostgresClient) LogMatch(match trigger.IMatch) int {
-	var matchData []byte
-	var trigId int
-	var err error
-
-	switch m := match.(type) {
-	case trigger.CnMatch:
-		matchData, err = json.Marshal(m.ToPersistent())
-		if err != nil {
-			log.Errorf("cannot marshall match into json")
-			return -1
-		}
-		trigId = m.TgId
-	case trigger.TxMatch:
-		matchData, err = json.Marshal(m.ZTx)
-		if err != nil {
-			log.Errorf("cannot marshall match into json")
-			return -1
-		}
-		trigId = m.Tg.TriggerId
-	default:
-		log.Errorf("unsupported match type: %T", m)
+	matchData, err := json.Marshal(match.ToPersistent())
+	if err != nil {
+		log.Errorf("cannot marshall match into json")
 		return -1
 	}
 	q := fmt.Sprintf(
@@ -135,7 +117,7 @@ func (cli PostgresClient) LogMatch(match trigger.IMatch) int {
 			"trigger_id", "match_data", "created_at")
 			VALUES ($1, $2, $3) RETURNING id`, cli.conf.TableMatches)
 	var lastId int
-	err = db.QueryRow(q, trigId, matchData, time.Now()).Scan(&lastId)
+	err = db.QueryRow(q, match.GetTriggerId(), matchData, time.Now()).Scan(&lastId)
 	if err != nil {
 		log.Errorf("cannot write log iMatch: %s", err)
 	}
