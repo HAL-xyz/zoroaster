@@ -59,14 +59,11 @@ func (PersistentTxMatch) isPersistable() {}
 func (TxMatch) isMatch() {}
 
 type CnMatch struct {
+	Trigger        *Trigger
 	BlockNo        int
 	BlockTimestamp int
 	BlockHash      string
 	MatchId        int
-	TgId           int
-	TgUserId       int
-	ContractAdd    string
-	FunctionName   string
 	MatchedValues  string
 	AllValues      string
 }
@@ -92,8 +89,8 @@ func (m CnMatch) ToPersistent() IPersistableMatch {
 		BlockNo:        m.BlockNo,
 		BlockTimestamp: m.BlockTimestamp,
 		BlockHash:      m.BlockHash,
-		ContractAdd:    m.ContractAdd,
-		FunctionName:   m.FunctionName,
+		ContractAdd:    m.Trigger.ContractAdd,
+		FunctionName:   m.Trigger.MethodName,
 		ReturnedData: struct {
 			MatchedValues string
 			AllValues     string
@@ -125,7 +122,7 @@ func (m CnMatch) ToCnPostData() *ContractPostData {
 }
 
 func (m CnMatch) GetTriggerId() int {
-	return m.TgId
+	return m.Trigger.TriggerId
 }
 
 // Outcome is the result of executing an Action;

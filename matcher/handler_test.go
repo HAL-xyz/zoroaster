@@ -71,13 +71,15 @@ func (mockDB2) GetActions(tgId int, userId int) ([]string, error) {
 
 func TestProcessMatch(t *testing.T) {
 
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+
 	match := trigger.CnMatch{
+		Trigger:        tg,
 		MatchId:        1,
 		BlockNo:        999,
 		BlockTimestamp: 1554828248,
-		TgId:           1,
-		TgUserId:       1,
 		MatchedValues:  "0xfffffffffffff",
+		BlockHash:      "0x",
 	}
 
 	outcomes := ProcessMatch(match, mockDB2{}, &mockSESClient{}, &mockHttpClient{})

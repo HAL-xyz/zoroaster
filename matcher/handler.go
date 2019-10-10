@@ -18,7 +18,7 @@ func ProcessMatch(match trigger.IMatch, idb aws.IDB, iEmail sesiface.SESAPI, htt
 		userId, triggerId, matchId = m.Tg.UserId, m.Tg.TriggerId, m.MatchId
 	case trigger.CnMatch:
 		log.Debug("Got a Contract Match")
-		userId, triggerId, matchId = m.TgUserId, m.TgId, m.MatchId
+		userId, triggerId, matchId = m.Trigger.UserId, m.Trigger.TriggerId, m.MatchId
 	default:
 		log.Errorf("invalid match type %T", m)
 		return nil

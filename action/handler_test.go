@@ -20,22 +20,21 @@ func (m mockHttpClient) Post(url, contentType string, body io.Reader) (*http.Res
 
 func TestHandleWebHookPost(t *testing.T) {
 
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 	url := AttributeWebhookPost{URI: "https://hal.xyz"}
 	cnMatch := trigger.CnMatch{
+		tg,
 		8888,
 		1554828248,
 		"0x",
 		10,
-		0,
-		1,
-		"0x",
-		"fn()",
 		"matched values",
 		"all values"}
 
 	outcome := handleWebHookPost(url, cnMatch, mockHttpClient{})
 
-	assert.Equal(t, outcome.Payload, `{"BlockNo":8888,"BlockTimestamp":1554828248,"ReturnedValue":"matched values","AllValues":"all values"}`)
+	expectedPayload := `{"BlockNo":8888,"BlockTimestamp":1554828248,"ReturnedValue":"matched values","AllValues":"all values"}`
+	assert.Equal(t, outcome.Payload, expectedPayload)
 	assert.Equal(t, outcome.Outcome, `{"StatusCode":200}`)
 }
 
@@ -58,14 +57,16 @@ func TestHandleEmail1(t *testing.T) {
 		Body:    "body",
 	}
 
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+
 	payload := trigger.CnMatch{
+		Trigger:        tg,
 		MatchId:        1,
 		BlockNo:        1,
-		TgId:           1,
-		TgUserId:       1,
 		MatchedValues:  "",
 		AllValues:      "[\"marco@atomic.eu.com\"",
 		BlockTimestamp: 123,
+		BlockHash:      "0x",
 	}
 	outcome := handleEmail(email, payload, &mockSESClient{})
 	expectedPayload := `{"Recipients":["manlio.poltronieri@gmail.com","marco@atomic.eu.com"],"Body":"body"}`
@@ -82,14 +83,16 @@ func TestHandleEmail2(t *testing.T) {
 		Body:    "body",
 	}
 
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+
 	payload := trigger.CnMatch{
+		Trigger:        tg,
 		MatchId:        1,
 		BlockNo:        1,
-		TgId:           1,
-		TgUserId:       1,
 		MatchedValues:  "",
 		AllValues:      "[[\"marco@atomic.eu.com\",\"matteo@atomic.eu.com\",\"not and address\"]]",
 		BlockTimestamp: 123,
+		BlockHash:      "0x",
 	}
 	outcome := handleEmail(email, payload, &mockSESClient{})
 	expectedPayload := `{"Recipients":["manlio.poltronieri@gmail.com","marco@atomic.eu.com","matteo@atomic.eu.com"],"Body":"body"}`
@@ -105,14 +108,16 @@ func TestHandleEmail3(t *testing.T) {
 		Body:    "body",
 	}
 
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+
 	payload := trigger.CnMatch{
+		Trigger:        tg,
 		MatchId:        1,
 		BlockNo:        1,
-		TgId:           1,
-		TgUserId:       1,
 		MatchedValues:  "",
 		AllValues:      "[4#END# \"manlio.poltronieri@gmail.com\"#END# \"hello@world.com\"]",
 		BlockTimestamp: 123,
+		BlockHash:      "0x",
 	}
 	outcome := handleEmail(email, payload, &mockSESClient{})
 	expectedPayload := `{"Recipients":["manlio.poltronieri@gmail.com","hello@world.com"],"Body":"body"}`

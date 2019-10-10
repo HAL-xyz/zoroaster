@@ -70,16 +70,13 @@ func matchContractsForBlock(
 		isMatch, matchedValues, allValues := trigger.MatchContract(client, tg, blockNo)
 		if isMatch {
 			match := &trigger.CnMatch{
+				Trigger:        tg,
 				MatchId:        0,
 				BlockNo:        blockNo,
 				BlockHash:      blockHash,
-				TgId:           tg.TriggerId,
-				TgUserId:       tg.UserId,
 				MatchedValues:  fmt.Sprint(matchedValues),
 				AllValues:      allValues,
 				BlockTimestamp: blockTimestamp,
-				ContractAdd:    tg.ContractAdd,
-				FunctionName:   tg.MethodName,
 			}
 			cnMatches = append(cnMatches, match)
 			log.Debugf("\tCN: Trigger %d matched on block %d\n", tg.TriggerId, blockNo)
@@ -97,7 +94,7 @@ func matchContractsForBlock(
 func updateStatusForMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch) {
 	var matchingTriggersIds []int
 	for _, m := range matches {
-		matchingTriggersIds = append(matchingTriggersIds, m.TgId)
+		matchingTriggersIds = append(matchingTriggersIds, m.Trigger.TriggerId)
 	}
 	idb.UpdateMatchingTriggers(matchingTriggersIds)
 }
@@ -111,7 +108,7 @@ func updateStatusForNonMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch,
 		setAll[t.TriggerId] = struct{}{}
 	}
 	for _, m := range matches {
-		setMatches[m.TgId] = struct{}{}
+		setMatches[m.Trigger.TriggerId] = struct{}{}
 	}
 
 	nonMatchingTriggersIds := getSliceFromIntSet(setDifference(setAll, setMatches))

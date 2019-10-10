@@ -55,15 +55,16 @@ func TestFillEmailTemplate1(t *testing.T) {
 }
 
 func TestFillEmailTemplate2(t *testing.T) {
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 
 	match := trigger.CnMatch{
+		Trigger:        tg,
 		MatchId:        1,
 		BlockNo:        88888,
-		TgId:           1,
-		TgUserId:       1,
 		MatchedValues:  "4",
 		BlockTimestamp: 123456,
 		AllValues:      "[[4,8,12]]",
+		BlockHash:      "0x",
 	}
 	template, err := ioutil.ReadFile("../resources/emails/template2.txt")
 	if err != nil {
@@ -81,15 +82,16 @@ func TestFillEmailTemplate2(t *testing.T) {
 }
 
 func TestFillEmailTemplate3(t *testing.T) {
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 
 	match := trigger.CnMatch{
+		Trigger:        tg,
 		MatchId:        1,
 		BlockNo:        88888,
-		TgId:           1,
-		TgUserId:       1,
 		MatchedValues:  "4",
 		BlockTimestamp: 123456,
 		AllValues:      "[4#END# \"sailor\"#END# \"moon\"]",
+		BlockHash:      "0x",
 	}
 	template, err := ioutil.ReadFile("../resources/emails/template3.txt")
 	if err != nil {
@@ -107,15 +109,16 @@ func TestFillEmailTemplate3(t *testing.T) {
 }
 
 func TestFillEmailTemplate4(t *testing.T) {
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 
 	match := trigger.CnMatch{
+		Trigger:        tg,
 		MatchId:        1,
 		BlockNo:        88888,
-		TgId:           1,
-		TgUserId:       1,
 		MatchedValues:  "4",
 		BlockTimestamp: 123456,
 		AllValues:      "[\"0x4a574510c7014e4ae985403536074abe582adfc8\"]",
+		BlockHash:      "0x",
 	}
 
 	template := "$AllValues$"
