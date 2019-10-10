@@ -9,16 +9,24 @@ type ZTransaction struct {
 	Tx             *ethrpc.Transaction
 }
 
-// IMatch is an interface to fake IMatch as a sum type {TxMatch, CnMatch}
+// A match as represented internally by Zoroaster
 type IMatch interface {
-	isMatch()
 	ToPersistent() IPersistableMatch
+	ToPostPayload() IPostablePaylaod
 	GetTriggerId() int
 }
 
+// A match persisted on the DB (in its json form)
 type IPersistableMatch interface {
 	isPersistable()
 }
+
+// A payload sent via web hook, and persisted under outcomes.payload
+type IPostablePaylaod interface {
+	isPostablePayload()
+}
+
+// TX MATCH
 
 type TxMatch struct {
 	MatchId int
@@ -26,7 +34,6 @@ type TxMatch struct {
 	ZTx     *ZTransaction
 }
 
-// The TxMatch data we save in the jsonb data field on DB
 type PersistentTxMatch struct {
 	DecodedData struct {
 		FunctionArguments *string
@@ -52,11 +59,38 @@ func (m TxMatch) GetTriggerId() int {
 	return m.Tg.TriggerId
 }
 
-// Implements IPersistable interface
+type TxPostPayload struct {
+	DecodedData struct {
+		FunctionArguments *string
+		FunctionName      *string
+	}
+	Tx          *ethrpc.Transaction
+	TriggerName string
+	TriggerType string
+	TriggerId   int
+}
+
+func (TxPostPayload) isPostablePayload() {}
+
+func (m TxMatch) ToPostPayload() IPostablePaylaod {
+	return TxPostPayload{
+		Tx: m.ZTx.Tx,
+		DecodedData: struct {
+			FunctionArguments *string
+			FunctionName      *string
+		}{
+			m.ZTx.DecodedFnArgs,
+			m.ZTx.DecodedFnName,
+		},
+		TriggerName: m.Tg.TriggerName,
+		TriggerType: m.Tg.TriggerType,
+		TriggerId:   m.Tg.TriggerId,
+	}
+}
+
 func (PersistentTxMatch) isPersistable() {}
 
-// Implements IMatch interface
-func (TxMatch) isMatch() {}
+// CONTRACT MATCH
 
 type CnMatch struct {
 	Trigger        *Trigger
@@ -68,10 +102,6 @@ type CnMatch struct {
 	AllValues      string
 }
 
-// Implements IMatch interface
-func (CnMatch) isMatch() {}
-
-// The CnMatch data we save in the jsonb data field on DB
 type PersistentCnMatch struct {
 	BlockNo        int
 	BlockTimestamp int
@@ -96,28 +126,47 @@ func (m CnMatch) ToPersistent() IPersistableMatch {
 			AllValues     string
 		}{
 			MatchedValues: m.MatchedValues,
-			AllValues:     m.AllValues},
+			AllValues:     m.AllValues,
+		},
 	}
 }
 
-// Implements IPersistable interface
 func (PersistentCnMatch) isPersistable() {}
 
-// A json version of this is what we send via web hook;
-// it is also what gets stored in the db under `outcomes.payload`.
-type ContractPostData struct {
+type CnPostPayload struct {
 	BlockNo        int
 	BlockTimestamp int
-	ReturnedValue  string
-	AllValues      string
+	BlockHash      string
+	ContractAdd    string
+	FunctionName   string
+	ReturnedData   struct {
+		MatchedValues string
+		AllValues     string
+	}
+	TriggerName string
+	TriggerType string
+	TriggerId   int
 }
 
-func (m CnMatch) ToCnPostData() *ContractPostData {
-	return &ContractPostData{
+func (CnPostPayload) isPostablePayload() {}
+
+func (m CnMatch) ToPostPayload() IPostablePaylaod {
+	return &CnPostPayload{
 		BlockNo:        m.BlockNo,
 		BlockTimestamp: m.BlockTimestamp,
-		ReturnedValue:  m.MatchedValues,
-		AllValues:      m.AllValues,
+		BlockHash:      m.BlockHash,
+		ContractAdd:    m.Trigger.ContractAdd,
+		FunctionName:   m.Trigger.MethodName,
+		ReturnedData: struct {
+			MatchedValues string
+			AllValues     string
+		}{
+			MatchedValues: m.MatchedValues,
+			AllValues:     m.AllValues,
+		},
+		TriggerName: m.Trigger.TriggerName,
+		TriggerType: m.Trigger.TriggerType,
+		TriggerId:   m.Trigger.TriggerId,
 	}
 }
 

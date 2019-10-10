@@ -85,7 +85,7 @@ func TestProcessMatch(t *testing.T) {
 	outcomes := ProcessMatch(match, mockDB2{}, &mockSESClient{}, &mockHttpClient{})
 
 	// web hook
-	webHookPayload := `{"BlockNo":999,"BlockTimestamp":1554828248,"ReturnedValue":"0xfffffffffffff","AllValues":""}`
+	webHookPayload := `{"BlockNo":999,"BlockTimestamp":1554828248,"BlockHash":"0x","ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413","FunctionName":"daoCreator","ReturnedData":{"MatchedValues":"0xfffffffffffff","AllValues":""},"TriggerName":"wac 1","TriggerType":"WatchContracts","TriggerId":0}`
 	webHookOutcome := `{"StatusCode":200}`
 
 	assert.Equal(t, outcomes[0].Payload, webHookPayload)

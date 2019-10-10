@@ -52,20 +52,9 @@ func getActionsFromString(actionsString []string) []*Action {
 }
 
 func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
-	var payload interface{}
-
-	// TODO if I pass a *CnMatch or *TxMatch the code compiles but the type
-	// assertion fails, which is scary. Need to ask on SO how to properly handle this.
-	m, ok := match.(trigger.CnMatch)
-	if ok {
-		payload = m.ToCnPostData()
-	} else {
-		payload = match
-	}
-
-	postData, err := json.Marshal(payload)
+	postData, err := json.Marshal(match.ToPostPayload())
 	if err != nil {
-		return &trigger.Outcome{fmt.Sprintf("%v", payload), err.Error()}
+		return &trigger.Outcome{fmt.Sprintf("%v", match.ToPostPayload()), err.Error()}
 	}
 	resp, err := httpCli.Post(awp.URI, "application/json", bytes.NewBuffer(postData))
 	if err != nil {
