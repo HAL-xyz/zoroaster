@@ -37,7 +37,7 @@ func TestFillEmailTemplate1(t *testing.T) {
 		t.Error(err)
 	}
 
-	match := trigger.TxMatch{0, nil, &ztx}
+	match := trigger.TxMatch{"uuid", nil, &ztx}
 
 	template, err := ioutil.ReadFile("../resources/emails/template1.txt")
 	if err != nil {
@@ -59,7 +59,7 @@ func TestFillEmailTemplate2(t *testing.T) {
 
 	match := trigger.CnMatch{
 		Trigger:        tg,
-		MatchId:        1,
+		MatchUUID:      "uuid",
 		BlockNo:        88888,
 		MatchedValues:  "4",
 		BlockTimestamp: 123456,
@@ -86,7 +86,7 @@ func TestFillEmailTemplate3(t *testing.T) {
 
 	match := trigger.CnMatch{
 		Trigger:        tg,
-		MatchId:        1,
+		MatchUUID:      "uuid",
 		BlockNo:        88888,
 		MatchedValues:  "4",
 		BlockTimestamp: 123456,
@@ -113,7 +113,7 @@ func TestFillEmailTemplate4(t *testing.T) {
 
 	match := trigger.CnMatch{
 		Trigger:        tg,
-		MatchId:        1,
+		MatchUUID:      "uuid",
 		BlockNo:        88888,
 		MatchedValues:  "4",
 		BlockTimestamp: 123456,

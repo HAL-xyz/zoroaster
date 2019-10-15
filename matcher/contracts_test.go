@@ -27,11 +27,11 @@ func (db mockDB) LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error)
 	return []*trigger.Trigger{tg}, nil
 }
 
-func (db mockDB) UpdateMatchingTriggers(triggerIds []int) {
+func (db mockDB) UpdateMatchingTriggers(triggerIds []string) {
 	// void
 }
 
-func (db mockDB) UpdateNonMatchingTriggers(triggerIds []int) {
+func (db mockDB) UpdateNonMatchingTriggers(triggerIds []string) {
 	// void
 }
 

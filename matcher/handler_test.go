@@ -39,15 +39,15 @@ type mockDB2 struct {
 	aws.IDB
 }
 
-func (mockDB2) LogOutcome(outcome *trigger.Outcome, matchId int) {
+func (mockDB2) LogOutcome(outcome *trigger.Outcome, matchUUID string) {
 	// void
 }
 
-func (mockDB2) GetActions(tgId int, userId int) ([]string, error) {
+func (mockDB2) GetActions(tgUUID string, userUUID string) ([]string, error) {
 	a1 := `
 	{
-  		"UserId": 1,
-  		"TriggerId": 35,
+  		"UserUUID": 1,
+  		"TriggerUUID": 35,
   		"ActionType": "webhook_post",
   		"Attributes": {
 			"URI": "https://webhook.site/4048fc82-5e5b-4095-8106-fa858f9d903d"
@@ -55,8 +55,8 @@ func (mockDB2) GetActions(tgId int, userId int) ([]string, error) {
 	}`
 	a2 := `
 	{
-		"UserId": 1,
-  		"TriggerId": 30,
+		"UserUUID": 1,
+  		"TriggerUUID": 30,
   		"ActionType": "email",
   		"Attributes": {
     		"To": [
@@ -75,7 +75,7 @@ func TestProcessMatch(t *testing.T) {
 
 	match := trigger.CnMatch{
 		Trigger:        tg,
-		MatchId:        1,
+		MatchUUID:      "",
 		BlockNo:        999,
 		BlockTimestamp: 1554828248,
 		MatchedValues:  "0xfffffffffffff",
@@ -85,7 +85,7 @@ func TestProcessMatch(t *testing.T) {
 	outcomes := ProcessMatch(match, mockDB2{}, &mockSESClient{}, &mockHttpClient{})
 
 	// web hook
-	webHookPayload := `{"BlockNo":999,"BlockTimestamp":1554828248,"BlockHash":"0x","ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413","FunctionName":"daoCreator","ReturnedData":{"MatchedValues":"0xfffffffffffff","AllValues":""},"TriggerName":"wac 1","TriggerType":"WatchContracts","TriggerId":0}`
+	webHookPayload := `{"BlockNo":999,"BlockTimestamp":1554828248,"BlockHash":"0x","ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413","FunctionName":"daoCreator","ReturnedData":{"MatchedValues":"0xfffffffffffff","AllValues":""},"TriggerName":"wac 1","TriggerType":"WatchContracts","TriggerUUID":""}`
 	webHookOutcome := `{"StatusCode":200}`
 
 	assert.Equal(t, outcomes[0].Payload, webHookPayload)

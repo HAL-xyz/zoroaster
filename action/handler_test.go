@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
 	"zoroaster/trigger"
+	"zoroaster/utils"
 )
 
 // HTTP Client mock
@@ -29,14 +30,16 @@ func TestHandleWebHookPost(t *testing.T) {
 		8888,
 		1554828248,
 		"0x",
-		10,
+		"uuid",
 		"matched values",
 		"all values"}
 
 	outcome := handleWebHookPost(url, cnMatch, mockHttpClient{})
 
-	expectedPayload := `{"BlockNo":8888,"BlockTimestamp":1554828248,"BlockHash":"0x","ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413","FunctionName":"daoCreator","ReturnedData":{"MatchedValues":"matched values","AllValues":"all values"},"TriggerName":"wac 1","TriggerType":"WatchContracts","TriggerId":0}`
-	assert.Equal(t, outcome.Payload, expectedPayload)
+	expectedPayload := `{"BlockNo":8888,"BlockTimestamp":1554828248,"BlockHash":"0x","ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413","FunctionName":"daoCreator","ReturnedData":{"MatchedValues":"matched values","AllValues":"all values"},"TriggerName":"wac 1","TriggerType":"WatchContracts","TriggerUUID":""}`
+	areEq, err := utils.AreEqualJSON(outcome.Payload, expectedPayload)
+	assert.NoError(t, err)
+	assert.True(t, areEq)
 	assert.Equal(t, outcome.Outcome, `{"StatusCode":200}`)
 }
 
@@ -53,9 +56,9 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 		Tx:             tx,
 	}
 	txMatch := trigger.TxMatch{
-		MatchId: 1,
-		Tg:      tg,
-		ZTx:     &ztx,
+		MatchUUID: "",
+		Tg:        tg,
+		ZTx:       &ztx,
 	}
 	outcome := handleWebHookPost(url, txMatch, mockHttpClient{})
 
@@ -83,9 +86,11 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
   },
   "TriggerName": "Basic/To, Basic/Nonce, FP/Address",
   "TriggerType": "WatchTransactions",
-  "TriggerId": 0
+  "TriggerUUID": "" 
 }`
-	assert.Equal(t, prettyJSON.String(), expectedPayload)
+	areEq, err := utils.AreEqualJSON(prettyJSON.String(), expectedPayload)
+	assert.NoError(t, err)
+	assert.True(t, areEq)
 }
 
 // SESAPI mock
@@ -111,7 +116,7 @@ func TestHandleEmail1(t *testing.T) {
 
 	payload := trigger.CnMatch{
 		Trigger:        tg,
-		MatchId:        1,
+		MatchUUID:      "",
 		BlockNo:        1,
 		MatchedValues:  "",
 		AllValues:      "[\"marco@atomic.eu.com\"",
@@ -137,7 +142,7 @@ func TestHandleEmail2(t *testing.T) {
 
 	payload := trigger.CnMatch{
 		Trigger:        tg,
-		MatchId:        1,
+		MatchUUID:      "",
 		BlockNo:        1,
 		MatchedValues:  "",
 		AllValues:      "[[\"marco@atomic.eu.com\",\"matteo@atomic.eu.com\",\"not and address\"]]",
@@ -162,7 +167,7 @@ func TestHandleEmail3(t *testing.T) {
 
 	payload := trigger.CnMatch{
 		Trigger:        tg,
-		MatchId:        1,
+		MatchUUID:      "",
 		BlockNo:        1,
 		MatchedValues:  "",
 		AllValues:      "[4#END# \"manlio.poltronieri@gmail.com\"#END# \"hello@world.com\"]",

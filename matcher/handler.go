@@ -10,20 +10,20 @@ import (
 
 func ProcessMatch(match trigger.IMatch, idb aws.IDB, iEmail sesiface.SESAPI, httpCli aws.IHttpClient) []*trigger.Outcome {
 
-	var userId, triggerId, matchId int
+	var userUUID, triggerUUID, matchUUID string
 
 	switch m := match.(type) {
 	case trigger.TxMatch:
 		log.Debug("Got a Tx Match")
-		userId, triggerId, matchId = m.Tg.UserId, m.Tg.TriggerId, m.MatchId
+		userUUID, triggerUUID, matchUUID = m.Tg.UserUUID, m.Tg.TriggerUUID, m.MatchUUID
 	case trigger.CnMatch:
 		log.Debug("Got a Contract Match")
-		userId, triggerId, matchId = m.Trigger.UserId, m.Trigger.TriggerId, m.MatchId
+		userUUID, triggerUUID, matchUUID = m.Trigger.UserUUID, m.Trigger.TriggerUUID, m.MatchUUID
 	default:
 		log.Errorf("invalid match type %T", m)
 		return nil
 	}
-	acts, err := idb.GetActions(triggerId, userId)
+	acts, err := idb.GetActions(triggerUUID, userUUID)
 	if err != nil {
 		log.Warnf("cannot get actions from db: %v", err)
 	}
@@ -31,8 +31,8 @@ func ProcessMatch(match trigger.IMatch, idb aws.IDB, iEmail sesiface.SESAPI, htt
 
 	outcomes := action.ProcessActions(acts, match, iEmail, httpCli)
 	for _, out := range outcomes {
-		idb.LogOutcome(out, matchId)
-		log.Debug("\tLogged outcome for match id ", matchId)
+		idb.LogOutcome(out, matchUUID)
+		log.Debug("\tLogged outcome for match id ", matchUUID)
 	}
 	return outcomes
 }

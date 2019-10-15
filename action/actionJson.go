@@ -40,8 +40,8 @@ func (a *Action) UnmarshalJSON(data []byte) error {
 
 // proxy struct
 type ActionJson struct {
-	TriggerID  int    `json:"TriggerId"`
-	UserID     int    `json:"UserId"`
+	TriggerID  int    `json:"TriggerUUID"`
+	UserID     int    `json:"UserUUID"`
 	ActionType string `json:"ActionType"`
 	Attributes struct {
 		URI     string   `json:"URI"`

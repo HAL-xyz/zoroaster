@@ -12,17 +12,17 @@ type IDB interface {
 
 	LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error)
 
-	LogOutcome(outcome *trigger.Outcome, matchId int)
+	LogOutcome(outcome *trigger.Outcome, matchUUID string)
 
-	GetActions(tgId int, userId int) ([]string, error)
+	GetActions(tgUUID string, userUUID string) ([]string, error)
 
 	ReadLastBlockProcessed(watOrWac string) int
 
 	SetLastBlockProcessed(blockNo int, watOrWac string)
 
-	LogMatch(match trigger.IMatch) int
+	LogMatch(match trigger.IMatch) string
 
-	UpdateMatchingTriggers(triggerIds []int)
+	UpdateMatchingTriggers(triggerIds []string)
 
-	UpdateNonMatchingTriggers(triggerIds []int)
+	UpdateNonMatchingTriggers(triggerIds []string)
 }

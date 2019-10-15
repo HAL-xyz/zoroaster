@@ -5,11 +5,11 @@
     "tableTriggers": "prod_triggers",
     "tableMatches": "prod_matches",
     "tableOutcomes": "prod_outcomes",
-    "tableStats": "prod_stats",
+    "tableState": "prod_state",
     "tableActions": "prod_actions",
     "host": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
     "user": "triggersdb_test_admin",
-    "name": "triggers",
+    "name": "HAL",
     "port": 5432
   }
 }

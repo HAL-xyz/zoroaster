@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"reflect"
 	"regexp"
 	"strings"
 )
@@ -102,4 +103,43 @@ func IsIn(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func AreEqualJSON(s1, s2 string) (bool, error) {
+	var o1 interface{}
+	var o2 interface{}
+
+	var err error
+	err = json.Unmarshal([]byte(s1), &o1)
+	if err != nil {
+		return false, fmt.Errorf("Error mashalling string 1 :: %s", err.Error())
+	}
+	err = json.Unmarshal([]byte(s2), &o2)
+	if err != nil {
+		return false, fmt.Errorf("Error mashalling string 2 :: %s", err.Error())
+	}
+
+	return reflect.DeepEqual(o1, o2), nil
+}
+
+func GetSliceFromIntSet(set map[string]struct{}) []string {
+	out := make([]string, len(set))
+	i := 0
+	for k := range set {
+		out[i] = k
+		i++
+	}
+	return out
+}
+
+func SetDifference(s1 map[string]struct{}, s2 map[string]struct{}) map[string]struct{} {
+	diff := make(map[string]struct{})
+	for v := range s1 {
+		_, ok := s2[v]
+		if ok {
+			continue
+		}
+		diff[v] = struct{}{}
+	}
+	return diff
 }

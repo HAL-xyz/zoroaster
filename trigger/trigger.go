@@ -6,7 +6,7 @@ import (
 )
 
 type Trigger struct {
-	TriggerId   int // id comes from the db
+	TriggerUUID string // UUID comes from Postgres
 	TriggerName string
 	TriggerType string
 	ContractABI string
@@ -15,7 +15,7 @@ type Trigger struct {
 	MethodName  string
 	Inputs      []Input
 	Outputs     []Output
-	UserId      int
+	UserUUID    string
 }
 
 type Filter struct {

@@ -13,7 +13,7 @@ type ZTransaction struct {
 type IMatch interface {
 	ToPersistent() IPersistableMatch
 	ToPostPayload() IPostablePaylaod
-	GetTriggerId() int
+	GetTriggerUUID() string
 }
 
 // A match persisted on the DB (in its json form)
@@ -29,9 +29,9 @@ type IPostablePaylaod interface {
 // TX MATCH
 
 type TxMatch struct {
-	MatchId int
-	Tg      *Trigger
-	ZTx     *ZTransaction
+	MatchUUID string
+	Tg        *Trigger
+	ZTx       *ZTransaction
 }
 
 type PersistentTxMatch struct {
@@ -55,8 +55,8 @@ func (m TxMatch) ToPersistent() IPersistableMatch {
 	}
 }
 
-func (m TxMatch) GetTriggerId() int {
-	return m.Tg.TriggerId
+func (m TxMatch) GetTriggerUUID() string {
+	return m.Tg.TriggerUUID
 }
 
 type TxPostPayload struct {
@@ -67,7 +67,7 @@ type TxPostPayload struct {
 	Tx          *ethrpc.Transaction
 	TriggerName string
 	TriggerType string
-	TriggerId   int
+	TriggerUUID string
 }
 
 func (TxPostPayload) isPostablePayload() {}
@@ -84,7 +84,7 @@ func (m TxMatch) ToPostPayload() IPostablePaylaod {
 		},
 		TriggerName: m.Tg.TriggerName,
 		TriggerType: m.Tg.TriggerType,
-		TriggerId:   m.Tg.TriggerId,
+		TriggerUUID: m.Tg.TriggerUUID,
 	}
 }
 
@@ -97,7 +97,7 @@ type CnMatch struct {
 	BlockNo        int
 	BlockTimestamp int
 	BlockHash      string
-	MatchId        int
+	MatchUUID      string
 	MatchedValues  string
 	AllValues      string
 }
@@ -145,7 +145,7 @@ type CnPostPayload struct {
 	}
 	TriggerName string
 	TriggerType string
-	TriggerId   int
+	TriggerUUID string
 }
 
 func (CnPostPayload) isPostablePayload() {}
@@ -166,12 +166,12 @@ func (m CnMatch) ToPostPayload() IPostablePaylaod {
 		},
 		TriggerName: m.Trigger.TriggerName,
 		TriggerType: m.Trigger.TriggerType,
-		TriggerId:   m.Trigger.TriggerId,
+		TriggerUUID: m.Trigger.TriggerUUID,
 	}
 }
 
-func (m CnMatch) GetTriggerId() int {
-	return m.Trigger.TriggerId
+func (m CnMatch) GetTriggerUUID() string {
+	return m.Trigger.TriggerUUID
 }
 
 // Outcome is the result of executing an Action;

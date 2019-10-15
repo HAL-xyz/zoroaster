@@ -37,15 +37,15 @@ func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
 func validateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {
 	match := true
 	for _, f := range tg.Filters {
-		filterMatch := validateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerId)
+		filterMatch := validateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerUUID)
 		match = match && filterMatch // a Trigger matches if all filters match
 	}
 	return match
 }
 
-func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgId int) bool {
+func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgUUID string) bool {
 	cxtLog := log.WithFields(log.Fields{
-		"trigger_id": tgId,
+		"trigger_id": tgUUID,
 		"tx_hash":    ts.Hash,
 	})
 	defer func() {
@@ -69,7 +69,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		return validatePredBigInt(v.Predicate, &ts.GasPrice, v.Attribute)
 	case ConditionFunctionParam:
 		// check transaction and ABI
-		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
+		if !isValidContractAbi(abi, cnt, ts.To, tgUUID) {
 			return false
 		}
 		// check FunctionName matches the transaction's method
@@ -95,7 +95,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 		}
 		return ValidateParam(rawParam, f.ParameterType, v.Attribute, v.Predicate, f.Index)
 	case ConditionFunctionCalled:
-		if !isValidContractAbi(abi, cnt, ts.To, tgId) {
+		if !isValidContractAbi(abi, cnt, ts.To, tgUUID) {
 			return false
 		}
 		ok, err := matchesMethodName(abi, ts.Input, f.FunctionName)
@@ -110,9 +110,9 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 	return false
 }
 
-func isValidContractAbi(abi *string, cntAddress string, txTo string, tgId int) bool {
+func isValidContractAbi(abi *string, cntAddress string, txTo string, tgUUID string) bool {
 	if len(*abi) == 0 {
-		log.Debugf("(trigger %d) no ABI provided\n", tgId)
+		log.Debugf("(trigger %s) no ABI provided\n", tgUUID)
 		return false
 	}
 	// make sure we are matching against the right transaction

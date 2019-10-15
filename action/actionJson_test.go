@@ -7,7 +7,7 @@ import (
 )
 
 func TestNewActionJson(t *testing.T) {
-	var s = `{"UserId": 1, "TriggerId": 30, "ActionType": "webhook_post", "Attributes": {"URI": "https://webhook.site/202d0fac-4bfa-43f5-8ad0-c791cf051e5f"}}`
+	var s = `{"UserUUID": 1, "TriggerUUID": 30, "ActionType": "webhook_post", "Attributes": {"URI": "https://webhook.site/202d0fac-4bfa-43f5-8ad0-c791cf051e5f"}}`
 	_, err := NewActionJson([]byte(s))
 	if err != nil {
 		t.Error(err)
@@ -15,7 +15,7 @@ func TestNewActionJson(t *testing.T) {
 }
 
 func TestAction_Webhook(t *testing.T) {
-	var s = `{"UserId": 1, "TriggerId": 30, "ActionType": "webhook_post", "Attributes": {"URI": "https://webhook.site/202d0fac-4bfa-43f5-8ad0-c791cf051e5f"}}`
+	var s = `{"UserUUID": 1, "TriggerUUID": 30, "ActionType": "webhook_post", "Attributes": {"URI": "https://webhook.site/202d0fac-4bfa-43f5-8ad0-c791cf051e5f"}}`
 	a := Action{}
 
 	err := json.Unmarshal([]byte(s), &a)
@@ -30,8 +30,8 @@ func TestAction_Webhook(t *testing.T) {
 func TestAction_Email(t *testing.T) {
 	var s = `
 	{  
-	   "UserId":1,
-	   "TriggerId":30,
+	   "UserUUID":1,
+	   "TriggerUUID":30,
 	   "ActionType":"email",
 	   "Attributes":{  
 		  "To":[  

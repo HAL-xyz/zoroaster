@@ -32,6 +32,7 @@ func TestPostgresClient_All(t *testing.T) {
 
 	// Log Tx Match
 	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/t1.json")
+	tg.TriggerUUID = "3b29b0c3-e403-4103-81ef-6685cd391cda"
 	tx := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
 	fnArgs := "{}"
 	ztx := trigger.ZTransaction{
@@ -41,36 +42,35 @@ func TestPostgresClient_All(t *testing.T) {
 		Tx:             tx,
 	}
 	txMatch := trigger.TxMatch{
-		MatchId: 1,
-		Tg:      tg,
-		ZTx:     &ztx,
+		MatchUUID: "3b29b0c3-e403-4103-81ef-6685cd391cdm",
+		Tg:        tg,
+		ZTx:       &ztx,
 	}
 	psqlClient.LogMatch(txMatch)
 
 	// Log Contract Match
-
 	cnMatch := trigger.CnMatch{
 		Trigger:        tg,
 		BlockNo:        1,
 		BlockTimestamp: 888888,
 		BlockHash:      "0x",
-		MatchId:        1,
+		MatchUUID:      "3b29b0c3-e403-4103-81ef-6685cd391cdm",
 		MatchedValues:  "{}",
 		AllValues:      "{}",
 	}
 	psqlClient.LogMatch(cnMatch)
 
 	// Update Matching Triggers
-	psqlClient.UpdateMatchingTriggers([]int{21, 31})
+	psqlClient.UpdateMatchingTriggers([]string{"3b29b0c3-e403-4103-81ef-6685cd391cda"})
 
 	// Update Non-Matching Triggers
-	psqlClient.UpdateNonMatchingTriggers([]int{21, 31})
+	psqlClient.UpdateNonMatchingTriggers([]string{"3b29b0c3-e403-4103-81ef-6685cd391cda"})
 
 	// Log Outcomes
 	payload := `{ "BlockNo": 1, "ContractAdd": "0x", "FunctionName": "fn()", "ReturnedData": { "AllValues": "{}", "MatchedValues": "{}" }, "BlockTimestamp": 8888 }`
 	outcome := `{"StatusCode":200}`
 	o1 := trigger.Outcome{payload, outcome}
-	psqlClient.LogOutcome(&o1, 1)
+	psqlClient.LogOutcome(&o1, "3b29b0c3-e403-4103-81ef-6685cd391cda")
 
 	// Load all the active triggers
 	_, err := psqlClient.LoadTriggersFromDB("WatchTransactions")
@@ -79,7 +79,7 @@ func TestPostgresClient_All(t *testing.T) {
 	}
 
 	// Get all the active actions
-	_, err = psqlClient.GetActions(34, 1)
+	_, err = psqlClient.GetActions("3b29b0c3-e403-4103-81ef-6685cd391cda", "3b29b0c3-e403-4103-81ef-6685cd391cde")
 	if err != nil {
 		t.Error(err)
 	}
