@@ -18,6 +18,34 @@ type PostgresClient struct {
 	conf *config.TriggersDB
 }
 
+func (cli PostgresClient) GetSilentButMatchingTriggers(triggerUUIDs []string) []string {
+	q := fmt.Sprintf(
+		`SELECT uuid FROM %s
+			WHERE uuid = ANY($1) 
+			AND triggered = false`, cli.conf.TableTriggers)
+
+	rows, err := db.Query(q, pq.Array(triggerUUIDs))
+	if err != nil {
+		log.Error(err)
+		return []string{}
+	}
+	defer rows.Close()
+
+	uuidsRet := make([]string, 0)
+	for rows.Next() {
+		var uuid string
+		err = rows.Scan(&uuid)
+		if err != nil {
+			log.Error(err)
+		}
+		uuidsRet = append(uuidsRet, uuid)
+	}
+	if err = rows.Err(); err != nil {
+		log.Error(err)
+	}
+	return uuidsRet
+}
+
 func (cli PostgresClient) UpdateNonMatchingTriggers(triggerUUIDs []string) {
 	q := fmt.Sprintf(
 		`UPDATE %s

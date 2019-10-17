@@ -51,27 +51,27 @@ func matchContractsForBlock(
 	}
 	log.Debug("\tmodified accounts: ", len(modAccounts))
 
-	triggers, err := idb.LoadTriggersFromDB("WatchContracts")
+	allTriggers, err := idb.LoadTriggersFromDB("WatchContracts")
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Debug("\ttriggers from IDB: ", len(triggers))
+	log.Debug("\ttriggers from IDB: ", len(allTriggers))
 
-	var wacTriggers []*trigger.Trigger
-	for i, t := range triggers {
+	var triggersToCheck []*trigger.Trigger
+	for i, t := range allTriggers {
 		if utils.IsIn(t.ContractAdd, modAccounts) {
-			wacTriggers = append(wacTriggers, triggers[i])
+			triggersToCheck = append(triggersToCheck, allTriggers[i])
 		}
 	}
-	log.Debug("\ttriggers pointing to a modified account: ", len(wacTriggers))
+	log.Debug("\ttriggers pointing to a modified account: ", len(triggersToCheck))
 
 	var cnMatches []*trigger.CnMatch
-	for _, tg := range wacTriggers {
+	for _, tg := range triggersToCheck {
 		isMatch, matchedValues, allValues := trigger.MatchContract(client, tg, blockNo)
 		if isMatch {
 			match := &trigger.CnMatch{
 				Trigger:        tg,
-				MatchUUID:      "", // this will be set by Postgres once we persist
+				MatchUUID:      "uuid", // this will be set by Postgres once we persist
 				BlockNo:        blockNo,
 				BlockHash:      blockHash,
 				MatchedValues:  fmt.Sprint(matchedValues),
@@ -82,12 +82,31 @@ func matchContractsForBlock(
 			log.Debugf("\tCN: Trigger %s matched on block %d\n", tg.TriggerUUID, blockNo)
 		}
 	}
+	matchesToActUpon := getMatchesToActUpon(idb, cnMatches)
 
 	updateStatusForMatchingTriggers(idb, cnMatches)
-	updateStatusForNonMatchingTriggers(idb, cnMatches, wacTriggers)
+	updateStatusForNonMatchingTriggers(idb, cnMatches, triggersToCheck)
 
-	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(wacTriggers), time.Since(start), blockNo)
-	return cnMatches
+	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(triggersToCheck), time.Since(start), blockNo)
+	return matchesToActUpon
+}
+
+// we only act on a match if it matches AND the triggered flag was set to false
+func getMatchesToActUpon(idb aws.IDB, cnMatches []*trigger.CnMatch) []*trigger.CnMatch {
+	var matchingTriggersUUIDs []string
+	for _, m := range cnMatches {
+		matchingTriggersUUIDs = append(matchingTriggersUUIDs, m.MatchUUID)
+	}
+
+	triggerUUIDsToActUpon := idb.GetSilentButMatchingTriggers(matchingTriggersUUIDs)
+
+	var matchesToActUpon []*trigger.CnMatch
+	for _, m := range cnMatches {
+		if utils.IsIn(m.MatchUUID, triggerUUIDsToActUpon) {
+			matchesToActUpon = append(matchesToActUpon, m)
+		}
+	}
+	return matchesToActUpon
 }
 
 // set triggered flag to true for all matching 'false' triggers

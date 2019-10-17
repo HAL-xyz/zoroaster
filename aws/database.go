@@ -25,4 +25,6 @@ type IDB interface {
 	UpdateMatchingTriggers(triggerIds []string)
 
 	UpdateNonMatchingTriggers(triggerIds []string)
+
+	GetSilentButMatchingTriggers(triggerUUIDs []string) []string
 }

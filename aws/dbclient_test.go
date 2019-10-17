@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"fmt"
 	"log"
 	"testing"
 	"zoroaster/config"
@@ -83,4 +84,8 @@ func TestPostgresClient_All(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	// Get all silent but matching triggers
+	res := psqlClient.GetSilentButMatchingTriggers([]string{"96f195bd-2fc7-491e-b1a0-b19dca514cb0"})
+	fmt.Println(res)
 }

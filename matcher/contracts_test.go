@@ -35,6 +35,10 @@ func (db mockDB) UpdateNonMatchingTriggers(triggerIds []string) {
 	// void
 }
 
+func (db mockDB) GetSilentButMatchingTriggers(triggerUUIDs []string) []string {
+	return []string{"uuid"}
+}
+
 func TestMatchContractsForBlock(t *testing.T) {
 
 	// mocks
