@@ -23,6 +23,7 @@ type Filter struct {
 	ParameterName string
 	ParameterType string
 	FunctionName  string
+	EventName     string
 	Condition     Conditioner
 	Index         *int
 }
@@ -96,6 +97,12 @@ type ConditionFunctionCalled struct {
 }
 
 type ConditionOutput struct {
+	Condition
+	Predicate Predicate
+	Attribute string
+}
+
+type ConditionEvent struct {
 	Condition
 	Predicate Predicate
 	Attribute string

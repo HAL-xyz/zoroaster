@@ -8,7 +8,7 @@ import (
 	"zoroaster/abidec"
 )
 
-func MatchTrigger(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
+func MatchTransaction(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
 	ztxs := make([]*ZTransaction, 0)
 	for i, tx := range block.Transactions {
 		if validateTrigger(trigger, &tx) {

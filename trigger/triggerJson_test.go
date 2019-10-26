@@ -14,6 +14,7 @@ func TestNewTriggerJson(t *testing.T) {
 	assert.Nil(t, err)
 }
 
+// WaT
 func TestTriggerJson_ToTrigger(t *testing.T) {
 	json, _ := ioutil.ReadFile("../resources/triggers/t1.json")
 
@@ -25,6 +26,7 @@ func TestTriggerJson_ToTrigger(t *testing.T) {
 	assert.True(t, ok)
 }
 
+// WaC
 func TestTriggerJson_ToTrigger2(t *testing.T) {
 	json, _ := ioutil.ReadFile("../resources/triggers/wac1.json")
 
@@ -34,6 +36,19 @@ func TestTriggerJson_ToTrigger2(t *testing.T) {
 
 	_, ok := trig.Outputs[0].Condition.(ConditionOutput)
 	assert.True(t, ok)
+}
+
+// WaE
+func TestTriggerJson_ToTrigger3(t *testing.T) {
+	json, _ := ioutil.ReadFile("../resources/triggers/ev1.json")
+
+	tjs, _ := NewTriggerJson(string(json))
+	trig, err := tjs.ToTrigger()
+	assert.Nil(t, err)
+
+	_, ok := trig.Filters[0].Condition.(ConditionEvent)
+	assert.True(t, ok)
+	assert.Equal(t, "Transfer", trig.Filters[0].EventName)
 }
 
 func TestMalformedJsonTrigger(t *testing.T) {

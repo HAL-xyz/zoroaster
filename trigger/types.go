@@ -2,13 +2,6 @@ package trigger
 
 import "github.com/onrik/ethrpc"
 
-type ZTransaction struct {
-	BlockTimestamp int
-	DecodedFnArgs  *string `json:"DecodedFnArgs,omitempty"`
-	DecodedFnName  *string `json:"DecodedFnName,omitempty"`
-	Tx             *ethrpc.Transaction
-}
-
 // A match as represented internally by Zoroaster
 type IMatch interface {
 	ToPersistent() IPersistableMatch
@@ -24,6 +17,13 @@ type IPersistableMatch interface {
 // A payload sent via web hook, and persisted under outcomes.payload
 type IPostablePaylaod interface {
 	isPostablePayload()
+}
+
+type ZTransaction struct {
+	BlockTimestamp int
+	DecodedFnArgs  *string `json:"DecodedFnArgs,omitempty"`
+	DecodedFnName  *string `json:"DecodedFnName,omitempty"`
+	Tx             *ethrpc.Transaction
 }
 
 // TX MATCH
@@ -172,6 +172,14 @@ func (m CnMatch) ToPostPayload() IPostablePaylaod {
 
 func (m CnMatch) GetTriggerUUID() string {
 	return m.Trigger.TriggerUUID
+}
+
+// EVENT MATCH
+
+type EventMatch struct {
+	tg          *Trigger
+	log         *ethrpc.Log
+	decodedData map[string]interface{}
 }
 
 // Outcome is the result of executing an Action;

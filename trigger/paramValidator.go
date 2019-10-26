@@ -34,6 +34,9 @@ func ValidateParam(rawParam []byte, parameterType string, attribute string, pred
 			log.Debug(err)
 			return false
 		}
+		// sometimes addresses (40 hex chars) are padded with 0s to
+		// make them 64 chars long. In this case we want to strip them.
+		param = strings.Replace(param, "0x000000000000000000000000", "0x", 1)
 		return strings.ToLower(param) == strings.ToLower(attribute)
 	}
 	// bool

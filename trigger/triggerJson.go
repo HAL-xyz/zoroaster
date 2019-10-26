@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 	"strconv"
+	"zoroaster/utils"
 )
 
 type TriggerJson struct {
@@ -24,6 +25,7 @@ type FilterJson struct {
 	ParameterName string        `json:"ParameterName"`
 	ParameterType string        `json:"ParameterType"`
 	FunctionName  string        `json:"FunctionName,omitempty"`
+	EventName     string        `json:"EventName,omitempty"`
 	Index         *int          `json:"Index"`
 	Condition     ConditionJson `json:"Condition"`
 }
@@ -60,7 +62,8 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 	if tjs.TriggerName == "" {
 		return nil, fmt.Errorf("cannot read trigger: missing TriggerName")
 	}
-	if !(tjs.TriggerType == "WatchTransactions" || tjs.TriggerType == "WatchContracts") {
+	validTriggerTypes := []string{"WatchTransactions", "WatchContracts", "WatchEvents"}
+	if !utils.IsIn(tjs.TriggerType, validTriggerTypes) {
 		return nil, fmt.Errorf("invalid trigger type: %s", tjs.TriggerType)
 	}
 
@@ -106,6 +109,7 @@ func (fjs FilterJson) ToFilter() (*Filter, error) {
 		ParameterName: fjs.ParameterName,
 		ParameterType: fjs.ParameterType,
 		FunctionName:  fjs.FunctionName,
+		EventName:     fjs.EventName,
 		Index:         fjs.Index,
 		Condition:     condition,
 	}
@@ -166,6 +170,11 @@ func makeCondition(fjs FilterJson) (Conditioner, error) {
 	if fjs.FilterType == "CheckFunctionCalled" {
 		c := ConditionFunctionCalled{Condition{}, predicate, fjs.Condition.Attribute}
 		return c, nil
+	}
+	if fjs.FilterType == "CheckEvent" {
+		c := ConditionEvent{Condition{}, predicate, fjs.Condition.Attribute}
+		return c, nil
+
 	}
 	return nil, fmt.Errorf("unsupported filter type %s", fjs.FilterType)
 }

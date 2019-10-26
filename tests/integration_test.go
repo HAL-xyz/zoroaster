@@ -59,7 +59,7 @@ func TestIntegration(t *testing.T) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			txs := trig.MatchTrigger(trigger, block)
+			txs := trig.MatchTransaction(trigger, block)
 
 			if len(txs) != rule.Occurrences {
 				log.Errorf("%s failed (expected %d, got %d instead)\n", rule.Assert, rule.Occurrences, len(txs))
