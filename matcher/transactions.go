@@ -15,7 +15,7 @@ func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, i
 		start := time.Now()
 		log.Info("TX: new -> ", block.Number)
 
-		triggers, err := idb.LoadTriggersFromDB("WatchTransactions")
+		triggers, err := idb.LoadTriggersFromDB(trigger.WaT)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -29,7 +29,7 @@ func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, i
 				matchesChan <- &m
 			}
 		}
-		idb.SetLastBlockProcessed(block.Number, "wat")
+		idb.SetLastBlockProcessed(block.Number, trigger.WaT)
 		log.Infof("\tTX: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)
 	}
 }

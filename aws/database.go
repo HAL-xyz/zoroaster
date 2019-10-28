@@ -10,15 +10,15 @@ type IDB interface {
 
 	Close()
 
-	LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error)
+	LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error)
 
 	LogOutcome(outcome *trigger.Outcome, matchUUID string)
 
 	GetActions(tgUUID string, userUUID string) ([]string, error)
 
-	ReadLastBlockProcessed(watOrWac string) int
+	ReadLastBlockProcessed(tgType trigger.TgType) int
 
-	SetLastBlockProcessed(blockNo int, watOrWac string)
+	SetLastBlockProcessed(blockNo int, tgType trigger.TgType)
 
 	LogMatch(match trigger.IMatch) string
 

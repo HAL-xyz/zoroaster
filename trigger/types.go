@@ -199,3 +199,37 @@ type EmailPayload struct {
 	Recipients []string
 	Body       string
 }
+
+type TgType int
+
+const (
+	WaT TgType = iota
+	WaC
+	WaE
+)
+
+func TgTypeToString(tgType TgType) string {
+	switch tgType {
+	case WaT:
+		return "WatchTransactions"
+	case WaC:
+		return "WatchContracts"
+	case WaE:
+		return "WatchEvents"
+	default:
+		return ""
+	}
+}
+
+func TgTypeToPrefix(tgType TgType) string {
+	switch tgType {
+	case WaT:
+		return "wat"
+	case WaC:
+		return "wac"
+	case WaE:
+		return "wae"
+	default:
+		return ""
+	}
+}

@@ -28,7 +28,7 @@ func ContractMatcher(
 			log.Debug("\tlogged one match with id ", matchId)
 			matchesChan <- m
 		}
-		idb.SetLastBlockProcessed(block.Number, "wac")
+		idb.SetLastBlockProcessed(block.Number, trigger.WaC)
 	}
 }
 
@@ -51,7 +51,7 @@ func matchContractsForBlock(
 	}
 	log.Debug("\tmodified accounts: ", len(modAccounts))
 
-	allTriggers, err := idb.LoadTriggersFromDB("WatchContracts")
+	allTriggers, err := idb.LoadTriggersFromDB(trigger.WaC)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -18,11 +18,11 @@ type mockDB struct {
 	aws.IDB
 }
 
-func (db mockDB) SetLastBlockProcessed(blockNo int, watOrWac string) {
+func (db mockDB) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) {
 	// void
 }
 
-func (db mockDB) LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error) {
+func (db mockDB) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error) {
 	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 	return []*trigger.Trigger{tg}, nil
 }

@@ -116,9 +116,9 @@ func (cli PostgresClient) GetActions(tgUUID string, userUUID string) ([]string, 
 	return actionsRet, nil
 }
 
-func (cli PostgresClient) ReadLastBlockProcessed(watOrWac string) int {
+func (cli PostgresClient) ReadLastBlockProcessed(tgType trigger.TgType) int {
 	var blockNo int
-	q := fmt.Sprintf("SELECT %s_last_block_processed FROM %s", watOrWac, cli.conf.TableState)
+	q := fmt.Sprintf("SELECT %s_last_block_processed FROM %s", trigger.TgTypeToPrefix(tgType), cli.conf.TableState)
 	err := db.QueryRow(q).Scan(&blockNo)
 	if err != nil {
 		log.Errorf("cannot read last block processed: %s", err)
@@ -126,8 +126,9 @@ func (cli PostgresClient) ReadLastBlockProcessed(watOrWac string) int {
 	return blockNo
 }
 
-func (cli PostgresClient) SetLastBlockProcessed(blockNo int, watOrWac string) {
-	q := fmt.Sprintf(`UPDATE "%s" SET %s_last_block_processed = $1, %s_date = $2`, cli.conf.TableState, watOrWac, watOrWac)
+func (cli PostgresClient) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) {
+	stringTgType := trigger.TgTypeToPrefix(tgType)
+	q := fmt.Sprintf(`UPDATE "%s" SET %s_last_block_processed = $1, %s_date = $2`, cli.conf.TableState, stringTgType, stringTgType)
 	_, err := db.Exec(q, blockNo, time.Now())
 	if err != nil {
 		log.Errorf("cannot set last block processed: %s", err)
@@ -152,13 +153,12 @@ func (cli PostgresClient) LogMatch(match trigger.IMatch) string {
 	return lastUUID
 }
 
-// TODO: need to make `watOrWac` its own type cuz I never remember what to plug in there otherwise
-func (cli PostgresClient) LoadTriggersFromDB(watOrWac string) ([]*trigger.Trigger, error) {
+func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error) {
 	q := fmt.Sprintf(
 		`SELECT uuid, trigger_data, user_uuid
 				FROM %s AS t
 				WHERE (t.trigger_data ->> 'TriggerType')::text = '%s'
-				AND t.is_active = true`, cli.conf.TableTriggers, watOrWac)
+				AND t.is_active = true`, cli.conf.TableTriggers, trigger.TgTypeToString(tgType))
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err

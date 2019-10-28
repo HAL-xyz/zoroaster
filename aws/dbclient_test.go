@@ -2,6 +2,7 @@ package aws
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
 	"zoroaster/config"
@@ -74,18 +75,23 @@ func TestPostgresClient_All(t *testing.T) {
 	psqlClient.LogOutcome(&o1, "3b29b0c3-e403-4103-81ef-6685cd391cda")
 
 	// Load all the active triggers
-	_, err := psqlClient.LoadTriggersFromDB("WatchTransactions")
-	if err != nil {
-		t.Error(err)
-	}
+	_, err := psqlClient.LoadTriggersFromDB(trigger.WaT)
+	assert.NoError(t, err)
 
 	// Get all the active actions
 	_, err = psqlClient.GetActions("3b29b0c3-e403-4103-81ef-6685cd391cda", "3b29b0c3-e403-4103-81ef-6685cd391cde")
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 
 	// Get all silent but matching triggers
 	res := psqlClient.GetSilentButMatchingTriggers([]string{"96f195bd-2fc7-491e-b1a0-b19dca514cb0"})
 	fmt.Println(res)
+
+	// Read app state
+	psqlClient.SetLastBlockProcessed(0, trigger.WaT)
+	blockNo := psqlClient.ReadLastBlockProcessed(trigger.WaT)
+	assert.Equal(t, 0, blockNo)
+
+	psqlClient.SetLastBlockProcessed(0, trigger.WaC)
+	blockNo = psqlClient.ReadLastBlockProcessed(trigger.WaC)
+	assert.Equal(t, 0, blockNo)
 }

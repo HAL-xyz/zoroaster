@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"time"
 	"zoroaster/aws"
+	"zoroaster/trigger"
 )
 
 func BlocksPoller(
@@ -19,8 +20,8 @@ func BlocksPoller(
 
 	const K = 8 // next block to process is (last block mined - K)
 
-	txLastBlockProcessed := idb.ReadLastBlockProcessed("wat")
-	cntLastBlockProcessed := idb.ReadLastBlockProcessed("wac")
+	txLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaT)
+	cntLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaC)
 
 	ticker := time.NewTicker(2500 * time.Millisecond)
 	for range ticker.C {

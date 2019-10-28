@@ -24,6 +24,9 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int) []*EventMatch {
 		return []*EventMatch{}
 	}
 	// EventName must be the same for every Filter, so we just get the first one
+	if len(tg.Filters) < 1 {
+		return []*EventMatch{}
+	}
 	eventName := tg.Filters[0].EventName
 
 	namedTopicsMap := getNamedTopics(abiObj, eventName)
