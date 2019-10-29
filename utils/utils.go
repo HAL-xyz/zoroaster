@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -120,6 +121,19 @@ func AreEqualJSON(s1, s2 string) (bool, error) {
 	}
 
 	return reflect.DeepEqual(o1, o2), nil
+}
+
+func GimmePrettyJson(o interface{}) (string, error) {
+	bytesObj, err := json.Marshal(o)
+	if err != nil {
+		return "", err
+	}
+	var prettyJSON bytes.Buffer
+	err = json.Indent(&prettyJSON, bytesObj, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return prettyJSON.String(), nil
 }
 
 func GetSliceFromIntSet(set map[string]struct{}) []string {

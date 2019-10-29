@@ -18,8 +18,8 @@ type mockDB struct {
 	aws.IDB
 }
 
-func (db mockDB) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) {
-	// void
+func (db mockDB) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error {
+	return nil
 }
 
 func (db mockDB) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error) {

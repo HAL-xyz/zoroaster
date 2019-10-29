@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func MatchEvent(client IEthRpc, tg *Trigger, blockNo int) []*EventMatch {
+func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []*EventMatch {
 
 	logs, err := getLogsForBlock(client, blockNo, tg.ContractAdd)
 	if err != nil {
@@ -29,21 +29,16 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int) []*EventMatch {
 	}
 	eventName := tg.Filters[0].EventName
 
-	namedTopicsMap := getNamedTopics(abiObj, eventName)
-	eventSignature, err := getEventSignature(tg.ContractABI, eventName)
-	if err != nil {
-		logrus.Debug(err)
-		return []*EventMatch{}
-	}
-
 	var eventMatches []*EventMatch
 	for _, log := range logs {
-		if validateTriggerLog(&log, tg, &abiObj, eventName, eventSignature, namedTopicsMap) {
+		if validateTriggerLog(&log, tg, &abiObj) {
 			decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
+			topicsMap := getTopicsMap(&abiObj, eventName, &log)
 			ev := EventMatch{
-				tg:          tg,
-				log:         &log,
-				decodedData: decodedData,
+				Tg:             tg,
+				Log:            &log,
+				BlockTimestamp: blockTimestamp,
+				EventParams:    makeEventParams(decodedData, topicsMap),
 			}
 			eventMatches = append(eventMatches, &ev)
 		}
@@ -51,19 +46,19 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int) []*EventMatch {
 	return eventMatches
 }
 
-func validateTriggerLog(
-	evLog *ethrpc.Log,
-	tg *Trigger,
-	abiObj *abi.ABI,
-	eventName string, // TODO this should be moved inside the filter
-	eventSignature string,
-	namedTopicsMap map[int]string,
-) bool {
+func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI) bool {
+
+	eventName := tg.Filters[0].EventName
+	eventSignature, err := getEventSignature(tg.ContractABI, eventName)
+	if err != nil {
+		logrus.Debug(err)
+		return false
+	}
 
 	match := true
 	if evLog.Topics[0] == eventSignature {
 		for _, f := range tg.Filters {
-			filterMatch := validateFilterLog(evLog, &f, abiObj, eventName, namedTopicsMap)
+			filterMatch := validateFilterLog(evLog, &f, abiObj, eventName)
 			match = match && filterMatch // a Trigger matches if all filters match
 		}
 	} else {
@@ -76,23 +71,12 @@ func validateFilterLog(
 	evLog *ethrpc.Log,
 	filter *Filter,
 	abiObj *abi.ABI,
-	eventName string,
-	namedTopicsMap map[int]string) bool {
+	eventName string) bool {
 
 	condition := filter.Condition.(ConditionEvent)
 
-	// validate TOPICS field
-
-	// a topicsMap is a map where
-	// named_topic_{1,2,3} -> value
-	// named_topic_0 is skipped being the event signature
-	topicsMap := make(map[string]string)
-	for i, t := range evLog.Topics {
-		if i > 0 { // topic 0 is always the event signature
-			topicsMap[namedTopicsMap[i]] = t
-		}
-	}
-
+	// validate TOPICS
+	topicsMap := getTopicsMap(abiObj, eventName, evLog)
 	param, ok := topicsMap[filter.ParameterName]
 	if ok {
 		jsn, err := json.Marshal(param)
@@ -119,7 +103,6 @@ func validateFilterLog(
 		}
 		return ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
 	}
-
 	// parameter name not found in topics nor in data
 	return false
 }
@@ -142,20 +125,18 @@ func getLogsForBlock(client IEthRpc, blockNo int, address string) ([]ethrpc.Log,
 	return logs, nil
 }
 
-// a map where
-// 1: first indexed input (topic 1)
-// 2: second indexed input (topic 2)
-// 3: third indexed input (topic 3)
-// topic 0 is skipped being the event signature
-func getNamedTopics(abiObj abi.ABI, eventName string) map[int]string {
-	namedTopicsMap := make(map[int]string)
+// a topicsMap is a map where
+// named_topic_{1,2,3} -> value
+// named_topic_0 is skipped being the event signature
+func getTopicsMap(abiObj *abi.ABI, eventName string, evLog *ethrpc.Log) map[string]string {
+	finalMap := make(map[string]string)
 	myEvent := abiObj.Events[eventName]
 	for i, input := range myEvent.Inputs {
 		if input.Indexed {
-			namedTopicsMap[i+1] = input.Name
+			finalMap[input.Name] = evLog.Topics[i+1]
 		}
 	}
-	return namedTopicsMap
+	return finalMap
 }
 
 func getEventSignature(cntABI string, eventName string) (string, error) {
@@ -194,4 +175,16 @@ func decodeDataField(rawData, eventName string, abiObj *abi.ABI) (map[string]int
 		return nil, err
 	}
 	return getMap, nil
+}
+
+func makeEventParams(data map[string]interface{}, topics map[string]string) map[string]string {
+
+	paramsMap := make(map[string]string, len(data)+len(topics))
+	for k, v := range topics {
+		paramsMap[k] = v
+	}
+	for k, v := range data {
+		paramsMap[k] = fmt.Sprintf("%v", v)
+	}
+	return paramsMap
 }

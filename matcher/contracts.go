@@ -28,7 +28,10 @@ func ContractMatcher(
 			log.Debug("\tlogged one match with id ", matchId)
 			matchesChan <- m
 		}
-		idb.SetLastBlockProcessed(block.Number, trigger.WaC)
+		err := idb.SetLastBlockProcessed(block.Number, trigger.WaC)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
 

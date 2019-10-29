@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
@@ -62,6 +61,17 @@ func TestPostgresClient_All(t *testing.T) {
 	}
 	psqlClient.LogMatch(cnMatch)
 
+	// Log Event Match
+	logs, _ := trigger.GetLogsFromFile("../resources/events/logs1.json")
+	eventMatch := trigger.EventMatch{
+		MatchUUID:      "3b29b0c3-e403-4103-81ef-6685cd391cdm",
+		Tg:             tg,
+		Log:            &logs[0],
+		EventParams:    map[string]string{},
+		BlockTimestamp: 888888,
+	}
+	psqlClient.LogMatch(eventMatch)
+
 	// Update Matching Triggers
 	psqlClient.UpdateMatchingTriggers([]string{"3b29b0c3-e403-4103-81ef-6685cd391cda"})
 
@@ -83,15 +93,21 @@ func TestPostgresClient_All(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Get all silent but matching triggers
-	res := psqlClient.GetSilentButMatchingTriggers([]string{"96f195bd-2fc7-491e-b1a0-b19dca514cb0"})
-	fmt.Println(res)
+	_ = psqlClient.GetSilentButMatchingTriggers([]string{"96f195bd-2fc7-491e-b1a0-b19dca514cb0"})
 
-	// Read app state
-	psqlClient.SetLastBlockProcessed(0, trigger.WaT)
+	// Set and read app state
+	err = psqlClient.SetLastBlockProcessed(0, trigger.WaT)
+	assert.NoError(t, err)
 	blockNo := psqlClient.ReadLastBlockProcessed(trigger.WaT)
 	assert.Equal(t, 0, blockNo)
 
-	psqlClient.SetLastBlockProcessed(0, trigger.WaC)
+	err = psqlClient.SetLastBlockProcessed(0, trigger.WaC)
+	assert.NoError(t, err)
 	blockNo = psqlClient.ReadLastBlockProcessed(trigger.WaC)
+	assert.Equal(t, 0, blockNo)
+
+	err = psqlClient.SetLastBlockProcessed(0, trigger.WaE)
+	assert.NoError(t, err)
+	blockNo = psqlClient.ReadLastBlockProcessed(trigger.WaE)
 	assert.Equal(t, 0, blockNo)
 }

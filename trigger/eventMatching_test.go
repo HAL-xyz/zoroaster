@@ -4,9 +4,9 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
-	"math/big"
 	"strings"
 	"testing"
+	"zoroaster/utils"
 )
 
 func TestValidateFilterLog(t *testing.T) {
@@ -20,19 +20,17 @@ func TestValidateFilterLog(t *testing.T) {
 		t.Error(err)
 	}
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
-	namedTopics := getNamedTopics(abiObj, tg.Filters[0].EventName)
 
-	res := validateFilterLog(&logs[0], &tg.Filters[0], &abiObj, tg.Filters[0].EventName, namedTopics)
+	res := validateFilterLog(&logs[0], &tg.Filters[0], &abiObj, tg.Filters[0].EventName)
 	assert.True(t, res)
 
-	res2 := validateFilterLog(&logs[0], &tg.Filters[1], &abiObj, tg.Filters[0].EventName, namedTopics)
+	res2 := validateFilterLog(&logs[0], &tg.Filters[1], &abiObj, tg.Filters[0].EventName)
 	assert.True(t, res2)
 
-	eventSignature, err := getEventSignature(tg.ContractABI, tg.Filters[0].EventName)
-	res3 := validateTriggerLog(&logs[0], tg, &abiObj, tg.Filters[0].EventName, eventSignature, namedTopics)
+	res3 := validateTriggerLog(&logs[0], tg, &abiObj)
 	assert.True(t, res3)
 
-	res4 := validateTriggerLog(&logs[1], tg, &abiObj, tg.Filters[0].EventName, eventSignature, namedTopics)
+	res4 := validateTriggerLog(&logs[1], tg, &abiObj)
 	assert.False(t, res4)
 }
 
@@ -47,16 +45,50 @@ func TestMatchEvent(t *testing.T) {
 	var client EthMock
 
 	tg1, _ := NewTriggerFromFile("../resources/triggers/ev1.json")
-	matches1 := MatchEvent(client, tg1, 8496661)
+	matches1 := MatchEvent(client, tg1, 8496661, 1572344236)
 
 	assert.Equal(t, 1, len(matches1))
-	assert.Equal(t, big.NewInt(677420000), matches1[0].decodedData["value"])
+	assert.Equal(t, "677420000", matches1[0].EventParams["value"])
 
 	tg2, _ := NewTriggerFromFile("../resources/triggers/ev2.json")
-	matches2 := MatchEvent(client, tg2, 8496661)
+	matches2 := MatchEvent(client, tg2, 8496661, 1572344236)
 
 	assert.Equal(t, 3, len(matches2))
-	assert.Equal(t, big.NewInt(677420000), matches2[0].decodedData["value"])
-	assert.Equal(t, big.NewInt(771470000), matches2[1].decodedData["value"])
-	assert.Equal(t, big.NewInt(607760000), matches2[2].decodedData["value"])
+	assert.Equal(t, "677420000", matches2[0].EventParams["value"])
+	assert.Equal(t, "771470000", matches2[1].EventParams["value"])
+	assert.Equal(t, "607760000", matches2[2].EventParams["value"])
+
+	assert.Equal(t, 3, len(matches2[0].EventParams))
+	assert.Equal(t, "0x000000000000000000000000f750f050e5596eb9480523eef7260b1535a689bd", matches2[0].EventParams["from"])
+	assert.Equal(t, "0x000000000000000000000000cd95b32c98423172e04b1c76841e5a73f4532a7f", matches2[0].EventParams["to"])
+	assert.Equal(t, "677420000", matches2[0].EventParams["value"])
+
+	// testing ToPersistent()
+	persistentJson, err := utils.GimmePrettyJson(matches1[0].ToPersistent())
+	expectedJsn := `{
+  "ContractAdd": "0xdac17f958d2ee523a2206206994597c13d831ec7",
+  "EventName": "Transfer",
+  "EventData": {
+    "EventParameters": {
+      "from": "0x000000000000000000000000f750f050e5596eb9480523eef7260b1535a689bd",
+      "to": "0x000000000000000000000000cd95b32c98423172e04b1c76841e5a73f4532a7f",
+      "value": "677420000"
+    },
+    "Data": "0x000000000000000000000000000000000000000000000000000000002439ae80",
+    "Topics": [
+      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+      "0x000000000000000000000000f3272a8f1da1f23979c63e328e4dfb35bdf5ff36",
+      "0x000000000000000000000000110f0bffb53c82a172edaf007fcaa3f56ed360b0"
+    ]
+  },
+  "Transaction": {
+    "BlockHash": "0xf3d70d822816015f26843d378b8c1d5d5da62f5d346f3e86d91a0c2463d30543",
+    "BlockNo": 8496661,
+    "BlockTimestamp": 1572344236,
+    "TxHash": "0xab5e7b8ec9eaf3aaffff797a7992780e9c1c717dfdb5dca2b76b0b71cf182f52"
+  }
+}`
+	ok, err := utils.AreEqualJSON(persistentJson, expectedJsn)
+	assert.NoError(t, err)
+	assert.True(t, ok)
 }

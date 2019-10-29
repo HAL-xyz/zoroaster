@@ -177,9 +177,68 @@ func (m CnMatch) GetTriggerUUID() string {
 // EVENT MATCH
 
 type EventMatch struct {
-	tg          *Trigger
-	log         *ethrpc.Log
-	decodedData map[string]interface{}
+	MatchUUID      string
+	Tg             *Trigger
+	Log            *ethrpc.Log
+	EventParams    map[string]string
+	BlockTimestamp int
+}
+
+type PersistentEventMatch struct {
+	ContractAdd string
+	EventName   string
+	EventData   struct {
+		EventParameters map[string]string // decoded data + topics
+		Data            string
+		Topics          []string
+	}
+	Transaction struct {
+		BlockHash      string
+		BlockNo        int
+		BlockTimestamp int
+		TxHash         string
+	}
+}
+
+func (PersistentEventMatch) isPersistable() {}
+
+func (m EventMatch) ToPersistent() IPersistableMatch {
+	return &PersistentEventMatch{
+		ContractAdd: m.Tg.ContractAdd,
+		EventName:   m.Tg.Filters[0].EventName,
+		EventData: struct {
+			EventParameters map[string]string // decoded data + topics
+			Data            string
+			Topics          []string
+		}{
+			EventParameters: m.EventParams,
+			Data:            m.Log.Data,
+			Topics:          m.Log.Topics,
+		},
+		Transaction: struct {
+			BlockHash      string
+			BlockNo        int
+			BlockTimestamp int
+			TxHash         string
+		}{
+			BlockHash:      m.Log.BlockHash,
+			BlockNo:        m.Log.BlockNumber,
+			BlockTimestamp: m.BlockTimestamp,
+			TxHash:         m.Log.TransactionHash,
+		},
+	}
+}
+
+type EventPostPayload struct{}
+
+func (EventPostPayload) isPostablePayload() {}
+
+func (EventMatch) ToPostPayload() IPostablePaylaod {
+	return EventPostPayload{}
+}
+
+func (m EventMatch) GetTriggerUUID() string {
+	return m.Tg.TriggerUUID
 }
 
 // Outcome is the result of executing an Action;

@@ -126,13 +126,14 @@ func (cli PostgresClient) ReadLastBlockProcessed(tgType trigger.TgType) int {
 	return blockNo
 }
 
-func (cli PostgresClient) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) {
+func (cli PostgresClient) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error {
 	stringTgType := trigger.TgTypeToPrefix(tgType)
 	q := fmt.Sprintf(`UPDATE "%s" SET %s_last_block_processed = $1, %s_date = $2`, cli.conf.TableState, stringTgType, stringTgType)
 	_, err := db.Exec(q, blockNo, time.Now())
 	if err != nil {
-		log.Errorf("cannot set last block processed: %s", err)
+		return fmt.Errorf("cannot set last block processed: %s", err)
 	}
+	return nil
 }
 
 func (cli PostgresClient) LogMatch(match trigger.IMatch) string {

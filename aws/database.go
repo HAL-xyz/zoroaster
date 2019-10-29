@@ -18,7 +18,7 @@ type IDB interface {
 
 	ReadLastBlockProcessed(tgType trigger.TgType) int
 
-	SetLastBlockProcessed(blockNo int, tgType trigger.TgType)
+	SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error
 
 	LogMatch(match trigger.IMatch) string
 
