@@ -229,12 +229,55 @@ func (m EventMatch) ToPersistent() IPersistableMatch {
 	}
 }
 
-type EventPostPayload struct{}
+type EventPostPayload struct {
+	ContractAdd string
+	EventName   string
+	EventData   struct {
+		EventParameters map[string]string // decoded data + topics
+		Data            string
+		Topics          []string
+	}
+	Transaction struct {
+		BlockHash      string
+		BlockNo        int
+		BlockTimestamp int
+		TxHash         string
+	}
+	TriggerName string
+	TriggerType string
+	TriggerUUID string
+}
 
 func (EventPostPayload) isPostablePayload() {}
 
-func (EventMatch) ToPostPayload() IPostablePaylaod {
-	return EventPostPayload{}
+func (m EventMatch) ToPostPayload() IPostablePaylaod {
+	return &EventPostPayload{
+		ContractAdd: m.Tg.ContractAdd,
+		EventName:   m.Tg.Filters[0].EventName,
+		EventData: struct {
+			EventParameters map[string]string // decoded data + topics
+			Data            string
+			Topics          []string
+		}{
+			EventParameters: m.EventParams,
+			Data:            m.Log.Data,
+			Topics:          m.Log.Topics,
+		},
+		Transaction: struct {
+			BlockHash      string
+			BlockNo        int
+			BlockTimestamp int
+			TxHash         string
+		}{
+			BlockHash:      m.Log.BlockHash,
+			BlockNo:        m.Log.BlockNumber,
+			BlockTimestamp: m.BlockTimestamp,
+			TxHash:         m.Log.TransactionHash,
+		},
+		TriggerName: m.Tg.TriggerName,
+		TriggerType: m.Tg.TriggerType,
+		TriggerUUID: m.Tg.TriggerUUID,
+	}
 }
 
 func (m EventMatch) GetTriggerUUID() string {

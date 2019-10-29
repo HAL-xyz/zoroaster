@@ -1,10 +1,9 @@
 package action
 
 import (
-	"bytes"
-	"encoding/json"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
+	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
@@ -12,6 +11,8 @@ import (
 	"zoroaster/trigger"
 	"zoroaster/utils"
 )
+
+// WEB HOOK TESTS
 
 // HTTP Client mock
 type mockHttpClient struct{}
@@ -36,7 +37,20 @@ func TestHandleWebHookPost(t *testing.T) {
 
 	outcome := handleWebHookPost(url, cnMatch, mockHttpClient{})
 
-	expectedPayload := `{"BlockNo":8888,"BlockTimestamp":1554828248,"BlockHash":"0x","ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413","FunctionName":"daoCreator","ReturnedData":{"MatchedValues":"matched values","AllValues":"all values"},"TriggerName":"wac 1","TriggerType":"WatchContracts","TriggerUUID":""}`
+	expectedPayload := `{
+   "BlockNo":8888,
+   "BlockTimestamp":1554828248,
+   "BlockHash":"0x",
+   "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
+   "FunctionName":"daoCreator",
+   "ReturnedData":{
+      "MatchedValues":"matched values",
+      "AllValues":"all values"
+   },
+   "TriggerName":"wac 1",
+   "TriggerType":"WatchContracts",
+   "TriggerUUID":""
+}`
 	areEq, err := utils.AreEqualJSON(outcome.Payload, expectedPayload)
 	assert.NoError(t, err)
 	assert.True(t, areEq)
@@ -62,10 +76,6 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 	}
 	outcome := handleWebHookPost(url, txMatch, mockHttpClient{})
 
-	// TODO use pretty json everywhere in tests
-	var prettyJSON bytes.Buffer
-	_ = json.Indent(&prettyJSON, []byte(outcome.Payload), "", "  ")
-
 	expectedPayload := `{
   "DecodedData": {
     "FunctionArguments": "{}",
@@ -88,10 +98,58 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
   "TriggerType": "WatchTransactions",
   "TriggerUUID": "" 
 }`
-	areEq, err := utils.AreEqualJSON(prettyJSON.String(), expectedPayload)
+	ok, err := utils.AreEqualJSON(outcome.Payload, expectedPayload)
 	assert.NoError(t, err)
-	assert.True(t, areEq)
+	assert.True(t, ok)
 }
+
+type EthMock struct{}
+
+func (cli EthMock) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
+	return trigger.GetLogsFromFile("../resources/events/logs1.json")
+}
+
+func TestHandleWebhookWithEvents(t *testing.T) {
+
+	var client EthMock
+	url := AttributeWebhookPost{URI: "https://hal.xyz"}
+	tg1, _ := trigger.NewTriggerFromFile("../resources/triggers/ev1.json")
+	matches1 := trigger.MatchEvent(client, tg1, 8496661, 1572344236)
+
+	outcome := handleWebHookPost(url, matches1[0], mockHttpClient{})
+
+	expectedPayload := `{
+   "ContractAdd":"0xdac17f958d2ee523a2206206994597c13d831ec7",
+   "EventName":"Transfer",
+   "EventData":{
+      "EventParameters":{
+         "from":"0x000000000000000000000000f750f050e5596eb9480523eef7260b1535a689bd",
+         "to":"0x000000000000000000000000cd95b32c98423172e04b1c76841e5a73f4532a7f",
+         "value":"677420000"
+      },
+      "Data":"0x000000000000000000000000000000000000000000000000000000002439ae80",
+      "Topics":[
+         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+         "0x000000000000000000000000f3272a8f1da1f23979c63e328e4dfb35bdf5ff36",
+         "0x000000000000000000000000110f0bffb53c82a172edaf007fcaa3f56ed360b0"
+      ]
+   },
+   "Transaction":{
+      "BlockHash":"0xf3d70d822816015f26843d378b8c1d5d5da62f5d346f3e86d91a0c2463d30543",
+      "BlockNo":8496661,
+      "BlockTimestamp":1572344236,
+      "TxHash":"0xab5e7b8ec9eaf3aaffff797a7992780e9c1c717dfdb5dca2b76b0b71cf182f52"
+   },
+   "TriggerName":"Watch an Event",
+   "TriggerType":"WatchEvents",
+   "TriggerUUID":""
+}`
+	ok, err := utils.AreEqualJSON(expectedPayload, outcome.Payload)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+}
+
+// EMAIL TESTS
 
 // SESAPI mock
 type mockSESClient struct {
