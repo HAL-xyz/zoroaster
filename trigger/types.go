@@ -7,6 +7,8 @@ type IMatch interface {
 	ToPersistent() IPersistableMatch
 	ToPostPayload() IPostablePaylaod
 	GetTriggerUUID() string
+	GetUserUUID() string
+	GetMatchUUID() string
 }
 
 // A match persisted on the DB (in its json form)
@@ -57,6 +59,14 @@ func (m TxMatch) ToPersistent() IPersistableMatch {
 
 func (m TxMatch) GetTriggerUUID() string {
 	return m.Tg.TriggerUUID
+}
+
+func (m TxMatch) GetMatchUUID() string {
+	return m.MatchUUID
+}
+
+func (m TxMatch) GetUserUUID() string {
+	return m.Tg.UserUUID
 }
 
 type TxPostPayload struct {
@@ -174,6 +184,14 @@ func (m CnMatch) GetTriggerUUID() string {
 	return m.Trigger.TriggerUUID
 }
 
+func (m CnMatch) GetMatchUUID() string {
+	return m.MatchUUID
+}
+
+func (m CnMatch) GetUserUUID() string {
+	return m.Trigger.UserUUID
+}
+
 // EVENT MATCH
 
 type EventMatch struct {
@@ -282,6 +300,14 @@ func (m EventMatch) ToPostPayload() IPostablePaylaod {
 
 func (m EventMatch) GetTriggerUUID() string {
 	return m.Tg.TriggerUUID
+}
+
+func (m EventMatch) GetMatchUUID() string {
+	return m.MatchUUID
+}
+
+func (m EventMatch) GetUserUUID() string {
+	return m.Tg.UserUUID
 }
 
 // Outcome is the result of executing an Action;
