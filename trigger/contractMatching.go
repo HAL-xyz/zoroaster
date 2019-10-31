@@ -64,21 +64,13 @@ func validateContractReturnValue(
 		log.Debug(err)
 		return "", ""
 	}
-	rawJsParamsList := utils.GetValuesFromMap(rawJsParamsMap)
+	rawParam, returnType := getRawParamAndReturnType(cnReturnType, index, rawJsParamsMap)
 
-	// in case of multiple return values, like (int128, []uint8, string)
-	// we want to select the right param from the list, as well as the right type
-	var rawParam json.RawMessage
-	if len(rawJsParamsMap) > 1 && index != nil && *index < len(rawJsParamsMap) {
-		rawParam = rawJsParamsList[*index]
-		allTypes := strings.Split(cnReturnType, ",")
-		indexedType := allTypes[*index]
-		cnReturnType = utils.RemoveCharacters(indexedType, "() ")
-	} else {
-		rawParam = rawJsParamsList[0]
-	}
-	// Yes this whole templating thing is beyond shit but hey.
-	if ValidateParam(rawParam, cnReturnType, cond.Attribute, cond.Predicate, index) {
+	// TODO: this whole templating mess doesn't belong here!
+	// Also returning a list is stupid. I should return the whole map[string]interface{}
+	// and deal with it when templating.
+	if ValidateParam(rawParam, returnType, cond.Attribute, cond.Predicate, index) {
+		rawJsParamsList := utils.GetValuesFromMap(rawJsParamsMap)
 		out := make([]string, len(rawJsParamsList))
 		for i, elem := range rawJsParamsList {
 			out[i] = fmt.Sprintf("%s"+"#END#", elem)
@@ -90,6 +82,27 @@ func validateContractReturnValue(
 		return cond.Attribute, s
 	}
 	return "", ""
+}
+
+// in case of multiple return values, like (int128, []uint8, string)
+// we want to select the right param from the list, as well as the right type
+func getRawParamAndReturnType(
+	cnReturnType string,
+	index *int,
+	rawJsParamsMap map[string]json.RawMessage) ([]byte, string) {
+
+	rawJsParamsList := utils.GetValuesFromMap(rawJsParamsMap)
+	var rawParam json.RawMessage
+
+	if len(rawJsParamsMap) > 1 && index != nil && *index < len(rawJsParamsMap) {
+		rawParam = rawJsParamsList[*index]
+		allTypes := strings.Split(cnReturnType, ",")
+		indexedType := allTypes[*index]
+		cnReturnType = utils.RemoveCharacters(indexedType, "() ")
+	} else {
+		rawParam = rawJsParamsList[0]
+	}
+	return rawParam, cnReturnType
 }
 
 func makeEthRpcCall(client *ethrpc.EthRPC, cntAddress, data string, blockNumber int) (string, error) {
