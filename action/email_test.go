@@ -33,24 +33,18 @@ func TestFillEmailTemplate1(t *testing.T) {
 	`
 	var ztx trigger.ZTransaction
 	err := json.Unmarshal([]byte(input), &ztx)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
 
 	match := trigger.TxMatch{"uuid", nil, &ztx}
 
-	template, err := ioutil.ReadFile("../resources/emails/template1.txt")
-	if err != nil {
-		t.Error(err)
-	}
+	template, err := ioutil.ReadFile("../resources/emails/1-wat-templ.txt")
+	assert.NoError(t, err)
 
 	body := fillEmailTemplate(string(template), match)
 
-	expected, err := ioutil.ReadFile("../resources/emails/expected1.txt")
-	if err != nil {
-		t.Error(err)
-	}
+	expected, err := ioutil.ReadFile("../resources/emails/1-wat-exp.txt")
 
+	assert.NoError(t, err)
 	assert.Equal(t, body, string(expected))
 }
 
@@ -66,18 +60,13 @@ func TestFillEmailTemplate2(t *testing.T) {
 		AllValues:      "[[4,8,12]]",
 		BlockHash:      "0x",
 	}
-	template, err := ioutil.ReadFile("../resources/emails/template2.txt")
-	if err != nil {
-		t.Error(err)
-	}
+	template, err := ioutil.ReadFile("../resources/emails/2-wac-templ.txt")
+	assert.NoError(t, err)
 
 	body := fillEmailTemplate(string(template), match)
 
-	expected, err := ioutil.ReadFile("../resources/emails/expected2.txt")
-	if err != nil {
-		t.Error(err)
-	}
-
+	expected, err := ioutil.ReadFile("../resources/emails/2-wac-exp.txt")
+	assert.NoError(t, err)
 	assert.Equal(t, body, string(expected))
 }
 
@@ -93,18 +82,13 @@ func TestFillEmailTemplate3(t *testing.T) {
 		AllValues:      "[4#END# \"sailor\"#END# \"moon\"]",
 		BlockHash:      "0x",
 	}
-	template, err := ioutil.ReadFile("../resources/emails/template3.txt")
-	if err != nil {
-		t.Error(err)
-	}
+	template, err := ioutil.ReadFile("../resources/emails/3-wac-templ.txt")
+	assert.NoError(t, err)
 
 	body := fillEmailTemplate(string(template), match)
 
-	expected, err := ioutil.ReadFile("../resources/emails/expected3.txt")
-	if err != nil {
-		t.Error(err)
-	}
-
+	expected, err := ioutil.ReadFile("../resources/emails/3-wac-exp.txt")
+	assert.NoError(t, err)
 	assert.Equal(t, body, string(expected))
 }
 

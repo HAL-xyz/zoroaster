@@ -15,7 +15,7 @@ import (
 
 func ProcessActions(
 	actionsString []string,
-	payload trigger.IMatch,
+	match trigger.IMatch,
 	iEmail sesiface.SESAPI,
 	httpCli aws.IHttpClient) []*trigger.Outcome {
 
@@ -26,9 +26,9 @@ func ProcessActions(
 	for i, a := range actions {
 		switch v := a.Attribute.(type) {
 		case AttributeWebhookPost:
-			out = handleWebHookPost(v, payload, httpCli)
+			out = handleWebHookPost(v, match, httpCli)
 		case AttributeEmail:
-			out = handleEmail(v, payload, iEmail)
+			out = handleEmail(v, match, iEmail)
 		default:
 			out = &trigger.Outcome{fmt.Sprintf("unsupported ActionType: %s", a.ActionType), ""}
 		}
@@ -52,6 +52,7 @@ func getActionsFromString(actionsString []string) []*Action {
 }
 
 func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
+
 	postData, err := json.Marshal(match.ToPostPayload())
 	if err != nil {
 		return &trigger.Outcome{fmt.Sprintf("%v", match.ToPostPayload()), err.Error()}
@@ -66,45 +67,10 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 	return &trigger.Outcome{string(postData), string(jsonRespCode)}
 }
 
-func handleEmail(email AttributeEmail, payload trigger.IMatch, iemail sesiface.SESAPI) *trigger.Outcome {
-	body := fillEmailTemplate(email.Body, payload)
+func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SESAPI) *trigger.Outcome {
 
-	// get extra recipients from the TO field
-	extraRecipients := make([]string, 0)
-	for _, r := range email.To {
-		newAddress := fillEmailTemplate(r, payload)
-		// we need to figure out what type the return value is
-		returnType := "single"
-		if strings.HasPrefix(newAddress, "[") {
-			returnType = "array"
-		}
-		if strings.Contains(newAddress, " ") && !strings.HasPrefix(newAddress, "[") {
-			returnType = "multiple"
-		}
-		switch returnType {
-		case "array":
-			emails := strings.Split(newAddress, ",")
-			for _, em := range emails {
-				em = utils.RemoveCharacters(em, "[]")
-				if !utils.IsIn(em, email.To) {
-					extraRecipients = append(extraRecipients, em)
-				}
-			}
-		case "multiple":
-			emails := strings.Split(newAddress, " ")
-			for _, em := range emails {
-				if !utils.IsIn(em, email.To) {
-					extraRecipients = append(extraRecipients, em)
-				}
-			}
-		case "single":
-			if !utils.IsIn(newAddress, email.To) {
-				extraRecipients = append(extraRecipients, newAddress)
-			}
-		}
-	}
-	allRecipients := append(email.To, extraRecipients...)
-	allRecipients = validateEmails(allRecipients)
+	body := fillEmailTemplate(email.Body, match)
+	allRecipients := getAllRecipients(email.To, match)
 
 	emailPayload := trigger.EmailPayload{
 		Recipients: allRecipients,
@@ -120,6 +86,47 @@ func handleEmail(email AttributeEmail, payload trigger.IMatch, iemail sesiface.S
 		return &trigger.Outcome{string(emailPayloadString), err.Error()}
 	}
 	return &trigger.Outcome{string(emailPayloadString), result.String()}
+}
+
+// get extra recipients from the TO field
+func getAllRecipients(emailTo []string, match trigger.IMatch) []string {
+	extraRecipients := make([]string, 0)
+
+	for _, r := range emailTo {
+		newAddress := fillEmailTemplate(r, match)
+		// we need to figure out what type the return value is
+		returnType := "single"
+		if strings.HasPrefix(newAddress, "[") {
+			returnType = "array"
+		}
+		if strings.Contains(newAddress, " ") && !strings.HasPrefix(newAddress, "[") {
+			returnType = "multiple"
+		}
+		switch returnType {
+		case "array":
+			emails := strings.Split(newAddress, ",")
+			for _, em := range emails {
+				em = utils.RemoveCharacters(em, "[]")
+				if !utils.IsIn(em, emailTo) {
+					extraRecipients = append(extraRecipients, em)
+				}
+			}
+		case "multiple":
+			emails := strings.Split(newAddress, " ")
+			for _, em := range emails {
+				if !utils.IsIn(em, emailTo) {
+					extraRecipients = append(extraRecipients, em)
+				}
+			}
+		case "single":
+			if !utils.IsIn(newAddress, emailTo) {
+				extraRecipients = append(extraRecipients, newAddress)
+			}
+		}
+	}
+	allRecipients := append(emailTo, extraRecipients...)
+	allRecipients = validateEmails(allRecipients)
+	return allRecipients
 }
 
 func validateEmails(emails []string) []string {

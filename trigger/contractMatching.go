@@ -33,7 +33,7 @@ func MatchContract(
 		outputMatch, allVals := validateContractReturnValue(contractReturnValue, tg.ContractABI, tg.MethodName, expectedOutput)
 		matchingValues[i] = outputMatch
 		if allVals != "" {
-			allValues = allVals
+			allValues = allVals // always the same if not empty
 		}
 	}
 	// a trigger matches if all the Outputs are a match (i.e. non-empty strings)
@@ -49,7 +49,7 @@ func MatchContract(
 // - in case of a match: a tuple (value_matched, all_values)
 // - in case of no match, error or whatever: a tuple ("", "")
 func validateContractReturnValue(
-	contractValue string,
+	rawData string,
 	abi string,
 	methodName string,
 	expectedOutput Output) (string, string) {
@@ -57,10 +57,9 @@ func validateContractReturnValue(
 	cnReturnType := expectedOutput.ReturnType
 	cond := expectedOutput.Condition.(ConditionOutput)
 	index := expectedOutput.Index
+	rawData = strings.TrimPrefix(rawData, "0x")
 
-	contractValue = strings.TrimPrefix(contractValue, "0x")
-
-	rawJsParamsMap, err := abidec.DecodeParamsToJsonMap(contractValue, abi, methodName)
+	rawJsParamsMap, err := abidec.DecodeParamsToJsonMap(rawData, abi, methodName)
 	if err != nil {
 		log.Debug(err)
 		return "", ""

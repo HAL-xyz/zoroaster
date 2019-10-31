@@ -172,7 +172,7 @@ func TestHandleEmail1(t *testing.T) {
 
 	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 
-	payload := trigger.CnMatch{
+	match := trigger.CnMatch{
 		Trigger:        tg,
 		MatchUUID:      "",
 		BlockNo:        1,
@@ -181,10 +181,16 @@ func TestHandleEmail1(t *testing.T) {
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
-	outcome := handleEmail(email, payload, &mockSESClient{})
-	expectedPayload := `{"Recipients":["manlio.poltronieri@gmail.com","marco@atomic.eu.com"],"Body":"body"}`
-
-	assert.Equal(t, outcome.Payload, expectedPayload)
+	outcome := handleEmail(email, match, &mockSESClient{})
+	expectedPayload := `{
+   "Recipients":[
+      "manlio.poltronieri@gmail.com",
+      "marco@atomic.eu.com"
+   ],
+   "Body":"body"
+}`
+	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
+	assert.True(t, ok)
 }
 
 func TestHandleEmail2(t *testing.T) {
@@ -198,7 +204,7 @@ func TestHandleEmail2(t *testing.T) {
 
 	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 
-	payload := trigger.CnMatch{
+	match := trigger.CnMatch{
 		Trigger:        tg,
 		MatchUUID:      "",
 		BlockNo:        1,
@@ -207,9 +213,18 @@ func TestHandleEmail2(t *testing.T) {
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
-	outcome := handleEmail(email, payload, &mockSESClient{})
-	expectedPayload := `{"Recipients":["manlio.poltronieri@gmail.com","marco@atomic.eu.com","matteo@atomic.eu.com"],"Body":"body"}`
-	assert.Equal(t, outcome.Payload, expectedPayload)
+	outcome := handleEmail(email, match, &mockSESClient{})
+
+	expectedPayload := `{
+   "Recipients":[
+      "manlio.poltronieri@gmail.com",
+      "marco@atomic.eu.com",
+      "matteo@atomic.eu.com"
+   ],
+   "Body":"body"
+}`
+	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
+	assert.True(t, ok)
 }
 
 func TestHandleEmail3(t *testing.T) {
@@ -223,7 +238,7 @@ func TestHandleEmail3(t *testing.T) {
 
 	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 
-	payload := trigger.CnMatch{
+	match := trigger.CnMatch{
 		Trigger:        tg,
 		MatchUUID:      "",
 		BlockNo:        1,
@@ -232,7 +247,18 @@ func TestHandleEmail3(t *testing.T) {
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
-	outcome := handleEmail(email, payload, &mockSESClient{})
-	expectedPayload := `{"Recipients":["manlio.poltronieri@gmail.com","hello@world.com"],"Body":"body"}`
-	assert.Equal(t, outcome.Payload, expectedPayload)
+	outcome := handleEmail(email, match, &mockSESClient{})
+	expectedPayload := `{
+   "Recipients":[
+      "manlio.poltronieri@gmail.com",
+      "hello@world.com"
+   ],
+   "Body":"body"
+}`
+	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
+	assert.True(t, ok)
+}
+
+func TestHandleEmailWithEvents(t *testing.T) {
+
 }
