@@ -9,14 +9,14 @@ import (
 )
 
 type ZConfiguration struct {
-	Stage      string
-	EthNode    string
-	LogsPath   string
-	LogsFile   string
-	TriggersDB TriggersDB
+	Stage    string
+	EthNode  string
+	LogsPath string
+	LogsFile string
+	Database ZoroDB
 }
 
-type TriggersDB struct {
+type ZoroDB struct {
 	TableTriggers string
 	TableMatches  string
 	TableOutcomes string
@@ -28,6 +28,13 @@ type TriggersDB struct {
 	Port          int
 	Password      string
 }
+
+// ENV variables
+const (
+	dbUsr   = "DB_USR"
+	dbPwd   = "DB_PWD"
+	ethNode = "ETH_NODE"
+)
 
 func Load(dirpath string) *ZConfiguration {
 
@@ -57,10 +64,19 @@ func Load(dirpath string) *ZConfiguration {
 
 	zconfig.LogsFile = fmt.Sprintf("%s/%s.log", zconfig.LogsPath, stage)
 
-	const dbPwd = "DB_PWD"
-	zconfig.TriggersDB.Password = os.Getenv(dbPwd)
-	if zconfig.TriggersDB.Password == "" {
+	zconfig.Database.User = os.Getenv(dbUsr)
+	if zconfig.Database.User == "" {
+		log.Fatal("no db user set in local env ", dbUsr)
+	}
+
+	zconfig.Database.Password = os.Getenv(dbPwd)
+	if zconfig.Database.Password == "" {
 		log.Fatal("no db password set in local env ", dbPwd)
+	}
+
+	zconfig.EthNode = os.Getenv(ethNode)
+	if zconfig.EthNode == "" {
+		log.Fatal("no eth node set in local env ", ethNode)
 	}
 
 	return &zconfig

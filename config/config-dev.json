@@ -1,14 +1,12 @@
 {
-  "ethNode": "https://ethshared.bdnodes.net/?auth=88h79-QJjNSLayKUGEchg5aSxcZi1iLgJdv3huM7qnU",
   "logsPath": "logs",
-  "triggersDB": {
-    "tableTriggers": "dev_triggers",
-    "tableMatches": "dev_matches",
-    "tableOutcomes": "dev_outcomes",
-    "tableState": "dev_state",
-    "tableActions": "dev_actions",
+  "database": {
+    "tableTriggers": "triggers",
+    "tableMatches": "matches",
+    "tableOutcomes": "outcomes",
+    "tableState": "state",
+    "tableActions": "actions",
     "host": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
-    "user": "triggersdb_test_admin",
     "name": "HAL",
     "port": 5432
   }

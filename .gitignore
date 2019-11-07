@@ -25,3 +25,6 @@ cover.html
 
 # Experiments
 exp
+
+# ENV
+local.env

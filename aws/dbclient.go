@@ -15,7 +15,7 @@ import (
 var db *sql.DB
 
 type PostgresClient struct {
-	conf *config.TriggersDB
+	conf *config.ZoroDB
 }
 
 func (cli PostgresClient) GetSilentButMatchingTriggers(triggerUUIDs []string) []string {
@@ -191,7 +191,7 @@ func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.
 
 func (cli *PostgresClient) InitDB(c *config.ZConfiguration) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		c.TriggersDB.Host, c.TriggersDB.Port, c.TriggersDB.User, c.TriggersDB.Password, c.TriggersDB.Name)
+		c.Database.Host, c.Database.Port, c.Database.User, c.Database.Password, c.Database.Name)
 
 	var err error
 	db, err = sql.Open("postgres", psqlInfo)
@@ -204,7 +204,7 @@ func (cli *PostgresClient) InitDB(c *config.ZConfiguration) {
 		log.Fatal("cannot connect to the DB -> ", err)
 	}
 
-	cli.conf = &c.TriggersDB
+	cli.conf = &c.Database
 }
 
 func (cli PostgresClient) Close() {

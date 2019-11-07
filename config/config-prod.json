@@ -1,15 +1,13 @@
 {
-  "ethNode": "https://reader:7MTqNuJ4Az4sEWHQBejy8B9tprFGZRsekWB3mM77HFj3qPtVgczsXgnyATgQAf9z@node-1.hal.xyz/node",
   "logsPath": "logs",
-  "triggersDB": {
-    "tableTriggers": "prod_triggers",
-    "tableMatches": "prod_matches",
-    "tableOutcomes": "prod_outcomes",
-    "tableState": "prod_state",
-    "tableActions": "prod_actions",
-    "host": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
-    "user": "triggersdb_test_admin",
-    "name": "HAL",
+  "database": {
+    "tableTriggers": "triggers",
+    "tableMatches": "matches",
+    "tableOutcomes": "outcomes",
+    "tableState": "state",
+    "tableActions": "actions",
+    "host": "",
+    "name": "HAL-PROD",
     "port": 5432
   }
 }
