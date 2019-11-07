@@ -3,6 +3,7 @@ package action
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 type Action struct {
@@ -69,7 +70,7 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 		ActionType: ajs.ActionType,
 	}
 
-	switch ajs.ActionType {
+	switch strings.ToLower(ajs.ActionType) {
 	case "webhook_post":
 		action.Attribute = AttributeWebhookPost{URI: ajs.Attributes.URI}
 	case "email":

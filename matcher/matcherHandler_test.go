@@ -93,9 +93,7 @@ func TestProcessMatch(t *testing.T) {
 
 	// email
 	emailPayload := "{\"Recipients\":[\"hello@gmail.com\"],\"Body\":\"999\"}"
-	emailOutcome := `{
-  MessageId: "mock email success"
-}`
+	emailOutcome := `{"MessageId":"mock email success"}`
 	assert.Equal(t, outcomes[1].Payload, emailPayload)
 	assert.Equal(t, outcomes[1].Outcome, emailOutcome)
 }

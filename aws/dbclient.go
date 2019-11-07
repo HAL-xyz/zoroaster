@@ -82,7 +82,7 @@ func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchUUID string)
 
 	_, err := db.Exec(q, matchUUID, outcome.Payload, outcome.Outcome, time.Now())
 	if err != nil {
-		log.Errorf("cannot log outcome: %s", err)
+		log.Errorf("cannot log outcome with payload: %s; outcome: %s; error: %s", outcome.Payload, outcome.Outcome, err)
 	}
 }
 
@@ -93,7 +93,7 @@ func (cli PostgresClient) GetActions(tgUUID string, userUUID string) ([]string, 
 				WHERE tg_table.user_uuid = $1::uuid
 				AND tg_table.uuid = act_table.trigger_uuid
 				AND tg_table.uuid = $2::uuid
-				AND tg_table.is_active = true`,
+				AND act_table.is_active = true`,
 		cli.conf.TableTriggers, cli.conf.TableActions)
 	rows, err := db.Query(q, userUUID, tgUUID)
 	if err != nil {

@@ -76,16 +76,27 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 		Recipients: allRecipients,
 		Body:       body,
 	}
-	emailPayloadString, err := json.Marshal(emailPayload)
+	emailPayloadJson, err := json.Marshal(emailPayload)
 	if err != nil {
-		return &trigger.Outcome{fmt.Sprintf("%s", emailPayload), err.Error()}
+		errJson, _ := json.Marshal(err)
+		return &trigger.Outcome{
+			Payload: fmt.Sprintf("%s", emailPayload),
+			Outcome: string(errJson),
+		}
 	}
-
 	result, err := sendEmail(iemail, allRecipients, email.Subject, body)
 	if err != nil {
-		return &trigger.Outcome{string(emailPayloadString), err.Error()}
+		errJson, _ := json.Marshal(err)
+		return &trigger.Outcome{
+			Payload: string(emailPayloadJson),
+			Outcome: string(errJson),
+		}
 	}
-	return &trigger.Outcome{string(emailPayloadString), result.String()}
+	outcomeJsn, _ := json.Marshal(result)
+	return &trigger.Outcome{
+		Payload: string(emailPayloadJson),
+		Outcome: string(outcomeJsn),
+	}
 }
 
 // get extra recipients from the TO field
