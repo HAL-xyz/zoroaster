@@ -2,8 +2,10 @@ package action
 
 import (
 	"encoding/json"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"math/big"
 	"testing"
 	"zoroaster/trigger"
 )
@@ -45,70 +47,183 @@ func TestFillEmailTemplate1(t *testing.T) {
 	expected, err := ioutil.ReadFile("../resources/emails/1-wat-exp.txt")
 
 	assert.NoError(t, err)
-	assert.Equal(t, body, string(expected))
+	assert.Equal(t, string(expected), body)
+}
+
+var cnMatch = trigger.CnMatch{
+	Trigger:        nil,
+	MatchUUID:      "uuid",
+	BlockNo:        88888,
+	MatchedValues:  "4",
+	BlockTimestamp: 123456,
+	AllValues:      []interface{}{},
+	BlockHash:      "0x",
 }
 
 func TestFillEmailTemplate2(t *testing.T) {
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 
-	match := trigger.CnMatch{
-		Trigger:        tg,
-		MatchUUID:      "uuid",
-		BlockNo:        88888,
-		MatchedValues:  "4",
-		BlockTimestamp: 123456,
-		AllValues:      "[[4,8,12]]",
-		BlockHash:      "0x",
-	}
-	template, err := ioutil.ReadFile("../resources/emails/2-wac-templ.txt")
-	assert.NoError(t, err)
+	cnMatch.AllValues = []interface{}{[3]*big.Int{big.NewInt(4), big.NewInt(8), big.NewInt(12)}}
 
-	body := fillEmailTemplate(string(template), match)
+	template := "$ReturnedValues$"
+	body := fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "[[4 8 12]]", body)
 
-	expected, err := ioutil.ReadFile("../resources/emails/2-wac-exp.txt")
-	assert.NoError(t, err)
-	assert.Equal(t, body, string(expected))
+	template = "$ReturnedValues[0]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "4", body)
+
+	template = "$ReturnedValues[2]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "12", body)
+
+	template = "found: $ReturnedValues[1]$; not found: $ReturnedValues[33]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "found: 8; not found: $ReturnedValues[33]$", body)
 }
 
 func TestFillEmailTemplate3(t *testing.T) {
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 
-	match := trigger.CnMatch{
-		Trigger:        tg,
-		MatchUUID:      "uuid",
-		BlockNo:        88888,
-		MatchedValues:  "4",
-		BlockTimestamp: 123456,
-		AllValues:      "[4#END# \"sailor\"#END# \"moon\"]",
-		BlockHash:      "0x",
-	}
-	template, err := ioutil.ReadFile("../resources/emails/3-wac-templ.txt")
-	assert.NoError(t, err)
+	cnMatch.AllValues = []interface{}{
+		big.NewInt(4), "sailor", "moon"}
 
-	body := fillEmailTemplate(string(template), match)
+	template := "$ReturnedValues$"
+	body := fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "[4 sailor moon]", body)
 
-	expected, err := ioutil.ReadFile("../resources/emails/3-wac-exp.txt")
-	assert.NoError(t, err)
-	assert.Equal(t, body, string(expected))
+	template = "$ReturnedValues[0]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "4", body)
+
+	template = "$ReturnedValues[2]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "moon", body)
+
+	template = "$ReturnedValues[0]$, $ReturnedValues[1]$, $ReturnedValues[2]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "4, sailor, moon", body)
 }
 
 func TestFillEmailTemplate4(t *testing.T) {
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
 
-	match := trigger.CnMatch{
-		Trigger:        tg,
-		MatchUUID:      "uuid",
-		BlockNo:        88888,
-		MatchedValues:  "4",
-		BlockTimestamp: 123456,
-		AllValues:      "[\"0x4a574510c7014e4ae985403536074abe582adfc8\"]",
-		BlockHash:      "0x",
-	}
+	cnMatch.AllValues = []interface{}{
+		common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8")}
 
-	template := "$AllValues$"
-	body := fillEmailTemplate(template, match)
+	// []Address{}
+	cnMatch.AllValues = []interface{}{
+		[]common.Address{
+			common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8"),
+			common.HexToAddress("0xffffffffffffffffffffffffffffffffffffffff"),
+		}}
 
-	assert.Equal(t, body, "0x4a574510c7014e4ae985403536074abe582adfc8")
+	template := "$ReturnedValues[0]$"
+	body := fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "0x4a574510c7014e4ae985403536074abe582adfc8", body)
+}
+
+func TestFillEmailTemplateAdd(t *testing.T) {
+
+	cnMatch.AllValues = []interface{}{
+		[]common.Address{
+			common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8"),
+			common.HexToAddress("0xffffffffffffffffffffffffffffffffffffffff"),
+		}}
+
+	template := "$ReturnedValues[0]$"
+	body := fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "0x4a574510c7014e4ae985403536074abe582adfc8", body)
+
+	template = "$ReturnedValues[1]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "0xffffffffffffffffffffffffffffffffffffffff", body)
+
+	template = "$ReturnedValues[2]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "$ReturnedValues[2]$", body)
+}
+
+// multiple values and []Address
+func TestFillEmailTemplate6(t *testing.T) {
+
+	cnMatch.AllValues = []interface{}{
+		big.NewInt(4), "sailor", "moon", []common.Address{
+			common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8"),
+			common.HexToAddress("0xffffffffffffffffffffffffffffffffffffffff"),
+		}}
+
+	template := "$ReturnedValues[3]$"
+	body := fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "[0x4a574510c7014e4ae985403536074abe582adfc8 0xffffffffffffffffffffffffffffffffffffffff]", body)
+
+	template = "$ReturnedValues[3][0]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "0x4a574510c7014e4ae985403536074abe582adfc8", body)
+
+	template = "$ReturnedValues[3][1]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "0xffffffffffffffffffffffffffffffffffffffff", body)
+
+	template = "$ReturnedValues[3][2]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "$ReturnedValues[3][2]$", body)
+}
+
+// testing a template with (int, string, string, [3]int)
+func TestFillEmailTemplate5(t *testing.T) {
+
+	cnMatch.AllValues = []interface{}{
+		big.NewInt(4), "sailor", "moon", [3]string{"one", "two", "three"}}
+
+	template := "$ReturnedValues$"
+	body := fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "[4 sailor moon [one two three]]", body)
+
+	template = "$ReturnedValues[3][0]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "one", body)
+
+	template = "$ReturnedValues[3][1]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "two", body)
+
+	template = "$ReturnedValues[3][9]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "$ReturnedValues[3][9]$", body)
+
+	template = "$ReturnedValues[3]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "[one two three]", body)
+
+	template = "$ReturnedValues[1]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "sailor", body)
+
+	template = "$ReturnedValues[10]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "$ReturnedValues[10]$", body)
+
+	template = "sailor: $ReturnedValues[1]$ and moon: $ReturnedValues[2]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "sailor: sailor and moon: moon", body)
+
+	template = "sailor: $ReturnedValues[1]$ and one: $ReturnedValues[3][0]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "sailor: sailor and one: one", body)
+}
+
+func TestFillEmailTemplate7(t *testing.T) {
+
+	cnMatch.AllValues = []interface{}{
+		big.NewInt(4), "sailor", "moon", [3]string{"one", "two", "three"}}
+
+	template, err := ioutil.ReadFile("../resources/emails/2-wac-templ.txt")
+	assert.NoError(t, err)
+
+	body := fillEmailTemplate(string(template), cnMatch)
+
+	expected, err := ioutil.ReadFile("../resources/emails/2-wac-exp.txt")
+	assert.NoError(t, err)
+
+	assert.Equal(t, string(expected), body)
 }
 
 // Actually send an email. Commented out bc we only want

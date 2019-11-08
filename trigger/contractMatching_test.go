@@ -1,11 +1,13 @@
 package trigger
 
 import (
-	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
+	"math/big"
 	"testing"
 	"zoroaster/config"
+	"zoroaster/utils"
 )
 
 var zconf = config.Load("../config")
@@ -19,9 +21,12 @@ func TestMatchContract1(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387102)
+	exp := []interface{}{common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8")}
+
 	assert.True(t, isMatch)
 	assert.Equal(t, "0x4a574510c7014e4ae985403536074abe582adfc8", matchingVals[0])
-	assert.Equal(t, "[\"0x4a574510c7014e4ae985403536074abe582adfc8\"]", fmt.Sprint(returnedVals))
+	assert.Equal(t, exp, returnedVals)
+
 }
 
 func TestMatchContract2(t *testing.T) {
@@ -31,9 +36,11 @@ func TestMatchContract2(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387679)
+	exp := []interface{}{utils.MakeBigInt("3876846319093283908984")}
+
 	assert.True(t, isMatch)
 	assert.Equal(t, "3876846319093283908984", matchingVals[0])
-	assert.Equal(t, "[3876846319093283908984]", fmt.Sprint(returnedVals))
+	assert.Equal(t, exp, returnedVals)
 }
 
 func TestMatchContract3(t *testing.T) {
@@ -43,9 +50,11 @@ func TestMatchContract3(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387102)
+	exp := []interface{}{true}
+
 	assert.True(t, isMatch)
 	assert.Equal(t, "true", matchingVals[0])
-	assert.Equal(t, "[true]", fmt.Sprint(returnedVals))
+	assert.Equal(t, exp, returnedVals)
 }
 
 func TestMatchContract4(t *testing.T) {
@@ -55,9 +64,11 @@ func TestMatchContract4(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387102)
+	exp := []interface{}{common.HexToAddress("0xd4fe7bc31cedb7bfb8a345f31e668033056b2728")}
+
 	assert.True(t, isMatch)
 	assert.Equal(t, "0xd4fe7bc31cedb7bfb8a345f31e668033056b2728", matchingVals[0])
-	assert.Equal(t, "[\"0xd4fe7bc31cedb7bfb8a345f31e668033056b2728\"]", fmt.Sprint(returnedVals))
+	assert.Equal(t, exp, returnedVals)
 }
 
 func TestMatchContract5(t *testing.T) {
@@ -68,8 +79,9 @@ func TestMatchContract5(t *testing.T) {
 
 	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387102)
 	assert.True(t, isMatch)
+	exp := []interface{}{common.HexToAddress("0x02ca0dfabf5285b0b9d09dfaa241167013355c35")}
 	assert.Equal(t, "0x02ca0dfabf5285b0b9d09dfaa241167013355c35", matchingVals[0])
-	assert.Equal(t, "[\"0x02ca0dfabf5285b0b9d09dfaa241167013355c35\"]", fmt.Sprint(returnedVals))
+	assert.Equal(t, exp, returnedVals)
 }
 
 func TestMatchContract6(t *testing.T) {
@@ -79,9 +91,12 @@ func TestMatchContract6(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	exp := []interface{}{
+		[3]*big.Int{big.NewInt(4), big.NewInt(8), big.NewInt(12)}}
+
 	assert.True(t, isMatch)
 	assert.Equal(t, "12", matchingVals[0])
-	assert.Equal(t, "[[4,8,12]]", fmt.Sprint(returnedVals))
+	assert.Equal(t, exp, returnedVals)
 }
 
 func TestMatchContract7(t *testing.T) {
@@ -91,9 +106,14 @@ func TestMatchContract7(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	exp := []interface{}{big.NewInt(4), big.NewInt(8), big.NewInt(12)}
+
 	assert.True(t, isMatch)
 	assert.Equal(t, "4", matchingVals[0])
-	assert.Equal(t, "[4#END# 8#END# 12]", fmt.Sprint(returnedVals))
+	assert.Equal(t, exp, returnedVals)
+	assert.Equal(t, returnedVals[0], big.NewInt(4))
+	assert.Equal(t, returnedVals[1], big.NewInt(8))
+	assert.Equal(t, returnedVals[2], big.NewInt(12))
 }
 
 func TestMatchContract8(t *testing.T) {
@@ -103,9 +123,12 @@ func TestMatchContract8(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	exp := []interface{}{
+		big.NewInt(4), "sailor", "moon"}
+
 	assert.True(t, isMatch)
 	assert.Equal(t, "moon", matchingVals[0])
-	assert.Equal(t, "[4#END# \"sailor\"#END# \"moon\"]", fmt.Sprint(returnedVals))
+	assert.Equal(t, exp, returnedVals)
 }
 
 func TestMatchContract9(t *testing.T) {
@@ -115,9 +138,10 @@ func TestMatchContract9(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	exp := []interface{}{[3]string{"ciao", "come", "stai"}}
 	assert.True(t, isMatch)
 	assert.Equal(t, "ciao", matchingVals[0])
-	assert.Equal(t, "[[\"ciao\",\"come\",\"stai\"]]", fmt.Sprint(returnedVals))
+	assert.Equal(t, exp, returnedVals)
 }
 
 func TestMatchContract10(t *testing.T) {
@@ -127,11 +151,17 @@ func TestMatchContract10(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	exp := []interface{}{
+		[3]common.Address{
+			common.HexToAddress("0x4fed1fc4144c223ae3c1553be203cdfcbd38c581"),
+			common.HexToAddress("0x65d21616594825a738bcd08a5227358593a9aaf2"),
+			common.HexToAddress("0xd76f7d7d2ede0631ad23e4a01176c0e59878abda"),
+		}}
 	assert.True(t, isMatch)
 	assert.Equal(t, len(matchingVals), 2)
 	assert.Equal(t, "10", matchingVals[0])
 	assert.Equal(t, "0x4fed1fc4144c223ae3c1553be203cdfcbd38c581", matchingVals[1])
-	assert.Equal(t, `[["0x4fed1fc4144c223ae3c1553be203cdfcbd38c581","0x65d21616594825a738bcd08a5227358593a9aaf2","0xd76f7d7d2ede0631ad23e4a01176c0e59878abda"]]`, returnedVals)
+	assert.Equal(t, exp, returnedVals)
 }
 
 func TestMatchContract11(t *testing.T) {
@@ -141,10 +171,16 @@ func TestMatchContract11(t *testing.T) {
 	assert.NoError(t, err)
 
 	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	exp := []interface{}{
+		[3]common.Address{
+			common.HexToAddress("0x4fed1fc4144c223ae3c1553be203cdfcbd38c581"),
+			common.HexToAddress("0x65d21616594825a738bcd08a5227358593a9aaf2"),
+			common.HexToAddress("0xd76f7d7d2ede0631ad23e4a01176c0e59878abda"),
+		}}
 	assert.False(t, isMatch)
 	assert.Equal(t, "10", matchingVals[0])
 	assert.Equal(t, "", matchingVals[1])
-	assert.Equal(t, `[["0x4fed1fc4144c223ae3c1553be203cdfcbd38c581","0x65d21616594825a738bcd08a5227358593a9aaf2","0xd76f7d7d2ede0631ad23e4a01176c0e59878abda"]]`, returnedVals)
+	assert.Equal(t, exp, returnedVals)
 }
 
 func TestMatchContractUniswap(t *testing.T) {

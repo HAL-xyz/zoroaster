@@ -5,8 +5,11 @@ BlockTimestamp is 123456
 
 The matched value is 4
 
-All values returned from contract call: [4,8,12]
+All values returned from contract call: [4 sailor moon [one two three]]
 
 The first element is: 4
-The second element is: 8
-This does not exist: !AllValues[333]
+The second element is: sailor
+The third element is: [one two three]
+
+The [3][0] element is: one
+This element does not not exist: $ReturnedValues[3][100]$

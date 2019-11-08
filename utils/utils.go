@@ -70,16 +70,6 @@ func GetOnlyNumbers(s string) string {
 	return re.FindString(s)
 }
 
-func GetValuesFromMap(m map[string]json.RawMessage) []json.RawMessage {
-	v := make([]json.RawMessage, len(m), len(m))
-	idx := 0
-	for _, value := range m {
-		v[idx] = value
-		idx++
-	}
-	return v
-}
-
 func Reverse(s string) string {
 	// Get Unicode code points.
 	n := 0

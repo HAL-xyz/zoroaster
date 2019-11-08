@@ -5,8 +5,11 @@ BlockTimestamp is $BlockTimestamp$
 
 The matched value is $MatchedValue$
 
-All values returned from contract call: $AllValues$
+All values returned from contract call: $ReturnedValues$
 
-The first element is: !AllValues[0]
-The second element is: !AllValues[1]
-This does not exist: !AllValues[333]
+The first element is: $ReturnedValues[0]$
+The second element is: $ReturnedValues[1]$
+The third element is: $ReturnedValues[3]$
+
+The [3][0] element is: $ReturnedValues[3][0]$
+This element does not not exist: $ReturnedValues[3][100]$

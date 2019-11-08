@@ -7,7 +7,9 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
+	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -95,51 +97,95 @@ func fillEmailTemplate(text string, payload trigger.IMatch) string {
 	}
 }
 
+// ffs...
+func ifcPrintf(in interface{}) string {
+	switch v := in.(type) {
+	case common.Address:
+		return strings.ToLower(v.String())
+	case []common.Address:
+		out := make([]string, len(v))
+		for i, a := range v {
+			out[i] = strings.ToLower(a.String())
+		}
+		return fmt.Sprintf("%s", out)
+	case []interface{}:
+		out := make([]string, len(v))
+		for i, inner := range v {
+			switch innerV := inner.(type) {
+			case common.Address:
+				out[i] = strings.ToLower(innerV.String())
+			default:
+				out[i] = fmt.Sprintf("%s", innerV)
+			}
+		}
+		return fmt.Sprintf("%s", out)
+	case reflect.Value:
+		a, ok := v.Interface().(common.Address)
+		if ok {
+			return strings.ToLower(a.String())
+		} else {
+			return fmt.Sprintf("%s", v)
+		}
+	default:
+		return fmt.Sprintf("%s", in)
+	}
+}
+
 func templateContract(text string, match trigger.CnMatch) string {
 	// standard fields
 	blockNumber := fmt.Sprintf("%v", match.BlockNo)
 	blockTimestamp := fmt.Sprintf("%v", match.BlockTimestamp)
-
 	text = strings.ReplaceAll(text, "$BlockNumber$", blockNumber)
 	text = strings.ReplaceAll(text, "$BlockTimestamp$", blockTimestamp)
-
-	// all values
-	cleanAllValues := strings.ReplaceAll(match.AllValues, "#END#", "")
-	cleanAllValues = strings.TrimPrefix(cleanAllValues, "[")
-	cleanAllValues = strings.TrimSuffix(cleanAllValues, "]")
-	cleanAllValues = strings.ReplaceAll(cleanAllValues, "\"", "")
-	text = strings.ReplaceAll(text, "$AllValues$", fmt.Sprintf("%s", cleanAllValues))
+	text = strings.ReplaceAll(text, "$BlockHash$", match.BlockHash)
 
 	// matched value
 	text = strings.ReplaceAll(text, "$MatchedValue$", fmt.Sprintf("%s", match.MatchedValues))
 
-	// array indexing
+	// all values
+	text = strings.ReplaceAll(text, "$ReturnedValues$", ifcPrintf(match.AllValues))
 
-	// Arrays are split by commas, multiple returns objects by #END# token
-	var allValues []string
-	if strings.HasPrefix(match.AllValues, "[[") {
-		allValues = strings.Split(match.AllValues, ",")
-	} else {
-		allValues = strings.Split(fmt.Sprintf(";;%s;;", match.AllValues), "#END# ")
-	}
-	for i := range allValues {
-		allValues[i] = strings.ReplaceAll(allValues[i], "[[", "")
-		allValues[i] = strings.ReplaceAll(allValues[i], "]]", "")
-		allValues[i] = strings.ReplaceAll(allValues[i], ";;[", "")
-		allValues[i] = strings.ReplaceAll(allValues[i], "];;", "")
-		allValues[i] = strings.ReplaceAll(allValues[i], "\"", "")
-	}
-
-	// figure out the positions, like [!AllValues[0], AllValues[1]...]
-	indexedValueRgx := regexp.MustCompile(`!AllValues\[\d+]`)
-	indexedValues := indexedValueRgx.FindAllString(text, -1)
-	for _, e := range indexedValues {
-		index := utils.GetOnlyNumbers(e)
-		position, _ := strconv.Atoi(index)
-		if position < len(allValues) {
-			text = strings.ReplaceAll(text, e, allValues[position])
+	// indexed value, multiple returns (i.e. $ReturnedValues[K][N]$)
+	multIndexedValueRgx := regexp.MustCompile(`\$ReturnedValues\[\d+]\[\d+]\$`)
+	multIndexedValues := multIndexedValueRgx.FindAllString(text, -1)
+	for _, e := range multIndexedValues {
+		positionS := utils.GetOnlyNumbers(strings.Split(e, "][")[0])
+		indexS := utils.GetOnlyNumbers(strings.Split(e, "][")[1])
+		position, _ := strconv.Atoi(positionS)
+		index, _ := strconv.Atoi(indexS)
+		if position < len(match.AllValues) {
+			switch reflect.TypeOf(match.AllValues[position]).Kind() {
+			case reflect.Array, reflect.Slice:
+				if index < reflect.ValueOf(match.AllValues[position]).Len() {
+					text = strings.ReplaceAll(text, e, ifcPrintf(reflect.ValueOf(match.AllValues[position]).Index(index)))
+				}
+			}
 		}
 	}
+
+	// indexed value, single return (i.e. $ReturnedValues[N]$)
+	indexedValueRgx := regexp.MustCompile(`\$ReturnedValues\[\d+]\$`)
+	indexedValues := indexedValueRgx.FindAllString(text, -1)
+	for _, e := range indexedValues {
+		indexS := utils.GetOnlyNumbers(e)
+		index, _ := strconv.Atoi(indexS)
+		// single value with array / slice
+		if len(match.AllValues) == 1 {
+			rt := reflect.TypeOf(match.AllValues[0])
+			switch rt.Kind() {
+			case reflect.Array, reflect.Slice:
+				if index < reflect.ValueOf(match.AllValues[0]).Len() {
+					text = strings.ReplaceAll(text, e, ifcPrintf(reflect.ValueOf(match.AllValues[0]).Index(index)))
+					continue
+				}
+			}
+		}
+		// multiple value
+		if index < len(match.AllValues) {
+			text = strings.ReplaceAll(text, e, ifcPrintf(match.AllValues[index]))
+		}
+	}
+
 	return text
 }
 

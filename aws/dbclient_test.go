@@ -57,7 +57,7 @@ func TestPostgresClient_All(t *testing.T) {
 		BlockHash:      "0x",
 		MatchUUID:      "3b29b0c3-e403-4103-81ef-6685cd391cdm",
 		MatchedValues:  "{}",
-		AllValues:      "{}",
+		AllValues:      nil,
 	}
 	psqlClient.LogMatch(cnMatch)
 

@@ -41,6 +41,32 @@ func DecodeParameters(data string, cntABI string, methodName string) (map[string
 	return getMap, nil
 }
 
+func DecodeParamsIntoList(data string, cntABI string, methodName string) ([]interface{}, error) {
+
+	encb, err := hex.DecodeString(data)
+	if err != nil {
+		return nil, fmt.Errorf("invalid hex: %s", data)
+	}
+
+	xabi, err := abi.JSON(strings.NewReader(cntABI))
+	if err != nil {
+		return nil, fmt.Errorf("cannot read abi: %s", err)
+	}
+
+	methodObj, ok := xabi.Methods[methodName]
+	if !ok {
+		return nil, fmt.Errorf("method %s not found", methodName)
+	}
+
+	ls, err := methodObj.Outputs.UnpackValues(encb)
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot unpack outputs: %s", err)
+	}
+
+	return ls, nil
+}
+
 func DecodeParamsToJsonMap(data string, cntABI string, methodName string) (map[string]json.RawMessage, error) {
 	ifData, err := DecodeParameters(data, cntABI, methodName)
 	if err != nil {

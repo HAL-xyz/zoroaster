@@ -1,6 +1,9 @@
 package trigger
 
-import "github.com/onrik/ethrpc"
+import (
+	"encoding/json"
+	"github.com/onrik/ethrpc"
+)
 
 // A match as represented internally by Zoroaster
 type IMatch interface {
@@ -109,7 +112,7 @@ type CnMatch struct {
 	BlockHash      string
 	MatchUUID      string
 	MatchedValues  string
-	AllValues      string
+	AllValues      []interface{}
 }
 
 type PersistentCnMatch struct {
@@ -125,6 +128,8 @@ type PersistentCnMatch struct {
 }
 
 func (m CnMatch) ToPersistent() IPersistableMatch {
+	stringValues, _ := json.Marshal(m.AllValues)
+
 	return &PersistentCnMatch{
 		BlockNo:        m.BlockNo,
 		BlockTimestamp: m.BlockTimestamp,
@@ -136,7 +141,7 @@ func (m CnMatch) ToPersistent() IPersistableMatch {
 			AllValues     string
 		}{
 			MatchedValues: m.MatchedValues,
-			AllValues:     m.AllValues,
+			AllValues:     string(stringValues),
 		},
 	}
 }
@@ -161,6 +166,8 @@ type CnPostPayload struct {
 func (CnPostPayload) isPostablePayload() {}
 
 func (m CnMatch) ToPostPayload() IPostablePaylaod {
+	stringValues, _ := json.Marshal(m.AllValues)
+
 	return &CnPostPayload{
 		BlockNo:        m.BlockNo,
 		BlockTimestamp: m.BlockTimestamp,
@@ -172,7 +179,7 @@ func (m CnMatch) ToPostPayload() IPostablePaylaod {
 			AllValues     string
 		}{
 			MatchedValues: m.MatchedValues,
-			AllValues:     m.AllValues,
+			AllValues:     string(stringValues),
 		},
 		TriggerName: m.Trigger.TriggerName,
 		TriggerType: m.Trigger.TriggerType,

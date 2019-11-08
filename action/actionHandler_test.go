@@ -33,7 +33,8 @@ func TestHandleWebHookPost(t *testing.T) {
 		"0x",
 		"uuid",
 		"matched values",
-		"all values"}
+		[]interface{}{true},
+	}
 
 	outcome := handleWebHookPost(url, cnMatch, mockHttpClient{})
 
@@ -45,7 +46,7 @@ func TestHandleWebHookPost(t *testing.T) {
    "FunctionName":"daoCreator",
    "ReturnedData":{
       "MatchedValues":"matched values",
-      "AllValues":"all values"
+      "AllValues":"[true]"
    },
    "TriggerName":"wac 1",
    "TriggerType":"WatchContracts",
@@ -151,7 +152,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
 
 // EMAIL TESTS
 
-// SESAPI mock
+//SESAPI mock
 type mockSESClient struct {
 	sesiface.SESAPI
 }
@@ -165,7 +166,7 @@ func TestHandleEmail1(t *testing.T) {
 
 	email := AttributeEmail{
 		From:    "hello@wolrd.com",
-		To:      []string{"manlio.poltronieri@gmail.com", "$AllValues$"},
+		To:      []string{"manlio.poltronieri@gmail.com", "$ReturnedValues$"},
 		Subject: "Hello World Test",
 		Body:    "body",
 	}
@@ -177,17 +178,17 @@ func TestHandleEmail1(t *testing.T) {
 		MatchUUID:      "",
 		BlockNo:        1,
 		MatchedValues:  "",
-		AllValues:      "[\"marco@atomic.eu.com\"",
+		AllValues:      []interface{}{"marco@atomic.eu.com"},
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
 	outcome := handleEmail(email, match, &mockSESClient{})
 	expectedPayload := `{
-   "Recipients":[
-      "manlio.poltronieri@gmail.com",
-      "marco@atomic.eu.com"
-   ],
-   "Body":"body"
+ "Recipients":[
+    "manlio.poltronieri@gmail.com",
+    "marco@atomic.eu.com"
+ ],
+ "Body":"body"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
@@ -197,7 +198,7 @@ func TestHandleEmail2(t *testing.T) {
 
 	email := AttributeEmail{
 		From:    "hello@wolrd.com",
-		To:      []string{"manlio.poltronieri@gmail.com", "$AllValues$"},
+		To:      []string{"manlio.poltronieri@gmail.com", "$ReturnedValues$"},
 		Subject: "Hello World Test",
 		Body:    "body",
 	}
@@ -209,19 +210,19 @@ func TestHandleEmail2(t *testing.T) {
 		MatchUUID:      "",
 		BlockNo:        1,
 		MatchedValues:  "",
-		AllValues:      "[[\"marco@atomic.eu.com\",\"matteo@atomic.eu.com\",\"not and address\"]]",
+		AllValues:      []interface{}{[]string{"marco@atomic.eu.com", "matteo@atomic.eu.com", "not and address"}},
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
 	outcome := handleEmail(email, match, &mockSESClient{})
 
 	expectedPayload := `{
-   "Recipients":[
-      "manlio.poltronieri@gmail.com",
-      "marco@atomic.eu.com",
-      "matteo@atomic.eu.com"
-   ],
-   "Body":"body"
+  "Recipients":[
+     "manlio.poltronieri@gmail.com",
+     "marco@atomic.eu.com",
+     "matteo@atomic.eu.com"
+  ],
+  "Body":"body"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
@@ -231,7 +232,7 @@ func TestHandleEmail3(t *testing.T) {
 
 	email := AttributeEmail{
 		From:    "hello@wolrd.com",
-		To:      []string{"manlio.poltronieri@gmail.com", "$AllValues$"},
+		To:      []string{"manlio.poltronieri@gmail.com", "$ReturnedValues$"},
 		Subject: "Hello World Test",
 		Body:    "body",
 	}
@@ -243,22 +244,22 @@ func TestHandleEmail3(t *testing.T) {
 		MatchUUID:      "",
 		BlockNo:        1,
 		MatchedValues:  "",
-		AllValues:      "[4#END# \"manlio.poltronieri@gmail.com\"#END# \"hello@world.com\"]",
+		AllValues:      []interface{}{"manlio.poltronieri@gmail.com", "hello@world.com"},
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
 	outcome := handleEmail(email, match, &mockSESClient{})
 	expectedPayload := `{
-   "Recipients":[
-      "manlio.poltronieri@gmail.com",
-      "hello@world.com"
-   ],
-   "Body":"body"
+  "Recipients":[
+     "manlio.poltronieri@gmail.com",
+     "hello@world.com"
+  ],
+  "Body":"body"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
 }
 
-func TestHandleEmailWithEvents(t *testing.T) {
-
-}
+//func TestHandleEmailWithEvents(t *testing.T) {
+//
+//}

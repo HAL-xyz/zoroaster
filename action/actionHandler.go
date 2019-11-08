@@ -102,42 +102,18 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 // get extra recipients from the TO field
 func getAllRecipients(emailTo []string, match trigger.IMatch) []string {
 	extraRecipients := make([]string, 0)
+	extraRecipients = append(extraRecipients, emailTo...)
 
 	for _, r := range emailTo {
-		newAddress := fillEmailTemplate(r, match)
-		// we need to figure out what type the return value is
-		returnType := "single"
-		if strings.HasPrefix(newAddress, "[") {
-			returnType = "array"
-		}
-		if strings.Contains(newAddress, " ") && !strings.HasPrefix(newAddress, "[") {
-			returnType = "multiple"
-		}
-		switch returnType {
-		case "array":
-			emails := strings.Split(newAddress, ",")
-			for _, em := range emails {
-				em = utils.RemoveCharacters(em, "[]")
-				if !utils.IsIn(em, emailTo) {
-					extraRecipients = append(extraRecipients, em)
-				}
-			}
-		case "multiple":
-			emails := strings.Split(newAddress, " ")
-			for _, em := range emails {
-				if !utils.IsIn(em, emailTo) {
-					extraRecipients = append(extraRecipients, em)
-				}
-			}
-		case "single":
-			if !utils.IsIn(newAddress, emailTo) {
-				extraRecipients = append(extraRecipients, newAddress)
+		templatedString := fillEmailTemplate(r, match)
+		cleanString := utils.RemoveCharacters(templatedString, "[]")
+		for _, email := range strings.Split(cleanString, " ") {
+			if !utils.IsIn(email, extraRecipients) {
+				extraRecipients = append(extraRecipients, email)
 			}
 		}
 	}
-	allRecipients := append(emailTo, extraRecipients...)
-	allRecipients = validateEmails(allRecipients)
-	return allRecipients
+	return validateEmails(extraRecipients)
 }
 
 func validateEmails(emails []string) []string {

@@ -3,12 +3,13 @@ package matcher
 import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
-	"github.com/magiconair/properties/assert"
+	"github.com/stretchr/testify/assert"
 	"io"
 	"net/http"
 	"testing"
 	"zoroaster/aws"
 	"zoroaster/trigger"
+	"zoroaster/utils"
 )
 import log "github.com/sirupsen/logrus"
 
@@ -85,11 +86,26 @@ func TestProcessMatch(t *testing.T) {
 	outcomes := ProcessMatch(match, mockDB2{}, &mockSESClient{}, &mockHttpClient{})
 
 	// web hook
-	webHookPayload := `{"BlockNo":999,"BlockTimestamp":1554828248,"BlockHash":"0x","ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413","FunctionName":"daoCreator","ReturnedData":{"MatchedValues":"0xfffffffffffff","AllValues":""},"TriggerName":"wac 1","TriggerType":"WatchContracts","TriggerUUID":""}`
-	webHookOutcome := `{"StatusCode":200}`
+	expPayload := `{
+   "BlockNo":999,
+   "BlockTimestamp":1554828248,
+   "BlockHash":"0x",
+   "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
+   "FunctionName":"daoCreator",
+   "ReturnedData":{
+      "MatchedValues":"0xfffffffffffff",
+      "AllValues":"null"
+   },
+   "TriggerName":"wac 1",
+   "TriggerType":"WatchContracts",
+   "TriggerUUID":""
+}`
+	expOutcome := `{"StatusCode":200}`
 
-	assert.Equal(t, outcomes[0].Payload, webHookPayload)
-	assert.Equal(t, outcomes[0].Outcome, webHookOutcome)
+	ok, err := utils.AreEqualJSON(expPayload, outcomes[0].Payload)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+	assert.Equal(t, outcomes[0].Outcome, expOutcome)
 
 	// email
 	emailPayload := "{\"Recipients\":[\"hello@gmail.com\"],\"Body\":\"999\"}"
