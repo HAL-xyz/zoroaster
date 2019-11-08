@@ -104,6 +104,22 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 	assert.True(t, ok)
 }
 
+func TestHandleWebHookWrongStuff(t *testing.T) {
+	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+	url := AttributeWebhookPost{URI: "https://foo.zyusfddsiu"}
+	cnMatch := trigger.CnMatch{
+		tg,
+		8888,
+		1554828248,
+		"0x",
+		"uuid",
+		"matched values",
+		[]interface{}{true},
+	}
+	outcome := handleWebHookPost(url, cnMatch, &http.Client{})
+	assert.Equal(t, outcome.Outcome, `{"error":"Post https://foo.zyusfddsiu: dial tcp: lookup foo.zyusfddsiu: no such host"}`)
+}
+
 type EthMock struct{}
 
 func (cli EthMock) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {

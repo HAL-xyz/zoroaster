@@ -51,20 +51,38 @@ func getActionsFromString(actionsString []string) []*Action {
 	return actions
 }
 
+type ErrorMsg struct {
+	Error string `json:"error"`
+}
+
+func makeErrorResponse(e string) string {
+	errMsg := ErrorMsg{e}
+	errJsn, _ := json.Marshal(errMsg)
+	return string(errJsn)
+}
+
 func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
 
 	postData, err := json.Marshal(match.ToPostPayload())
 	if err != nil {
-		return &trigger.Outcome{fmt.Sprintf("%v", match.ToPostPayload()), err.Error()}
+		return &trigger.Outcome{
+			Payload: fmt.Sprintf("%v", match.ToPostPayload()),
+			Outcome: makeErrorResponse(err.Error()),
+		}
 	}
 	resp, err := httpCli.Post(awp.URI, "application/json", bytes.NewBuffer(postData))
 	if err != nil {
-		return &trigger.Outcome{string(postData), err.Error()}
+		return &trigger.Outcome{
+			Payload: string(postData),
+			Outcome: makeErrorResponse(err.Error()),
+		}
 	}
-
 	responseCode := trigger.WebhookResponse{resp.StatusCode}
 	jsonRespCode, _ := json.Marshal(responseCode)
-	return &trigger.Outcome{string(postData), string(jsonRespCode)}
+	return &trigger.Outcome{
+		Payload: string(postData),
+		Outcome: string(jsonRespCode),
+	}
 }
 
 func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SESAPI) *trigger.Outcome {
@@ -78,18 +96,16 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 	}
 	emailPayloadJson, err := json.Marshal(emailPayload)
 	if err != nil {
-		errJson, _ := json.Marshal(err)
 		return &trigger.Outcome{
 			Payload: fmt.Sprintf("%s", emailPayload),
-			Outcome: string(errJson),
+			Outcome: makeErrorResponse(err.Error()),
 		}
 	}
 	result, err := sendEmail(iemail, allRecipients, email.Subject, body)
 	if err != nil {
-		errJson, _ := json.Marshal(err)
 		return &trigger.Outcome{
 			Payload: string(emailPayloadJson),
-			Outcome: string(errJson),
+			Outcome: makeErrorResponse(err.Error()),
 		}
 	}
 	outcomeJsn, _ := json.Marshal(result)
