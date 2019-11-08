@@ -21,7 +21,7 @@ func init() {
 type mockHttpClient struct{}
 
 func (m mockHttpClient) Post(url, contentType string, body io.Reader) (*http.Response, error) {
-	resp := http.Response{StatusCode: 200}
+	resp := http.Response{StatusCode: 200, Status: "200 OK"}
 	return &resp, nil
 }
 
@@ -100,16 +100,16 @@ func TestProcessMatch(t *testing.T) {
    "TriggerType":"WatchContracts",
    "TriggerUUID":""
 }`
-	expOutcome := `{"StatusCode":200}`
+	expOutcome := `{"HttpCode":200,"Response":"200 OK"}`
 
 	ok, err := utils.AreEqualJSON(expPayload, outcomes[0].Payload)
 	assert.NoError(t, err)
 	assert.True(t, ok)
-	assert.Equal(t, outcomes[0].Outcome, expOutcome)
+	assert.Equal(t, expOutcome, outcomes[0].Outcome)
 
 	// email
-	emailPayload := "{\"Recipients\":[\"hello@gmail.com\"],\"Body\":\"999\"}"
-	emailOutcome := `{"MessageId":"mock email success"}`
-	assert.Equal(t, outcomes[1].Payload, emailPayload)
-	assert.Equal(t, outcomes[1].Outcome, emailOutcome)
+	expEmailPayload := "{\"Recipients\":[\"hello@gmail.com\"],\"Body\":\"999\"}"
+	expEmailOutcome := `{"MessageId":"mock email success"}`
+	assert.Equal(t, expEmailPayload, outcomes[1].Payload)
+	assert.Equal(t, expEmailOutcome, outcomes[1].Outcome)
 }

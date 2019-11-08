@@ -18,7 +18,7 @@ import (
 type mockHttpClient struct{}
 
 func (m mockHttpClient) Post(url, contentType string, body io.Reader) (*http.Response, error) {
-	resp := http.Response{StatusCode: 200}
+	resp := http.Response{StatusCode: 200, Status: "200 OK"}
 	return &resp, nil
 }
 
@@ -55,7 +55,7 @@ func TestHandleWebHookPost(t *testing.T) {
 	areEq, err := utils.AreEqualJSON(outcome.Payload, expectedPayload)
 	assert.NoError(t, err)
 	assert.True(t, areEq)
-	assert.Equal(t, outcome.Outcome, `{"StatusCode":200}`)
+	assert.Equal(t, `{"HttpCode":200,"Response":"200 OK"}`, outcome.Outcome)
 }
 
 func TestHandleWebhookPostWithTxMatch(t *testing.T) {
@@ -117,7 +117,7 @@ func TestHandleWebHookWrongStuff(t *testing.T) {
 		[]interface{}{true},
 	}
 	outcome := handleWebHookPost(url, cnMatch, &http.Client{})
-	assert.Equal(t, outcome.Outcome, `{"error":"Post https://foo.zyusfddsiu: dial tcp: lookup foo.zyusfddsiu: no such host"}`)
+	assert.Equal(t, `{"error":"Post https://foo.zyusfddsiu: dial tcp: lookup foo.zyusfddsiu: no such host"}`, outcome.Outcome)
 }
 
 type EthMock struct{}

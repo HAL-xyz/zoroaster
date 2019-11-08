@@ -77,7 +77,7 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 			Outcome: makeErrorResponse(err.Error()),
 		}
 	}
-	responseCode := trigger.WebhookResponse{resp.StatusCode}
+	responseCode := trigger.WebhookResponse{resp.StatusCode, resp.Status}
 	jsonRespCode, _ := json.Marshal(responseCode)
 	return &trigger.Outcome{
 		Payload: string(postData),

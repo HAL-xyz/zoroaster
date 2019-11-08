@@ -80,7 +80,7 @@ func TestPostgresClient_All(t *testing.T) {
 
 	// Log Outcomes
 	payload := `{ "BlockNo": 1, "ContractAdd": "0x", "FunctionName": "fn()", "ReturnedData": { "AllValues": "{}", "MatchedValues": "{}" }, "BlockTimestamp": 8888 }`
-	outcome := `{"StatusCode":200}`
+	outcome := `{"HttpCode":200}`
 	o1 := trigger.Outcome{payload, outcome}
 	psqlClient.LogOutcome(&o1, "3b29b0c3-e403-4103-81ef-6685cd391cda")
 

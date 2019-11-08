@@ -327,7 +327,8 @@ type Outcome struct {
 }
 
 type WebhookResponse struct {
-	StatusCode int
+	HttpCode int
+	Response string
 }
 
 type EmailPayload struct {
