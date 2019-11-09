@@ -26,7 +26,7 @@ func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, i
 				m := trigger.TxMatch{"", tg, ztx}
 				matchUUID := idb.LogMatch(m)
 				m.MatchUUID = matchUUID
-				matchesChan <- &m
+				matchesChan <- m
 			}
 		}
 		err = idb.SetLastBlockProcessed(block.Number, trigger.WaT)
