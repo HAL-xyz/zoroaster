@@ -133,7 +133,7 @@ func ifcPrintf(in interface{}) string {
 
 func templateContract(text string, match trigger.CnMatch) string {
 	// standard fields
-	blockNumber := fmt.Sprintf("%v", match.BlockNo)
+	blockNumber := fmt.Sprintf("%v", match.BlockNumber)
 	blockTimestamp := fmt.Sprintf("%v", match.BlockTimestamp)
 	text = strings.ReplaceAll(text, "$BlockNumber$", blockNumber)
 	text = strings.ReplaceAll(text, "$BlockTimestamp$", blockTimestamp)

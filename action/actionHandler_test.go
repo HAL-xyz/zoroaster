@@ -39,7 +39,7 @@ func TestHandleWebHookPost(t *testing.T) {
 	outcome := handleWebHookPost(url, cnMatch, mockHttpClient{})
 
 	expectedPayload := `{
-   "BlockNo":8888,
+   "BlockNumber":8888,
    "BlockTimestamp":1554828248,
    "BlockHash":"0x",
    "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
@@ -153,7 +153,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
    },
    "Transaction":{
       "BlockHash":"0xf3d70d822816015f26843d378b8c1d5d5da62f5d346f3e86d91a0c2463d30543",
-      "BlockNo":8496661,
+      "BlockNumber":8496661,
       "BlockTimestamp":1572344236,
       "TxHash":"0xab5e7b8ec9eaf3aaffff797a7992780e9c1c717dfdb5dca2b76b0b71cf182f52"
    },
@@ -192,7 +192,7 @@ func TestHandleEmail1(t *testing.T) {
 	match := trigger.CnMatch{
 		Trigger:        tg,
 		MatchUUID:      "",
-		BlockNo:        1,
+		BlockNumber:    1,
 		MatchedValues:  "",
 		AllValues:      []interface{}{"marco@atomic.eu.com"},
 		BlockTimestamp: 123,
@@ -224,7 +224,7 @@ func TestHandleEmail2(t *testing.T) {
 	match := trigger.CnMatch{
 		Trigger:        tg,
 		MatchUUID:      "",
-		BlockNo:        1,
+		BlockNumber:    1,
 		MatchedValues:  "",
 		AllValues:      []interface{}{[]string{"marco@atomic.eu.com", "matteo@atomic.eu.com", "not and address"}},
 		BlockTimestamp: 123,
@@ -258,7 +258,7 @@ func TestHandleEmail3(t *testing.T) {
 	match := trigger.CnMatch{
 		Trigger:        tg,
 		MatchUUID:      "",
-		BlockNo:        1,
+		BlockNumber:    1,
 		MatchedValues:  "",
 		AllValues:      []interface{}{"manlio.poltronieri@gmail.com", "hello@world.com"},
 		BlockTimestamp: 123,

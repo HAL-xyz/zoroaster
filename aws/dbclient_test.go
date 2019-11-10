@@ -52,7 +52,7 @@ func TestPostgresClient_All(t *testing.T) {
 	// Log Contract Match
 	cnMatch := trigger.CnMatch{
 		Trigger:        tg,
-		BlockNo:        1,
+		BlockNumber:    1,
 		BlockTimestamp: 888888,
 		BlockHash:      "0x",
 		MatchUUID:      "3b29b0c3-e403-4103-81ef-6685cd391cdm",
@@ -79,7 +79,7 @@ func TestPostgresClient_All(t *testing.T) {
 	psqlClient.UpdateNonMatchingTriggers([]string{"3b29b0c3-e403-4103-81ef-6685cd391cda"})
 
 	// Log Outcomes
-	payload := `{ "BlockNo": 1, "ContractAdd": "0x", "FunctionName": "fn()", "ReturnedData": { "AllValues": "{}", "MatchedValues": "{}" }, "BlockTimestamp": 8888 }`
+	payload := `{ "BlockNumber": 1, "ContractAdd": "0x", "FunctionName": "fn()", "ReturnedData": { "AllValues": "{}", "MatchedValues": "{}" }, "BlockTimestamp": 8888 }`
 	outcome := `{"HttpCode":200}`
 	o1 := trigger.Outcome{payload, outcome}
 	psqlClient.LogOutcome(&o1, "3b29b0c3-e403-4103-81ef-6685cd391cda")

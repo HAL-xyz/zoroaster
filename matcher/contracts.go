@@ -75,7 +75,7 @@ func matchContractsForBlock(
 			match := &trigger.CnMatch{
 				Trigger:        tg,
 				MatchUUID:      "uuid", // this will be set by Postgres once we persist
-				BlockNo:        blockNo,
+				BlockNumber:    blockNo,
 				BlockHash:      blockHash,
 				MatchedValues:  fmt.Sprint(matchedValues),
 				AllValues:      allValues,

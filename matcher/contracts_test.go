@@ -52,5 +52,5 @@ func TestMatchContractsForBlock(t *testing.T) {
 	cnMatches := matchContractsForBlock(8081000, 1554828248, "0x", mockGetModAccounts, mockDB{}, client)
 
 	assert.Equal(t, len(cnMatches), 1)
-	assert.Equal(t, cnMatches[0].BlockNo, 8081000)
+	assert.Equal(t, cnMatches[0].BlockNumber, 8081000)
 }

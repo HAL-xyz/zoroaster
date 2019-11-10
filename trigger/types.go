@@ -3,6 +3,7 @@ package trigger
 import (
 	"encoding/json"
 	"github.com/onrik/ethrpc"
+	"math/big"
 )
 
 // A match as represented internally by Zoroaster
@@ -39,17 +40,39 @@ type TxMatch struct {
 	ZTx       *ZTransaction
 }
 
+type PersistentTx struct {
+	BlockHash      string
+	BlockNumber    *int
+	BlockTimestamp int
+	From           string
+	Gas            int
+	GasPrice       big.Int
+	Nonce          int
+	To             string
+	TxHash         string
+}
+
 type PersistentTxMatch struct {
 	DecodedData struct {
 		FunctionArguments *string
 		FunctionName      *string
 	}
-	Tx *ethrpc.Transaction
+	PTx PersistentTx `json:"Tx"`
 }
 
 func (m TxMatch) ToPersistent() IPersistableMatch {
 	return &PersistentTxMatch{
-		Tx: m.ZTx.Tx,
+		PTx: PersistentTx{
+			BlockHash:      m.ZTx.Tx.BlockHash,
+			BlockNumber:    m.ZTx.Tx.BlockNumber,
+			BlockTimestamp: m.ZTx.BlockTimestamp,
+			From:           m.ZTx.Tx.From,
+			Gas:            m.ZTx.Tx.Gas,
+			GasPrice:       m.ZTx.Tx.GasPrice,
+			Nonce:          m.ZTx.Tx.Nonce,
+			To:             m.ZTx.Tx.To,
+			TxHash:         m.ZTx.Tx.Hash,
+		},
 		DecodedData: struct {
 			FunctionArguments *string
 			FunctionName      *string
@@ -107,7 +130,7 @@ func (PersistentTxMatch) isPersistable() {}
 
 type CnMatch struct {
 	Trigger        *Trigger
-	BlockNo        int
+	BlockNumber    int
 	BlockTimestamp int
 	BlockHash      string
 	MatchUUID      string
@@ -116,7 +139,7 @@ type CnMatch struct {
 }
 
 type PersistentCnMatch struct {
-	BlockNo        int
+	BlockNumber    int
 	BlockTimestamp int
 	BlockHash      string
 	ContractAdd    string
@@ -131,7 +154,7 @@ func (m CnMatch) ToPersistent() IPersistableMatch {
 	stringValues, _ := json.Marshal(m.AllValues)
 
 	return &PersistentCnMatch{
-		BlockNo:        m.BlockNo,
+		BlockNumber:    m.BlockNumber,
 		BlockTimestamp: m.BlockTimestamp,
 		BlockHash:      m.BlockHash,
 		ContractAdd:    m.Trigger.ContractAdd,
@@ -149,7 +172,7 @@ func (m CnMatch) ToPersistent() IPersistableMatch {
 func (PersistentCnMatch) isPersistable() {}
 
 type CnPostPayload struct {
-	BlockNo        int
+	BlockNumber    int
 	BlockTimestamp int
 	BlockHash      string
 	ContractAdd    string
@@ -169,7 +192,7 @@ func (m CnMatch) ToPostPayload() IPostablePaylaod {
 	stringValues, _ := json.Marshal(m.AllValues)
 
 	return &CnPostPayload{
-		BlockNo:        m.BlockNo,
+		BlockNumber:    m.BlockNumber,
 		BlockTimestamp: m.BlockTimestamp,
 		BlockHash:      m.BlockHash,
 		ContractAdd:    m.Trigger.ContractAdd,
@@ -219,10 +242,10 @@ type PersistentEventMatch struct {
 	}
 	Transaction struct {
 		BlockHash      string
-		BlockNo        int
+		BlockNumber    int
 		BlockTimestamp int
 		TxHash         string
-	}
+	} `json:"Tx"`
 }
 
 func (PersistentEventMatch) isPersistable() {}
@@ -242,12 +265,12 @@ func (m EventMatch) ToPersistent() IPersistableMatch {
 		},
 		Transaction: struct {
 			BlockHash      string
-			BlockNo        int
+			BlockNumber    int
 			BlockTimestamp int
 			TxHash         string
 		}{
 			BlockHash:      m.Log.BlockHash,
-			BlockNo:        m.Log.BlockNumber,
+			BlockNumber:    m.Log.BlockNumber,
 			BlockTimestamp: m.BlockTimestamp,
 			TxHash:         m.Log.TransactionHash,
 		},
@@ -264,7 +287,7 @@ type EventPostPayload struct {
 	}
 	Transaction struct {
 		BlockHash      string
-		BlockNo        int
+		BlockNumber    int
 		BlockTimestamp int
 		TxHash         string
 	}
@@ -290,12 +313,12 @@ func (m EventMatch) ToPostPayload() IPostablePaylaod {
 		},
 		Transaction: struct {
 			BlockHash      string
-			BlockNo        int
+			BlockNumber    int
 			BlockTimestamp int
 			TxHash         string
 		}{
 			BlockHash:      m.Log.BlockHash,
-			BlockNo:        m.Log.BlockNumber,
+			BlockNumber:    m.Log.BlockNumber,
 			BlockTimestamp: m.BlockTimestamp,
 			TxHash:         m.Log.TransactionHash,
 		},

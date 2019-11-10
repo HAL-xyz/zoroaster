@@ -77,7 +77,7 @@ func TestProcessMatch(t *testing.T) {
 	match := trigger.CnMatch{
 		Trigger:        tg,
 		MatchUUID:      "",
-		BlockNo:        999,
+		BlockNumber:    999,
 		BlockTimestamp: 1554828248,
 		MatchedValues:  "0xfffffffffffff",
 		BlockHash:      "0x",
@@ -87,7 +87,7 @@ func TestProcessMatch(t *testing.T) {
 
 	// web hook
 	expPayload := `{
-   "BlockNo":999,
+   "BlockNumber":999,
    "BlockTimestamp":1554828248,
    "BlockHash":"0x",
    "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",

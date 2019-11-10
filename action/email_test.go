@@ -53,7 +53,7 @@ func TestFillEmailTemplate1(t *testing.T) {
 var cnMatch = trigger.CnMatch{
 	Trigger:        nil,
 	MatchUUID:      "uuid",
-	BlockNo:        88888,
+	BlockNumber:    88888,
 	MatchedValues:  "4",
 	BlockTimestamp: 123456,
 	AllValues:      []interface{}{},

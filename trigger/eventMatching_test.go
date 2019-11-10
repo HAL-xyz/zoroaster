@@ -81,9 +81,9 @@ func TestMatchEvent(t *testing.T) {
       "0x000000000000000000000000110f0bffb53c82a172edaf007fcaa3f56ed360b0"
     ]
   },
-  "Transaction": {
+  "Tx": {
     "BlockHash": "0xf3d70d822816015f26843d378b8c1d5d5da62f5d346f3e86d91a0c2463d30543",
-    "BlockNo": 8496661,
+    "BlockNumber": 8496661,
     "BlockTimestamp": 1572344236,
     "TxHash": "0xab5e7b8ec9eaf3aaffff797a7992780e9c1c717dfdb5dca2b76b0b71cf182f52"
   }
