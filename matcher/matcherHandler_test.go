@@ -64,7 +64,7 @@ func (mockDB2) GetActions(tgUUID string, userUUID string) ([]string, error) {
 				"hello@gmail.com"
 			],
     		"Body": "$BlockNumber$",
-    		"Subject": "Trigger 30"
+    		"Subject": "subj"
   		}
 	}`
 	return []string{a1, a2}, nil
@@ -108,7 +108,7 @@ func TestProcessMatch(t *testing.T) {
 	assert.Equal(t, expOutcome, outcomes[0].Outcome)
 
 	// email
-	expEmailPayload := "{\"Recipients\":[\"hello@gmail.com\"],\"Body\":\"999\"}"
+	expEmailPayload := `{"Recipients":["hello@gmail.com"],"Body":"999","Subject":"subj"}`
 	expEmailOutcome := `{"MessageId":"mock email success"}`
 	assert.Equal(t, expEmailPayload, outcomes[1].Payload)
 	assert.Equal(t, expEmailOutcome, outcomes[1].Outcome)

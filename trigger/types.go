@@ -46,10 +46,10 @@ type PersistentTx struct {
 	BlockTimestamp int
 	From           string
 	Gas            int
-	GasPrice       big.Int
+	GasPrice       *big.Int
 	Nonce          int
 	To             string
-	TxHash         string
+	Hash           string
 }
 
 type PersistentTxMatch struct {
@@ -57,7 +57,7 @@ type PersistentTxMatch struct {
 		FunctionArguments *string
 		FunctionName      *string
 	}
-	PTx PersistentTx `json:"Tx"`
+	PTx PersistentTx `json:"Transaction"`
 }
 
 func (m TxMatch) ToPersistent() IPersistableMatch {
@@ -68,10 +68,10 @@ func (m TxMatch) ToPersistent() IPersistableMatch {
 			BlockTimestamp: m.ZTx.BlockTimestamp,
 			From:           m.ZTx.Tx.From,
 			Gas:            m.ZTx.Tx.Gas,
-			GasPrice:       m.ZTx.Tx.GasPrice,
+			GasPrice:       &m.ZTx.Tx.GasPrice,
 			Nonce:          m.ZTx.Tx.Nonce,
 			To:             m.ZTx.Tx.To,
-			TxHash:         m.ZTx.Tx.Hash,
+			Hash:           m.ZTx.Tx.Hash,
 		},
 		DecodedData: struct {
 			FunctionArguments *string
@@ -100,7 +100,7 @@ type TxPostPayload struct {
 		FunctionArguments *string
 		FunctionName      *string
 	}
-	Tx          *ethrpc.Transaction
+	Transaction PersistentTx
 	TriggerName string
 	TriggerType string
 	TriggerUUID string
@@ -110,7 +110,17 @@ func (TxPostPayload) isPostablePayload() {}
 
 func (m TxMatch) ToPostPayload() IPostablePaylaod {
 	return TxPostPayload{
-		Tx: m.ZTx.Tx,
+		Transaction: PersistentTx{
+			BlockHash:      m.ZTx.Tx.BlockHash,
+			BlockNumber:    m.ZTx.Tx.BlockNumber,
+			BlockTimestamp: m.ZTx.BlockTimestamp,
+			From:           m.ZTx.Tx.From,
+			Gas:            m.ZTx.Tx.Gas,
+			GasPrice:       &m.ZTx.Tx.GasPrice,
+			Nonce:          m.ZTx.Tx.Nonce,
+			To:             m.ZTx.Tx.To,
+			Hash:           m.ZTx.Tx.Hash,
+		},
 		DecodedData: struct {
 			FunctionArguments *string
 			FunctionName      *string
@@ -244,8 +254,8 @@ type PersistentEventMatch struct {
 		BlockHash      string
 		BlockNumber    int
 		BlockTimestamp int
-		TxHash         string
-	} `json:"Tx"`
+		Hash           string
+	} `json:"Transaction"`
 }
 
 func (PersistentEventMatch) isPersistable() {}
@@ -267,12 +277,12 @@ func (m EventMatch) ToPersistent() IPersistableMatch {
 			BlockHash      string
 			BlockNumber    int
 			BlockTimestamp int
-			TxHash         string
+			Hash           string
 		}{
 			BlockHash:      m.Log.BlockHash,
 			BlockNumber:    m.Log.BlockNumber,
 			BlockTimestamp: m.BlockTimestamp,
-			TxHash:         m.Log.TransactionHash,
+			Hash:           m.Log.TransactionHash,
 		},
 	}
 }
@@ -289,7 +299,7 @@ type EventPostPayload struct {
 		BlockHash      string
 		BlockNumber    int
 		BlockTimestamp int
-		TxHash         string
+		Hash           string
 	}
 	TriggerName string
 	TriggerType string
@@ -315,12 +325,12 @@ func (m EventMatch) ToPostPayload() IPostablePaylaod {
 			BlockHash      string
 			BlockNumber    int
 			BlockTimestamp int
-			TxHash         string
+			Hash           string
 		}{
 			BlockHash:      m.Log.BlockHash,
 			BlockNumber:    m.Log.BlockNumber,
 			BlockTimestamp: m.BlockTimestamp,
-			TxHash:         m.Log.TransactionHash,
+			Hash:           m.Log.TransactionHash,
 		},
 		TriggerName: m.Tg.TriggerName,
 		TriggerType: m.Tg.TriggerType,
@@ -357,6 +367,7 @@ type WebhookResponse struct {
 type EmailPayload struct {
 	Recipients []string
 	Body       string
+	Subject    string
 }
 
 type TgType int

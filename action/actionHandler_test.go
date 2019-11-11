@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	"github.com/onrik/ethrpc"
@@ -82,23 +83,22 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
     "FunctionArguments": "{}",
     "FunctionName": "{}"
   },
-  "Tx": {
+  "Transaction": {
     "Hash": "0x0641bb18e73d9e874252d3de6993473d176200dc02f4482a64c6540749aecaff",
     "Nonce": 233172,
     "BlockHash": "0xc3fb1f0d4b36593bb2746086955c8c30727c62065e320602c93903ae080bf0af",
     "BlockNumber": 7669714,
-    "TransactionIndex": 4,
+	"BlockTimestamp":1554828248,
     "From": "0xabaf790eb22618275fdb47671fc6eab57b2ee04e",
     "To": "0x097b3b7cb01945ba7e76804ddc2fdda2cce6ef43",
-    "Value": 0,
     "Gas": 79068,
-    "GasPrice": 5579104000,
-    "Input": "0x64887334000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000e000000000000000000000000000000000000000000000000000000000007507d00000000000000000000000000000000000000000000000000000000000000140000000000000000000000000000000000000000000000000000000000000000211170bfa274328fcc100121d00ed000000000000000000000000000000000000000b4e00f124e2110d0600fd00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002efe7f903e9c2d904340000e4001300000000000000000000000000000000000000f1b40008dd1ffdfbfc00020000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
+    "GasPrice": 5579104000
   },
   "TriggerName": "Basic/To, Basic/Nonce, FP/Address",
   "TriggerType": "WatchTransactions",
   "TriggerUUID": "" 
 }`
+	fmt.Println(outcome.Payload)
 	ok, err := utils.AreEqualJSON(outcome.Payload, expectedPayload)
 	assert.NoError(t, err)
 	assert.True(t, ok)
@@ -155,7 +155,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
       "BlockHash":"0xf3d70d822816015f26843d378b8c1d5d5da62f5d346f3e86d91a0c2463d30543",
       "BlockNumber":8496661,
       "BlockTimestamp":1572344236,
-      "TxHash":"0xab5e7b8ec9eaf3aaffff797a7992780e9c1c717dfdb5dca2b76b0b71cf182f52"
+      "Hash":"0xab5e7b8ec9eaf3aaffff797a7992780e9c1c717dfdb5dca2b76b0b71cf182f52"
    },
    "TriggerName":"Watch an Event",
    "TriggerType":"WatchEvents",
@@ -204,7 +204,8 @@ func TestHandleEmail1(t *testing.T) {
     "manlio.poltronieri@gmail.com",
     "marco@atomic.eu.com"
  ],
- "Body":"body"
+ "Body":"body",
+ "Subject":"Hello World Test"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
@@ -238,7 +239,8 @@ func TestHandleEmail2(t *testing.T) {
      "marco@atomic.eu.com",
      "matteo@atomic.eu.com"
   ],
-  "Body":"body"
+  "Body":"body",
+  "Subject":"Hello World Test"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
@@ -270,7 +272,8 @@ func TestHandleEmail3(t *testing.T) {
      "manlio.poltronieri@gmail.com",
      "hello@world.com"
   ],
-  "Body":"body"
+  "Body":"body",
+  "Subject":"Hello World Test"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)

@@ -1,7 +1,6 @@
 {
   "TriggerName":"FP/bool, int128",
   "TriggerType":"WatchTransactions",
-  "CreationDate":"2019-03-24 17:45:12",
   "ContractAdd":"0x484f8d565f8198a6de7f3580d5a4d02564422d3c",
   "ContractABI":"[ { \"outputs\": [], \"inputs\": [], \"constant\": false, \"payable\": false, \"type\": \"constructor\" }, { \"name\": \"update\", \"outputs\": [], \"inputs\": [ { \"type\": \"bool\", \"name\": \"new_bool_var\" }, { \"type\": \"int128\", \"name\": \"new_int128_var\" }, { \"type\": \"uint256\", \"name\": \"new_wei_value_var\", \"unit\": \"wei\" } ], \"constant\": false, \"payable\": false, \"type\": \"function\", \"gas\": 105451 }, { \"name\": \"bool_var\", \"outputs\": [ { \"type\": \"bool\", \"name\": \"out\" } ], \"inputs\": [], \"constant\": true, \"payable\": false, \"type\": \"function\", \"gas\": 513 }, { \"name\": \"int128_var\", \"outputs\": [ { \"type\": \"int128\", \"name\": \"out\" } ], \"inputs\": [], \"constant\": true, \"payable\": false, \"type\": \"function\", \"gas\": 543 }, { \"name\": \"wei_value_var\", \"outputs\": [ { \"type\": \"uint256\", \"name\": \"out\", \"unit\": \"wei\" } ], \"inputs\": [], \"constant\": true, \"payable\": false, \"type\": \"function\", \"gas\": 573 } ]",
   "Filters":[

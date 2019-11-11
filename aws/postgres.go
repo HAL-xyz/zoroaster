@@ -76,8 +76,8 @@ func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchUUID string)
 	q := fmt.Sprintf(
 		`INSERT INTO %s (
 			"match_uuid",
-			"payload",
-			"outcome",
+			"payload_data",
+			"outcome_data",
 			"created_at") VALUES ($1::uuid, $2, $3, $4)`, cli.conf.TableOutcomes)
 
 	_, err := db.Exec(q, matchUUID, outcome.Payload, outcome.Outcome, time.Now())

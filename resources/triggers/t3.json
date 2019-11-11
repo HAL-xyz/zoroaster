@@ -1,7 +1,6 @@
 {
   "TriggerName":"Basic/From",
   "TriggerType":"WatchTransactions",
-  "CreationDate":"2019-03-24 17:45:12",
   "ContractABI":"",
   "Filters":[
     {

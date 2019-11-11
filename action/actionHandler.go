@@ -93,6 +93,7 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 	emailPayload := trigger.EmailPayload{
 		Recipients: allRecipients,
 		Body:       body,
+		Subject:    email.Subject,
 	}
 	emailPayloadJson, err := json.Marshal(emailPayload)
 	if err != nil {
