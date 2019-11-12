@@ -14,54 +14,57 @@ import (
 
 func BlocksPoller(
 	txChan chan *ethrpc.Block,
-	cntChan chan *ethrpc.Block,
+	cnChan chan *ethrpc.Block,
+	evChan chan *ethrpc.Block,
 	client *ethrpc.EthRPC,
 	idb aws.IDB) {
 
-	const K = 8 // next block to process is (last block mined - K)
-
 	txLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaT)
-	cntLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaC)
+	cnLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaC)
+	evLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaE)
 
 	ticker := time.NewTicker(2500 * time.Millisecond)
 	for range ticker.C {
-		n, err := client.EthBlockNumber()
+		lastBlockSeen, err := client.EthBlockNumber()
 		if err != nil {
 			log.Warn("failed to poll ETH node -> ", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}
 
-		// this only happens during dev as a way to reset lastBlockProcessed
-		if txLastBlockProcessed == 0 {
-			txLastBlockProcessed = n - K
-		}
-		if cntLastBlockProcessed == 0 {
-			cntLastBlockProcessed = n - K
-		}
-
 		// Watch a Transaction
-		if n-K > txLastBlockProcessed {
-			block, err := client.EthGetBlockByNumber(txLastBlockProcessed+1, true)
-			if err != nil {
-				log.Warnf("failed to get block %d -> %s", n, err)
-				time.Sleep(5 * time.Second)
-				continue
-			}
-			txLastBlockProcessed += 1
-			txChan <- block
-		}
+		fetchLastBlock(lastBlockSeen, &txLastBlockProcessed, txChan, client, true)
 
 		// Watch a Contract
-		if n-K > cntLastBlockProcessed {
-			block, err := client.EthGetBlockByNumber(cntLastBlockProcessed+1, false)
-			if err != nil {
-				log.Warnf("failed to get block %d -> %s", n, err)
-				time.Sleep(5 * time.Second)
-				continue
-			}
-			cntLastBlockProcessed += 1
-			cntChan <- block
+		fetchLastBlock(lastBlockSeen, &cnLastBlockProcessed, cnChan, client, false)
+
+		// Watch an Event
+		fetchLastBlock(lastBlockSeen, &evLastBlockProcessed, evChan, client, false)
+	}
+}
+
+func fetchLastBlock(
+	lastBlockSeen int,
+	lastBlockProcessed *int,
+	ch chan *ethrpc.Block,
+	client *ethrpc.EthRPC,
+	withTxs bool) {
+
+	const K = 8 // next block to process is (last block mined - K)
+
+	// this is used to reset the last block processed
+	if *lastBlockProcessed == 0 {
+		*lastBlockProcessed = lastBlockSeen - K
+	}
+
+	if lastBlockSeen-K > *lastBlockProcessed {
+		block, err := client.EthGetBlockByNumber(*lastBlockProcessed+1, withTxs)
+		if err != nil {
+			log.Warnf("failed to get block %d -> %s", *lastBlockProcessed+1, err)
+			time.Sleep(5 * time.Second)
+		} else {
+			*lastBlockProcessed += 1
+			ch <- block
 		}
 	}
 }

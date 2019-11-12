@@ -35,6 +35,6 @@ func EventMatcher(
 		if err != nil {
 			logrus.Fatal(err)
 		}
-		logrus.Infof("\tTX: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)
+		logrus.Infof("\tEvents: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)
 	}
 }

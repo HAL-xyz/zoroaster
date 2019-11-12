@@ -171,7 +171,7 @@ func makeCondition(fjs FilterJson) (Conditioner, error) {
 		c := ConditionFunctionCalled{Condition{}, predicate, fjs.Condition.Attribute}
 		return c, nil
 	}
-	if fjs.FilterType == "CheckEvent" {
+	if fjs.FilterType == "CheckEventParameter" {
 		c := ConditionEvent{Condition{}, predicate, fjs.Condition.Attribute}
 		return c, nil
 

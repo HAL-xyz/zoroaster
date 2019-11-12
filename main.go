@@ -35,6 +35,8 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
+	log.Info("Starting up Zoroaster...")
+
 	// Init Postgres DB client
 	psqlClient := aws.PostgresClient{}
 	psqlClient.InitDB(zconf)
@@ -47,17 +49,21 @@ func main() {
 
 	// Channels are buffered because a) contracts is slower, and b) so I can run wac/wat independently for tests
 	txBlocksChan := make(chan *ethrpc.Block, 100)
-	contractsBlocksChan := make(chan *ethrpc.Block, 100)
+	cnBlocksChan := make(chan *ethrpc.Block, 100)
+	evBlocksChan := make(chan *ethrpc.Block, 100)
 	matchesChan := make(chan trigger.IMatch)
 
 	// Poll ETH node
-	go eth.BlocksPoller(txBlocksChan, contractsBlocksChan, ethClient, &psqlClient)
+	go eth.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, ethClient, &psqlClient)
 
 	// Watch a Transaction
 	go matcher.TxMatcher(txBlocksChan, matchesChan, &psqlClient)
 
 	// Watch a Contract
-	go matcher.ContractMatcher(contractsBlocksChan, matchesChan, eth.GetModifiedAccounts, &psqlClient, ethClient)
+	go matcher.ContractMatcher(cnBlocksChan, matchesChan, eth.GetModifiedAccounts, &psqlClient, ethClient)
+
+	// Watch an Event
+	go matcher.EventMatcher(evBlocksChan, matchesChan, &psqlClient, ethClient)
 
 	// Main routine - process matches
 	for {

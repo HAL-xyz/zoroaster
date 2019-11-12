@@ -130,7 +130,8 @@ func TestHandleWebhookWithEvents(t *testing.T) {
 
 	var client EthMock
 	url := AttributeWebhookPost{URI: "https://hal.xyz"}
-	tg1, _ := trigger.NewTriggerFromFile("../resources/triggers/ev1.json")
+	tg1, err := trigger.NewTriggerFromFile("../resources/triggers/ev1.json")
+	assert.NoError(t, err)
 	matches1 := trigger.MatchEvent(client, tg1, 8496661, 1572344236)
 
 	outcome := handleWebHookPost(url, matches1[0], mockHttpClient{})
