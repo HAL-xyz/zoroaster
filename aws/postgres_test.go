@@ -67,7 +67,7 @@ func TestPostgresClient_All(t *testing.T) {
 		MatchUUID:      "3b29b0c3-e403-4103-81ef-6685cd391cdm",
 		Tg:             tg,
 		Log:            &logs[0],
-		EventParams:    map[string]string{},
+		EventParams:    map[string]interface{}{},
 		BlockTimestamp: 888888,
 	}
 	psqlClient.LogMatch(eventMatch)

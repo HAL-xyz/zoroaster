@@ -177,14 +177,14 @@ func decodeDataField(rawData, eventName string, abiObj *abi.ABI) (map[string]int
 	return getMap, nil
 }
 
-func makeEventParams(data map[string]interface{}, topics map[string]string) map[string]string {
+func makeEventParams(data map[string]interface{}, topics map[string]string) map[string]interface{} {
 
-	paramsMap := make(map[string]string, len(data)+len(topics))
+	paramsMap := make(map[string]interface{}, len(data)+len(topics))
 	for k, v := range topics {
 		paramsMap[k] = v
 	}
 	for k, v := range data {
-		paramsMap[k] = fmt.Sprintf("%v", v)
+		paramsMap[k] = v
 	}
 	return paramsMap
 }

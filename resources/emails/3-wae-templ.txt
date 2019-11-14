@@ -1,0 +1,14 @@
+Block number is: $BlockNumber$
+Block hash is: $BlockHash$
+Tx hash: $TransactionHash$
+Block timestamp: $BlockTimestamp$
+Method name: $MethodName$
+Contract address: $ContractAddress$
+
+Custom fields are:
+Parameter name: !from
+Parameter name: !to
+Parameter name: !value
+
+!arrayParam
+!arrayParam[2]

@@ -1,7 +1,6 @@
 package action
 
 import (
-	"fmt"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	"github.com/onrik/ethrpc"
@@ -98,7 +97,6 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
   "TriggerType": "WatchTransactions",
   "TriggerUUID": "" 
 }`
-	fmt.Println(outcome.Payload)
 	ok, err := utils.AreEqualJSON(outcome.Payload, expectedPayload)
 	assert.NoError(t, err)
 	assert.True(t, ok)
@@ -143,7 +141,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
       "EventParameters":{
          "from":"0x000000000000000000000000f750f050e5596eb9480523eef7260b1535a689bd",
          "to":"0x000000000000000000000000cd95b32c98423172e04b1c76841e5a73f4532a7f",
-         "value":"677420000"
+         "value":677420000
       },
       "Data":"0x000000000000000000000000000000000000000000000000000000002439ae80",
       "Topics":[
@@ -280,6 +278,47 @@ func TestHandleEmail3(t *testing.T) {
 	assert.True(t, ok)
 }
 
-//func TestHandleEmailWithEvents(t *testing.T) {
-//
-//}
+func TestHandleEmailWithEvents(t *testing.T) {
+
+	tg1, err := trigger.NewTriggerFromFile("../resources/triggers/ev1.json")
+	assert.NoError(t, err)
+	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
+
+	matches[0].EventParams["extraAddresses"] = []string{"yes@hal.xyz", "nope@hal.xyz"}
+
+	email := AttributeEmail{
+		From:    "hello@haz.xyz",
+		To:      []string{"manlio.poltronieri@gmail.com", "!extraAddresses"},
+		Subject: "Event email test",
+		Body:    "body",
+	}
+
+	outcome := handleEmail(email, *matches[0], &mockSESClient{})
+	expPayload := `{ 
+   "Recipients":[ 
+      "manlio.poltronieri@gmail.com",
+      "yes@hal.xyz",
+      "nope@hal.xyz"
+   ],
+   "Body":"body",
+   "Subject":"Event email test"
+}`
+	ok, err := utils.AreEqualJSON(expPayload, outcome.Payload)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+
+	email.To = []string{"manlio.poltronieri@gmail.com", "!extraAddresses[0]"}
+	expPayload = `{ 
+   "Recipients":[ 
+      "manlio.poltronieri@gmail.com",
+      "yes@hal.xyz"
+   ],
+   "Body":"body",
+   "Subject":"Event email test"
+}`
+	outcome = handleEmail(email, *matches[0], &mockSESClient{})
+
+	ok, err = utils.AreEqualJSON(expPayload, outcome.Payload)
+	assert.NoError(t, err)
+	assert.True(t, ok)
+}

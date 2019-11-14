@@ -91,6 +91,8 @@ func fillEmailTemplate(text string, payload trigger.IMatch) string {
 		return templateTransaction(text, m.ZTx)
 	case trigger.CnMatch:
 		return templateContract(text, m)
+	case trigger.EventMatch:
+		return templateEvent(text, m)
 	default:
 		log.Warnf("Invalid match type %T", payload)
 		return text
@@ -127,8 +129,45 @@ func ifcPrintf(in interface{}) string {
 			return fmt.Sprintf("%s", v)
 		}
 	default:
-		return fmt.Sprintf("%s", in)
+		return utils.NormalizeAddress(fmt.Sprintf("%s", in))
 	}
+}
+
+func templateEvent(text string, match trigger.EventMatch) string {
+	// standard fields
+	blockNumber := fmt.Sprintf("%v", match.Log.BlockNumber)
+	blockTimestamp := fmt.Sprintf("%v", match.BlockTimestamp)
+	text = strings.ReplaceAll(text, "$BlockNumber$", blockNumber)
+	text = strings.ReplaceAll(text, "$BlockTimestamp$", blockTimestamp)
+	text = strings.ReplaceAll(text, "$BlockHash$", match.Log.BlockHash)
+	text = strings.ReplaceAll(text, "$TransactionHash$", match.Log.TransactionHash)
+	text = strings.ReplaceAll(text, "$ContractAddress$", match.Tg.ContractAdd)
+
+	// custom fields
+	text = strings.ReplaceAll(text, "$MethodName$", match.Tg.Filters[0].EventName)
+
+	// arrays, such as !ParamName[K]
+	arrayRgx := regexp.MustCompile(`!\w+\[\d+]`)
+	for _, templateToken := range arrayRgx.FindAllString(text, -1) {
+		pos := utils.GetOnlyNumbers(templateToken)
+		index, _ := strconv.Atoi(pos)
+
+		cleanToken := strings.Split(templateToken, "[")[0][1:]
+		actualVal := match.EventParams[cleanToken]
+		if actualVal != nil {
+			if reflect.TypeOf(actualVal).Kind() == reflect.Array || reflect.TypeOf(actualVal).Kind() == reflect.Slice {
+				if index < reflect.ValueOf(actualVal).Len() {
+					text = strings.ReplaceAll(text, fmt.Sprintf("%s", templateToken), ifcPrintf(reflect.ValueOf(actualVal).Index(index)))
+				}
+			}
+		}
+	}
+
+	// all other param names
+	for k, v := range match.EventParams {
+		text = strings.ReplaceAll(text, fmt.Sprintf("!%s", k), ifcPrintf(v))
+	}
+	return text
 }
 
 func templateContract(text string, match trigger.CnMatch) string {

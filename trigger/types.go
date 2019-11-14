@@ -238,7 +238,7 @@ type EventMatch struct {
 	MatchUUID      string
 	Tg             *Trigger
 	Log            *ethrpc.Log
-	EventParams    map[string]string
+	EventParams    map[string]interface{}
 	BlockTimestamp int
 }
 
@@ -246,7 +246,7 @@ type PersistentEventMatch struct {
 	ContractAdd string
 	EventName   string
 	EventData   struct {
-		EventParameters map[string]string // decoded data + topics
+		EventParameters map[string]interface{} // decoded data + topics
 		Data            string
 		Topics          []string
 	}
@@ -265,7 +265,7 @@ func (m EventMatch) ToPersistent() IPersistableMatch {
 		ContractAdd: m.Tg.ContractAdd,
 		EventName:   m.Tg.Filters[0].EventName,
 		EventData: struct {
-			EventParameters map[string]string // decoded data + topics
+			EventParameters map[string]interface{} // decoded data + topics
 			Data            string
 			Topics          []string
 		}{
@@ -291,7 +291,7 @@ type EventPostPayload struct {
 	ContractAdd string
 	EventName   string
 	EventData   struct {
-		EventParameters map[string]string // decoded data + topics
+		EventParameters map[string]interface{} // decoded data + topics
 		Data            string
 		Topics          []string
 	}
@@ -313,7 +313,7 @@ func (m EventMatch) ToPostPayload() IPostablePaylaod {
 		ContractAdd: m.Tg.ContractAdd,
 		EventName:   m.Tg.Filters[0].EventName,
 		EventData: struct {
-			EventParameters map[string]string // decoded data + topics
+			EventParameters map[string]interface{} // decoded data + topics
 			Data            string
 			Topics          []string
 		}{

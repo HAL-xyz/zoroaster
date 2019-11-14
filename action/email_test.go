@@ -226,6 +226,28 @@ func TestFillEmailTemplate7(t *testing.T) {
 	assert.Equal(t, string(expected), body)
 }
 
+func TestEmailTemplateEvent(t *testing.T) {
+
+	tg1, err := trigger.NewTriggerFromFile("../resources/triggers/ev1.json")
+	assert.NoError(t, err)
+	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
+
+	matches[0].EventParams["arrayParam"] = []string{"hello", "world", "yo yo"}
+
+	addresses := []common.Address{common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8")}
+	matches[0].EventParams["addresses"] = addresses
+
+	template, err := ioutil.ReadFile("../resources/emails/3-wae-templ.txt")
+	assert.NoError(t, err)
+
+	body := fillEmailTemplate(string(template), *matches[0])
+
+	expected, err := ioutil.ReadFile("../resources/emails/3-wae-exp.txt")
+	assert.NoError(t, err)
+
+	assert.Equal(t, string(expected), body)
+}
+
 // Actually send an email. Commented out bc we only want
 // to run it manually
 //func TestSendEmail(t *testing.T) {

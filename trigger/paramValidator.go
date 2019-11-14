@@ -27,16 +27,22 @@ func ValidateParam(rawParam []byte, parameterType string, attribute string, pred
 			return validatePredUIntArray(predicate, param, tgVal, index)
 		}
 	}
-	// single address or string
-	if parameterType == "address" || parameterType == "string" {
+	// address
+	if parameterType == "address" {
 		var param string
 		if err = json.Unmarshal(rawParam, &param); err != nil {
 			log.Debug(err)
 			return false
 		}
-		// sometimes addresses (40 hex chars) are padded with 0s to
-		// make them 64 chars long. In this case we want to strip them.
-		param = strings.Replace(param, "0x000000000000000000000000", "0x", 1)
+		return utils.NormalizeAddress(param) == strings.ToLower(attribute)
+	}
+	// string
+	if parameterType == "string" {
+		var param string
+		if err = json.Unmarshal(rawParam, &param); err != nil {
+			log.Debug(err)
+			return false
+		}
 		return strings.ToLower(param) == strings.ToLower(attribute)
 	}
 	// bool
