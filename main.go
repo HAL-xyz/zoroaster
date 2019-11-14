@@ -35,7 +35,7 @@ func main() {
 	defer f.Close()
 	log.SetOutput(f)
 
-	log.Info("Starting up Zoroaster...")
+	log.Info("Starting up Zoroaster, stage = ", zconf.Stage)
 
 	// Init Postgres DB client
 	psqlClient := aws.PostgresClient{}

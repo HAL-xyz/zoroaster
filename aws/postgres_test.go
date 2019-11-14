@@ -12,8 +12,8 @@ var psqlClient = PostgresClient{}
 var zconf = config.Load("../config")
 
 func init() {
-	if zconf.Stage != "DEV" {
-		log.Fatal("$STAGE must be DEV to run db tests")
+	if zconf.Stage != config.TEST {
+		log.Fatal("$STAGE must be TEST to run db tests")
 	}
 	psqlClient.InitDB(zconf)
 }

@@ -9,11 +9,12 @@ import (
 )
 
 type ZConfiguration struct {
-	Stage    string
-	EthNode  string
-	LogsPath string
-	LogsFile string
-	Database ZoroDB
+	Stage      Stage
+	ConfigFile string
+	EthNode    string
+	LogsPath   string
+	LogsFile   string
+	Database   ZoroDB
 }
 
 type ZoroDB struct {
@@ -30,39 +31,58 @@ type ZoroDB struct {
 }
 
 // ENV variables
+
+type Stage int
+
+const (
+	TEST Stage = iota
+	DEV
+	PROD
+)
+
+func (s Stage) String() string {
+	return [...]string{"TEST", "DEV", "PROD"}[s]
+}
+
 const (
 	dbUsr   = "DB_USR"
 	dbPwd   = "DB_PWD"
 	ethNode = "ETH_NODE"
 )
 
-func Load(dirpath string) *ZConfiguration {
-
-	var zconfig ZConfiguration
-	var configFile string
+func readStage(dirPath string) ZConfiguration {
+	zconf := ZConfiguration{}
 	stage := os.Getenv("STAGE")
 	switch stage {
+	case "TEST":
+		zconf.ConfigFile = fmt.Sprintf("%s/config-test.json", dirPath)
+		zconf.Stage = TEST
 	case "DEV":
-		configFile = fmt.Sprintf("%s/config-dev.json", dirpath)
-		zconfig.Stage = "DEV"
+		zconf.ConfigFile = fmt.Sprintf("%s/config-dev.json", dirPath)
+		zconf.Stage = DEV
 	case "PROD":
-		configFile = fmt.Sprintf("%s/config-prod.json", dirpath)
-		zconfig.Stage = "PROD"
+		zconf.ConfigFile = fmt.Sprintf("%s/config-prod.json", dirPath)
+		zconf.Stage = PROD
 	default:
-		log.Fatal("local env STAGE must be DEV or PROD")
+		log.Fatal("local env STAGE must be TEST, DEV or PROD")
 	}
+	return zconf
+}
 
-	var err error
-	f, err := ioutil.ReadFile(configFile)
+func Load(dirPath string) *ZConfiguration {
+
+	zconfig := readStage(dirPath)
+
+	f, err := ioutil.ReadFile(zconfig.ConfigFile)
 	if err != nil {
-		log.Fatalf("cannot open %s: %s", configFile, err)
+		log.Fatalf("cannot open %s: %s", zconfig.ConfigFile, err)
 	}
 	err = json.Unmarshal(f, &zconfig)
 	if err != nil {
-		log.Fatalf("cannot load %s: %s", configFile, err)
+		log.Fatalf("cannot load %s: %s", zconfig.ConfigFile, err)
 	}
 
-	zconfig.LogsFile = fmt.Sprintf("%s/%s.log", zconfig.LogsPath, stage)
+	zconfig.LogsFile = fmt.Sprintf("%s/%s.log", zconfig.LogsPath, zconfig.Stage)
 
 	zconfig.Database.User = os.Getenv(dbUsr)
 	if zconfig.Database.User == "" {

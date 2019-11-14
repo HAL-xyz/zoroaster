@@ -7,7 +7,7 @@
     "tableState": "state",
     "tableActions": "actions",
     "host": "",
-    "name": "HAL-PROD",
+    "name": "hal_prod",
     "port": 5432
   }
 }
