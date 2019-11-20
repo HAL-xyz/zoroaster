@@ -1,11 +1,13 @@
 package action
 
 import (
+	"bytes"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"testing"
 	"zoroaster/trigger"
@@ -18,7 +20,10 @@ import (
 type mockHttpClient struct{}
 
 func (m mockHttpClient) Post(url, contentType string, body io.Reader) (*http.Response, error) {
-	resp := http.Response{StatusCode: 200, Status: "200 OK"}
+	resp := http.Response{
+		StatusCode: 200,
+		Status:     "200 OK",
+		Body:       ioutil.NopCloser(bytes.NewBufferString("Hello World"))}
 	return &resp, nil
 }
 
