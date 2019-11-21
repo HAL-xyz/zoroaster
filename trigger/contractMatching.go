@@ -17,7 +17,7 @@ func MatchContract(
 
 	methodId, err := encodeMethod(tg.MethodName, tg.ContractABI, tg.Inputs)
 	if err != nil {
-		log.Debug("cannot encode method: ", err)
+		log.Debugf("trigger %s: cannot encode method: %s", tg.TriggerUUID, err)
 		return false, nil, nil
 	}
 	contractReturnValue, err := makeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)

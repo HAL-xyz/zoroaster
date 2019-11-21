@@ -18,6 +18,30 @@ type PostgresClient struct {
 	conf *config.ZoroDB
 }
 
+func (cli PostgresClient) SaveTrigger(triggerData string, isActive, triggered bool) error {
+	q := fmt.Sprintf(
+		`INSERT INTO triggers (
+			"trigger_data", 
+			"is_active", 
+			"created_at",
+			"updated_at",
+			"triggered",
+			"user_uuid") VALUES ($1, $2, $3, $4, $5, $6)`)
+	_, err := db.Exec(q, triggerData, isActive, time.Now(), time.Now(), triggered, "8eda47b7-67b7-493d-b24c-9dc33b9c42bc")
+	return err
+}
+
+func (cli PostgresClient) TruncateTables(tables []string) error {
+	for _, t := range tables {
+		q := fmt.Sprintf(`TRUNCATE table %s`, t)
+		_, err := db.Exec(q)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (cli PostgresClient) GetSilentButMatchingTriggers(triggerUUIDs []string) []string {
 	q := fmt.Sprintf(
 		`SELECT uuid FROM %s
@@ -136,11 +160,10 @@ func (cli PostgresClient) SetLastBlockProcessed(blockNo int, tgType trigger.TgTy
 	return nil
 }
 
-func (cli PostgresClient) LogMatch(match trigger.IMatch) string {
+func (cli PostgresClient) LogMatch(match trigger.IMatch) (string, error) {
 	matchData, err := json.Marshal(match.ToPersistent())
 	if err != nil {
-		log.Errorf("cannot marshall match into json")
-		return ""
+		return "", err
 	}
 	q := fmt.Sprintf(
 		`INSERT INTO "%s" (
@@ -149,9 +172,9 @@ func (cli PostgresClient) LogMatch(match trigger.IMatch) string {
 	var lastUUID string
 	err = db.QueryRow(q, match.GetTriggerUUID(), matchData, time.Now()).Scan(&lastUUID)
 	if err != nil {
-		log.Errorf("cannot write log iMatch: %s", err)
+		return "", err
 	}
-	return lastUUID
+	return lastUUID, nil
 }
 
 func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error) {

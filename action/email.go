@@ -249,7 +249,7 @@ func templateTransaction(text string, ztx *trigger.ZTransaction) string {
 
 	// function name
 	if ztx.DecodedFnName != nil {
-		text = strings.ReplaceAll(text, "!MethodName", *ztx.DecodedFnName)
+		text = strings.ReplaceAll(text, "$MethodName$", *ztx.DecodedFnName)
 	}
 
 	// function params

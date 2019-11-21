@@ -24,7 +24,10 @@ func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, i
 			for _, ztx := range matchingZTxs {
 				log.Debugf("\tTX: Trigger %s matched transaction https://etherscan.io/tx/%s", tg.TriggerUUID, ztx.Tx.Hash)
 				m := trigger.TxMatch{"", tg, ztx}
-				matchUUID := idb.LogMatch(m)
+				matchUUID, err := idb.LogMatch(m)
+				if err != nil {
+					log.Fatal(err)
+				}
 				m.MatchUUID = matchUUID
 				matchesChan <- m
 			}

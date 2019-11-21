@@ -20,11 +20,15 @@ type IDB interface {
 
 	SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error
 
-	LogMatch(match trigger.IMatch) string
+	LogMatch(match trigger.IMatch) (string, error)
 
 	UpdateMatchingTriggers(triggerIds []string)
 
 	UpdateNonMatchingTriggers(triggerIds []string)
 
 	GetSilentButMatchingTriggers(triggerUUIDs []string) []string
+
+	TruncateTables(tables []string) error
+
+	SaveTrigger(triggerData string, isActive, triggered bool) error
 }

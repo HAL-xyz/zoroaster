@@ -23,10 +23,13 @@ func ContractMatcher(
 
 		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, getModifiedAccounts, idb, client)
 		for _, m := range cnMatches {
-			matchId := idb.LogMatch(*m)
-			m.MatchUUID = matchId
-			log.Debug("\tlogged one match with id ", matchId)
-			matchesChan <- m
+			matchUUID, err := idb.LogMatch(*m)
+			if err != nil {
+				log.Fatal(err)
+			}
+			m.MatchUUID = matchUUID
+			log.Debug("\tlogged one match with id ", matchUUID)
+			matchesChan <- *m
 		}
 		err := idb.SetLastBlockProcessed(block.Number, trigger.WaC)
 		if err != nil {
@@ -74,7 +77,7 @@ func matchContractsForBlock(
 		if isMatch {
 			match := &trigger.CnMatch{
 				Trigger:        tg,
-				MatchUUID:      "uuid", // this will be set by Postgres once we persist
+				MatchUUID:      "", // this will be set by Postgres once we persist
 				BlockNumber:    blockNo,
 				BlockHash:      blockHash,
 				MatchedValues:  fmt.Sprint(matchedValues),
@@ -98,14 +101,14 @@ func matchContractsForBlock(
 func getMatchesToActUpon(idb aws.IDB, cnMatches []*trigger.CnMatch) []*trigger.CnMatch {
 	var matchingTriggersUUIDs []string
 	for _, m := range cnMatches {
-		matchingTriggersUUIDs = append(matchingTriggersUUIDs, m.MatchUUID)
+		matchingTriggersUUIDs = append(matchingTriggersUUIDs, m.Trigger.TriggerUUID)
 	}
 
 	triggerUUIDsToActUpon := idb.GetSilentButMatchingTriggers(matchingTriggersUUIDs)
 
 	var matchesToActUpon []*trigger.CnMatch
 	for _, m := range cnMatches {
-		if utils.IsIn(m.MatchUUID, triggerUUIDsToActUpon) {
+		if utils.IsIn(m.Trigger.TriggerUUID, triggerUUIDsToActUpon) {
 			matchesToActUpon = append(matchesToActUpon, m)
 		}
 	}

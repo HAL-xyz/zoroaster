@@ -11,7 +11,7 @@ Gas is $Gas$
 GasPrice is $GasPrice$
 Nonce is $Nonce$
 
-Function name is: !MethodName
+Function name is: $MethodName$
 
 Function params:
 

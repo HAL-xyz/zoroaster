@@ -26,9 +26,13 @@ func EventMatcher(
 		for _, tg := range triggers {
 			matchingEvents := trigger.MatchEvent(rpcCli, tg, block.Number, block.Timestamp)
 			for _, match := range matchingEvents {
-				matchUUID := idb.LogMatch(match)
+				matchUUID, err := idb.LogMatch(match)
+				if err != nil {
+					logrus.Fatal(err)
+				}
 				match.MatchUUID = matchUUID
-				matchesChan <- match
+				logrus.Debug("\tlogged one event with id ", matchUUID)
+				matchesChan <- *match
 			}
 		}
 		err = idb.SetLastBlockProcessed(block.Number, trigger.WaE)
