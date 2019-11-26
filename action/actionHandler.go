@@ -89,12 +89,13 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 
 func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SESAPI) *trigger.Outcome {
 
-	body := fillEmailTemplate(email.Body, match)
+	email.Body = fillEmailTemplate(email.Body, match)
+	email.Subject = fillEmailTemplate(email.Subject, match)
 	allRecipients := getAllRecipients(email.To, match)
 
 	emailPayload := trigger.EmailPayload{
 		Recipients: allRecipients,
-		Body:       body,
+		Body:       email.Body,
 		Subject:    email.Subject,
 	}
 	emailPayloadJson, err := json.Marshal(emailPayload)
@@ -104,7 +105,7 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 			Outcome: makeErrorResponse(err.Error()),
 		}
 	}
-	result, err := sendEmail(iemail, allRecipients, email.Subject, body)
+	result, err := sendEmail(iemail, allRecipients, email.Subject, email.Body)
 	if err != nil {
 		return &trigger.Outcome{
 			Payload: string(emailPayloadJson),

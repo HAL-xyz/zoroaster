@@ -187,7 +187,7 @@ func TestHandleEmail1(t *testing.T) {
 	email := AttributeEmail{
 		From:    "hello@wolrd.com",
 		To:      []string{"manlio.poltronieri@gmail.com", "$ReturnedValues$"},
-		Subject: "Hello World Test",
+		Subject: "Hello World Test on block $BlockNumber$",
 		Body:    "body",
 	}
 
@@ -196,7 +196,7 @@ func TestHandleEmail1(t *testing.T) {
 	match := trigger.CnMatch{
 		Trigger:        tg,
 		MatchUUID:      "",
-		BlockNumber:    1,
+		BlockNumber:    777,
 		MatchedValues:  "",
 		AllValues:      []interface{}{"marco@atomic.eu.com"},
 		BlockTimestamp: 123,
@@ -209,7 +209,7 @@ func TestHandleEmail1(t *testing.T) {
     "marco@atomic.eu.com"
  ],
  "Body":"body",
- "Subject":"Hello World Test"
+ "Subject":"Hello World Test on block 777"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
@@ -220,7 +220,7 @@ func TestHandleEmail2(t *testing.T) {
 	email := AttributeEmail{
 		From:    "hello@wolrd.com",
 		To:      []string{"manlio.poltronieri@gmail.com", "$ReturnedValues$"},
-		Subject: "Hello World Test",
+		Subject: "Matched value is $MatchedValue$",
 		Body:    "body",
 	}
 
@@ -230,7 +230,7 @@ func TestHandleEmail2(t *testing.T) {
 		Trigger:        tg,
 		MatchUUID:      "",
 		BlockNumber:    1,
-		MatchedValues:  "",
+		MatchedValues:  "0x000",
 		AllValues:      []interface{}{[]string{"marco@atomic.eu.com", "matteo@atomic.eu.com", "not and address"}},
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
@@ -244,7 +244,7 @@ func TestHandleEmail2(t *testing.T) {
      "matteo@atomic.eu.com"
   ],
   "Body":"body",
-  "Subject":"Hello World Test"
+  "Subject":"Matched value is 0x000"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
@@ -255,7 +255,7 @@ func TestHandleEmail3(t *testing.T) {
 	email := AttributeEmail{
 		From:    "hello@wolrd.com",
 		To:      []string{"manlio.poltronieri@gmail.com", "$ReturnedValues$"},
-		Subject: "Hello World Test",
+		Subject: "Timestamp: $BlockTimestamp$",
 		Body:    "body",
 	}
 
@@ -277,7 +277,7 @@ func TestHandleEmail3(t *testing.T) {
      "hello@world.com"
   ],
   "Body":"body",
-  "Subject":"Hello World Test"
+  "Subject":"Timestamp: 123"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
