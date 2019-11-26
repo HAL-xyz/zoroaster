@@ -14,7 +14,7 @@ type TriggerJson struct {
 	CreationDate string       `json:"CreationDate"`
 	ContractABI  string       `json:"ContractABI"`
 	ContractAdd  string       `json:"ContractAdd"`
-	MethodName   string       `json:"MethodName"`
+	FunctionName string       `json:"FunctionName,omitempty"`
 	Filters      []FilterJson `json:"Filters"`
 	Inputs       []InputJson  `json:"Inputs"`
 	Outputs      []OutputJson `json:"Outputs"`
@@ -66,13 +66,16 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 	if !utils.IsIn(tjs.TriggerType, validTriggerTypes) {
 		return nil, fmt.Errorf("invalid trigger type: %s", tjs.TriggerType)
 	}
+	if tjs.TriggerType == "WatchContracts" && tjs.FunctionName == "" {
+		return nil, fmt.Errorf("cannot read WaC trigger: missing FunctionName")
+	}
 
 	trigger := Trigger{
-		TriggerName: tjs.TriggerName,
-		TriggerType: tjs.TriggerType,
-		ContractABI: tjs.ContractABI,
-		ContractAdd: tjs.ContractAdd,
-		MethodName:  tjs.MethodName,
+		TriggerName:  tjs.TriggerName,
+		TriggerType:  tjs.TriggerType,
+		ContractABI:  tjs.ContractABI,
+		ContractAdd:  tjs.ContractAdd,
+		FunctionName: tjs.FunctionName,
 	}
 
 	// populate Input/Output for Watch a Contract

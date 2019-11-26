@@ -15,7 +15,7 @@ func MatchContract(
 	tg *Trigger,
 	blockNo int) (isMatch bool, allMatchingValues []string, allReturnedValues []interface{}) {
 
-	methodId, err := encodeMethod(tg.MethodName, tg.ContractABI, tg.Inputs)
+	methodId, err := encodeMethod(tg.FunctionName, tg.ContractABI, tg.Inputs)
 	if err != nil {
 		log.Debugf("trigger %s: cannot encode method: %s", tg.TriggerUUID, err)
 		return false, nil, nil
@@ -30,7 +30,7 @@ func MatchContract(
 	var allValues []interface{}
 	matchingValues := make([]string, len(tg.Outputs))
 	for i, expectedOutput := range tg.Outputs {
-		outputMatch, allVals := validateContractReturnValue(contractReturnValue, tg.ContractABI, tg.MethodName, expectedOutput)
+		outputMatch, allVals := validateContractReturnValue(contractReturnValue, tg.ContractABI, tg.FunctionName, expectedOutput)
 		matchingValues[i] = outputMatch
 		if allVals != nil {
 			allValues = allVals // always the same if not empty

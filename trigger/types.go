@@ -168,7 +168,7 @@ func (m CnMatch) ToPersistent() IPersistableMatch {
 		BlockTimestamp: m.BlockTimestamp,
 		BlockHash:      m.BlockHash,
 		ContractAdd:    m.Trigger.ContractAdd,
-		FunctionName:   m.Trigger.MethodName,
+		FunctionName:   m.Trigger.FunctionName,
 		ReturnedData: struct {
 			MatchedValues string
 			AllValues     string
@@ -206,7 +206,7 @@ func (m CnMatch) ToPostPayload() IPostablePaylaod {
 		BlockTimestamp: m.BlockTimestamp,
 		BlockHash:      m.BlockHash,
 		ContractAdd:    m.Trigger.ContractAdd,
-		FunctionName:   m.Trigger.MethodName,
+		FunctionName:   m.Trigger.FunctionName,
 		ReturnedData: struct {
 			MatchedValues string
 			AllValues     string

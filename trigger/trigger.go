@@ -6,16 +6,16 @@ import (
 )
 
 type Trigger struct {
-	TriggerUUID string // UUID comes from Postgres
-	TriggerName string
-	TriggerType string
-	ContractABI string
-	ContractAdd string
-	Filters     []Filter
-	MethodName  string
-	Inputs      []Input
-	Outputs     []Output
-	UserUUID    string
+	TriggerUUID  string // UUID comes from Postgres
+	TriggerName  string
+	TriggerType  string
+	ContractABI  string
+	ContractAdd  string
+	Filters      []Filter
+	FunctionName string
+	Inputs       []Input
+	Outputs      []Output
+	UserUUID     string
 }
 
 type Filter struct {
