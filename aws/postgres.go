@@ -199,8 +199,7 @@ func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.
 		}
 		trig, err := trigger.NewTriggerFromJson(tg)
 		if err != nil {
-			log.Debugf("(trigger uuid %s): %v", triggerUUID, err)
-			return nil, err
+			log.Warnf("trigger uuid %s: %v", triggerUUID, err)
 		} else {
 			trig.TriggerUUID, trig.UserUUID = triggerUUID, userUUID
 			triggers = append(triggers, trig)
