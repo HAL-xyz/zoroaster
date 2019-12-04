@@ -9,6 +9,7 @@
   "Outputs":[
     {
       "ReturnType":"bool",
+      "ReturnIndex": 0,
       "Condition":{
         "Predicate":"Eq",
         "Attribute":"true"

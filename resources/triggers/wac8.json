@@ -8,11 +8,19 @@
   ],
   "Outputs":[
     {
-      "ReturnType":"(int128, string, string)",
-      "Index": 2,
+      "ReturnType":"string",
+      "ReturnIndex": 2,
       "Condition":{
         "Predicate":"Eq",
         "Attribute":"moon"
+      }
+    },
+    {
+      "ReturnType":"int",
+      "ReturnIndex": 0,
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"4"
       }
     }
   ]

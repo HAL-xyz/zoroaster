@@ -42,9 +42,10 @@ type InputJson struct {
 }
 
 type OutputJson struct {
-	Index      *int          `json:"Index"`
-	ReturnType string        `json:"ReturnType"`
-	Condition  ConditionJson `json:"Condition"`
+	Index       *int          `json:"Index"`
+	ReturnIndex int           `json:"ReturnIndex"`
+	ReturnType  string        `json:"ReturnType"`
+	Condition   ConditionJson `json:"Condition"`
 }
 
 // creates a new TriggerJson from JSON
@@ -85,7 +86,12 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 	}
 	for _, outputJs := range tjs.Outputs {
 		cond := ConditionOutput{Condition{}, unpackPredicate(outputJs.Condition.Predicate), outputJs.Condition.Attribute}
-		out := Output{outputJs.Index, outputJs.ReturnType, cond}
+		out := Output{
+			Index:       outputJs.Index,
+			ReturnIndex: outputJs.ReturnIndex,
+			ReturnType:  outputJs.ReturnType,
+			Condition:   cond,
+		}
 		trigger.Outputs = append(trigger.Outputs, out)
 	}
 

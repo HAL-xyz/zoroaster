@@ -8,11 +8,30 @@
   ],
   "Outputs":[
     {
-      "ReturnType":"(int128, int128, int128)",
+      "ReturnType":"int128",
       "Index": 0,
+      "ReturnIndex": 0,
       "Condition":{
         "Predicate":"Eq",
         "Attribute":"4"
+      }
+    },
+    {
+      "ReturnType":"int128",
+      "Index": 0,
+      "ReturnIndex": 1,
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"8"
+      }
+    },
+    {
+      "ReturnType":"int128",
+      "Index": 0,
+      "ReturnIndex": 2,
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"12"
       }
     }
   ]

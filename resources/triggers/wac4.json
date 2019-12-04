@@ -13,6 +13,7 @@
   "Outputs":[
     {
       "ReturnType":"address",
+      "ReturnIndex": 0,
       "Condition":{
         "Predicate":"Eq",
         "Attribute":"0xd4fe7bc31cedb7bfb8a345f31e668033056b2728"

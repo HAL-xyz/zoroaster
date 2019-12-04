@@ -34,9 +34,10 @@ type Input struct {
 }
 
 type Output struct {
-	Index      *int
-	ReturnType string
-	Condition  Conditioner
+	Index       *int
+	ReturnIndex int
+	ReturnType  string
+	Condition   Conditioner
 }
 
 type Conditioner interface {

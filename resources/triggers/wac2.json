@@ -13,6 +13,7 @@
   "Outputs":[
     {
       "ReturnType":"uint256",
+      "ReturnIndex": 0,
       "Condition":{
         "Predicate":"Eq",
         "Attribute":"3876846319093283908984"

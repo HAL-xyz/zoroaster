@@ -1,0 +1,23 @@
+{
+  "TriggerName":"wac 18",
+  "TriggerType":"WatchContracts",
+  "ContractAdd":"0x085317f12cf19b17b16b365c3f246d4ca6c43fcf",
+  "ContractABI":"[{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes16\",\"name\":\"v1\",\"type\":\"bytes16\"}],\"name\":\"Fnc16\",\"outputs\":[{\"internalType\":\"bytes16\",\"name\":\"\",\"type\":\"bytes16\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"int8\",\"name\":\"int_var\",\"type\":\"int8\"},{\"internalType\":\"int16[3]\",\"name\":\"int_fidex_arr\",\"type\":\"int16[3]\"},{\"internalType\":\"int32[]\",\"name\":\"int_din_arr\",\"type\":\"int32[]\"}],\"name\":\"Monster1\",\"outputs\":[{\"internalType\":\"int256[3]\",\"name\":\"res1\",\"type\":\"int256[3]\"},{\"internalType\":\"bytes\",\"name\":\"res2\",\"type\":\"bytes\"},{\"internalType\":\"int64\",\"name\":\"res3\",\"type\":\"int64\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes1[]\",\"name\":\"v1\",\"type\":\"bytes1[]\"},{\"internalType\":\"bytes32\",\"name\":\"v2\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"v3\",\"type\":\"bytes\"}],\"name\":\"Monster3\",\"outputs\":[{\"internalType\":\"bytes1[]\",\"name\":\"res1\",\"type\":\"bytes1[]\"},{\"internalType\":\"bytes32\",\"name\":\"res2\",\"type\":\"bytes32\"},{\"internalType\":\"bytes\",\"name\":\"res3\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"v1\",\"type\":\"bytes32\"}],\"name\":\"Fnc32\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes1[]\",\"name\":\"v1\",\"type\":\"bytes1[]\"}],\"name\":\"FncByteArray\",\"outputs\":[{\"internalType\":\"bytes1[]\",\"name\":\"\",\"type\":\"bytes1[]\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"address\",\"name\":\"add_var\",\"type\":\"address\"},{\"internalType\":\"address[3]\",\"name\":\"add_fidex_arr\",\"type\":\"address[3]\"},{\"internalType\":\"address[]\",\"name\":\"add_din_arr\",\"type\":\"address[]\"}],\"name\":\"Monster2\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"res1\",\"type\":\"address\"},{\"internalType\":\"address[3]\",\"name\":\"res2\",\"type\":\"address[3]\"},{\"internalType\":\"address[]\",\"name\":\"res3\",\"type\":\"address[]\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"v1\",\"type\":\"bytes\"}],\"name\":\"FncBytes\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"FncStuff\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"res1\",\"type\":\"bytes\"},{\"internalType\":\"bytes1[]\",\"name\":\"res2\",\"type\":\"bytes1[]\"},{\"internalType\":\"bytes20\",\"name\":\"res3\",\"type\":\"bytes20\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"}]",
+  "FunctionName": "Fnc32",
+  "Inputs": [
+    {
+      "ParameterType":"bytes32",
+      "ParameterValue": "68656c6c6f20776f726c6400000000000000"
+    }
+  ],
+  "Outputs":[
+    {
+      "ReturnType":"bytes32",
+      "ReturnIndex": 0,
+      "Condition":{
+        "Predicate":"Eq",
+        "Attribute":"68656c6c6f20776f726c64000000000000000000000000000000000000000000"
+      }
+    }
+  ]
+}

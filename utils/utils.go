@@ -157,3 +157,9 @@ func NormalizeAddress(add string) string {
 	}
 	return add
 }
+
+// given "[10, 20, 30]" returns []string{"10", "20", "30"}
+func GetValsFromStringifiedArray(a string) []string {
+	a = RemoveCharacters(a, "[] ")
+	return strings.Split(a, ",")
+}

@@ -177,10 +177,102 @@ func TestMatchContract11(t *testing.T) {
 			common.HexToAddress("0x65d21616594825a738bcd08a5227358593a9aaf2"),
 			common.HexToAddress("0xd76f7d7d2ede0631ad23e4a01176c0e59878abda"),
 		}}
-	assert.False(t, isMatch)
+	assert.False(t, isMatch)              // no match
+	assert.Equal(t, 1, len(matchingVals)) // only the first Output matches
 	assert.Equal(t, "10", matchingVals[0])
-	assert.Equal(t, "", matchingVals[1])
 	assert.Equal(t, exp, returnedVals)
+}
+
+func TestMatchContract12(t *testing.T) {
+
+	// int8 -> string
+	tg, err := NewTriggerFromFile("../resources/triggers/wac12.json")
+	assert.NoError(t, err)
+
+	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+
+	exp := []interface{}{"99"}
+	assert.True(t, isMatch)
+	assert.Equal(t, "99", matchingVals[0])
+	assert.Equal(t, exp, returnedVals)
+}
+
+func TestMatchContract13(t *testing.T) {
+
+	// int8[3] -> string
+	tg, err := NewTriggerFromFile("../resources/triggers/wac13.json")
+	assert.NoError(t, err)
+
+	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+
+	exp := []interface{}{"20"}
+	assert.True(t, isMatch)
+	assert.Equal(t, "20", matchingVals[0])
+	assert.Equal(t, exp, returnedVals)
+}
+
+func TestMatchContract14(t *testing.T) {
+
+	// int8[] -> string
+	tg, err := NewTriggerFromFile("../resources/triggers/wac14.json")
+	assert.NoError(t, err)
+
+	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+
+	exp := []interface{}{"10"}
+	assert.True(t, isMatch)
+	assert.Equal(t, "10", matchingVals[0])
+	assert.Equal(t, exp, returnedVals)
+}
+
+func TestMatchContract15(t *testing.T) {
+
+	// int8, int16[3], int32[] -> int256[3], bytes, int64
+	tg, err := NewTriggerFromFile("../resources/triggers/wac15.json")
+	assert.NoError(t, err)
+
+	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	assert.True(t, isMatch)
+}
+
+func TestMatchContract16(t *testing.T) {
+
+	// address, address[3], address[] -> address, address[3], address[]
+	tg, err := NewTriggerFromFile("../resources/triggers/wac16.json")
+	assert.NoError(t, err)
+
+	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	assert.True(t, isMatch)
+}
+
+func TestMatchContract17(t *testing.T) {
+
+	// bytes -> bytes
+	tg, err := NewTriggerFromFile("../resources/triggers/wac17.json")
+	assert.NoError(t, err)
+
+	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	assert.True(t, isMatch)
+}
+
+func TestMatchContract18(t *testing.T) {
+
+	// bytes32 -> bytes32
+	tg, err := NewTriggerFromFile("../resources/triggers/wac18.json")
+	assert.NoError(t, err)
+
+	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	assert.True(t, isMatch)
+}
+
+func TestMatchContract19(t *testing.T) {
+
+	// byte16 -> byte16
+	tg, err := NewTriggerFromFile("../resources/triggers/wac19.json")
+	assert.NoError(t, err)
+
+	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	assert.True(t, isMatch)
 }
 
 func TestMatchContractUniswap(t *testing.T) {

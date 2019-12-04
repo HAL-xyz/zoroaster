@@ -9,6 +9,7 @@
   "Outputs":[
     {
       "ReturnType":"string[3]",
+      "ReturnIndex": 0,
       "Index": 0,
       "Condition":{
         "Predicate":"Eq",
