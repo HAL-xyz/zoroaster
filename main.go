@@ -47,10 +47,12 @@ func main() {
 	// ETH client
 	ethClient := ethrpc.New(zconf.EthNode)
 
-	// Channels are buffered because a) contracts is slower, and b) so I can run wac/wat independently for tests
-	txBlocksChan := make(chan *ethrpc.Block, 100)
-	cnBlocksChan := make(chan *ethrpc.Block, 100)
-	evBlocksChan := make(chan *ethrpc.Block, 100)
+	// Channels are buffered so the poller doesn't stop queueing blocks
+	// if one of the Matcher isn't up (during tests) of if WaC is very slow (which it is)
+	// Another solution would be to have three different pollers, but for now this should do.
+	txBlocksChan := make(chan *ethrpc.Block, 10000)
+	cnBlocksChan := make(chan *ethrpc.Block, 10000)
+	evBlocksChan := make(chan *ethrpc.Block, 10000)
 	matchesChan := make(chan trigger.IMatch)
 
 	// Poll ETH node

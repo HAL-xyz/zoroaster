@@ -23,7 +23,7 @@ func BlocksPoller(
 	cnLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaC)
 	evLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaE)
 
-	ticker := time.NewTicker(2500 * time.Millisecond)
+	ticker := time.NewTicker(500 * time.Millisecond)
 	for range ticker.C {
 		lastBlockSeen, err := client.EthBlockNumber()
 		if err != nil {
