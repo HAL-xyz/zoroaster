@@ -19,7 +19,13 @@ func ContractMatcher(
 
 	for {
 		block := <-blocksChan
+		start := time.Now()
 		log.Info("CN: new -> ", block.Number)
+
+		triggers, err := idb.LoadTriggersFromDB(trigger.WaC)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, getModifiedAccounts, idb, client)
 		for _, m := range cnMatches {
@@ -31,9 +37,13 @@ func ContractMatcher(
 			log.Debug("\tlogged one match with id ", matchUUID)
 			matchesChan <- *m
 		}
-		err := idb.SetLastBlockProcessed(block.Number, trigger.WaC)
+		err = idb.SetLastBlockProcessed(block.Number, trigger.WaC)
 		if err != nil {
 			log.Fatal(err)
+		}
+		err = idb.LogAnalytics(trigger.WaC, block.Number, len(triggers), block.Timestamp, start, time.Now())
+		if err != nil {
+			log.Warn("cannot log analytics: ", err)
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package aws
 
 import (
+	"time"
 	"zoroaster/config"
 	"zoroaster/trigger"
 )
@@ -31,4 +32,6 @@ type IDB interface {
 	TruncateTables(tables []string) error
 
 	SaveTrigger(triggerData string, isActive, triggered bool) error
+
+	LogAnalytics(tgType trigger.TgType, blockNo, triggersNo, blockTime int, start, end time.Time) error
 }

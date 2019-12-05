@@ -18,6 +18,20 @@ type PostgresClient struct {
 	conf *config.ZoroDB
 }
 
+func (cli PostgresClient) LogAnalytics(tgType trigger.TgType, blockNo, triggersNo, blockTime int, start, end time.Time) error {
+	q := fmt.Sprintf(
+		`INSERT INTO analytics (
+			"type", 
+			"block_no", 
+			"no_triggers",
+			"start_time",
+			"end_time",
+			"duration",
+			"block_time") VALUES ($1, $2, $3, $4, $5, $6, $7)`)
+	_, err := db.Exec(q, trigger.TgTypeToPrefix(tgType), blockNo, triggersNo, start, end, end.Sub(start).Seconds(), time.Unix(int64(blockTime), 0))
+	return err
+}
+
 func (cli PostgresClient) SaveTrigger(triggerData string, isActive, triggered bool) error {
 	q := fmt.Sprintf(
 		`INSERT INTO triggers (

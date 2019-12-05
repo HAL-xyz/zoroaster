@@ -37,5 +37,9 @@ func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, i
 			log.Fatal(err)
 		}
 		log.Infof("\tTX: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)
+		err = idb.LogAnalytics(trigger.WaT, block.Number, len(triggers), block.Timestamp, start, time.Now())
+		if err != nil {
+			log.Warn("cannot log analytics: ", err)
+		}
 	}
 }

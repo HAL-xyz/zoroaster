@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"log"
 	"testing"
+	"time"
 	"zoroaster/config"
 	"zoroaster/trigger"
 )
@@ -47,7 +48,8 @@ func TestPostgresClient_All(t *testing.T) {
 		Tg:        tg,
 		ZTx:       &ztx,
 	}
-	psqlClient.LogMatch(txMatch)
+	_, err := psqlClient.LogMatch(txMatch)
+	assert.NoError(t, err)
 
 	// Log Contract Match
 	cnMatch := trigger.CnMatch{
@@ -59,7 +61,8 @@ func TestPostgresClient_All(t *testing.T) {
 		MatchedValues:  "{}",
 		AllValues:      nil,
 	}
-	psqlClient.LogMatch(cnMatch)
+	_, err = psqlClient.LogMatch(cnMatch)
+	assert.NoError(t, err)
 
 	// Log Event Match
 	logs, _ := trigger.GetLogsFromFile("../resources/events/logs1.json")
@@ -70,7 +73,8 @@ func TestPostgresClient_All(t *testing.T) {
 		EventParams:    map[string]interface{}{},
 		BlockTimestamp: 888888,
 	}
-	psqlClient.LogMatch(eventMatch)
+	_, err = psqlClient.LogMatch(eventMatch)
+	assert.NoError(t, err)
 
 	// Update Matching Triggers
 	psqlClient.UpdateMatchingTriggers([]string{"3b29b0c3-e403-4103-81ef-6685cd391cda"})
@@ -85,7 +89,7 @@ func TestPostgresClient_All(t *testing.T) {
 	psqlClient.LogOutcome(&o1, "3b29b0c3-e403-4103-81ef-6685cd391cda")
 
 	// Load all the active triggers
-	_, err := psqlClient.LoadTriggersFromDB(trigger.WaT)
+	_, err = psqlClient.LoadTriggersFromDB(trigger.WaT)
 	assert.NoError(t, err)
 
 	// Get all the active actions
@@ -110,4 +114,8 @@ func TestPostgresClient_All(t *testing.T) {
 	assert.NoError(t, err)
 	blockNo = psqlClient.ReadLastBlockProcessed(trigger.WaE)
 	assert.Equal(t, 0, blockNo)
+
+	// Write analytics
+	err = psqlClient.LogAnalytics(trigger.WaT, 9999, 100, int(time.Now().Unix()), time.Now(), time.Now().Add(10*time.Second))
+	assert.NoError(t, err)
 }
