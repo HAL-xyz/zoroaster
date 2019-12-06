@@ -1,7 +1,6 @@
 {
   "TriggerName": "All transactions with a value smaller than X",
   "TriggerType": "WatchTransactions",
-  "CreationDate": "2019-06-01 00:00:00",
   "Filters": [
     {
       "FilterType": "BasicFilter",

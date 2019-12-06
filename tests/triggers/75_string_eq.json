@@ -1,7 +1,6 @@
 {
   "TriggerName": "Strinq Eq",
   "TriggerType": "WatchTransactions",
-  "CreationDate": "2019-06-01 00:00:00",
   "ContractAdd": "0x61958A8C7aCCf7018F023Ee1ee3065A8Ce71387F",
   "ContractABI": "[{\"constant\":false,\"inputs\":[{\"name\":\"Bitmond\",\"type\":\"string\"},{\"name\":\"Owner\",\"type\":\"string\"}],\"name\":\"take\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"Bitmond\",\"type\":\"string\"}],\"name\":\"lookup\",\"outputs\":[{\"name\":\"Owner\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}]",
   "Filters": [
