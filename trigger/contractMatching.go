@@ -37,8 +37,9 @@ func MatchContract(
 		if expectedOutput.ReturnIndex < len(allValuesLs) {
 			rawParam := getRawParam(allValuesLs[expectedOutput.ReturnIndex])
 			cond := expectedOutput.Condition.(ConditionOutput)
-			if ValidateParam(rawParam, expectedOutput.ReturnType, cond.Attribute, cond.Predicate, expectedOutput.Index) {
-				matchingValues = append(matchingValues, cond.Attribute)
+			yes, matchedValue := ValidateParam(rawParam, expectedOutput.ReturnType, cond.Attribute, cond.Predicate, expectedOutput.Index)
+			if yes {
+				matchingValues = append(matchingValues, fmt.Sprintf("%v", matchedValue))
 			}
 		}
 	}

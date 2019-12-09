@@ -84,7 +84,8 @@ func validateFilterLog(
 			logrus.Debug(err)
 			return false
 		}
-		return ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
+		isValid, _ := ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
+		return isValid
 	}
 
 	// validate DATA field
@@ -101,7 +102,8 @@ func validateFilterLog(
 			logrus.Debug(err)
 			return false
 		}
-		return ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
+		isValid, _ := ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
+		return isValid
 	}
 	// parameter name not found in topics nor in data
 	return false

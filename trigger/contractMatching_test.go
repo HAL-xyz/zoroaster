@@ -159,7 +159,7 @@ func TestMatchContract10(t *testing.T) {
 		}}
 	assert.True(t, isMatch)
 	assert.Equal(t, len(matchingVals), 2)
-	assert.Equal(t, "10", matchingVals[0])
+	assert.Equal(t, "[4fed1fc4144c223ae3c1553be203cdfcbd38c581 65d21616594825a738bcd08a5227358593a9aaf2 d76f7d7d2ede0631ad23e4a01176c0e59878abda]", matchingVals[0])
 	assert.Equal(t, "0x4fed1fc4144c223ae3c1553be203cdfcbd38c581", matchingVals[1])
 	assert.Equal(t, exp, returnedVals)
 }
@@ -179,7 +179,7 @@ func TestMatchContract11(t *testing.T) {
 		}}
 	assert.False(t, isMatch)              // no match
 	assert.Equal(t, 1, len(matchingVals)) // only the first Output matches
-	assert.Equal(t, "10", matchingVals[0])
+	assert.Equal(t, "[4fed1fc4144c223ae3c1553be203cdfcbd38c581 65d21616594825a738bcd08a5227358593a9aaf2 d76f7d7d2ede0631ad23e4a01176c0e59878abda]", matchingVals[0])
 	assert.Equal(t, exp, returnedVals)
 }
 
@@ -231,8 +231,12 @@ func TestMatchContract15(t *testing.T) {
 	tg, err := NewTriggerFromFile("../resources/triggers/wac15.json")
 	assert.NoError(t, err)
 
-	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, _ := MatchContract(cliRinkeby, tg, 5527743)
 	assert.True(t, isMatch)
+	assert.Equal(t, "20", matchingVals[0])
+	assert.Equal(t, "10", matchingVals[1])
+	assert.Equal(t, "110", matchingVals[2])
+	assert.Equal(t, "0x6c61206c61206c612068656c6c6f20776f726c64", matchingVals[3])
 }
 
 func TestMatchContract16(t *testing.T) {
@@ -241,8 +245,11 @@ func TestMatchContract16(t *testing.T) {
 	tg, err := NewTriggerFromFile("../resources/triggers/wac16.json")
 	assert.NoError(t, err)
 
-	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, _ := MatchContract(cliRinkeby, tg, 5527743)
 	assert.True(t, isMatch)
+	assert.Equal(t, "0x6d64ca40f70cc4c54bbb2a32f1ea52a7d7d4ccec", matchingVals[0])
+	assert.Equal(t, "0x0000000000000000000000000000000000000000", matchingVals[1])
+	assert.Equal(t, "0x0000000000000000000000000000000000000001", matchingVals[2])
 }
 
 func TestMatchContract17(t *testing.T) {
@@ -251,8 +258,10 @@ func TestMatchContract17(t *testing.T) {
 	tg, err := NewTriggerFromFile("../resources/triggers/wac17.json")
 	assert.NoError(t, err)
 
-	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, _ := MatchContract(cliRinkeby, tg, 5527743)
 	assert.True(t, isMatch)
+	assert.Equal(t, "0x68656c6c6f20776f726c64", matchingVals[0])
+	assert.Equal(t, 1, len(matchingVals))
 }
 
 func TestMatchContract18(t *testing.T) {
@@ -261,8 +270,10 @@ func TestMatchContract18(t *testing.T) {
 	tg, err := NewTriggerFromFile("../resources/triggers/wac18.json")
 	assert.NoError(t, err)
 
-	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, _ := MatchContract(cliRinkeby, tg, 5527743)
 	assert.True(t, isMatch)
+	assert.Equal(t, 1, len(matchingVals))
+	assert.Equal(t, "0x68656c6c6f20776f726c64000000000000000000000000000000000000000000", matchingVals[0])
 }
 
 func TestMatchContract19(t *testing.T) {
@@ -271,8 +282,10 @@ func TestMatchContract19(t *testing.T) {
 	tg, err := NewTriggerFromFile("../resources/triggers/wac19.json")
 	assert.NoError(t, err)
 
-	isMatch, _, _ := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, _ := MatchContract(cliRinkeby, tg, 5527743)
 	assert.True(t, isMatch)
+	assert.Equal(t, 1, len(matchingVals))
+	assert.Equal(t, "0x68656c6c6f20776f726c640000000000", matchingVals[0])
 }
 
 func TestMatchContractUniswap(t *testing.T) {
@@ -280,6 +293,7 @@ func TestMatchContractUniswap(t *testing.T) {
 	tg, err := NewTriggerFromFile("../resources/triggers/wac-uniswap.json")
 	assert.NoError(t, err)
 
-	isMatch, _, _ := MatchContract(client, tg, 8496486)
+	isMatch, matchingVals, _ := MatchContract(client, tg, 8496486)
 	assert.True(t, isMatch)
+	assert.Equal(t, "177", matchingVals[0])
 }
