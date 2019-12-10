@@ -19,17 +19,16 @@ func jsonToTransaction(jsonSrc []byte) (*ethrpc.Transaction, error) {
 	return &tx, nil
 }
 
-func GetTransactionFromFile(path string) *ethrpc.Transaction {
+func GetTransactionFromFile(path string) (*ethrpc.Transaction, error) {
 	txSrc, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Error(err)
+		return nil, err
 	}
-
 	tx, err := jsonToTransaction(txSrc)
 	if err != nil {
-		log.Error(err)
+		return nil, err
 	}
-	return tx
+	return tx, nil
 }
 
 func jsonToBlock(jsonBlock []byte) (*ethrpc.Block, error) {
@@ -44,16 +43,16 @@ func jsonToBlock(jsonBlock []byte) (*ethrpc.Block, error) {
 	return &block, nil
 }
 
-func GetBlockFromFile(path string) *ethrpc.Block {
+func GetBlockFromFile(path string) (*ethrpc.Block, error) {
 	blockSrc, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Error(err)
+		return nil, err
 	}
 	block, err := jsonToBlock(blockSrc)
 	if err != nil {
-		log.Error(err)
+		return nil, err
 	}
-	return block
+	return block, nil
 }
 
 func GetLogsFromFile(path string) ([]ethrpc.Log, error) {
@@ -72,7 +71,7 @@ func GetLogsFromFile(path string) ([]ethrpc.Log, error) {
 	return logs, nil
 }
 
-func NewTriggerFromFile(path string) (*Trigger, error) {
+func GetTriggerFromFile(path string) (*Trigger, error) {
 	triggerSrc, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Error(err)

@@ -16,7 +16,7 @@ func TestValidateFilterLog(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tg, err := NewTriggerFromFile("../resources/triggers/ev1.json")
+	tg, err := GetTriggerFromFile("../resources/triggers/ev1.json")
 	if err != nil {
 		t.Error(err)
 	}
@@ -45,14 +45,14 @@ func TestMatchEvent(t *testing.T) {
 
 	var client EthMock
 
-	tg1, err := NewTriggerFromFile("../resources/triggers/ev1.json")
+	tg1, err := GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
 	matches1 := MatchEvent(client, tg1, 8496661, 1572344236)
 
 	assert.Equal(t, 1, len(matches1))
 	assert.Equal(t, big.NewInt(677420000), matches1[0].EventParams["value"])
 
-	tg2, err := NewTriggerFromFile("../resources/triggers/ev2.json")
+	tg2, err := GetTriggerFromFile("../resources/triggers/ev2.json")
 	assert.NoError(t, err)
 	matches2 := MatchEvent(client, tg2, 8496661, 1572344236)
 

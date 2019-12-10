@@ -77,7 +77,7 @@ func (mockDB2) GetActions(tgUUID string, userUUID string) ([]string, error) {
 
 func TestProcessMatch(t *testing.T) {
 
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
 
 	match := trigger.CnMatch{
 		Trigger:        tg,

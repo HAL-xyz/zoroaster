@@ -29,7 +29,7 @@ func (m mockHttpClient) Post(url, contentType string, body io.Reader) (*http.Res
 
 func TestHandleWebHookPost(t *testing.T) {
 
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
 	url := AttributeWebhookPost{URI: "https://hal.xyz"}
 	cnMatch := trigger.CnMatch{
 		tg,
@@ -65,9 +65,9 @@ func TestHandleWebHookPost(t *testing.T) {
 
 func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 	url := AttributeWebhookPost{URI: "https://hal.xyz"}
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/t1.json")
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/t1.json")
 	tg.ContractABI = "" // otherwise it's a pain to test
-	tx := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
+	tx, _ := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
 	fnArgs := "{}"
 	ztx := trigger.ZTransaction{
 		BlockTimestamp: 1554828248,
@@ -108,7 +108,7 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 }
 
 func TestHandleWebHookWrongStuff(t *testing.T) {
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
 	url := AttributeWebhookPost{URI: "https://foo.zyusfddsiu"}
 	cnMatch := trigger.CnMatch{
 		tg,
@@ -133,7 +133,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
 
 	var client EthMock
 	url := AttributeWebhookPost{URI: "https://hal.xyz"}
-	tg1, err := trigger.NewTriggerFromFile("../resources/triggers/ev1.json")
+	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
 	matches1 := trigger.MatchEvent(client, tg1, 8496661, 1572344236)
 
@@ -191,7 +191,7 @@ func TestHandleEmail1(t *testing.T) {
 		Body:    "body",
 	}
 
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
 
 	match := trigger.CnMatch{
 		Trigger:        tg,
@@ -224,7 +224,7 @@ func TestHandleEmail2(t *testing.T) {
 		Body:    "body",
 	}
 
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
 
 	match := trigger.CnMatch{
 		Trigger:        tg,
@@ -259,7 +259,7 @@ func TestHandleEmail3(t *testing.T) {
 		Body:    "body",
 	}
 
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/wac1.json")
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
 
 	match := trigger.CnMatch{
 		Trigger:        tg,
@@ -285,7 +285,7 @@ func TestHandleEmail3(t *testing.T) {
 
 func TestHandleEmailWithEvents(t *testing.T) {
 
-	tg1, err := trigger.NewTriggerFromFile("../resources/triggers/ev1.json")
+	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
 	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
 

@@ -11,21 +11,21 @@ func init() {
 }
 
 func TestValidateFilter1(t *testing.T) {
-	block := GetBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t1.json")
+	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t1.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// BasicFilter / To
-	//assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[0], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[0], cnt, abi, tid), true)
 	assert.Equal(t, validateFilter(&block.Transactions[1], &trigger.Filters[0], cnt, abi, tid), false)
 
 	// BasicFilter / Nonce
-	//assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[2], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[2], cnt, abi, tid), true)
 }
 
 func TestValidateFilter2(t *testing.T) {
-	block := GetBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t1.json")
+	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t1.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// Address
@@ -34,8 +34,8 @@ func TestValidateFilter2(t *testing.T) {
 }
 
 func TestValidateFilter3(t *testing.T) {
-	block := GetBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t3.json")
+	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t3.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// From
@@ -44,8 +44,8 @@ func TestValidateFilter3(t *testing.T) {
 }
 
 func TestValidateFilter4(t *testing.T) {
-	block := GetBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t4.json")
+	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t4.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// Value
@@ -65,8 +65,8 @@ func TestValidateFilter4(t *testing.T) {
 }
 
 func TestValidateFilter5(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx1.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t5.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx1.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t5.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// uint256[]
@@ -86,8 +86,8 @@ func TestValidateFilter5(t *testing.T) {
 }
 
 func TestValidateFilter6(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx2.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t6.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx2.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t6.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// address[N]
@@ -100,8 +100,8 @@ func TestValidateFilter6(t *testing.T) {
 }
 
 func TestValidateFilter7(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx3.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t7.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx3.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t7.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// uint256
@@ -115,8 +115,8 @@ func TestValidateFilter7(t *testing.T) {
 }
 
 func TestValidateFilter8(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx4.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t8.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx4.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t8.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// int128[N]
@@ -130,8 +130,8 @@ func TestValidateFilter8(t *testing.T) {
 }
 
 func TestValidateFilter9(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx5.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t9.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx5.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t9.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// int32
@@ -150,8 +150,8 @@ func TestValidateFilter9(t *testing.T) {
 }
 
 func TestValidateFilter10(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx6.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t9.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx6.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t9.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// address[]
@@ -170,8 +170,8 @@ func TestValidateFilter11(t *testing.T) {
 	// mute logging just for these tests to reduce noise
 	log.SetLevel(log.WarnLevel)
 
-	tx := GetTransactionFromFile("../resources/transactions/tx5.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t10.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx5.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t10.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// wrong func param type - for now we're just happy to log and assume the filter didn't match
@@ -185,8 +185,8 @@ func TestValidateFilter11(t *testing.T) {
 }
 
 func TestValidateFilter12(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx2.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t12.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx2.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t12.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// Index on bigInt[]
@@ -209,8 +209,8 @@ func TestValidateFilter13(t *testing.T) {
 	// mute logging just for these tests to reduce noise
 	log.SetLevel(log.WarnLevel)
 
-	tx := GetTransactionFromFile("../resources/transactions/tx2.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t12.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx2.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t12.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// CheckFunctionParameter - different method name
@@ -225,8 +225,8 @@ func TestValidateFilter13(t *testing.T) {
 }
 
 func TestValidateFilter14(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx7.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t13.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx7.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t13.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// uint32
@@ -234,8 +234,8 @@ func TestValidateFilter14(t *testing.T) {
 }
 
 func TestValidateFilter15(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx8.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t14.json")
+	tx, _ := GetTransactionFromFile("../resources/transactions/tx8.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t14.json")
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// uint16
@@ -244,16 +244,16 @@ func TestValidateFilter15(t *testing.T) {
 
 // Testing one Trigger vs one Transaction
 func TestValidateTrigger(t *testing.T) {
-	block := GetBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t1.json")
+	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t1.json")
 
 	assert.Equal(t, validateTrigger(trigger, &block.Transactions[0]), true)
 	assert.Equal(t, validateTrigger(trigger, &block.Transactions[1]), false)
 }
 
 func TestValidateTrigger2(t *testing.T) {
-	block := GetBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t2.json")
+	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t2.json")
 
 	assert.Equal(t, validateTrigger(trigger, &block.Transactions[6]), true)
 	assert.Equal(t, validateTrigger(trigger, &block.Transactions[1]), false)
@@ -262,8 +262,8 @@ func TestValidateTrigger2(t *testing.T) {
 
 // Testing one Trigger vs one Block
 func TestMatchTrigger(t *testing.T) {
-	block := GetBlockFromFile("../resources/blocks/block1.json")
-	trigger, _ := NewTriggerFromFile("../resources/triggers/t2.json")
+	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
+	trigger, _ := GetTriggerFromFile("../resources/triggers/t2.json")
 
 	ztxs := MatchTransaction(trigger, block)
 
@@ -275,9 +275,11 @@ func TestMatchTrigger(t *testing.T) {
 	assert.Equal(t, *(ztxs[0].DecodedFnArgs), `{"_to":"0xfea2f9433058cd555fd67cdde8efd7e6031e56c0","_value":4000000000000000000}`)
 }
 
+// test that hex values are correctly decoded
 func TestJsonToTransaction(t *testing.T) {
-	tx := GetTransactionFromFile("../resources/transactions/tx1.json")
+	tx, err := GetTransactionFromFile("../resources/transactions/tx1.json")
 
+	assert.NoError(t, err)
 	assert.Equal(t, *tx.BlockNumber, 7669714)
 	assert.Equal(t, *tx.TransactionIndex, 4)
 	assert.Equal(t, tx.Gas, 79068)
@@ -285,8 +287,9 @@ func TestJsonToTransaction(t *testing.T) {
 }
 
 func TestJsonToBlock(t *testing.T) {
-	block := GetBlockFromFile("../resources/blocks/block1.json")
+	block, err := GetBlockFromFile("../resources/blocks/block1.json")
 
+	assert.NoError(t, err)
 	assert.Equal(t, block.Number, 7535077)
 	assert.Equal(t, block.Size, 5392)
 }

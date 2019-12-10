@@ -51,7 +51,7 @@ func TestIntegration(t *testing.T) {
 		wg.Add(1)
 		go func(rule Rule) {
 			defer wg.Done()
-			trigger, err := trig.NewTriggerFromFile("triggers/" + rule.TriggerFile)
+			trigger, err := trig.GetTriggerFromFile("triggers/" + rule.TriggerFile)
 			if err != nil {
 				log.Fatal(err)
 			}

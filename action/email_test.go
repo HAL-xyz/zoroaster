@@ -228,7 +228,7 @@ func TestFillEmailTemplate7(t *testing.T) {
 
 func TestEmailTemplateEvent(t *testing.T) {
 
-	tg1, err := trigger.NewTriggerFromFile("../resources/triggers/ev1.json")
+	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
 	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
 

@@ -33,9 +33,10 @@ func TestPostgresClient_All(t *testing.T) {
 	defer psqlClient.Close()
 
 	// Log Tx Match
-	tg, _ := trigger.NewTriggerFromFile("../resources/triggers/t1.json")
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/t1.json")
 	tg.TriggerUUID = "3b29b0c3-e403-4103-81ef-6685cd391cda"
-	tx := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
+	tx, err := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
+	assert.NoError(t, err)
 	fnArgs := "{}"
 	ztx := trigger.ZTransaction{
 		BlockTimestamp: 1554828248,
@@ -48,7 +49,7 @@ func TestPostgresClient_All(t *testing.T) {
 		Tg:        tg,
 		ZTx:       &ztx,
 	}
-	_, err := psqlClient.LogMatch(txMatch)
+	_, err = psqlClient.LogMatch(txMatch)
 	assert.NoError(t, err)
 
 	// Log Contract Match
