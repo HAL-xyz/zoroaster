@@ -27,6 +27,7 @@ func MatchTransaction(trigger *Trigger, block *ethrpc.Block) []*TxMatch {
 				DecodedFnArgs:  fnArgs,
 				DecodedFnName:  fnName,
 				Tx:             &block.Transactions[i],
+				Tg:             trigger,
 			}
 			txMatches = append(txMatches, &match)
 		}

@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"zoroaster/utils"
 )
 
 func init() {
@@ -265,14 +266,39 @@ func TestMatchTrigger(t *testing.T) {
 	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
 	trigger, _ := GetTriggerFromFile("../resources/triggers/t2.json")
 
-	ztxs := MatchTransaction(trigger, block)
+	matches := MatchTransaction(trigger, block)
 
-	assert.Equal(t, len(ztxs), 2)
-	assert.Equal(t, *(ztxs[0].Tx.TransactionIndex), 6)
-	assert.Equal(t, *(ztxs[1].Tx.TransactionIndex), 8)
+	assert.Equal(t, len(matches), 2)
+	assert.Equal(t, *(matches[0].Tx.TransactionIndex), 6)
+	assert.Equal(t, *(matches[1].Tx.TransactionIndex), 8)
 
-	assert.Equal(t, *(ztxs[0].DecodedFnName), "transfer")
-	assert.Equal(t, *(ztxs[0].DecodedFnArgs), `{"_to":"0xfea2f9433058cd555fd67cdde8efd7e6031e56c0","_value":4000000000000000000}`)
+	assert.Equal(t, *(matches[0].DecodedFnName), "transfer")
+	assert.Equal(t, *(matches[0].DecodedFnArgs), `{"_to":"0xfea2f9433058cd555fd67cdde8efd7e6031e56c0","_value":4000000000000000000}`)
+
+	// testing ToPersistent()
+	persistentJson, err := utils.GimmePrettyJson(matches[0].ToPersistent())
+	expectedJsn := `{
+  "DecodedData": {
+    "FunctionArguments": "{\"_to\":\"0xfea2f9433058cd555fd67cdde8efd7e6031e56c0\",\"_value\":4000000000000000000}",
+    "FunctionName": "transfer"
+  },
+  "Transaction": {
+    "BlockHash": "0xb972fb8fe7a2aca471fa649e790ac51f59f920a2b71ec522aee606f1ccc99f6e",
+    "BlockNumber": 7535077,
+    "BlockTimestamp": 1554828248,
+    "From": "0x3d2339bf362a9b0f8ef3ca0867bd73f350ed66ac",
+    "Gas": 115960,
+    "GasPrice": 7000000000,
+    "Nonce": 414,
+    "To": "0x174bfa6600bf90c885c7c01c7031389ed1461ab9",
+    "Hash": "0x42c8de77ef5d76f36aea6e051b9059ece6e34619d9fb4a1d97f3224d5c990a67",
+    "Value": 0,
+    "InputData": "0xa9059cbb000000000000000000000000fea2f9433058cd555fd67cdde8efd7e6031e56c00000000000000000000000000000000000000000000000003782dace9d900000"
+  }
+}`
+	ok, err := utils.AreEqualJSON(persistentJson, expectedJsn)
+	assert.NoError(t, err)
+	assert.True(t, ok)
 }
 
 // test that hex values are correctly decoded

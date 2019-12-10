@@ -46,6 +46,8 @@ type PersistentTx struct {
 	Nonce          int
 	To             string
 	Hash           string
+	Value          *big.Int
+	InputData      string
 }
 
 type PersistentTxMatch struct {
@@ -68,6 +70,8 @@ func (m TxMatch) ToPersistent() IPersistableMatch {
 			Nonce:          m.Tx.Nonce,
 			To:             m.Tx.To,
 			Hash:           m.Tx.Hash,
+			Value:          &m.Tx.Value,
+			InputData:      m.Tx.Input,
 		},
 		DecodedData: struct {
 			FunctionArguments *string
@@ -116,6 +120,8 @@ func (m TxMatch) ToPostPayload() IPostablePaylaod {
 			Nonce:          m.Tx.Nonce,
 			To:             m.Tx.To,
 			Hash:           m.Tx.Hash,
+			Value:          &m.Tx.Value,
+			InputData:      m.Tx.Input,
 		},
 		DecodedData: struct {
 			FunctionArguments *string
