@@ -69,16 +69,13 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 	tg.ContractABI = "" // otherwise it's a pain to test
 	tx, _ := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
 	fnArgs := "{}"
-	ztx := trigger.ZTransaction{
+	txMatch := trigger.TxMatch{
+		MatchUUID:      "",
+		Tg:             tg,
 		BlockTimestamp: 1554828248,
 		DecodedFnName:  &fnArgs,
 		DecodedFnArgs:  &fnArgs,
 		Tx:             tx,
-	}
-	txMatch := trigger.TxMatch{
-		MatchUUID: "",
-		Tg:        tg,
-		ZTx:       &ztx,
 	}
 	outcome := handleWebHookPost(url, txMatch, mockHttpClient{})
 

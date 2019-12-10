@@ -24,9 +24,7 @@ func TestPostgresClient_All(t *testing.T) {
 	// for now I can't be bothered and I'll fit everything in one test,
 	// closing the connection only once, at the end.
 
-	// Also note that these tests they are, at best, asserting for non-errors.
-	// The way I'm using them is to run them as a stand-alone module and see
-	// what they return.
+	// Also note that these tests are, at best, asserting for non-errors.
 	// In the future it would be nice to have some real assertions;
 	// we would need to populate a database and have asserts on the returned values.
 
@@ -38,16 +36,13 @@ func TestPostgresClient_All(t *testing.T) {
 	tx, err := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
 	assert.NoError(t, err)
 	fnArgs := "{}"
-	ztx := trigger.ZTransaction{
+	txMatch := trigger.TxMatch{
+		MatchUUID:      "3b29b0c3-e403-4103-81ef-6685cd391cdm",
 		BlockTimestamp: 1554828248,
+		Tg:             tg,
 		DecodedFnName:  &fnArgs,
 		DecodedFnArgs:  &fnArgs,
 		Tx:             tx,
-	}
-	txMatch := trigger.TxMatch{
-		MatchUUID: "3b29b0c3-e403-4103-81ef-6685cd391cdm",
-		Tg:        tg,
-		ZTx:       &ztx,
 	}
 	_, err = psqlClient.LogMatch(txMatch)
 	assert.NoError(t, err)

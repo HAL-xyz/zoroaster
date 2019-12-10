@@ -88,7 +88,7 @@ func assembleEmail(recipients []string, subject, body string) *ses.SendEmailInpu
 func fillEmailTemplate(text string, payload trigger.IMatch) string {
 	switch m := payload.(type) {
 	case trigger.TxMatch:
-		return templateTransaction(text, m.ZTx)
+		return templateTransaction(text, m)
 	case trigger.CnMatch:
 		return templateContract(text, m)
 	case trigger.EventMatch:
@@ -228,34 +228,34 @@ func templateContract(text string, match trigger.CnMatch) string {
 	return text
 }
 
-func templateTransaction(text string, ztx *trigger.ZTransaction) string {
+func templateTransaction(text string, match trigger.TxMatch) string {
 	// standard fields
-	blockNumber := fmt.Sprintf("%v", *ztx.Tx.BlockNumber)
-	blockTimestamp := fmt.Sprintf("%v", ztx.BlockTimestamp)
-	gas := fmt.Sprintf("%v", ztx.Tx.Gas)
-	gasPrice := fmt.Sprintf("%v", &ztx.Tx.GasPrice)
-	nonce := fmt.Sprintf("%v", ztx.Tx.Nonce)
+	blockNumber := fmt.Sprintf("%v", *match.Tx.BlockNumber)
+	blockTimestamp := fmt.Sprintf("%v", match.BlockTimestamp)
+	gas := fmt.Sprintf("%v", match.Tx.Gas)
+	gasPrice := fmt.Sprintf("%v", &match.Tx.GasPrice)
+	nonce := fmt.Sprintf("%v", match.Tx.Nonce)
 
 	text = strings.ReplaceAll(text, "$BlockNumber$", blockNumber)
-	text = strings.ReplaceAll(text, "$BlockHash$", ztx.Tx.BlockHash)
-	text = strings.ReplaceAll(text, "$TransactionHash$", ztx.Tx.Hash)
+	text = strings.ReplaceAll(text, "$BlockHash$", match.Tx.BlockHash)
+	text = strings.ReplaceAll(text, "$TransactionHash$", match.Tx.Hash)
 	text = strings.ReplaceAll(text, "$BlockTimestamp$", blockTimestamp)
-	text = strings.ReplaceAll(text, "$From$", ztx.Tx.From)
-	text = strings.ReplaceAll(text, "$To$", ztx.Tx.To)
-	text = strings.ReplaceAll(text, "$Value$", ztx.Tx.Value.String())
+	text = strings.ReplaceAll(text, "$From$", match.Tx.From)
+	text = strings.ReplaceAll(text, "$To$", match.Tx.To)
+	text = strings.ReplaceAll(text, "$Value$", match.Tx.Value.String())
 	text = strings.ReplaceAll(text, "$Gas$", gas)
 	text = strings.ReplaceAll(text, "$GasPrice$", gasPrice)
 	text = strings.ReplaceAll(text, "$Nonce$", nonce)
 
 	// function name
-	if ztx.DecodedFnName != nil {
-		text = strings.ReplaceAll(text, "$MethodName$", *ztx.DecodedFnName)
+	if match.DecodedFnName != nil {
+		text = strings.ReplaceAll(text, "$MethodName$", *match.DecodedFnName)
 	}
 
 	// function params
-	if ztx.DecodedFnArgs != nil {
+	if match.DecodedFnArgs != nil {
 		var args map[string]json.RawMessage
-		err := json.Unmarshal([]byte(*ztx.DecodedFnArgs), &args)
+		err := json.Unmarshal([]byte(*match.DecodedFnArgs), &args)
 		if err != nil {
 			log.Error(err)
 			return text

@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func jsonToTransaction(jsonSrc []byte) (*ethrpc.Transaction, error) {
+func JsonToTransaction(jsonSrc []byte) (*ethrpc.Transaction, error) {
 	var tx ethrpc.Transaction
 	err := json.Unmarshal(jsonSrc, &tx)
 	if err != nil {
@@ -24,7 +24,7 @@ func GetTransactionFromFile(path string) (*ethrpc.Transaction, error) {
 	if err != nil {
 		return nil, err
 	}
-	tx, err := jsonToTransaction(txSrc)
+	tx, err := JsonToTransaction(txSrc)
 	if err != nil {
 		return nil, err
 	}

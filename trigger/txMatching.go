@@ -8,8 +8,8 @@ import (
 	"zoroaster/abidec"
 )
 
-func MatchTransaction(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
-	ztxs := make([]*ZTransaction, 0)
+func MatchTransaction(trigger *Trigger, block *ethrpc.Block) []*TxMatch {
+	txMatches := make([]*TxMatch, 0)
 	for i, tx := range block.Transactions {
 		if validateTrigger(trigger, &tx) {
 			// we discard errors here bc not every match will have input data
@@ -22,16 +22,16 @@ func MatchTransaction(trigger *Trigger, block *ethrpc.Block) []*ZTransaction {
 			}
 			fnName, _ := abidec.DecodeInputMethod(&tx.Input, &trigger.ContractABI)
 
-			zt := ZTransaction{
+			match := TxMatch{
 				BlockTimestamp: block.Timestamp,
 				DecodedFnArgs:  fnArgs,
 				DecodedFnName:  fnName,
 				Tx:             &block.Transactions[i],
 			}
-			ztxs = append(ztxs, &zt)
+			txMatches = append(txMatches, &match)
 		}
 	}
-	return ztxs
+	return txMatches
 }
 
 func validateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {

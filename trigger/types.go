@@ -25,19 +25,15 @@ type IPostablePaylaod interface {
 	isPostablePayload()
 }
 
-type ZTransaction struct {
+// TX MATCH
+
+type TxMatch struct {
+	MatchUUID      string
+	Tg             *Trigger
 	BlockTimestamp int
 	DecodedFnArgs  *string `json:"DecodedFnArgs,omitempty"`
 	DecodedFnName  *string `json:"DecodedFnName,omitempty"`
 	Tx             *ethrpc.Transaction
-}
-
-// TX MATCH
-
-type TxMatch struct {
-	MatchUUID string
-	Tg        *Trigger
-	ZTx       *ZTransaction
 }
 
 type PersistentTx struct {
@@ -63,22 +59,22 @@ type PersistentTxMatch struct {
 func (m TxMatch) ToPersistent() IPersistableMatch {
 	return &PersistentTxMatch{
 		PTx: PersistentTx{
-			BlockHash:      m.ZTx.Tx.BlockHash,
-			BlockNumber:    m.ZTx.Tx.BlockNumber,
-			BlockTimestamp: m.ZTx.BlockTimestamp,
-			From:           m.ZTx.Tx.From,
-			Gas:            m.ZTx.Tx.Gas,
-			GasPrice:       &m.ZTx.Tx.GasPrice,
-			Nonce:          m.ZTx.Tx.Nonce,
-			To:             m.ZTx.Tx.To,
-			Hash:           m.ZTx.Tx.Hash,
+			BlockHash:      m.Tx.BlockHash,
+			BlockNumber:    m.Tx.BlockNumber,
+			BlockTimestamp: m.BlockTimestamp,
+			From:           m.Tx.From,
+			Gas:            m.Tx.Gas,
+			GasPrice:       &m.Tx.GasPrice,
+			Nonce:          m.Tx.Nonce,
+			To:             m.Tx.To,
+			Hash:           m.Tx.Hash,
 		},
 		DecodedData: struct {
 			FunctionArguments *string
 			FunctionName      *string
 		}{
-			m.ZTx.DecodedFnArgs,
-			m.ZTx.DecodedFnName,
+			m.DecodedFnArgs,
+			m.DecodedFnName,
 		},
 	}
 }
@@ -111,22 +107,22 @@ func (TxPostPayload) isPostablePayload() {}
 func (m TxMatch) ToPostPayload() IPostablePaylaod {
 	return TxPostPayload{
 		Transaction: PersistentTx{
-			BlockHash:      m.ZTx.Tx.BlockHash,
-			BlockNumber:    m.ZTx.Tx.BlockNumber,
-			BlockTimestamp: m.ZTx.BlockTimestamp,
-			From:           m.ZTx.Tx.From,
-			Gas:            m.ZTx.Tx.Gas,
-			GasPrice:       &m.ZTx.Tx.GasPrice,
-			Nonce:          m.ZTx.Tx.Nonce,
-			To:             m.ZTx.Tx.To,
-			Hash:           m.ZTx.Tx.Hash,
+			BlockHash:      m.Tx.BlockHash,
+			BlockNumber:    m.Tx.BlockNumber,
+			BlockTimestamp: m.BlockTimestamp,
+			From:           m.Tx.From,
+			Gas:            m.Tx.Gas,
+			GasPrice:       &m.Tx.GasPrice,
+			Nonce:          m.Tx.Nonce,
+			To:             m.Tx.To,
+			Hash:           m.Tx.Hash,
 		},
 		DecodedData: struct {
 			FunctionArguments *string
 			FunctionName      *string
 		}{
-			m.ZTx.DecodedFnArgs,
-			m.ZTx.DecodedFnName,
+			m.DecodedFnArgs,
+			m.DecodedFnName,
 		},
 		TriggerName: m.Tg.TriggerName,
 		TriggerType: m.Tg.TriggerType,
