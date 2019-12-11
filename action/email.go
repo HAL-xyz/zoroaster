@@ -173,6 +173,7 @@ func templateContract(text string, match trigger.CnMatch) string {
 	text = strings.ReplaceAll(text, "$BlockNumber$", blockNumber)
 	text = strings.ReplaceAll(text, "$BlockTimestamp$", blockTimestamp)
 	text = strings.ReplaceAll(text, "$BlockHash$", match.BlockHash)
+	text = strings.ReplaceAll(text, "$ContractAddress$", match.Trigger.ContractAdd)
 
 	// matched value
 	text = strings.ReplaceAll(text, "$MatchedValue$", fmt.Sprintf("%s", match.MatchedValues))

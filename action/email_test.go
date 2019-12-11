@@ -51,8 +51,10 @@ func TestFillEmailTemplate1(t *testing.T) {
 	assert.Equal(t, string(expected), body)
 }
 
+var tg, _ = trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
+
 var cnMatch = trigger.CnMatch{
-	Trigger:        nil,
+	Trigger:        tg,
 	MatchUUID:      "uuid",
 	BlockNumber:    88888,
 	MatchedValues:  "4",
