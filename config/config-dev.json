@@ -1,5 +1,6 @@
 {
   "logsPath": "logs",
+  "blocksDelay": 8,
   "database": {
     "tableTriggers": "triggers",
     "tableMatches": "matches",

@@ -17,7 +17,8 @@ func BlocksPoller(
 	cnChan chan *ethrpc.Block,
 	evChan chan *ethrpc.Block,
 	client *ethrpc.EthRPC,
-	idb aws.IDB) {
+	idb aws.IDB,
+	blocksDelay int) {
 
 	txLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaT)
 	cnLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaC)
@@ -33,13 +34,13 @@ func BlocksPoller(
 		}
 
 		// Watch a Transaction
-		fetchLastBlock(lastBlockSeen, &txLastBlockProcessed, txChan, client, true)
+		fetchLastBlock(lastBlockSeen, &txLastBlockProcessed, txChan, client, true, blocksDelay)
 
 		// Watch a Contract
-		fetchLastBlock(lastBlockSeen, &cnLastBlockProcessed, cnChan, client, false)
+		fetchLastBlock(lastBlockSeen, &cnLastBlockProcessed, cnChan, client, false, blocksDelay)
 
 		// Watch an Event
-		fetchLastBlock(lastBlockSeen, &evLastBlockProcessed, evChan, client, false)
+		fetchLastBlock(lastBlockSeen, &evLastBlockProcessed, evChan, client, false, blocksDelay)
 	}
 }
 
@@ -48,16 +49,15 @@ func fetchLastBlock(
 	lastBlockProcessed *int,
 	ch chan *ethrpc.Block,
 	client *ethrpc.EthRPC,
-	withTxs bool) {
-
-	const K = 8 // next block to process is (last block mined - K)
+	withTxs bool,
+	blocksDelay int) {
 
 	// this is used to reset the last block processed
 	if *lastBlockProcessed == 0 {
-		*lastBlockProcessed = lastBlockSeen - K
+		*lastBlockProcessed = lastBlockSeen - blocksDelay
 	}
 
-	if lastBlockSeen-K > *lastBlockProcessed {
+	if lastBlockSeen-blocksDelay > *lastBlockProcessed {
 		block, err := client.EthGetBlockByNumber(*lastBlockProcessed+1, withTxs)
 		if err != nil {
 			log.Warnf("failed to get block %d -> %s", *lastBlockProcessed+1, err)

@@ -56,7 +56,7 @@ func main() {
 	matchesChan := make(chan trigger.IMatch)
 
 	// Poll ETH node
-	go eth.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, ethClient, &psqlClient)
+	go eth.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, ethClient, &psqlClient, zconf.BlocksDelay)
 
 	// Watch a Transaction
 	go matcher.TxMatcher(txBlocksChan, matchesChan, &psqlClient)

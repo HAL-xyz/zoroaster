@@ -9,12 +9,13 @@ import (
 )
 
 type ZConfiguration struct {
-	Stage      Stage
-	ConfigFile string
-	EthNode    string
-	LogsPath   string
-	LogsFile   string
-	Database   ZoroDB
+	Stage       Stage
+	ConfigFile  string
+	EthNode     string
+	LogsPath    string
+	LogsFile    string
+	Database    ZoroDB
+	BlocksDelay int
 }
 
 type ZoroDB struct {
