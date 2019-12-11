@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	Sender  = "hello@hal.xyz"
+	Sender  = `"HAL" <hello@hal.xyz>`
 	CharSet = "UTF-8"
 )
 
@@ -66,10 +66,6 @@ func assembleEmail(recipients []string, subject, body string) *ses.SendEmailInpu
 		},
 		Message: &ses.Message{
 			Body: &ses.Body{
-				Html: &ses.Content{
-					Charset: aws.String(CharSet),
-					Data:    aws.String(body),
-				},
 				Text: &ses.Content{
 					Charset: aws.String(CharSet),
 					Data:    aws.String(body),
