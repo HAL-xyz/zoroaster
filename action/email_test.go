@@ -213,6 +213,21 @@ func TestFillEmailTemplate5(t *testing.T) {
 	assert.Equal(t, "sailor: sailor and one: one", body)
 }
 
+func TestFillEmailTemplateBool(t *testing.T) {
+
+	cnMatch.AllValues = []interface{}{
+		big.NewInt(4), true, false, [2]bool{false, true}}
+
+	template := "$ReturnedValues$"
+	body := fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "[4 true false [false true]]", body)
+
+	template = "$ReturnedValues[1]$ and $ReturnedValues[3][0]$"
+	body = fillEmailTemplate(template, cnMatch)
+	assert.Equal(t, "true and false", body)
+
+}
+
 func TestFillEmailTemplate7(t *testing.T) {
 
 	cnMatch.AllValues = []interface{}{

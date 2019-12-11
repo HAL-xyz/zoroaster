@@ -113,7 +113,7 @@ func ifcPrintf(in interface{}) string {
 			case common.Address:
 				out[i] = strings.ToLower(innerV.String())
 			default:
-				out[i] = fmt.Sprintf("%s", innerV)
+				out[i] = fmt.Sprintf("%v", innerV)
 			}
 		}
 		return fmt.Sprintf("%s", out)
@@ -122,8 +122,10 @@ func ifcPrintf(in interface{}) string {
 		if ok {
 			return strings.ToLower(a.String())
 		} else {
-			return fmt.Sprintf("%s", v)
+			return fmt.Sprintf("%v", v)
 		}
+	case bool:
+		return fmt.Sprintf("%v", in)
 	default:
 		return utils.NormalizeAddress(fmt.Sprintf("%s", in))
 	}
