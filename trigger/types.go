@@ -146,7 +146,7 @@ type CnMatch struct {
 	BlockTimestamp int
 	BlockHash      string
 	MatchUUID      string
-	MatchedValues  string
+	MatchedValues  []string
 	AllValues      []interface{}
 }
 
@@ -163,7 +163,8 @@ type PersistentCnMatch struct {
 }
 
 func (m CnMatch) ToPersistent() IPersistableMatch {
-	stringValues, _ := json.Marshal(m.AllValues)
+	stringAllValues, _ := json.Marshal(m.AllValues)
+	stringMatchingValues, _ := json.Marshal(m.MatchedValues)
 
 	return &PersistentCnMatch{
 		BlockNumber:    m.BlockNumber,
@@ -175,8 +176,8 @@ func (m CnMatch) ToPersistent() IPersistableMatch {
 			MatchedValues string
 			AllValues     string
 		}{
-			MatchedValues: m.MatchedValues,
-			AllValues:     string(stringValues),
+			MatchedValues: string(stringMatchingValues),
+			AllValues:     string(stringAllValues),
 		},
 	}
 }
@@ -201,7 +202,8 @@ type CnPostPayload struct {
 func (CnPostPayload) isPostablePayload() {}
 
 func (m CnMatch) ToPostPayload() IPostablePaylaod {
-	stringValues, _ := json.Marshal(m.AllValues)
+	stringAllValues, _ := json.Marshal(m.AllValues)
+	stringMatchingValues, _ := json.Marshal(m.MatchedValues)
 
 	return &CnPostPayload{
 		BlockNumber:    m.BlockNumber,
@@ -213,8 +215,8 @@ func (m CnMatch) ToPostPayload() IPostablePaylaod {
 			MatchedValues string
 			AllValues     string
 		}{
-			MatchedValues: m.MatchedValues,
-			AllValues:     string(stringValues),
+			MatchedValues: string(stringMatchingValues),
+			AllValues:     string(stringAllValues),
 		},
 		TriggerName: m.Trigger.TriggerName,
 		TriggerType: m.Trigger.TriggerType,

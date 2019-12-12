@@ -5,7 +5,7 @@ BlockHash is $BlockHash$
 BlockTimestamp is $BlockTimestamp$
 Contract Address is $ContractAddress$
 
-The matched value is $MatchedValue$
+The matched values are $MatchedValue$
 
 All values returned from contract call: $ReturnedValues$
 

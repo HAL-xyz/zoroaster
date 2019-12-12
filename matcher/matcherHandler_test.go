@@ -84,7 +84,7 @@ func TestProcessMatch(t *testing.T) {
 		MatchUUID:      "",
 		BlockNumber:    999,
 		BlockTimestamp: 1554828248,
-		MatchedValues:  "0xfffffffffffff",
+		MatchedValues:  []string{"0xfffffffffffff"},
 		BlockHash:      "0x",
 	}
 
@@ -98,7 +98,7 @@ func TestProcessMatch(t *testing.T) {
    "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
    "FunctionName":"daoCreator",
    "ReturnedData":{
-      "MatchedValues":"0xfffffffffffff",
+      "MatchedValues":"[\"0xfffffffffffff\"]",
       "AllValues":"null"
    },
    "TriggerName":"wac 1",

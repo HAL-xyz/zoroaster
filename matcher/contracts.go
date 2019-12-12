@@ -1,7 +1,6 @@
 package matcher
 
 import (
-	"fmt"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -90,7 +89,7 @@ func matchContractsForBlock(
 				MatchUUID:      "", // this will be set by Postgres once we persist
 				BlockNumber:    blockNo,
 				BlockHash:      blockHash,
-				MatchedValues:  fmt.Sprint(matchedValues),
+				MatchedValues:  matchedValues,
 				AllValues:      allValues,
 				BlockTimestamp: blockTimestamp,
 			}

@@ -5,7 +5,7 @@ BlockHash is 0x
 BlockTimestamp is 123456
 Contract Address is 0xbb9bc244d798123fde783fcc1c72d3bb8c189413
 
-The matched value is 4
+The matched values are [4]
 
 All values returned from contract call: [4 sailor moon [one two three]]
 

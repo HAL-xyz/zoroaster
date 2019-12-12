@@ -57,7 +57,7 @@ var cnMatch = trigger.CnMatch{
 	Trigger:        tg,
 	MatchUUID:      "uuid",
 	BlockNumber:    88888,
-	MatchedValues:  "4",
+	MatchedValues:  []string{"4"},
 	BlockTimestamp: 123456,
 	AllValues:      []interface{}{},
 	BlockHash:      "0x",

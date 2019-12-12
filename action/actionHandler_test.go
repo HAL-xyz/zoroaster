@@ -37,7 +37,7 @@ func TestHandleWebHookPost(t *testing.T) {
 		1554828248,
 		"0x",
 		"uuid",
-		"matched values",
+		[]string{"true"},
 		[]interface{}{true},
 	}
 
@@ -50,7 +50,7 @@ func TestHandleWebHookPost(t *testing.T) {
    "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
    "FunctionName":"daoCreator",
    "ReturnedData":{
-      "MatchedValues":"matched values",
+      "MatchedValues":"[\"true\"]",
       "AllValues":"[true]"
    },
    "TriggerName":"wac 1",
@@ -115,7 +115,7 @@ func TestHandleWebHookWrongStuff(t *testing.T) {
 		1554828248,
 		"0x",
 		"uuid",
-		"matched values",
+		[]string{"true"},
 		[]interface{}{true},
 	}
 	outcome := handleWebHookPost(url, cnMatch, &http.Client{})
@@ -196,7 +196,7 @@ func TestHandleEmail1(t *testing.T) {
 		Trigger:        tg,
 		MatchUUID:      "",
 		BlockNumber:    777,
-		MatchedValues:  "",
+		MatchedValues:  []string{},
 		AllValues:      []interface{}{"marco@atomic.eu.com"},
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
@@ -229,7 +229,7 @@ func TestHandleEmail2(t *testing.T) {
 		Trigger:        tg,
 		MatchUUID:      "",
 		BlockNumber:    1,
-		MatchedValues:  "0x000",
+		MatchedValues:  []string{"0x000"},
 		AllValues:      []interface{}{[]string{"marco@atomic.eu.com", "matteo@atomic.eu.com", "not and address"}},
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
@@ -243,7 +243,7 @@ func TestHandleEmail2(t *testing.T) {
      "matteo@atomic.eu.com"
   ],
   "Body":"body",
-  "Subject":"Matched value is 0x000"
+  "Subject":"Matched value is [0x000]"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
@@ -264,7 +264,7 @@ func TestHandleEmail3(t *testing.T) {
 		Trigger:        tg,
 		MatchUUID:      "",
 		BlockNumber:    1,
-		MatchedValues:  "",
+		MatchedValues:  []string{},
 		AllValues:      []interface{}{"manlio.poltronieri@gmail.com", "hello@world.com"},
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
