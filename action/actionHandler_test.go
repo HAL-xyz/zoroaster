@@ -38,7 +38,7 @@ func TestHandleWebHookPost(t *testing.T) {
 		"0x",
 		"uuid",
 		[]string{"true"},
-		[]interface{}{true},
+		[]interface{}{"true"},
 	}
 
 	outcome := handleWebHookPost(url, cnMatch, mockHttpClient{})
@@ -51,7 +51,7 @@ func TestHandleWebHookPost(t *testing.T) {
    "FunctionName":"daoCreator",
    "ReturnedData":{
       "MatchedValues":"[\"true\"]",
-      "AllValues":"[true]"
+      "AllValues":"[\"true\"]"
    },
    "TriggerName":"wac 1",
    "TriggerType":"WatchContracts",
@@ -116,7 +116,7 @@ func TestHandleWebHookWrongStuff(t *testing.T) {
 		"0x",
 		"uuid",
 		[]string{"true"},
-		[]interface{}{true},
+		[]interface{}{"true"},
 	}
 	outcome := handleWebHookPost(url, cnMatch, &http.Client{})
 	assert.Equal(t, `{"error":"Post https://foo.zyusfddsiu: dial tcp: lookup foo.zyusfddsiu: no such host"}`, outcome.Outcome)
@@ -143,9 +143,9 @@ func TestHandleWebhookWithEvents(t *testing.T) {
    "EventName":"Transfer",
    "EventData":{
       "EventParameters":{
-         "from":"0x000000000000000000000000f750f050e5596eb9480523eef7260b1535a689bd",
-         "to":"0x000000000000000000000000cd95b32c98423172e04b1c76841e5a73f4532a7f",
-         "value":677420000
+         "from":"0xf750f050e5596eb9480523eef7260b1535a689bd",
+         "to":"0xcd95b32c98423172e04b1c76841e5a73f4532a7f",
+         "value":"677420000"
       },
       "Data":"0x000000000000000000000000000000000000000000000000000000002439ae80",
       "Topics":[
@@ -230,7 +230,7 @@ func TestHandleEmail2(t *testing.T) {
 		MatchUUID:      "",
 		BlockNumber:    1,
 		MatchedValues:  []string{"0x000"},
-		AllValues:      []interface{}{[]string{"marco@atomic.eu.com", "matteo@atomic.eu.com", "not and address"}},
+		AllValues:      []interface{}{"marco@atomic.eu.com", "matteo@atomic.eu.com", "not and address"},
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}

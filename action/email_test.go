@@ -4,7 +4,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
-	"math/big"
 	"testing"
 	"zoroaster/trigger"
 )
@@ -65,11 +64,11 @@ var cnMatch = trigger.CnMatch{
 
 func TestFillEmailTemplate2(t *testing.T) {
 
-	cnMatch.AllValues = []interface{}{[3]*big.Int{big.NewInt(4), big.NewInt(8), big.NewInt(12)}}
+	cnMatch.AllValues = []interface{}{"4", "8", "12"}
 
 	template := "$ReturnedValues$"
 	body := fillEmailTemplate(template, cnMatch)
-	assert.Equal(t, "[[4 8 12]]", body)
+	assert.Equal(t, "[4 8 12]", body)
 
 	template = "$ReturnedValues[0]$"
 	body = fillEmailTemplate(template, cnMatch)
@@ -86,8 +85,7 @@ func TestFillEmailTemplate2(t *testing.T) {
 
 func TestFillEmailTemplate3(t *testing.T) {
 
-	cnMatch.AllValues = []interface{}{
-		big.NewInt(4), "sailor", "moon"}
+	cnMatch.AllValues = []interface{}{"4", "sailor", "moon"}
 
 	template := "$ReturnedValues$"
 	body := fillEmailTemplate(template, cnMatch)
@@ -108,15 +106,7 @@ func TestFillEmailTemplate3(t *testing.T) {
 
 func TestFillEmailTemplate4(t *testing.T) {
 
-	cnMatch.AllValues = []interface{}{
-		common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8")}
-
-	// []Address{}
-	cnMatch.AllValues = []interface{}{
-		[]common.Address{
-			common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8"),
-			common.HexToAddress("0xffffffffffffffffffffffffffffffffffffffff"),
-		}}
+	cnMatch.AllValues = []interface{}{"0x4a574510c7014e4ae985403536074abe582adfc8", "0xffffffffffffffffffffffffffffffffffffffff"}
 
 	template := "$ReturnedValues[0]$"
 	body := fillEmailTemplate(template, cnMatch)
@@ -126,9 +116,9 @@ func TestFillEmailTemplate4(t *testing.T) {
 func TestFillEmailTemplateAdd(t *testing.T) {
 
 	cnMatch.AllValues = []interface{}{
-		[]common.Address{
-			common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8"),
-			common.HexToAddress("0xffffffffffffffffffffffffffffffffffffffff"),
+		[]string{
+			"0x4a574510c7014e4ae985403536074abe582adfc8",
+			"0xffffffffffffffffffffffffffffffffffffffff",
 		}}
 
 	template := "$ReturnedValues[0]$"
@@ -148,9 +138,12 @@ func TestFillEmailTemplateAdd(t *testing.T) {
 func TestFillEmailTemplate6(t *testing.T) {
 
 	cnMatch.AllValues = []interface{}{
-		big.NewInt(4), "sailor", "moon", []common.Address{
-			common.HexToAddress("0x4a574510c7014e4ae985403536074abe582adfc8"),
-			common.HexToAddress("0xffffffffffffffffffffffffffffffffffffffff"),
+		"4",
+		"sailor",
+		"moon",
+		[]string{
+			"0x4a574510c7014e4ae985403536074abe582adfc8",
+			"0xffffffffffffffffffffffffffffffffffffffff",
 		}}
 
 	template := "$ReturnedValues[3]$"
@@ -174,7 +167,10 @@ func TestFillEmailTemplate6(t *testing.T) {
 func TestFillEmailTemplate5(t *testing.T) {
 
 	cnMatch.AllValues = []interface{}{
-		big.NewInt(4), "sailor", "moon", [3]string{"one", "two", "three"}}
+		"4",
+		"sailor",
+		"moon",
+		[]string{"one", "two", "three"}}
 
 	template := "$ReturnedValues$"
 	body := fillEmailTemplate(template, cnMatch)
@@ -213,25 +209,13 @@ func TestFillEmailTemplate5(t *testing.T) {
 	assert.Equal(t, "sailor: sailor and one: one", body)
 }
 
-func TestFillEmailTemplateBool(t *testing.T) {
-
-	cnMatch.AllValues = []interface{}{
-		big.NewInt(4), true, false, [2]bool{false, true}}
-
-	template := "$ReturnedValues$"
-	body := fillEmailTemplate(template, cnMatch)
-	assert.Equal(t, "[4 true false [false true]]", body)
-
-	template = "$ReturnedValues[1]$ and $ReturnedValues[3][0]$"
-	body = fillEmailTemplate(template, cnMatch)
-	assert.Equal(t, "true and false", body)
-
-}
-
 func TestFillEmailTemplate7(t *testing.T) {
 
 	cnMatch.AllValues = []interface{}{
-		big.NewInt(4), "sailor", "moon", [3]string{"one", "two", "three"}}
+		"4",
+		"sailor",
+		"moon",
+		[]string{"one", "two", "three"}}
 
 	template, err := ioutil.ReadFile("../resources/emails/2-wac-templ.txt")
 	assert.NoError(t, err)

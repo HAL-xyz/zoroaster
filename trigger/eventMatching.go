@@ -8,6 +8,7 @@ import (
 	"github.com/onrik/ethrpc"
 	"github.com/sirupsen/logrus"
 	"strings"
+	"zoroaster/utils"
 )
 
 func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []*EventMatch {
@@ -183,10 +184,10 @@ func makeEventParams(data map[string]interface{}, topics map[string]string) map[
 
 	paramsMap := make(map[string]interface{}, len(data)+len(topics))
 	for k, v := range topics {
-		paramsMap[k] = v
+		paramsMap[k] = utils.NormalizeAddress(v)
 	}
 	for k, v := range data {
-		paramsMap[k] = v
+		paramsMap[k] = utils.SprintfInterfaces([]interface{}{v})[0]
 	}
 	return paramsMap
 }

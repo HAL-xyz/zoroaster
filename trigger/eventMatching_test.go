@@ -4,7 +4,6 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
-	"math/big"
 	"strings"
 	"testing"
 	"zoroaster/utils"
@@ -50,21 +49,21 @@ func TestMatchEvent(t *testing.T) {
 	matches1 := MatchEvent(client, tg1, 8496661, 1572344236)
 
 	assert.Equal(t, 1, len(matches1))
-	assert.Equal(t, big.NewInt(677420000), matches1[0].EventParams["value"])
+	assert.Equal(t, "677420000", matches1[0].EventParams["value"])
 
 	tg2, err := GetTriggerFromFile("../resources/triggers/ev2.json")
 	assert.NoError(t, err)
 	matches2 := MatchEvent(client, tg2, 8496661, 1572344236)
 
 	assert.Equal(t, 3, len(matches2))
-	assert.Equal(t, big.NewInt(677420000), matches2[0].EventParams["value"])
-	assert.Equal(t, big.NewInt(771470000), matches2[1].EventParams["value"])
-	assert.Equal(t, big.NewInt(607760000), matches2[2].EventParams["value"])
+	assert.Equal(t, "677420000", matches2[0].EventParams["value"])
+	assert.Equal(t, "771470000", matches2[1].EventParams["value"])
+	assert.Equal(t, "607760000", matches2[2].EventParams["value"])
 
 	assert.Equal(t, 3, len(matches2[0].EventParams))
-	assert.Equal(t, "0x000000000000000000000000f750f050e5596eb9480523eef7260b1535a689bd", matches2[0].EventParams["from"])
-	assert.Equal(t, "0x000000000000000000000000cd95b32c98423172e04b1c76841e5a73f4532a7f", matches2[0].EventParams["to"])
-	assert.Equal(t, big.NewInt(677420000), matches2[0].EventParams["value"])
+	assert.Equal(t, "0xf750f050e5596eb9480523eef7260b1535a689bd", matches2[0].EventParams["from"])
+	assert.Equal(t, "0xcd95b32c98423172e04b1c76841e5a73f4532a7f", matches2[0].EventParams["to"])
+	assert.Equal(t, "677420000", matches2[0].EventParams["value"])
 
 	// testing ToPersistent()
 	persistentJson, err := utils.GimmePrettyJson(matches1[0].ToPersistent())
@@ -73,9 +72,9 @@ func TestMatchEvent(t *testing.T) {
   "EventName": "Transfer",
   "EventData": {
     "EventParameters": {
-      "from": "0x000000000000000000000000f750f050e5596eb9480523eef7260b1535a689bd",
-      "to": "0x000000000000000000000000cd95b32c98423172e04b1c76841e5a73f4532a7f",
-      "value": 677420000
+      "from": "0xf750f050e5596eb9480523eef7260b1535a689bd",
+      "to": "0xcd95b32c98423172e04b1c76841e5a73f4532a7f",
+      "value": "677420000"
     },
     "Data": "0x000000000000000000000000000000000000000000000000000000002439ae80",
     "Topics": [

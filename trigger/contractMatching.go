@@ -7,6 +7,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"strings"
 	"zoroaster/abidec"
+	"zoroaster/utils"
 )
 
 func MatchContract(
@@ -43,7 +44,7 @@ func MatchContract(
 			}
 		}
 	}
-	return len(matchingValues) == len(tg.Outputs), matchingValues, allValuesLs
+	return len(matchingValues) == len(tg.Outputs), matchingValues, utils.SprintfInterfaces(allValuesLs)
 }
 
 func getRawParam(param interface{}) []byte {

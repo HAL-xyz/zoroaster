@@ -7,7 +7,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
-	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"reflect"
 	"regexp"
@@ -95,42 +94,6 @@ func fillEmailTemplate(text string, payload trigger.IMatch) string {
 	}
 }
 
-// ffs...
-func ifcPrintf(in interface{}) string {
-	switch v := in.(type) {
-	case common.Address:
-		return strings.ToLower(v.String())
-	case []common.Address:
-		out := make([]string, len(v))
-		for i, a := range v {
-			out[i] = strings.ToLower(a.String())
-		}
-		return fmt.Sprintf("%s", out)
-	case []interface{}:
-		out := make([]string, len(v))
-		for i, inner := range v {
-			switch innerV := inner.(type) {
-			case common.Address:
-				out[i] = strings.ToLower(innerV.String())
-			default:
-				out[i] = fmt.Sprintf("%v", innerV)
-			}
-		}
-		return fmt.Sprintf("%s", out)
-	case reflect.Value:
-		a, ok := v.Interface().(common.Address)
-		if ok {
-			return strings.ToLower(a.String())
-		} else {
-			return fmt.Sprintf("%v", v)
-		}
-	case bool:
-		return fmt.Sprintf("%v", in)
-	default:
-		return utils.NormalizeAddress(fmt.Sprintf("%s", in))
-	}
-}
-
 func templateEvent(text string, match trigger.EventMatch) string {
 	// standard fields
 	blockNumber := fmt.Sprintf("%v", match.Log.BlockNumber)
@@ -155,7 +118,7 @@ func templateEvent(text string, match trigger.EventMatch) string {
 		if actualVal != nil {
 			if reflect.TypeOf(actualVal).Kind() == reflect.Array || reflect.TypeOf(actualVal).Kind() == reflect.Slice {
 				if index < reflect.ValueOf(actualVal).Len() {
-					text = strings.ReplaceAll(text, fmt.Sprintf("%s", templateToken), ifcPrintf(reflect.ValueOf(actualVal).Index(index)))
+					text = strings.ReplaceAll(text, fmt.Sprintf("%s", templateToken), fmt.Sprintf("%s", reflect.ValueOf(actualVal).Index(index)))
 				}
 			}
 		}
@@ -163,7 +126,7 @@ func templateEvent(text string, match trigger.EventMatch) string {
 
 	// all other param names
 	for k, v := range match.EventParams {
-		text = strings.ReplaceAll(text, fmt.Sprintf("!%s", k), ifcPrintf(v))
+		text = strings.ReplaceAll(text, fmt.Sprintf("!%s", k), fmt.Sprintf("%s", v))
 	}
 	return text
 }
@@ -181,7 +144,7 @@ func templateContract(text string, match trigger.CnMatch) string {
 	text = strings.ReplaceAll(text, "$MatchedValue$", fmt.Sprintf("%s", match.MatchedValues))
 
 	// all values
-	text = strings.ReplaceAll(text, "$ReturnedValues$", ifcPrintf(match.AllValues))
+	text = strings.ReplaceAll(text, "$ReturnedValues$", fmt.Sprintf("%s", match.AllValues))
 
 	// indexed value, multiple returns (i.e. $ReturnedValues[K][N]$)
 	multIndexedValueRgx := regexp.MustCompile(`\$ReturnedValues\[\d+]\[\d+]\$`)
@@ -195,7 +158,7 @@ func templateContract(text string, match trigger.CnMatch) string {
 			switch reflect.TypeOf(match.AllValues[position]).Kind() {
 			case reflect.Array, reflect.Slice:
 				if index < reflect.ValueOf(match.AllValues[position]).Len() {
-					text = strings.ReplaceAll(text, e, ifcPrintf(reflect.ValueOf(match.AllValues[position]).Index(index)))
+					text = strings.ReplaceAll(text, e, fmt.Sprintf("%s", reflect.ValueOf(match.AllValues[position]).Index(index)))
 				}
 			}
 		}
@@ -213,14 +176,14 @@ func templateContract(text string, match trigger.CnMatch) string {
 			switch rt.Kind() {
 			case reflect.Array, reflect.Slice:
 				if index < reflect.ValueOf(match.AllValues[0]).Len() {
-					text = strings.ReplaceAll(text, e, ifcPrintf(reflect.ValueOf(match.AllValues[0]).Index(index)))
+					text = strings.ReplaceAll(text, e, fmt.Sprintf("%s", reflect.ValueOf(match.AllValues[0]).Index(index)))
 					continue
 				}
 			}
 		}
 		// multiple value
 		if index < len(match.AllValues) {
-			text = strings.ReplaceAll(text, e, ifcPrintf(match.AllValues[index]))
+			text = strings.ReplaceAll(text, e, fmt.Sprintf("%s", match.AllValues[index]))
 		}
 	}
 

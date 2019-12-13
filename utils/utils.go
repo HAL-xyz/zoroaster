@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"reflect"
 	"regexp"
@@ -155,11 +156,252 @@ func NormalizeAddress(add string) string {
 		standardAdd := strings.Replace(add, "0x000000000000000000000000", "0x", 1)
 		return strings.ToLower(standardAdd)
 	}
-	return add
+	return strings.ToLower(add)
 }
 
 // given "[10, 20, 30]" returns []string{"10", "20", "30"}
 func GetValsFromStringifiedArray(a string) []string {
 	a = RemoveCharacters(a, "[] ")
 	return strings.Split(a, ",")
+}
+
+// given an []interfaces{} returns and []interfaces{} where
+// all the objects are the sprintf'd version of the original ones.
+// just using fmt.Sprintf here isn't enough because for some types
+// we want to do some custom formatting:
+//
+// []byte => hex representation
+// []address and address => normalized address
+// []int{1,2,3} => []string{"1", "2", "3"}
+//
+// note that the order *IS* important: bytes must go first
+func SprintfInterfaces(ls []interface{}) []interface{} {
+	out := make([]interface{}, len(ls))
+	for i, e := range ls {
+		// bytes
+		v, ok := e.([]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v)
+			continue
+		}
+		v32, ok := e.([32]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v32[:])
+			continue
+		}
+		v31, ok := e.([31]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v31[:])
+			continue
+		}
+		v30, ok := e.([30]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v30[:])
+			continue
+		}
+		v29, ok := e.([29]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v29[:])
+			continue
+		}
+		v28, ok := e.([28]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v28[:])
+			continue
+		}
+		v27, ok := e.([27]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v27[:])
+			continue
+		}
+		v26, ok := e.([26]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v26[:])
+			continue
+		}
+		v25, ok := e.([25]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v25[:])
+			continue
+		}
+		v24, ok := e.([24]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v24[:])
+			continue
+		}
+		v23, ok := e.([23]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v23[:])
+			continue
+		}
+		v22, ok := e.([22]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v22[:])
+			continue
+		}
+		v21, ok := e.([21]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v21[:])
+			continue
+		}
+		v20, ok := e.([20]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v20[:])
+			continue
+		}
+		v19, ok := e.([19]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v19[:])
+			continue
+		}
+		v18, ok := e.([18]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v18[:])
+			continue
+		}
+		v17, ok := e.([17]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v17[:])
+			continue
+		}
+		v16, ok := e.([16]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v16[:])
+			continue
+		}
+		v15, ok := e.([15]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v15[:])
+			continue
+		}
+		v14, ok := e.([14]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v14[:])
+			continue
+		}
+		v13, ok := e.([13]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v13[:])
+			continue
+		}
+		v12, ok := e.([12]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v12[:])
+			continue
+		}
+		v11, ok := e.([11]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v11[:])
+			continue
+		}
+		v10, ok := e.([10]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v10[:])
+			continue
+		}
+		v9, ok := e.([9]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v9[:])
+			continue
+		}
+		v8, ok := e.([8]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v8[:])
+			continue
+		}
+		v7, ok := e.([7]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v7[:])
+			continue
+		}
+		v6, ok := e.([6]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v6[:])
+			continue
+		}
+		v5, ok := e.([5]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v5[:])
+			continue
+		}
+		v4, ok := e.([4]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v4[:])
+			continue
+		}
+		v3, ok := e.([3]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v3[:])
+			continue
+		}
+		v2, ok := e.([2]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v2[:])
+			continue
+		}
+		v1, ok := e.([1]uint8)
+		if ok {
+			out[i] = common.Bytes2Hex(v1[:])
+			continue
+		}
+		// common.Address
+		add, ok := e.(common.Address)
+		if ok {
+			out[i] = NormalizeAddress(add.String())
+			continue
+		}
+		// []common.Address
+		out[i], ok = decodeAddressArray(e)
+		if ok {
+			continue
+		}
+		// []Int - any kind
+		out[i], ok = decodeIntArray(e)
+		if ok {
+			continue
+		}
+		// default case, where good old Sprintf is enough
+		out[i] = fmt.Sprintf("%v", e)
+		continue
+	}
+	return out
+}
+
+// []interface{}{[]common.Address{...}} => []interface{}{[]string{...}
+// where the output string is a "normalized" version of the address
+func decodeAddressArray(array interface{}) ([]string, bool) {
+	worked := false
+	var out []string
+	a := reflect.ValueOf(array)
+
+	if a.Kind() == reflect.Array || a.Kind() == reflect.Slice {
+		out = make([]string, a.Len())
+		for i := 0; i < a.Len(); i++ {
+			idxval := reflect.ValueOf(array).Index(i)
+			aidxval, ok := idxval.Interface().(common.Address)
+			if ok {
+				out[i] = NormalizeAddress(aidxval.String())
+				worked = ok
+			}
+		}
+	}
+	return out, worked
+}
+
+// []interface{}{1,2,3} => []interface{}{[]string{"1","2","3"}
+// works with every type of int
+func decodeIntArray(array interface{}) ([]string, bool) {
+	worked := false
+	var out []string
+	a := reflect.ValueOf(array)
+
+	if a.Kind() == reflect.Array || a.Kind() == reflect.Slice {
+		worked = true
+		out = make([]string, a.Len())
+		for i := 0; i < a.Len(); i++ {
+			idxval := reflect.ValueOf(array).Index(i)
+			out[i] = fmt.Sprintf("%v", idxval.Interface())
+		}
+	}
+	return out, worked // only return worked=true on arrays and slices
 }
