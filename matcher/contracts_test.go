@@ -1,7 +1,6 @@
 package matcher
 
 import (
-	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -11,14 +10,13 @@ import (
 	"zoroaster/trigger"
 )
 
-var zconf = config.Load("../config")
 var psqlClient = aws.PostgresClient{}
 
 func init() {
-	if zconf.Stage != config.TEST {
+	if config.Zconf.Stage != config.TEST {
 		log.Fatal("$STAGE must be TEST to run tests")
 	}
-	psqlClient.InitDB(zconf)
+	psqlClient.InitDB(config.Zconf)
 	log.SetLevel(log.DebugLevel)
 }
 
@@ -55,15 +53,13 @@ func TestMatchContractsForBlock(t *testing.T) {
 		return []string{"0xbb9bc244d798123fde783fcc1c72d3bb8c189413"}
 	}
 
-	var client = ethrpc.New(zconf.EthNode)
-
 	cnMatches := matchContractsForBlock(
 		8081000,
 		1554828248,
 		"0x",
 		mockGetModAccounts,
 		mockDB{},
-		client)
+		config.CliTest)
 
 	assert.Equal(t, 1, len(cnMatches))
 	assert.Equal(t, 8081000, cnMatches[0].BlockNumber)
@@ -85,9 +81,6 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		return []string{"0x09cabec1ead1c0ba254b09efb3ee13841712be14"}
 	}
 
-	// TODO mock this
-	var client = ethrpc.New(zconf.EthNode)
-
 	// this should match
 	cnMatches := matchContractsForBlock(
 		8081000,
@@ -95,7 +88,7 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		"0x",
 		mockGetModAccounts,
 		&psqlClient,
-		client)
+		config.CliTest)
 
 	assert.Equal(t, 1, len(cnMatches))
 
@@ -112,7 +105,7 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		"0x",
 		mockGetModAccounts,
 		&psqlClient,
-		client)
+		config.CliTest)
 
 	assert.Equal(t, 0, len(cnMatches))
 }

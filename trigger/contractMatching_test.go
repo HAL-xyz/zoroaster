@@ -1,15 +1,10 @@
 package trigger
 
 import (
-	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"zoroaster/config"
 )
-
-var zconf = config.Load("../config")
-var client = ethrpc.New(zconf.EthNode)
-var cliRinkeby = ethrpc.New("https://rinkebyshared.bdnodes.net?auth=dKvc9d7tXrOdmnKK9nsfl119I19PH4GZPbACnbH-QW0")
 
 func TestMatchContract1(t *testing.T) {
 
@@ -17,7 +12,7 @@ func TestMatchContract1(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac1.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387102)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliTest, tg, 8387102)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "0x4a574510c7014e4ae985403536074abe582adfc8", matchingVals[0])
@@ -30,7 +25,7 @@ func TestMatchContract2(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac2.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387679)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliTest, tg, 8387679)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "3876846319093283908984", matchingVals[0])
@@ -43,7 +38,7 @@ func TestMatchContract3(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac3.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387102)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliTest, tg, 8387102)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "true", matchingVals[0])
@@ -56,7 +51,7 @@ func TestMatchContract4(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac4.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387102)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliTest, tg, 8387102)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "0xd4fe7bc31cedb7bfb8a345f31e668033056b2728", matchingVals[0])
@@ -69,7 +64,7 @@ func TestMatchContract5(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac5.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8387102)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliTest, tg, 8387102)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "0x02ca0dfabf5285b0b9d09dfaa241167013355c35", matchingVals[0])
@@ -82,7 +77,7 @@ func TestMatchContract6(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac6.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 4974958)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "12", matchingVals[0])
@@ -95,7 +90,7 @@ func TestMatchContract7(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac7.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 4974958)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "4", matchingVals[0])
@@ -108,7 +103,7 @@ func TestMatchContract8(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac8.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 4974958)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "moon", matchingVals[0])
@@ -121,7 +116,7 @@ func TestMatchContract9(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac9.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 4974958)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "ciao", matchingVals[0])
@@ -134,7 +129,7 @@ func TestMatchContract10(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac10.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 4974958)
 
 	exp := []interface{}{
 		[]string{
@@ -156,7 +151,7 @@ func TestMatchContract11(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac11.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 4974958)
 
 	exp := []interface{}{
 		[]string{
@@ -177,7 +172,7 @@ func TestMatchContract12(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac12.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 4974958)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "99", matchingVals[0])
@@ -190,7 +185,7 @@ func TestMatchContract13(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac13.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 4974958)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "20", matchingVals[0])
@@ -203,7 +198,7 @@ func TestMatchContract14(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac14.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 4974958)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 4974958)
 
 	assert.True(t, isMatch)
 	assert.Equal(t, "10", matchingVals[0])
@@ -216,7 +211,7 @@ func TestMatchContract15(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac15.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 5527743)
 
 	exp := []interface{}{
 		[]string{"20", "10", "333333333333333333333"},
@@ -239,7 +234,7 @@ func TestMatchContract16(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac16.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 5527743)
 
 	exp := []interface{}{
 		"0x6d64ca40f70cc4c54bbb2a32f1ea52a7d7d4ccec",
@@ -260,7 +255,7 @@ func TestMatchContract17(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac17.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 5527743)
 	assert.True(t, isMatch)
 	assert.Equal(t, "0x68656c6c6f20776f726c64", matchingVals[0])
 	assert.Equal(t, 1, len(matchingVals))
@@ -273,7 +268,7 @@ func TestMatchContract18(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac18.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 5527743)
 	assert.True(t, isMatch)
 	assert.Equal(t, 1, len(matchingVals))
 	assert.Equal(t, "0x68656c6c6f20776f726c64000000000000000000000000000000000000000000", matchingVals[0])
@@ -286,7 +281,7 @@ func TestMatchContract19(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac19.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(cliRinkeby, tg, 5527743)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliRinkeby, tg, 5527743)
 	assert.True(t, isMatch)
 	assert.Equal(t, 1, len(matchingVals))
 	assert.Equal(t, "0x68656c6c6f20776f726c640000000000", matchingVals[0])
@@ -298,7 +293,7 @@ func TestMatchContractUniswap(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/wac-uniswap.json")
 	assert.NoError(t, err)
 
-	isMatch, matchingVals, returnedVals := MatchContract(client, tg, 8496486)
+	isMatch, matchingVals, returnedVals := MatchContract(config.CliTest, tg, 8496486)
 	assert.True(t, isMatch)
 	assert.Equal(t, "177", matchingVals[0])
 	assert.Equal(t, []interface{}{"177"}, returnedVals)

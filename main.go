@@ -15,9 +15,6 @@ import (
 
 func main() {
 
-	// Load Config
-	zconf := config.Load("config")
-
 	// Load AWS SES session
 	sesSession := aws.GetSESSession()
 
@@ -28,24 +25,24 @@ func main() {
 		TimestampFormat: time.Stamp,
 	})
 	log.SetLevel(log.DebugLevel)
-	f, err := os.OpenFile(zconf.LogsFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+	f, err := os.OpenFile(config.Zconf.LogsFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer f.Close()
 	log.SetOutput(f)
 
-	log.Info("Starting up Zoroaster, stage = ", zconf.Stage)
+	log.Info("Starting up Zoroaster, stage = ", config.Zconf.Stage)
 
 	// Init Postgres DB client
 	psqlClient := aws.PostgresClient{}
-	psqlClient.InitDB(zconf)
+	psqlClient.InitDB(config.Zconf)
 
 	// HTTP client
 	httpClient := http.Client{}
 
 	// ETH client
-	ethClient := ethrpc.New(zconf.EthNode)
+	ethClient := ethrpc.New(config.Zconf.EthNode)
 
 	// Channels are buffered so the poller doesn't stop queueing blocks
 	// if one of the Matcher isn't up (during tests) of if WaC is very slow (which it is)
@@ -56,7 +53,7 @@ func main() {
 	matchesChan := make(chan trigger.IMatch)
 
 	// Poll ETH node
-	go eth.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, ethClient, &psqlClient, zconf.BlocksDelay)
+	go eth.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, ethClient, &psqlClient, config.Zconf.BlocksDelay)
 
 	// Watch a Transaction
 	go matcher.TxMatcher(txBlocksChan, matchesChan, &psqlClient)

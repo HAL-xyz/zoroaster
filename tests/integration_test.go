@@ -2,7 +2,6 @@ package tests
 
 import (
 	"encoding/json"
-	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"sync"
@@ -21,15 +20,11 @@ type Rule struct {
 	TriggerFile string `json:"trigger_file"`
 }
 
-var zconf = config.Load("../config")
-
 func init() {
 	log.SetLevel(log.DebugLevel)
 }
 
 func TestIntegration(t *testing.T) {
-
-	var client = ethrpc.New(zconf.EthNode)
 
 	data, err := ioutil.ReadFile("rules.json")
 	if err != nil {
@@ -55,7 +50,7 @@ func TestIntegration(t *testing.T) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			block, err := client.EthGetBlockByNumber(rule.BlockNo, true)
+			block, err := config.CliTest.EthGetBlockByNumber(rule.BlockNo, true)
 			if err != nil {
 				log.Fatal(err)
 			}

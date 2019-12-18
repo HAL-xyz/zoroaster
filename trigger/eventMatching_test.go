@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+	"zoroaster/config"
 	"zoroaster/utils"
 )
 
@@ -72,9 +73,7 @@ func TestMatchEvent2(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var cli = ethrpc.New("http://node-lb.hal.xyz:8545")
-
-	matches := MatchEvent(cli, tg, 9099675, 1572344236)
+	matches := MatchEvent(config.CliMain, tg, 9099675, 1572344236)
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9099675, matches[0].Log.BlockNumber)
 }

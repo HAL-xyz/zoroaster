@@ -10,13 +10,12 @@ import (
 )
 
 var psqlClient = PostgresClient{}
-var zconf = config.Load("../config")
 
 func init() {
-	if zconf.Stage != config.TEST {
+	if config.Zconf.Stage != config.TEST {
 		log.Fatal("$STAGE must be TEST to run db tests")
 	}
-	psqlClient.InitDB(zconf)
+	psqlClient.InitDB(config.Zconf)
 }
 
 func TestPostgresClient_All(t *testing.T) {

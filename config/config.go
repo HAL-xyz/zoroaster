@@ -11,7 +11,9 @@ import (
 type ZConfiguration struct {
 	Stage       Stage
 	ConfigFile  string
-	EthNode     string
+	EthNode     string // the main eth node
+	TestNode    string // additional node used for tests
+	RinkebyNode string // Rinkeby network, used for tests
 	LogsPath    string
 	LogsFile    string
 	Database    ZoroDB
@@ -46,23 +48,25 @@ func (s Stage) String() string {
 }
 
 const (
-	dbUsr   = "DB_USR"
-	dbPwd   = "DB_PWD"
-	ethNode = "ETH_NODE"
+	dbUsr       = "DB_USR"
+	dbPwd       = "DB_PWD"
+	ethNode     = "ETH_NODE"
+	testNode    = "TEST_NODE"
+	rinkebyNode = "RINKEBY_NODE"
 )
 
-func readStage(dirPath string) ZConfiguration {
+func readStage() ZConfiguration {
 	zconf := ZConfiguration{}
 	stage := os.Getenv("STAGE")
 	switch stage {
 	case "TEST":
-		zconf.ConfigFile = fmt.Sprintf("%s/config-test.json", dirPath)
+		zconf.ConfigFile = fmt.Sprintf("/etc/zoro-test.json")
 		zconf.Stage = TEST
 	case "DEV":
-		zconf.ConfigFile = fmt.Sprintf("%s/config-dev.json", dirPath)
+		zconf.ConfigFile = fmt.Sprintf("/etc/zoro-dev.json")
 		zconf.Stage = DEV
 	case "PROD":
-		zconf.ConfigFile = fmt.Sprintf("%s/config-prod.json", dirPath)
+		zconf.ConfigFile = fmt.Sprintf("/etc/zoro-prod.json")
 		zconf.Stage = PROD
 	default:
 		log.Fatal("local env STAGE must be TEST, DEV or PROD")
@@ -70,9 +74,9 @@ func readStage(dirPath string) ZConfiguration {
 	return zconf
 }
 
-func Load(dirPath string) *ZConfiguration {
+func Load() *ZConfiguration {
 
-	zconfig := readStage(dirPath)
+	zconfig := readStage()
 
 	f, err := ioutil.ReadFile(zconfig.ConfigFile)
 	if err != nil {
@@ -98,6 +102,18 @@ func Load(dirPath string) *ZConfiguration {
 	zconfig.EthNode = os.Getenv(ethNode)
 	if zconfig.EthNode == "" {
 		log.Fatal("no eth node set in local env ", ethNode)
+	}
+
+	// extra nodes are only required for running tests
+
+	zconfig.TestNode = os.Getenv(testNode)
+	if zconfig.Stage == TEST && zconfig.EthNode == "" {
+		log.Fatal("no test node set in local env ", testNode)
+	}
+
+	zconfig.RinkebyNode = os.Getenv(rinkebyNode)
+	if zconfig.Stage == TEST && zconfig.EthNode == "" {
+		log.Fatal("no Rinkeby node set in local env ", rinkebyNode)
 	}
 
 	return &zconfig
