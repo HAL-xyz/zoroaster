@@ -48,7 +48,6 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 }
 
 func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI) bool {
-
 	eventName := tg.Filters[0].EventName
 	eventSignature, err := getEventSignature(tg.ContractABI, eventName)
 	if err != nil {
@@ -95,7 +94,6 @@ func validateFilterLog(
 		logrus.Debug(err)
 		return false
 	}
-
 	dataParam, ok := decodedData[filter.ParameterName]
 	if ok {
 		jsn, err := json.Marshal(dataParam)
@@ -129,14 +127,24 @@ func getLogsForBlock(client IEthRpc, blockNo int, address string) ([]ethrpc.Log,
 }
 
 // a topicsMap is a map where
-// named_topic_{1,2,3} -> value
-// named_topic_0 is skipped being the event signature
+// topic_name_1 -> value
+// topic_name_2 -> value
+// topic_name_3 -> value
+// topic_name_0 is skipped being the event signature
+//
+// this is needed bc evLog.Topics is simply a []string of the topic values,
+// and we want to produce a map (topic_name -> value) looping through the
+// events Inputs names (i.e. the variables of the Event struct) and linking
+// each name to the value in Topics
 func getTopicsMap(abiObj *abi.ABI, eventName string, evLog *ethrpc.Log) map[string]string {
 	finalMap := make(map[string]string)
 	myEvent := abiObj.Events[eventName]
-	for i, input := range myEvent.Inputs {
+
+	var i = 1 // topic_name_0 is the event signature so we start from 1
+	for _, input := range myEvent.Inputs {
 		if input.Indexed {
-			finalMap[input.Name] = evLog.Topics[i+1]
+			finalMap[input.Name] = evLog.Topics[i]
+			i += 1
 		}
 	}
 	return finalMap

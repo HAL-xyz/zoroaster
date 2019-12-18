@@ -35,7 +35,7 @@ func ValidateParam(rawParam []byte, parameterType string, attribute string, pred
 			log.Debug(err)
 			return false, nil
 		}
-		return utils.NormalizeAddress(param) == strings.ToLower(attribute), param
+		return utils.NormalizeAddress(param) == utils.NormalizeAddress(attribute), param
 	}
 	// string
 	if parameterType == "string" {
