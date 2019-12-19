@@ -3,6 +3,7 @@ package matcher
 import (
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"time"
 	"zoroaster/aws"
 	"zoroaster/trigger"
@@ -74,7 +75,7 @@ func matchContractsForBlock(
 
 	var triggersToCheck []*trigger.Trigger
 	for i, t := range allTriggers {
-		if utils.IsIn(t.ContractAdd, modAccounts) {
+		if utils.IsIn(strings.ToLower(t.ContractAdd), modAccounts) {
 			triggersToCheck = append(triggersToCheck, allTriggers[i])
 		}
 	}

@@ -31,6 +31,7 @@ func (db mockDB) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error
 func (db mockDB) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error) {
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
 	tg.TriggerUUID = "some-complicated-uuid"
+	tg.ContractAdd = "0xBB9bc244d798123fde783fCC1c72d3bb8c189413" // uppercase some letters
 	return []*trigger.Trigger{tg}, nil
 }
 
