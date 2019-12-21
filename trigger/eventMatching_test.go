@@ -22,10 +22,12 @@ func TestValidateFilterLog(t *testing.T) {
 	}
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 
-	res := validateFilterLog(&logs[0], &tg.Filters[0], &abiObj, tg.Filters[0].EventName)
+	res, err := validateFilterLog(&logs[0], &tg.Filters[0], &abiObj, tg.Filters[0].EventName)
+	assert.NoError(t, err)
 	assert.True(t, res)
 
-	res2 := validateFilterLog(&logs[0], &tg.Filters[1], &abiObj, tg.Filters[0].EventName)
+	res2, err := validateFilterLog(&logs[0], &tg.Filters[1], &abiObj, tg.Filters[0].EventName)
+	assert.NoError(t, err)
 	assert.True(t, res2)
 
 	res3 := validateTriggerLog(&logs[0], tg, &abiObj)

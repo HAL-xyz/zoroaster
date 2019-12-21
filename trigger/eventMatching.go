@@ -48,17 +48,26 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 }
 
 func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI) bool {
+	cxtLog := logrus.WithFields(logrus.Fields{
+		"trigger_id": tg.TriggerUUID,
+		"tx_hash":    evLog.TransactionHash,
+		"block_no":   evLog.BlockNumber,
+	})
+
 	eventName := tg.Filters[0].EventName
 	eventSignature, err := getEventSignature(tg.ContractABI, eventName)
 	if err != nil {
-		logrus.Debug(err)
+		cxtLog.Debug(err)
 		return false
 	}
 
 	match := true
 	if evLog.Topics[0] == eventSignature {
 		for _, f := range tg.Filters {
-			filterMatch := validateFilterLog(evLog, &f, abiObj, eventName)
+			filterMatch, err := validateFilterLog(evLog, &f, abiObj, eventName)
+			if err != nil {
+				cxtLog.Debug(err)
+			}
 			match = match && filterMatch // a Trigger matches if all filters match
 		}
 	} else {
@@ -71,7 +80,7 @@ func validateFilterLog(
 	evLog *ethrpc.Log,
 	filter *Filter,
 	abiObj *abi.ABI,
-	eventName string) bool {
+	eventName string) (bool, error) {
 
 	condition := filter.Condition.(ConditionEvent)
 
@@ -81,31 +90,28 @@ func validateFilterLog(
 	if ok {
 		jsn, err := json.Marshal(param)
 		if err != nil {
-			logrus.Debug(err)
-			return false
+			return false, err
 		}
 		isValid, _ := ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
-		return isValid
+		return isValid, nil
 	}
 
 	// validate DATA field
 	decodedData, err := decodeDataField(evLog.Data, eventName, abiObj)
 	if err != nil {
-		logrus.Debug(err)
-		return false
+		return false, err
 	}
 	dataParam, ok := decodedData[filter.ParameterName]
 	if ok {
 		jsn, err := json.Marshal(dataParam)
 		if err != nil {
-			logrus.Debug(err)
-			return false
+			return false, err
 		}
 		isValid, _ := ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
-		return isValid
+		return isValid, nil
 	}
 	// parameter name not found in topics nor in data
-	return false
+	return false, nil
 }
 
 func getLogsForBlock(client IEthRpc, blockNo int, address string) ([]ethrpc.Log, error) {
