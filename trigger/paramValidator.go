@@ -12,6 +12,69 @@ import (
 	"zoroaster/utils"
 )
 
+// According to https://solidity.readthedocs.io/en/v0.5.3/abi-spec.html#abi-events
+//
+// For all fixed-length Solidity types, the EVENT_INDEXED_ARGS array contains
+// the 32-byte encoded value directly.
+// However, for types of dynamic length, which include string, bytes, and arrays,
+// EVENT_INDEXED_ARGS will contain the Keccak hash of the packed encoded value
+// rather than the encoded value directly.
+//
+// This means that when validating strings, bytes and arrays
+// we simply compare their Keccak hash
+
+func ValidateTopicParam(topicParam string, paramType string, attribute string, predicate Predicate, index *int) (bool, string) {
+
+	// bool
+	if paramType == "bool" {
+		if topicParam == "0x0000000000000000000000000000000000000000000000000000000000000001" {
+			return "true" == strings.ToLower(attribute), topicParam
+		} else {
+			return "false" == strings.ToLower(attribute), topicParam
+		}
+	}
+
+	// bool[], bool[N]
+	if strings.HasPrefix(paramType, "bool[") {
+		return strings.ToLower(topicParam) == strings.ToLower(attribute), topicParam
+	}
+
+	// string, string[], string[N]
+	if strings.HasPrefix(paramType, "string") {
+		return strings.ToLower(topicParam) == strings.ToLower(attribute), topicParam
+	}
+
+	// bytes1...32, bytes
+	if strings.HasPrefix(paramType, "bytes") {
+		return compareBytesWithParameter(common.Hex2Bytes(strings.TrimPrefix(topicParam, "0x")), attribute), topicParam
+	}
+
+	// address
+	if paramType == "address" {
+		return utils.NormalizeAddress(topicParam) == utils.NormalizeAddress(attribute), topicParam
+	}
+
+	// address[], address[N]
+	if strings.HasPrefix(paramType, "address[") {
+		return strings.ToLower(topicParam) == strings.ToLower(attribute), topicParam
+	}
+
+	// int
+	intRgx := regexp.MustCompile(`u?int\d*$`)
+	if intRgx.MatchString(paramType) {
+		return validatePredBigInt(predicate, utils.MakeBigIntFromHex(topicParam), utils.MakeBigInt(attribute)), topicParam
+	}
+
+	// int[N] and int[]
+	arrayIntRgx := regexp.MustCompile(`u?int\d*\[\d*]$`)
+	if arrayIntRgx.MatchString(paramType) {
+		return strings.ToLower(topicParam) == strings.ToLower(attribute), topicParam
+	}
+
+	log.Debug("topic parameter type not supported: ", paramType)
+	return false, ""
+}
+
 func ValidateParam(rawParam []byte, parameterType string, attribute string, predicate Predicate, index *int) (bool, interface{}) {
 
 	var err error

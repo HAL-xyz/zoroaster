@@ -15,7 +15,7 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 
 	logs, err := getLogsForBlock(client, blockNo, tg.ContractAdd)
 	if err != nil {
-		logrus.Debug(err)
+		logrus.Debugf("cannot get events for trigger %s, %s", tg.TriggerUUID, err)
 		return []*EventMatch{}
 	}
 
@@ -24,15 +24,23 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 		logrus.Debug(err)
 		return []*EventMatch{}
 	}
+
 	// EventName must be the same for every Filter, so we just get the first one
-	if len(tg.Filters) < 1 {
+	var eventName string
+	for _, f := range tg.Filters {
+		if f.FilterType == "CheckEventParameter" {
+			eventName = f.EventName
+			break
+		}
+	}
+	if eventName == "" {
+		logrus.Debug("no valid Event Name found in trigger ", tg.TriggerUUID)
 		return []*EventMatch{}
 	}
-	eventName := tg.Filters[0].EventName
 
 	var eventMatches []*EventMatch
 	for _, log := range logs {
-		if validateTriggerLog(&log, tg, &abiObj) {
+		if validateTriggerLog(&log, tg, &abiObj, eventName) {
 			decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
 			topicsMap := getTopicsMap(&abiObj, eventName, &log)
 			ev := EventMatch{
@@ -47,14 +55,13 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 	return eventMatches
 }
 
-func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI) bool {
+func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI, eventName string) bool {
 	cxtLog := logrus.WithFields(logrus.Fields{
 		"trigger_id": tg.TriggerUUID,
 		"tx_hash":    evLog.TransactionHash,
 		"block_no":   evLog.BlockNumber,
 	})
 
-	eventName := tg.Filters[0].EventName
 	eventSignature, err := getEventSignature(tg.ContractABI, eventName)
 	if err != nil {
 		cxtLog.Debug(err)
@@ -82,17 +89,17 @@ func validateFilterLog(
 	abiObj *abi.ABI,
 	eventName string) (bool, error) {
 
-	condition := filter.Condition.(ConditionEvent)
+	condition, ok := filter.Condition.(ConditionEvent)
+	if !ok {
+		// filter isn't of type CheckEventParameter, ignore it
+		return true, nil
+	}
 
 	// validate TOPICS
 	topicsMap := getTopicsMap(abiObj, eventName, evLog)
 	param, ok := topicsMap[filter.ParameterName]
 	if ok {
-		jsn, err := json.Marshal(param)
-		if err != nil {
-			return false, err
-		}
-		isValid, _ := ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
+		isValid, _ := ValidateTopicParam(param, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
 		return isValid, nil
 	}
 

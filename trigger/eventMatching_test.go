@@ -30,10 +30,10 @@ func TestValidateFilterLog(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, res2)
 
-	res3 := validateTriggerLog(&logs[0], tg, &abiObj)
+	res3 := validateTriggerLog(&logs[0], tg, &abiObj, "Transfer")
 	assert.True(t, res3)
 
-	res4 := validateTriggerLog(&logs[1], tg, &abiObj)
+	res4 := validateTriggerLog(&logs[1], tg, &abiObj, "Transfer")
 	assert.False(t, res4)
 }
 
@@ -41,6 +41,210 @@ type EthMock struct{}
 
 func (cli EthMock) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
 	return GetLogsFromFile("../resources/events/logs1.json")
+}
+
+type EthMock2 struct{}
+
+func (cli EthMock2) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
+	return GetLogsFromFile("../resources/events/logs2.json")
+}
+
+func TestMatchEvent7(t *testing.T) {
+	js := `{
+    "Filters": [
+        {
+            "Condition": {
+                "Attribute": "0x875c04fcadcd0ae4b369679d6d8eefaf3080de016142bddfabdfe543b430ffac",
+                "Predicate": "Eq"
+            },
+            "EventName": "address_event",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "v4",
+            "ParameterType": "address[]"
+        }
+    ],
+    "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":true,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":true,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":true,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":true,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":true,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":true,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+    "ContractAdd": "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1",
+    "TriggerName": "test event",
+    "TriggerType": "WatchEvents"
+}`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	matches := MatchEvent(config.CliRinkeby, tg, 5693736, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5693736, matches[0].Log.BlockNumber)
+}
+
+func TestMatchEvent6(t *testing.T) {
+	js := `{
+    "Filters": [
+        {
+            "Condition": {
+                "Attribute": "true",
+                "Predicate": "Eq"
+            },
+            "EventName": "bool_event",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "v8",
+            "ParameterType": "bool"
+        },
+        {
+            "Condition": {
+                "Attribute": "0xa6eef7e35abe7026729641147f7915573c7e97b47efa546f5f6e3230263bcb49",
+                "Predicate": "Eq"
+            },
+            "EventName": "int_event",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "v9",
+            "ParameterType": "bool[]"
+        }
+    ],
+    "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":true,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":true,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":true,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":true,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":true,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":true,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+    "ContractAdd": "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1",
+    "TriggerName": "test event",
+    "TriggerType": "WatchEvents"
+}`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	matches := MatchEvent(config.CliRinkeby, tg, 5693736, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5693736, matches[0].Log.BlockNumber)
+}
+
+func TestMatchEvent5(t *testing.T) {
+	js := `{
+    "Filters": [
+        {
+            "Condition": {
+                "Attribute": "0x7250aa92a65150fcccca5852ea1a09d977f749a84405ea8fcbfbc6727ec4f515",
+                "Predicate": "Eq"
+            },
+            "EventName": "int_event",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "v6",
+            "ParameterType": "int[]"
+        }
+    ],
+    "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":true,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":true,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":true,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":true,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":true,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":true,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+    "ContractAdd": "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1",
+    "TriggerName": "test event",
+    "TriggerType": "WatchEvents"
+}`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	matches := MatchEvent(config.CliRinkeby, tg, 5693738, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5693738, matches[0].Log.BlockNumber)
+}
+
+func TestMatchEvent4(t *testing.T) {
+	js := `{
+    "Filters": [
+        {
+            "Condition": {
+                "Attribute": "0x9c22ff5f21f0b81b113e63f7db6da94fedef11b2119b4088b89664fb9a3cb658",
+                "Predicate": "Eq"
+            },
+            "EventName": "string_event",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "v1",
+            "ParameterType": "string"
+        },
+        {
+            "Condition": {
+                "Attribute": "0x4c314d3ec7fe572b5f0ca8d4231464e89602faea100b49f287ef5148bfb5b776",
+                "Predicate": "Eq"
+            },
+            "EventName": "string_event",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "v2",
+            "ParameterType": "string[]"
+        },
+        {
+            "Condition": {
+                "Attribute": "0xe7cc7564e647aae3b7253c8ab67ae03afc76f838e01ce364433dba9960e50afd",
+                "Predicate": "Eq"
+            },
+            "EventName": "string_event",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "v3",
+            "ParameterType": "string[3]"
+        }
+    ],
+    "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":true,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":true,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":true,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":true,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":true,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":true,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":true,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+    "ContractAdd": "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1",
+    "TriggerName": "test event",
+    "TriggerType": "WatchEvents"
+}`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	matches := MatchEvent(config.CliRinkeby, tg, 5693738, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5693738, matches[0].Log.BlockNumber)
+}
+
+func TestMatchEvent3(t *testing.T) {
+	js := `{
+    "Filters": [
+        {
+            "Condition": {
+                "Attribute": "0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d",
+                "Predicate": "Eq"
+            },
+            "FilterType": "BasicFilter",
+            "ParameterName": "To"
+        },
+        {
+            "Condition": {
+                "Attribute": "335632",
+                "Predicate": "Eq"
+            },
+            "EventName": "LogResult",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "ResultSerialNumber",
+            "ParameterType": "uint256"
+        },
+        {
+            "Condition": {
+                "Attribute": "0x49c2381f46efd87fbc3e6662593bf4992a6e027ca569bddd35b3dce2c2f9ec23",
+                "Predicate": "Eq"
+            },
+            "EventName": "LogResult",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "BetID",
+            "ParameterType": "bytes32"
+        },
+        {
+            "Condition": {
+                "Attribute": "0x4236daa27a262fe6baf9bb43ade5e41f8f7498f9",
+                "Predicate": "Eq"
+            },
+            "EventName": "LogResult",
+            "FilterType": "CheckEventParameter",
+            "ParameterName": "PlayerAddress",
+            "ParameterType": "address"
+        }
+    ],
+    "ContractABI": "[{\"constant\":false,\"inputs\":[{\"name\":\"newCallbackGasPrice\",\"type\":\"uint256\"}],\"name\":\"ownerSetCallbackGasPrice\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalWeiWon\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxProfitAsPercentOfHouse\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newHouseEdge\",\"type\":\"uint256\"}],\"name\":\"ownerSetHouseEdge\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"myid\",\"type\":\"bytes32\"},{\"name\":\"result\",\"type\":\"string\"}],\"name\":\"__callback\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"payoutsPaused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newTreasury\",\"type\":\"address\"}],\"name\":\"ownerSetTreasury\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"myid\",\"type\":\"bytes32\"},{\"name\":\"result\",\"type\":\"string\"},{\"name\":\"proof\",\"type\":\"bytes\"}],\"name\":\"__callback\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxNumber\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addressToCheck\",\"type\":\"address\"}],\"name\":\"playerGetPendingTxByAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newContractBalanceInWei\",\"type\":\"uint256\"}],\"name\":\"ownerUpdateContractBalance\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxProfitDivisor\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newPayoutStatus\",\"type\":\"bool\"}],\"name\":\"ownerPausePayouts\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"ownerChangeOwner\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minNumber\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newMaxProfitAsPercent\",\"type\":\"uint256\"}],\"name\":\"ownerSetMaxProfitAsPercentOfHouse\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"treasury\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalWeiWagered\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newMinimumBet\",\"type\":\"uint256\"}],\"name\":\"ownerSetMinBet\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newStatus\",\"type\":\"bool\"}],\"name\":\"ownerPauseGame\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"gasForOraclize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"sendTo\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"ownerTransferEther\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"contractBalance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minBet\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"playerWithdrawPendingTransactions\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxProfit\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalBets\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"randomQueryID\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"gamePaused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"originalPlayerBetId\",\"type\":\"bytes32\"},{\"name\":\"sendTo\",\"type\":\"address\"},{\"name\":\"originalPlayerProfit\",\"type\":\"uint256\"},{\"name\":\"originalPlayerBetValue\",\"type\":\"uint256\"}],\"name\":\"ownerRefundPlayer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newSafeGasToOraclize\",\"type\":\"uint32\"}],\"name\":\"ownerSetOraclizeSafeGas\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"ownerkill\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"houseEdge\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"rollUnder\",\"type\":\"uint256\"}],\"name\":\"playerRollDice\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"houseEdgeDivisor\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxPendingPayouts\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"BetID\",\"type\":\"bytes32\"},{\"indexed\":true,\"name\":\"PlayerAddress\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"RewardValue\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"ProfitValue\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"BetValue\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"PlayerNumber\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"RandomQueryID\",\"type\":\"uint256\"}],\"name\":\"LogBet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"ResultSerialNumber\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"BetID\",\"type\":\"bytes32\"},{\"indexed\":true,\"name\":\"PlayerAddress\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"PlayerNumber\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"DiceResult\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"Value\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"Status\",\"type\":\"int256\"},{\"indexed\":false,\"name\":\"Proof\",\"type\":\"bytes\"}],\"name\":\"LogResult\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"BetID\",\"type\":\"bytes32\"},{\"indexed\":true,\"name\":\"PlayerAddress\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"RefundValue\",\"type\":\"uint256\"}],\"name\":\"LogRefund\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"SentToAddress\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"AmountTransferred\",\"type\":\"uint256\"}],\"name\":\"LogOwnerTransfer\",\"type\":\"event\"}]",
+    "ContractAdd": "0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d",
+    "TriggerName": "WAE MATTEO",
+    "TriggerType": "WatchEvents"
+}`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	matches := MatchEvent(EthMock2{}, tg, 9098826, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9098826, matches[0].Log.BlockNumber)
 }
 
 func TestMatchEvent2(t *testing.T) {
@@ -80,7 +284,7 @@ func TestMatchEvent2(t *testing.T) {
 	assert.Equal(t, 9099675, matches[0].Log.BlockNumber)
 }
 
-func TestMatchEvent(t *testing.T) {
+func TestMatchEvent1(t *testing.T) {
 
 	var client EthMock
 
