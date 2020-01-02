@@ -374,8 +374,8 @@
         "trigger_file": "61_int_between.json"
       },
       {
-        "assert": "TODO: this doesn't work; fix it one day - 62 - 3 trades occurred to address 0x14FBCA95be7e99C15Cc2996c6C9d841e54B79425 with function offer in the block 6616923",
-        "occurrences": 0,
+        "assert": "3 trades occurred to address 0x14FBCA95be7e99C15Cc2996c6C9d841e54B79425 with function offer in the block 6616923",
+        "occurrences": 3,
         "block_no": 6616923,
         "trigger_file": "62_more_than_one_function_with_same_name.json"
       },

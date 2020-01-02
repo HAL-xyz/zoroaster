@@ -180,7 +180,7 @@ func getEventSignature(cntABI string, eventName string) (string, error) {
 	var eventSignature string
 	for _, event := range abiObj.Events {
 		if event.Name == eventName {
-			eventSignature = event.Id().Hex()
+			eventSignature = event.ID().Hex()
 			return eventSignature, nil
 		}
 	}
