@@ -17,7 +17,7 @@ type IDB interface {
 
 	GetActions(tgUUID string, userUUID string) ([]string, error)
 
-	ReadLastBlockProcessed(tgType trigger.TgType) int
+	ReadLastBlockProcessed(tgType trigger.TgType) (int, error)
 
 	SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error
 

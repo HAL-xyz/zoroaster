@@ -20,9 +20,13 @@ func BlocksPoller(
 	idb aws.IDB,
 	blocksDelay int) {
 
-	txLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaT)
-	cnLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaC)
-	evLastBlockProcessed := idb.ReadLastBlockProcessed(trigger.WaE)
+	txLastBlockProcessed, err1 := idb.ReadLastBlockProcessed(trigger.WaT)
+	cnLastBlockProcessed, err2 := idb.ReadLastBlockProcessed(trigger.WaC)
+	evLastBlockProcessed, err3 := idb.ReadLastBlockProcessed(trigger.WaE)
+
+	if err1 != nil || err2 != nil || err3 != nil {
+		log.Fatal(err1, err2, err3)
+	}
 
 	ticker := time.NewTicker(500 * time.Millisecond)
 	for range ticker.C {

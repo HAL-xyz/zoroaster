@@ -154,14 +154,14 @@ func (cli PostgresClient) GetActions(tgUUID string, userUUID string) ([]string, 
 	return actionsRet, nil
 }
 
-func (cli PostgresClient) ReadLastBlockProcessed(tgType trigger.TgType) int {
+func (cli PostgresClient) ReadLastBlockProcessed(tgType trigger.TgType) (int, error) {
 	var blockNo int
 	q := fmt.Sprintf("SELECT %s_last_block_processed FROM %s", trigger.TgTypeToPrefix(tgType), cli.conf.TableState)
 	err := db.QueryRow(q).Scan(&blockNo)
 	if err != nil {
-		log.Errorf("cannot read last block processed: %s", err)
+		return 0, fmt.Errorf("cannot read last block processed: %s", err)
 	}
-	return blockNo
+	return blockNo, nil
 }
 
 func (cli PostgresClient) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error {

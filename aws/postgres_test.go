@@ -97,17 +97,20 @@ func TestPostgresClient_All(t *testing.T) {
 	// Set and read app state
 	err = psqlClient.SetLastBlockProcessed(0, trigger.WaT)
 	assert.NoError(t, err)
-	blockNo := psqlClient.ReadLastBlockProcessed(trigger.WaT)
+	blockNo, err := psqlClient.ReadLastBlockProcessed(trigger.WaT)
+	assert.NoError(t, err)
 	assert.Equal(t, 0, blockNo)
 
 	err = psqlClient.SetLastBlockProcessed(0, trigger.WaC)
 	assert.NoError(t, err)
-	blockNo = psqlClient.ReadLastBlockProcessed(trigger.WaC)
+	blockNo, err = psqlClient.ReadLastBlockProcessed(trigger.WaC)
+	assert.NoError(t, err)
 	assert.Equal(t, 0, blockNo)
 
 	err = psqlClient.SetLastBlockProcessed(0, trigger.WaE)
 	assert.NoError(t, err)
-	blockNo = psqlClient.ReadLastBlockProcessed(trigger.WaE)
+	blockNo, err = psqlClient.ReadLastBlockProcessed(trigger.WaE)
+	assert.NoError(t, err)
 	assert.Equal(t, 0, blockNo)
 
 	// Write analytics
