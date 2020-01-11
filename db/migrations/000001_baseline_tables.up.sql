@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 );
 
 ALTER TABLE ONLY public.users
-    ADD CONSTRAINT dev_users_pkey PRIMARY KEY (uuid);
+    ADD CONSTRAINT users_pkey PRIMARY KEY (uuid);
 
 
 /* TRIGGERS */
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS public.triggers (
 );
 
 ALTER TABLE ONLY public.triggers
-    ADD CONSTRAINT dev_triggers_pkey PRIMARY KEY (uuid);
+    ADD CONSTRAINT triggers_pkey PRIMARY KEY (uuid);
 
 CREATE INDEX user_index ON public.triggers USING btree (user_uuid);
 
@@ -45,6 +45,8 @@ CREATE TABLE IF NOT EXISTS public.actions (
     updated_at timestamp with time zone NOT NULL
 );
 
+ALTER TABLE ONLY public.actions
+    ADD CONSTRAINT actions_pkey PRIMARY KEY (uuid);
 
 /* ANALYTICS */
 
@@ -118,6 +120,9 @@ CREATE TABLE IF NOT EXISTS public.state (
     wae_date timestamp with time zone
 );
 
+ALTER TABLE ONLY public.state
+    ADD CONSTRAINT state_pkey PRIMARY KEY (id);
+    
 -- populate state
 INSERT INTO state (
     id,
@@ -126,6 +131,22 @@ INSERT INTO state (
     wae_last_block_processed)
 VALUES (1, 0, 0, 0);
 
+/* Create SQL Trigger to update match_c */
 
+START TRANSACTION;
+CREATE OR REPLACE FUNCTION update_match_count() RETURNS trigger
+AS $update_match_count$
+BEGIN
+UPDATE triggers SET match_c = match_c + 1 WHERE uuid = NEW.trigger_uuid;
+RETURN NEW;
+END;
+$update_match_count$ LANGUAGE plpgsql;
+ 
+CREATE CONSTRAINT TRIGGER t1
+   AFTER INSERT ON matches
+   DEFERRABLE INITIALLY DEFERRED
+   FOR EACH ROW EXECUTE PROCEDURE update_match_count();
+   
+COMMIT;
 
 
