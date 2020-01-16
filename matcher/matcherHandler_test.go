@@ -45,8 +45,8 @@ type mockDB2 struct {
 	aws.IDB
 }
 
-func (mockDB2) LogOutcome(outcome *trigger.Outcome, matchUUID string) {
-	// void
+func (mockDB2) LogOutcome(outcome *trigger.Outcome, matchUUID string) error {
+	return nil
 }
 
 func (mockDB2) GetActions(tgUUID string, userUUID string) ([]string, error) {

@@ -13,7 +13,7 @@ type IDB interface {
 
 	LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error)
 
-	LogOutcome(outcome *trigger.Outcome, matchUUID string)
+	LogOutcome(outcome *trigger.Outcome, matchUUID string) error
 
 	GetActions(tgUUID string, userUUID string) ([]string, error)
 
@@ -27,11 +27,7 @@ type IDB interface {
 
 	UpdateNonMatchingTriggers(triggerIds []string)
 
-	GetSilentButMatchingTriggers(triggerUUIDs []string) []string
-
-	TruncateTables(tables []string) error
-
-	SaveTrigger(triggerData string, isActive, triggered bool) error
+	GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, error)
 
 	LogAnalytics(tgType trigger.TgType, blockNo, triggersNo, blockTime int, start, end time.Time) error
 }

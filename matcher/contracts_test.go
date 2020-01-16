@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
@@ -43,8 +44,8 @@ func (db mockDB) UpdateNonMatchingTriggers(triggerIds []string) {
 	// void
 }
 
-func (db mockDB) GetSilentButMatchingTriggers(triggerUUIDs []string) []string {
-	return []string{"some-complicated-uuid"}
+func (db mockDB) GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, error) {
+	return []string{"some-complicated-uuid"}, nil
 }
 
 func TestMatchContractsForBlock(t *testing.T) {
@@ -71,18 +72,32 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	// clear up the database
 	err := psqlClient.TruncateTables([]string{"triggers", "matches"})
 	assert.NoError(t, err)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	// load one trigger
+	// load a User
+	userUUID, err := psqlClient.SaveUser()
+	assert.NoError(t, err)
+
+	// load a Trigger
 	triggerSrc, err := ioutil.ReadFile("../resources/triggers/wac-uniswap.json")
 	assert.NoError(t, err)
-	err = psqlClient.SaveTrigger(string(triggerSrc), true, false)
+	triggerUUID, err := psqlClient.SaveTrigger(string(triggerSrc), true, false, userUUID)
 	assert.NoError(t, err)
+
+	// at creation, triggered=false
+	status, err := psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, status, "false")
 
 	mockGetModAccounts := func(a, b int, node string) []string {
 		return []string{"0x09cabec1ead1c0ba254b09efb3ee13841712be14"}
 	}
 
-	// this should match
+	// here we call getTokenToEthOutputPrice(1) which returns the
+	// current ETH price in USD; since the trigger condition is "biggerThan 3"
+	// we expect this trigger to always match
 	cnMatches := matchContractsForBlock(
 		8081000,
 		1554828248,
@@ -92,6 +107,11 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		config.CliTest)
 
 	assert.Equal(t, 1, len(cnMatches))
+
+	// now trigger status will be triggered=true
+	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, status, "true")
 
 	for _, m := range cnMatches {
 		uuid, err := psqlClient.LogMatch(m)
@@ -109,4 +129,6 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		config.CliTest)
 
 	assert.Equal(t, 0, len(cnMatches))
+
+	// TODO mock the eth client to return a value that changes the trigger status again
 }

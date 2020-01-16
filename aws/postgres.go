@@ -32,22 +32,9 @@ func (cli PostgresClient) LogAnalytics(tgType trigger.TgType, blockNo, triggersN
 	return err
 }
 
-func (cli PostgresClient) SaveTrigger(triggerData string, isActive, triggered bool) error {
-	q := fmt.Sprintf(
-		`INSERT INTO triggers (
-			"trigger_data", 
-			"is_active", 
-			"created_at",
-			"updated_at",
-			"triggered",
-			"user_uuid") VALUES ($1, $2, $3, $4, $5, $6)`)
-	_, err := db.Exec(q, triggerData, isActive, time.Now(), time.Now(), triggered, "8eda47b7-67b7-493d-b24c-9dc33b9c42bc")
-	return err
-}
-
 func (cli PostgresClient) TruncateTables(tables []string) error {
 	for _, t := range tables {
-		q := fmt.Sprintf(`TRUNCATE table %s`, t)
+		q := fmt.Sprintf(`TRUNCATE table %s CASCADE`, t)
 		_, err := db.Exec(q)
 		if err != nil {
 			return err
@@ -56,7 +43,7 @@ func (cli PostgresClient) TruncateTables(tables []string) error {
 	return nil
 }
 
-func (cli PostgresClient) GetSilentButMatchingTriggers(triggerUUIDs []string) []string {
+func (cli PostgresClient) GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, error) {
 	q := fmt.Sprintf(
 		`SELECT uuid FROM %s
 			WHERE uuid = ANY($1) 
@@ -64,8 +51,7 @@ func (cli PostgresClient) GetSilentButMatchingTriggers(triggerUUIDs []string) []
 
 	rows, err := db.Query(q, pq.Array(triggerUUIDs))
 	if err != nil {
-		log.Error(err)
-		return []string{}
+		return []string{}, err
 	}
 	defer rows.Close()
 
@@ -81,7 +67,7 @@ func (cli PostgresClient) GetSilentButMatchingTriggers(triggerUUIDs []string) []
 	if err = rows.Err(); err != nil {
 		log.Error(err)
 	}
-	return uuidsRet
+	return uuidsRet, nil
 }
 
 func (cli PostgresClient) UpdateNonMatchingTriggers(triggerUUIDs []string) {
@@ -110,7 +96,7 @@ func (cli PostgresClient) UpdateMatchingTriggers(triggerUUIDs []string) {
 	}
 }
 
-func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchUUID string) {
+func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchUUID string) error {
 	q := fmt.Sprintf(
 		`INSERT INTO %s (
 			"match_uuid",
@@ -120,8 +106,9 @@ func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchUUID string)
 
 	_, err := db.Exec(q, matchUUID, outcome.Payload, outcome.Outcome, time.Now())
 	if err != nil {
-		log.Errorf("cannot log outcome with payload: %s; outcome: %s; error: %s", outcome.Payload, outcome.Outcome, err)
+		return fmt.Errorf("cannot log outcome with payload: %s; outcome: %s; error: %s", outcome.Payload, outcome.Outcome, err)
 	}
+	return nil
 }
 
 func (cli PostgresClient) GetActions(tgUUID string, userUUID string) ([]string, error) {
@@ -237,6 +224,7 @@ func (cli *PostgresClient) InitDB(c *config.ZConfiguration) {
 
 	err = db.Ping()
 	if err != nil {
+		fmt.Println(psqlInfo)
 		log.Fatal("cannot connect to the DB -> ", err)
 	}
 

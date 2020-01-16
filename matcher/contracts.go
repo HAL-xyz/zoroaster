@@ -114,7 +114,10 @@ func getMatchesToActUpon(idb aws.IDB, cnMatches []*trigger.CnMatch) []*trigger.C
 		matchingTriggersUUIDs = append(matchingTriggersUUIDs, m.Trigger.TriggerUUID)
 	}
 
-	triggerUUIDsToActUpon := idb.GetSilentButMatchingTriggers(matchingTriggersUUIDs)
+	triggerUUIDsToActUpon, err := idb.GetSilentButMatchingTriggers(matchingTriggersUUIDs)
+	if err != nil {
+		log.Error(err)
+	}
 
 	var matchesToActUpon []*trigger.CnMatch
 	for _, m := range cnMatches {
