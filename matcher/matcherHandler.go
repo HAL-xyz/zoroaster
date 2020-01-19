@@ -18,7 +18,10 @@ func ProcessMatch(match trigger.IMatch, idb aws.IDB, iEmail sesiface.SESAPI, htt
 
 	outcomes := action.ProcessActions(acts, match, iEmail, httpCli)
 	for _, out := range outcomes {
-		idb.LogOutcome(out, match.GetMatchUUID())
+		err = idb.LogOutcome(out, match.GetMatchUUID())
+		if err != nil {
+			log.Error(err)
+		}
 		log.Debug("\tLogged outcome for match id ", match.GetMatchUUID())
 	}
 	return outcomes

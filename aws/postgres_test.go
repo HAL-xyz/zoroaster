@@ -1,7 +1,9 @@
 package aws
 
 import (
+	"fmt"
 	"github.com/stretchr/testify/assert"
+	"io/ioutil"
 	"log"
 	"testing"
 	"time"
@@ -29,9 +31,25 @@ func TestPostgresClient_All(t *testing.T) {
 
 	defer psqlClient.Close()
 
+	// load a User
+	userUUID, err := psqlClient.SaveUser()
+	assert.NoError(t, err)
+
+	// load a Trigger
+	triggerSrc, err := ioutil.ReadFile("../resources/triggers/wac-uniswap.json")
+	assert.NoError(t, err)
+	triggerUUID, err := psqlClient.SaveTrigger(string(triggerSrc), true, false, userUUID)
+	assert.NoError(t, err)
+
+	// load two Actions
+	_, err = psqlClient.SaveAction(triggerUUID)
+	_, err = psqlClient.SaveAction(triggerUUID)
+	assert.NoError(t, err)
+
 	// Log Tx Match
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/t1.json")
-	tg.TriggerUUID = "3b29b0c3-e403-4103-81ef-6685cd391cda"
+	tg.TriggerUUID = triggerUUID
+
 	tx, err := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
 	assert.NoError(t, err)
 	fnArgs := "{}"
@@ -46,7 +64,7 @@ func TestPostgresClient_All(t *testing.T) {
 	_, err = psqlClient.LogMatch(txMatch)
 	assert.NoError(t, err)
 
-	// Log Contract Match
+	//// Log Contract Match
 	cnMatch := trigger.CnMatch{
 		Trigger:        tg,
 		BlockNumber:    1,
@@ -56,7 +74,7 @@ func TestPostgresClient_All(t *testing.T) {
 		MatchedValues:  []string{},
 		AllValues:      nil,
 	}
-	_, err = psqlClient.LogMatch(cnMatch)
+	matchUUID, err := psqlClient.LogMatch(cnMatch)
 	assert.NoError(t, err)
 
 	// Log Event Match
@@ -71,43 +89,66 @@ func TestPostgresClient_All(t *testing.T) {
 	_, err = psqlClient.LogMatch(eventMatch)
 	assert.NoError(t, err)
 
-	// Update Matching Triggers
-	psqlClient.UpdateMatchingTriggers([]string{"3b29b0c3-e403-4103-81ef-6685cd391cda"})
+	// Update Matching Triggers: set triggered=true
+	psqlClient.UpdateMatchingTriggers([]string{triggerUUID})
+	triggered, err := psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, triggered, "true")
 
-	// Update Non-Matching Triggers
-	psqlClient.UpdateNonMatchingTriggers([]string{"3b29b0c3-e403-4103-81ef-6685cd391cda"})
+	// Update Non-Matching Triggers: set triggered=false
+	psqlClient.UpdateNonMatchingTriggers([]string{triggerUUID})
+	triggered, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, triggered, "false")
+
+	// Get all silent but matching triggers
+	// if run after Update Non-Matching Triggers will find one trigger
+	silent, err := psqlClient.GetSilentButMatchingTriggers([]string{triggerUUID})
+	assert.NoError(t, err)
+	assert.Equal(t, 1, len(silent))
 
 	// Log Outcomes
-	payload := `{ "BlockNumber": 1, "ContractAdd": "0x", "FunctionName": "fn()", "ReturnedData": { "AllValues": "{}", "MatchedValues": "{}" }, "BlockTimestamp": 8888 }`
+	payload := `{
+   "BlockNumber":1,
+   "ContractAdd":"0x",
+   "FunctionName":"fn()",
+   "ReturnedData":{
+      "AllValues":"{}",
+      "MatchedValues":"{}"
+   },
+   "BlockTimestamp":8888
+}`
 	outcome := `{"HttpCode":200}`
 	o1 := trigger.Outcome{payload, outcome}
-	psqlClient.LogOutcome(&o1, "3b29b0c3-e403-4103-81ef-6685cd391cda")
+	err = psqlClient.LogOutcome(&o1, matchUUID)
+	assert.NoError(t, err)
 
 	// Load all the active triggers
 	_, err = psqlClient.LoadTriggersFromDB(trigger.WaT)
 	assert.NoError(t, err)
 
 	// Get all the active actions
-	_, err = psqlClient.GetActions("3b29b0c3-e403-4103-81ef-6685cd391cda", "3b29b0c3-e403-4103-81ef-6685cd391cde")
+	actions, err := psqlClient.GetActions(triggerUUID, userUUID)
 	assert.NoError(t, err)
-
-	// Get all silent but matching triggers
-	_ = psqlClient.GetSilentButMatchingTriggers([]string{"96f195bd-2fc7-491e-b1a0-b19dca514cb0"})
+	assert.Equal(t, 2, len(actions))
 
 	// Set and read app state
 	err = psqlClient.SetLastBlockProcessed(0, trigger.WaT)
 	assert.NoError(t, err)
-	blockNo := psqlClient.ReadLastBlockProcessed(trigger.WaT)
+	blockNo, err := psqlClient.ReadLastBlockProcessed(trigger.WaT)
+	assert.NoError(t, err)
 	assert.Equal(t, 0, blockNo)
 
 	err = psqlClient.SetLastBlockProcessed(0, trigger.WaC)
 	assert.NoError(t, err)
-	blockNo = psqlClient.ReadLastBlockProcessed(trigger.WaC)
+	blockNo, err = psqlClient.ReadLastBlockProcessed(trigger.WaC)
+	assert.NoError(t, err)
 	assert.Equal(t, 0, blockNo)
 
 	err = psqlClient.SetLastBlockProcessed(0, trigger.WaE)
 	assert.NoError(t, err)
-	blockNo = psqlClient.ReadLastBlockProcessed(trigger.WaE)
+	blockNo, err = psqlClient.ReadLastBlockProcessed(trigger.WaE)
+	assert.NoError(t, err)
 	assert.Equal(t, 0, blockNo)
 
 	// Write analytics

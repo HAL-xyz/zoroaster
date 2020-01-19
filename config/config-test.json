@@ -7,7 +7,7 @@
     "tableOutcomes": "outcomes",
     "tableState": "state",
     "tableActions": "actions",
-    "host": "triggersdb-test.cgylkhaks4ty.eu-central-1.rds.amazonaws.com",
+    "host": "",
     "name": "hal_test",
     "port": 5432
   }
