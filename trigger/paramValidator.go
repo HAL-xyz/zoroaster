@@ -118,6 +118,18 @@ func ValidateParam(rawParam []byte, parameterType string, attribute string, pred
 		}
 		return validatePredBool(predicate, param, attribute), param
 	}
+	// bool[], bool[N]
+	if strings.HasPrefix(parameterType, "bool[") {
+		var param []bool
+		if err = json.Unmarshal(rawParam, &param); err != nil {
+			log.Debug(err)
+			return false, nil
+		}
+		if index != nil && *index < len(param) && predicate == Eq {
+			return validatePredBool(predicate, param[*index], attribute), param[*index]
+		}
+		return validatePredBoolArray(predicate, param, attribute, index), param
+	}
 	// address[]
 	addressesRgx := regexp.MustCompile(`address\[\d*]$`)
 	if addressesRgx.MatchString(parameterType) {
@@ -442,7 +454,7 @@ func ValidateParam(rawParam []byte, parameterType string, attribute string, pred
 		return compareBytesWithParameter(param[:], attribute), "0x" + common.Bytes2Hex(param[:])
 	}
 
-	log.Debug("parameter type not supported: ", parameterType)
+	log.Debug("data parameter type not supported: ", parameterType)
 	return false, nil
 }
 

@@ -120,6 +120,49 @@ func validatePredBool(p Predicate, cv bool, tv string) bool {
 	return strings.ToLower(tv) == ctVal
 }
 
+func validatePredBoolArray(p Predicate, cvs []bool, tv string, index *int) bool {
+	if index != nil {
+		if *index > len(cvs) {
+			return false
+		}
+		return validatePredBool(p, cvs[*index], tv)
+	}
+
+	switch p {
+	case IsIn:
+		triggerVal := false
+		if strings.ToLower(tv) == "true " {
+			triggerVal = true
+		}
+		for _, v := range cvs {
+			if v == triggerVal {
+				return true
+			}
+		}
+		return false
+	case SmallerThan:
+		trigNumericVal, err := strconv.Atoi(tv)
+		if err != nil {
+			return false
+		}
+		return len(cvs) < trigNumericVal
+	case BiggerThan:
+		trigNumericVal, err := strconv.Atoi(tv)
+		if err != nil {
+			return false
+		}
+		return len(cvs) > trigNumericVal
+	case Eq:
+		trigNumericVal, err := strconv.Atoi(tv)
+		if err != nil {
+			return false
+		}
+		return len(cvs) == trigNumericVal
+	default:
+		return false
+	}
+}
+
 func validatePredUIntArray(p Predicate, cvs []uint8, tv int, index *int) bool {
 	if index != nil {
 		if *index > len(cvs) {

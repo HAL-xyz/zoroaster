@@ -419,375 +419,375 @@ func TestAddressDynamicArrayLengthEq(t *testing.T) {
     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolFixedArrayEqAtPosition1(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "false",
-//                     "Predicate": "Eq"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v10",
-//                 "ParameterType": "bool[3]",
-//                 "Index": 1
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolFixedArrayEqAtPosition1",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolFixedArrayEqAtPosition1(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "false",
+                    "Predicate": "Eq"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v10",
+                "ParameterType": "bool[3]",
+                "Index": 1
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolFixedArrayEqAtPosition1",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolFixedArrayIsIn(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "False",
-//                     "Predicate": "IsIn"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v10",
-//                 "ParameterType": "bool[3]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolFixedArrayIsIn",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolFixedArrayIsIn(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "False",
+                    "Predicate": "IsIn"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v10",
+                "ParameterType": "bool[3]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolFixedArrayIsIn",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolFixedArrayLengthInBetween(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "5",
-//                     "Predicate": "SmallerThan"
-//                 },
-//                 "Condition": {
-//                     "Attribute": "1",
-//                     "Predicate": "BiggerThan"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v10",
-//                 "ParameterType": "bool[3]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolFixedArrayLengthInBetween",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolFixedArrayLengthInBetween(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "5",
+                    "Predicate": "SmallerThan"
+                },
+                "Condition": {
+                    "Attribute": "1",
+                    "Predicate": "BiggerThan"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v10",
+                "ParameterType": "bool[3]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolFixedArrayLengthInBetween",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
-
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolFixedArrayLengthSmallerThan(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "4",
-//                     "Predicate": "SmallerThan"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v10",
-//                 "ParameterType": "bool[3]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolFixedArrayLengthSmallerThan",
-//         "TriggerType": "WatchEvents"
-//     }`
-    
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
-
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
-
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
 // // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolFixedArrayLengthBiggerThan(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "1",
-//                     "Predicate": "BiggerThan"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v10",
-//                 "ParameterType": "bool[3]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolFixedArrayLengthBiggerThan",
-//         "TriggerType": "WatchEvents"
-//     }`
+func TestBoolFixedArrayLengthSmallerThan(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "4",
+                    "Predicate": "SmallerThan"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v10",
+                "ParameterType": "bool[3]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolFixedArrayLengthSmallerThan",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolFixedArrayLengthEq(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "3",
-//                     "Predicate": "Eq"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v10",
-//                 "ParameterType": "bool[3]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolFixedArrayLengthEq",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolFixedArrayLengthBiggerThan(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "1",
+                    "Predicate": "BiggerThan"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v10",
+                "ParameterType": "bool[3]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolFixedArrayLengthBiggerThan",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolDynamicArrayEqAtPosition1(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "true",
-//                     "Predicate": "Eq"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v9",
-//                 "ParameterType": "bool[]",
-//                 "Index": 1
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolDynamicArrayEqAtPosition1",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolFixedArrayLengthEq(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "3",
+                    "Predicate": "Eq"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v10",
+                "ParameterType": "bool[3]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolFixedArrayLengthEq",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolDynamicArrayIsIn(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "False",
-//                     "Predicate": "IsIn"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v9",
-//                 "ParameterType": "bool[]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolDynamicArrayIsIn",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolDynamicArrayEqAtPosition1(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "true",
+                    "Predicate": "Eq"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v9",
+                "ParameterType": "bool[]",
+                "Index": 1
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolDynamicArrayEqAtPosition1",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolDynamicArrayLengthInBetween(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "5",
-//                     "Predicate": "SmallerThan"
-//                 },
-//                 "Condition": {
-//                     "Attribute": "1",
-//                     "Predicate": "BiggerThan"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v9",
-//                 "ParameterType": "bool[]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolDynamicArrayLengthInBetween",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolDynamicArrayIsIn(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "False",
+                    "Predicate": "IsIn"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v9",
+                "ParameterType": "bool[]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolDynamicArrayIsIn",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolDynamicArrayLengthSmallerThan(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "3",
-//                     "Predicate": "SmallerThan"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v9",
-//                 "ParameterType": "bool[]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolDynamicArrayLengthSmallerThan",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolDynamicArrayLengthInBetween(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "5",
+                    "Predicate": "SmallerThan"
+                },
+                "Condition": {
+                    "Attribute": "1",
+                    "Predicate": "BiggerThan"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v9",
+                "ParameterType": "bool[]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolDynamicArrayLengthInBetween",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolDynamicArrayLengthBiggerThan(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "1",
-//                     "Predicate": "BiggerThan"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v9",
-//                 "ParameterType": "bool[]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolDynamicArrayLengthBiggerThan",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolDynamicArrayLengthSmallerThan(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "3",
+                    "Predicate": "SmallerThan"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v9",
+                "ParameterType": "bool[]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolDynamicArrayLengthSmallerThan",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
-// // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
-// func TestBoolDynamicArrayLengthEq(t *testing.T) {
-//     js := `{
-//         "Filters": [
-//             {
-//                 "Condition": {
-//                     "Attribute": "2",
-//                     "Predicate": "Eq"
-//                 },
-//                 "EventName": "bool_event",
-//                 "FilterType": "CheckEventParameter",
-//                 "ParameterName": "v9",
-//                 "ParameterType": "bool[]"
-//             }
-//         ],
-//         "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
-//         "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
-//         "TriggerName": "WAE - TestBoolDynamicArrayLengthEq",
-//         "TriggerType": "WatchEvents"
-//     }`
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolDynamicArrayLengthBiggerThan(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "1",
+                    "Predicate": "BiggerThan"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v9",
+                "ParameterType": "bool[]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolDynamicArrayLengthBiggerThan",
+        "TriggerType": "WatchEvents"
+    }`
     
-//     tg, err := NewTriggerFromJson(js)
-//     assert.NoError(t, err)
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
 
-//     matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
 
-//     assert.Equal(t, 1, len(matches))
-//     assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
-// }
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
+
+// https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
+func TestBoolDynamicArrayLengthEq(t *testing.T) {
+    js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "2",
+                    "Predicate": "Eq"
+                },
+                "EventName": "bool_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v9",
+                "ParameterType": "bool[]"
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestBoolDynamicArrayLengthEq",
+        "TriggerType": "WatchEvents"
+    }`
+    
+    tg, err := NewTriggerFromJson(js)
+    assert.NoError(t, err)
+
+    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+    assert.Equal(t, 1, len(matches))
+    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+}
 
 func TestBytes16EqWithOX(t *testing.T) {
     js := `{
