@@ -51,7 +51,7 @@ func (cli EthMock2) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error)
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressFixedArrayEqAtPosition0(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -70,19 +70,19 @@ func TestAddressFixedArrayEqAtPosition0(t *testing.T) {
         "TriggerName": "WAE - TestAddressFixedArrayEqAtPosition0",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressFixedArrayIsIn(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -100,19 +100,19 @@ func TestAddressFixedArrayIsIn(t *testing.T) {
         "TriggerName": "WAE - TestAddressFixedArrayIsIn",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressFixedArrayLengthInBetween(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -134,19 +134,19 @@ func TestAddressFixedArrayLengthInBetween(t *testing.T) {
         "TriggerName": "WAE - TestAddressFixedArrayLengthInBetween",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressFixedArrayLengthSmallerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -164,19 +164,19 @@ func TestAddressFixedArrayLengthSmallerThan(t *testing.T) {
         "TriggerName": "WAE - TestAddressFixedArrayLengthSmallerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressFixedArrayLengthBiggerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -194,19 +194,19 @@ func TestAddressFixedArrayLengthBiggerThan(t *testing.T) {
         "TriggerName": "WAE - TestAddressFixedArrayLengthBiggerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressFixedArrayLengthEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -224,19 +224,19 @@ func TestAddressFixedArrayLengthEq(t *testing.T) {
         "TriggerName": "WAE - TestAddressFixedArrayLengthEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressDynamicArrayEqAtPosition0(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -255,19 +255,19 @@ func TestAddressDynamicArrayEqAtPosition0(t *testing.T) {
         "TriggerName": "WAE - TestAddressDynamicArrayEqAtPosition0",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressDynamicArrayIsIn(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -285,19 +285,19 @@ func TestAddressDynamicArrayIsIn(t *testing.T) {
         "TriggerName": "WAE - TestAddressDynamicArrayIsIn",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressDynamicArrayLengthInBetween(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -319,19 +319,19 @@ func TestAddressDynamicArrayLengthInBetween(t *testing.T) {
         "TriggerName": "WAE - TestAddressDynamicArrayLengthInBetween",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressDynamicArrayLengthSmallerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -349,19 +349,19 @@ func TestAddressDynamicArrayLengthSmallerThan(t *testing.T) {
         "TriggerName": "WAE - TestAddressDynamicArrayLengthSmallerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressDynamicArrayLengthBiggerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -379,19 +379,19 @@ func TestAddressDynamicArrayLengthBiggerThan(t *testing.T) {
         "TriggerName": "WAE - TestAddressDynamicArrayLengthBiggerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
 func TestAddressDynamicArrayLengthEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -409,19 +409,19 @@ func TestAddressDynamicArrayLengthEq(t *testing.T) {
         "TriggerName": "WAE - TestAddressDynamicArrayLengthEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolFixedArrayEqAtPosition1(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -440,19 +440,19 @@ func TestBoolFixedArrayEqAtPosition1(t *testing.T) {
         "TriggerName": "WAE - TestBoolFixedArrayEqAtPosition1",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolFixedArrayIsIn(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -470,19 +470,19 @@ func TestBoolFixedArrayIsIn(t *testing.T) {
         "TriggerName": "WAE - TestBoolFixedArrayIsIn",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolFixedArrayLengthInBetween(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -504,19 +504,19 @@ func TestBoolFixedArrayLengthInBetween(t *testing.T) {
         "TriggerName": "WAE - TestBoolFixedArrayLengthInBetween",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolFixedArrayLengthSmallerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -534,19 +534,19 @@ func TestBoolFixedArrayLengthSmallerThan(t *testing.T) {
         "TriggerName": "WAE - TestBoolFixedArrayLengthSmallerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolFixedArrayLengthBiggerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -564,19 +564,19 @@ func TestBoolFixedArrayLengthBiggerThan(t *testing.T) {
         "TriggerName": "WAE - TestBoolFixedArrayLengthBiggerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolFixedArrayLengthEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -594,19 +594,19 @@ func TestBoolFixedArrayLengthEq(t *testing.T) {
         "TriggerName": "WAE - TestBoolFixedArrayLengthEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolDynamicArrayEqAtPosition1(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -625,19 +625,19 @@ func TestBoolDynamicArrayEqAtPosition1(t *testing.T) {
         "TriggerName": "WAE - TestBoolDynamicArrayEqAtPosition1",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolDynamicArrayIsIn(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -655,19 +655,19 @@ func TestBoolDynamicArrayIsIn(t *testing.T) {
         "TriggerName": "WAE - TestBoolDynamicArrayIsIn",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolDynamicArrayLengthInBetween(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -689,19 +689,19 @@ func TestBoolDynamicArrayLengthInBetween(t *testing.T) {
         "TriggerName": "WAE - TestBoolDynamicArrayLengthInBetween",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolDynamicArrayLengthSmallerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -719,19 +719,19 @@ func TestBoolDynamicArrayLengthSmallerThan(t *testing.T) {
         "TriggerName": "WAE - TestBoolDynamicArrayLengthSmallerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolDynamicArrayLengthBiggerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -749,19 +749,19 @@ func TestBoolDynamicArrayLengthBiggerThan(t *testing.T) {
         "TriggerName": "WAE - TestBoolDynamicArrayLengthBiggerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 // https://rinkeby.etherscan.io/tx/0x56bce35c702186f21f4a102a116bc9c822f879a81f6d29d75502547945721d5e
 func TestBoolDynamicArrayLengthEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -779,18 +779,18 @@ func TestBoolDynamicArrayLengthEq(t *testing.T) {
         "TriggerName": "WAE - TestBoolDynamicArrayLengthEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
 }
 
 func TestBytes16EqWithOX(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -809,18 +809,18 @@ func TestBytes16EqWithOX(t *testing.T) {
         "TriggerName": "WAE - TestBytes16EqWithOX",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestBytes16Eq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -839,18 +839,18 @@ func TestBytes16Eq(t *testing.T) {
         "TriggerName": "WAE - TestBytes16Eq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256FixedArrayEqAtPosition1(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -869,18 +869,18 @@ func TestInt256FixedArrayEqAtPosition1(t *testing.T) {
         "TriggerName": "WAE - TestInt256FixedArrayEqAtPosition1",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256FixedArrayIsIn(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -898,18 +898,18 @@ func TestInt256FixedArrayIsIn(t *testing.T) {
         "TriggerName": "WAE - TestInt256FixedArrayIsIn",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256FixedArrayLengthInBetween(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -931,18 +931,18 @@ func TestInt256FixedArrayLengthInBetween(t *testing.T) {
         "TriggerName": "WAE - TestInt256FixedArrayLengthInBetween",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256FixedArrayLengthSmallerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -960,18 +960,18 @@ func TestInt256FixedArrayLengthSmallerThan(t *testing.T) {
         "TriggerName": "WAE - TestInt256FixedArrayLengthSmallerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256FixedArrayLengthBiggerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -989,18 +989,18 @@ func TestInt256FixedArrayLengthBiggerThan(t *testing.T) {
         "TriggerName": "WAE - TestInt256FixedArrayLengthBiggerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256FixedArrayLengthEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1018,18 +1018,18 @@ func TestInt256FixedArrayLengthEq(t *testing.T) {
         "TriggerName": "WAE - TestInt256FixedArrayLengthEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256DinamicArrayEqAtPosition0(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1048,18 +1048,18 @@ func TestInt256DinamicArrayEqAtPosition0(t *testing.T) {
         "TriggerName": "WAE - TestInt256DinamicArrayEqAtPosition0",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256DinamicArrayIsIn(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1077,18 +1077,18 @@ func TestInt256DinamicArrayIsIn(t *testing.T) {
         "TriggerName": "WAE - TestInt256DinamicArrayIsIn",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256DinamicArrayLengthInBetween(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1110,18 +1110,18 @@ func TestInt256DinamicArrayLengthInBetween(t *testing.T) {
         "TriggerName": "WAE - TestInt256DinamicArrayLengthInBetween",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256DinamicArrayLengthSmallerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1139,18 +1139,18 @@ func TestInt256DinamicArrayLengthSmallerThan(t *testing.T) {
         "TriggerName": "WAE - TestInt256DinamicArrayLengthSmallerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256DinamicArrayLengthBiggerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1168,18 +1168,18 @@ func TestInt256DinamicArrayLengthBiggerThan(t *testing.T) {
         "TriggerName": "WAE - TestInt256DinamicArrayLengthBiggerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestInt256DinamicArrayLengthEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1197,18 +1197,18 @@ func TestInt256DinamicArrayLengthEq(t *testing.T) {
         "TriggerName": "WAE - TestInt256DinamicArrayLengthEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
 }
 
 func TestStringFixedArrayIsIn(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1226,18 +1226,18 @@ func TestStringFixedArrayIsIn(t *testing.T) {
         "TriggerName": "WAE - TestStringFixedArrayIsIn",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringFixedArrayEqAtPosition0(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1256,18 +1256,18 @@ func TestStringFixedArrayEqAtPosition0(t *testing.T) {
         "TriggerName": "WAE - TestStringFixedArrayEqAtPosition0",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringFixedArrayLengthInBetween(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1289,18 +1289,18 @@ func TestStringFixedArrayLengthInBetween(t *testing.T) {
         "TriggerName": "WAE - TestStringFixedArrayLengthInBetween",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringFixedArrayLengthBiggerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1318,18 +1318,18 @@ func TestStringFixedArrayLengthBiggerThan(t *testing.T) {
         "TriggerName": "WAE - TestStringFixedArrayLengthBiggerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringFixedArrayLengthSmallerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1347,18 +1347,18 @@ func TestStringFixedArrayLengthSmallerThan(t *testing.T) {
         "TriggerName": "WAE - TestStringFixedArrayLengthSmallerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringFixedArrayLengthEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1376,18 +1376,18 @@ func TestStringFixedArrayLengthEq(t *testing.T) {
         "TriggerName": "WAE - TestStringFixedArrayLengthEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringDinamicArrayLengthInBetween(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1409,18 +1409,18 @@ func TestStringDinamicArrayLengthInBetween(t *testing.T) {
         "TriggerName": "WAE - TestStringDinamicArrayLengthInBetween",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringDinamicArrayLengthSmallerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1438,18 +1438,18 @@ func TestStringDinamicArrayLengthSmallerThan(t *testing.T) {
         "TriggerName": "WAE - TestStringDinamicArrayLengthSmallerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringDinamicArrayLengthBiggerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1467,18 +1467,18 @@ func TestStringDinamicArrayLengthBiggerThan(t *testing.T) {
         "TriggerName": "WAE - TestStringDinamicArrayLengthBiggerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringDinamicArrayLengthEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1496,18 +1496,18 @@ func TestStringDinamicArrayLengthEq(t *testing.T) {
         "TriggerName": "WAE - TestStringDinamicArrayLengthEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringDinamicArrayEqAtPosition0(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1526,18 +1526,18 @@ func TestStringDinamicArrayEqAtPosition0(t *testing.T) {
         "TriggerName": "WAE - TestStringDinamicArrayEqAtPosition0",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringDinamicArrayIsIn(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1555,18 +1555,18 @@ func TestStringDinamicArrayIsIn(t *testing.T) {
         "TriggerName": "WAE - TestStringDinamicArrayIsIn",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestStringEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1584,18 +1584,18 @@ func TestStringEq(t *testing.T) {
         "TriggerName": "WAE - TestStringEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
 }
 
 func TestUint8Eq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1613,18 +1613,18 @@ func TestUint8Eq(t *testing.T) {
         "TriggerName": "WAE - TestUint8Eq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9252401, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 2, len(matches))
-    assert.Equal(t, 9252401, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9252401, 1572344236)
+
+	assert.Equal(t, 2, len(matches))
+	assert.Equal(t, 9252401, matches[0].Log.BlockNumber)
 }
 
 func TestBytes32Eq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1642,19 +1642,19 @@ func TestBytes32Eq(t *testing.T) {
         "TriggerName": "WAE - TestBytes32Eq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9252045, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9252045, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9252045, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9252045, matches[0].Log.BlockNumber)
 }
 
 // https://etherscan.io/tx/0x55ae08e51da4e787b7589ba9342a81091ae76f29a86b723c2e96eb32be7303d0
 func TestBytesEqStartingWith0x(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1672,19 +1672,19 @@ func TestBytesEqStartingWith0x(t *testing.T) {
         "TriggerName": "WAE - TestBytesEqStartingWith0x",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9243327, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9243327, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
 }
 
 // https://etherscan.io/tx/0x55ae08e51da4e787b7589ba9342a81091ae76f29a86b723c2e96eb32be7303d0
 func TestBytesEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1702,18 +1702,18 @@ func TestBytesEq(t *testing.T) {
         "TriggerName": "WAE - TestBytesEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9243327, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9243327, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
 }
 
 func TestBoolEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1731,18 +1731,18 @@ func TestBoolEq(t *testing.T) {
         "TriggerName": "WAE - TestBoolEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9133542, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9133542, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9133542, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9133542, matches[0].Log.BlockNumber)
 }
 
 func TestUint64Eq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1760,18 +1760,18 @@ func TestUint64Eq(t *testing.T) {
         "TriggerName": "WAE - TestUint64Eq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9252369, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9252369, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
 }
 
 func TestUint128Eq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1789,18 +1789,18 @@ func TestUint128Eq(t *testing.T) {
         "TriggerName": "WAE - TestUint128Eq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9252369, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9252369, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
 }
 
 func XXXTestUint128EqBis(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1818,18 +1818,18 @@ func XXXTestUint128EqBis(t *testing.T) {
         "TriggerName": "WAE - TestUint128EqBis",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9252460, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 2, len(matches))
-    assert.Equal(t, 9252460, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9252460, 1572344236)
+
+	assert.Equal(t, 2, len(matches))
+	assert.Equal(t, 9252460, matches[0].Log.BlockNumber)
 }
 
 func TestAddressEqNotDecoded(t *testing.T) {
-    js := `{
+	js := `{
     "Filters": [
         {
             "Condition": {
@@ -1847,18 +1847,18 @@ func TestAddressEqNotDecoded(t *testing.T) {
     "TriggerName": "WAE - TestAddressEqNotDecoded",
     "TriggerType": "WatchEvents"
 }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9252175, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9252175, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9252175, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9252175, matches[0].Log.BlockNumber)
 }
 
 func TestUint256Eq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1906,18 +1906,18 @@ func TestUint256Eq(t *testing.T) {
         "TriggerName": "WAE - TestUint256Eq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9252357, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9252357, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9252357, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9252357, matches[0].Log.BlockNumber)
 }
 
 func TestUint256InBetween(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1945,18 +1945,18 @@ func TestUint256InBetween(t *testing.T) {
         "TriggerName": "WAE - TestUint256InBetween",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9130794, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9130794, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
 }
 
 func TestUint256BiggerThan(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -1974,18 +1974,18 @@ func TestUint256BiggerThan(t *testing.T) {
         "TriggerName": "WAE - TestUint256BiggerThan",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9130794, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9130794, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
 }
 
 func TestUint256EqBytes32EqAddressEq(t *testing.T) {
-    js := `{
+	js := `{
         "Filters": [
             {
                 "Condition": {
@@ -2023,18 +2023,18 @@ func TestUint256EqBytes32EqAddressEq(t *testing.T) {
         "TriggerName": "WAE - TestUint256EqBytes32EqAddressEq",
         "TriggerType": "WatchEvents"
     }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9130794, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9130794, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
 }
 
 func TestMatchEvent8(t *testing.T) {
-    js := `{
+	js := `{
     "Filters": [
         {
             "Condition": {
@@ -2060,14 +2060,14 @@ func TestMatchEvent8(t *testing.T) {
     "TriggerName": "WAE - Method",
     "TriggerType": "WatchEvents"
 }`
-    
-    tg, err := NewTriggerFromJson(js)
-    assert.NoError(t, err)
 
-    matches := MatchEvent(config.CliMain, tg, 9222611, 1572344236)
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
 
-    assert.Equal(t, 1, len(matches))
-    assert.Equal(t, 9222611, matches[0].Log.BlockNumber)
+	matches := MatchEvent(config.CliMain, tg, 9222611, 1572344236)
+
+	assert.Equal(t, 1, len(matches))
+	assert.Equal(t, 9222611, matches[0].Log.BlockNumber)
 }
 
 func TestMatchEvent7(t *testing.T) {

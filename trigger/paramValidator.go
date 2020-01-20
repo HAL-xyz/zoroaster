@@ -34,12 +34,12 @@ func ValidateTopicParam(topicParam string, paramType string, attribute string, p
 		}
 	}
 
-	// bool[], bool[N]
+	// bool[], bool[N] - Keccak hash, only Eq supported
 	if strings.HasPrefix(paramType, "bool[") {
 		return strings.ToLower(topicParam) == strings.ToLower(attribute), topicParam
 	}
 
-	// string, string[], string[N]
+	// string, string[], string[N] - Keccak hash, only Eq supported
 	if strings.HasPrefix(paramType, "string") {
 		return strings.ToLower(topicParam) == strings.ToLower(attribute), topicParam
 	}
@@ -54,7 +54,7 @@ func ValidateTopicParam(topicParam string, paramType string, attribute string, p
 		return utils.NormalizeAddress(topicParam) == utils.NormalizeAddress(attribute), topicParam
 	}
 
-	// address[], address[N]
+	// address[], address[N] - Keccak hash, only Eq supported
 	if strings.HasPrefix(paramType, "address[") {
 		return strings.ToLower(topicParam) == strings.ToLower(attribute), topicParam
 	}
@@ -65,7 +65,7 @@ func ValidateTopicParam(topicParam string, paramType string, attribute string, p
 		return validatePredBigInt(predicate, utils.MakeBigIntFromHex(topicParam), utils.MakeBigInt(attribute)), topicParam
 	}
 
-	// int[N] and int[]
+	// int[N] and int[] - Keccak hash, only Eq supported
 	arrayIntRgx := regexp.MustCompile(`u?int\d*\[\d*]$`)
 	if arrayIntRgx.MatchString(paramType) {
 		return strings.ToLower(topicParam) == strings.ToLower(attribute), topicParam

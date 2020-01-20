@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 	"zoroaster/trigger"
 	"zoroaster/utils"
@@ -119,7 +120,9 @@ func TestHandleWebHookWrongStuff(t *testing.T) {
 		[]interface{}{"true"},
 	}
 	outcome := handleWebHookPost(url, cnMatch, &http.Client{})
-	assert.Equal(t, `{"error":"Post https://foo.zyusfddsiu: dial tcp: lookup foo.zyusfddsiu: no such host"}`, outcome.Outcome)
+
+	notFoundPattern := strings.HasPrefix(outcome.Outcome, `{"error":"Post https://foo.zyusfddsiu:`)
+	assert.True(t, notFoundPattern)
 }
 
 type EthMock struct{}
