@@ -117,7 +117,8 @@ CREATE TABLE IF NOT EXISTS public.state (
     wac_last_block_processed integer,
     wac_date timestamp with time zone,
     wae_last_block_processed integer,
-    wae_date timestamp with time zone
+    wae_date timestamp with time zone,
+    current_month integer
 );
 
 ALTER TABLE ONLY public.state
@@ -128,8 +129,9 @@ INSERT INTO state (
     id,
     wat_last_block_processed,
     wac_last_block_processed,
-    wae_last_block_processed)
-VALUES (1, 0, 0, 0);
+    wae_last_block_processed,
+    current_month)
+VALUES (1, 0, 0, 0, 0);
 
 /* Create SQL Trigger to update match_c */
 

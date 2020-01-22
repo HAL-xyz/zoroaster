@@ -18,6 +18,32 @@ type PostgresClient struct {
 	conf *config.ZoroDB
 }
 
+func (cli PostgresClient) UpdateSavedMonth(newMonth int) error {
+	// update current month
+	q := fmt.Sprintf(`UPDATE "%s" SET current_month = $1`, cli.conf.TableState)
+	_, err := db.Exec(q, newMonth)
+	if err != nil {
+		return fmt.Errorf("cannot update current month: %s", err)
+	}
+	// reset counter_current_month for all users
+	userQ := fmt.Sprintf(`UPDATE "%s" SET counter_current_month = 0`, cli.conf.TableUsers)
+	_, err = db.Exec(userQ)
+	if err != nil {
+		return fmt.Errorf("cannot reset user counter_current_month: %s", err)
+	}
+	return nil
+}
+
+func (cli PostgresClient) ReadSavedMonth() (int, error) {
+	var currentMonth int
+	q := fmt.Sprintf(`SELECT current_month FROM %s`, cli.conf.TableState)
+	err := db.QueryRow(q).Scan(&currentMonth)
+	if err != nil {
+		return 0, err
+	}
+	return currentMonth, nil
+}
+
 func (cli PostgresClient) LogAnalytics(tgType trigger.TgType, blockNo, triggersNo, blockTime int, start, end time.Time) error {
 	q := fmt.Sprintf(
 		`INSERT INTO analytics (

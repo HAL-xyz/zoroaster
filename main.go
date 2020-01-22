@@ -8,6 +8,7 @@ import (
 	"time"
 	"zoroaster/aws"
 	"zoroaster/config"
+	"zoroaster/db"
 	"zoroaster/eth"
 	"zoroaster/matcher"
 	"zoroaster/trigger"
@@ -43,6 +44,9 @@ func main() {
 
 	// ETH client
 	ethClient := ethrpc.New(config.Zconf.EthNode)
+
+	// Run monthly matches update
+	go db.MatchesMonthlyUpdate(&psqlClient)
 
 	// Channels are buffered so the poller doesn't stop queueing blocks
 	// if one of the Matcher isn't up (during tests) of if WaC is very slow (which it is)

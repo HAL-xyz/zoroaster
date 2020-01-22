@@ -7,6 +7,14 @@ import (
 
 // Helper functions used for tests only
 
+func (cli PostgresClient) SetString(query string) error {
+	_, err := db.Exec(query)
+	if err != nil {
+		return fmt.Errorf("cannot set string: %s", err)
+	}
+	return nil
+}
+
 func (cli PostgresClient) ReadString(query string) (string, error) {
 	var output string
 	err := db.QueryRow(query).Scan(&output)

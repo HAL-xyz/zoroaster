@@ -30,4 +30,8 @@ type IDB interface {
 	GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, error)
 
 	LogAnalytics(tgType trigger.TgType, blockNo, triggersNo, blockTime int, start, end time.Time) error
+
+	ReadSavedMonth() (int, error)
+
+	UpdateSavedMonth(newMonth int) error
 }
