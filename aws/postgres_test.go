@@ -9,6 +9,7 @@ import (
 	"time"
 	"zoroaster/config"
 	"zoroaster/trigger"
+	"zoroaster/utils"
 )
 
 var psqlClient = PostgresClient{}
@@ -25,14 +26,10 @@ func TestPostgresClient_All(t *testing.T) {
 	// for now I can't be bothered and I'll fit everything in one test,
 	// closing the connection only once, at the end.
 
-	// Also note that these tests are, at best, asserting for non-errors.
-	// In the future it would be nice to have some real assertions;
-	// we would need to populate a database and have asserts on the returned values.
-
 	defer psqlClient.Close()
 
 	// load a User
-	userUUID, err := psqlClient.SaveUser()
+	userUUID, err := psqlClient.SaveUser(1, 1)
 	assert.NoError(t, err)
 
 	// load a Trigger
@@ -49,6 +46,7 @@ func TestPostgresClient_All(t *testing.T) {
 	// Log Tx Match
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/t1.json")
 	tg.TriggerUUID = triggerUUID
+	tg.UserUUID = userUUID
 
 	tx, err := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
 	assert.NoError(t, err)
@@ -64,7 +62,7 @@ func TestPostgresClient_All(t *testing.T) {
 	_, err = psqlClient.LogMatch(txMatch)
 	assert.NoError(t, err)
 
-	//// Log Contract Match
+	// Log Contract Match
 	cnMatch := trigger.CnMatch{
 		Trigger:        tg,
 		BlockNumber:    1,
@@ -109,14 +107,14 @@ func TestPostgresClient_All(t *testing.T) {
 
 	// Log Outcomes
 	payload := `{
-   "BlockNumber":1,
-   "ContractAdd":"0x",
-   "FunctionName":"fn()",
-   "ReturnedData":{
-      "AllValues":"{}",
-      "MatchedValues":"{}"
-   },
-   "BlockTimestamp":8888
+  "BlockNumber":1,
+  "ContractAdd":"0x",
+  "FunctionName":"fn()",
+  "ReturnedData":{
+     "AllValues":"{}",
+     "MatchedValues":"{}"
+  },
+  "BlockTimestamp":8888
 }`
 	outcome := `{"HttpCode":200}`
 	o1 := trigger.Outcome{payload, outcome}
@@ -154,4 +152,64 @@ func TestPostgresClient_All(t *testing.T) {
 	// Write analytics
 	err = psqlClient.LogAnalytics(trigger.WaT, 9999, 100, int(time.Now().Unix()), time.Now(), time.Now().Add(10*time.Second))
 	assert.NoError(t, err)
+
+	/* Test user limits */
+
+	// load a User
+	batmanUUID, err := psqlClient.SaveUser(1, 0)
+	assert.NoError(t, err)
+
+	// load a Trigger
+	batmanTriggerSrc, err := ioutil.ReadFile("../resources/triggers/wac-uniswap.json")
+	assert.NoError(t, err)
+	batmanTriggerUUID, err := psqlClient.SaveTrigger(string(batmanTriggerSrc), true, false, batmanUUID)
+	assert.NoError(t, err)
+
+	activeTriggers, err := psqlClient.LoadTriggersFromDB(trigger.WaC)
+	assert.NoError(t, err)
+
+	// check that batmanTriggerUUID is present within activeTriggers
+	uuids := make([]string, len(activeTriggers))
+	for _, tg := range activeTriggers {
+		uuids = append(uuids, tg.TriggerUUID)
+	}
+	assert.True(t, utils.IsIn(batmanTriggerUUID, uuids))
+
+	// fetch batman's trigger
+	var batmanTrigger *trigger.Trigger
+	for _, tg := range activeTriggers {
+		if tg.UserUUID == batmanUUID {
+			batmanTrigger = tg
+		}
+	}
+
+	assert.NotNil(t, batmanTrigger.UserUUID)
+
+	// when logging a match for batmanTriggerUUID, the batman's counter should ++
+	batmanMatch := trigger.CnMatch{
+		Trigger:        batmanTrigger,
+		BlockNumber:    1,
+		BlockTimestamp: 888888,
+		BlockHash:      "0x",
+		MatchUUID:      "3b29b0c3-e403-4103-81ef-6685cd391cdm",
+		MatchedValues:  []string{},
+		AllValues:      nil,
+	}
+	_, err = psqlClient.LogMatch(batmanMatch)
+	assert.NoError(t, err)
+
+	newCounter, err := psqlClient.ReadString(fmt.Sprintf("SELECT counter_current_month FROM users WHERE uuid = '%s'", batmanTrigger.UserUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, "1", newCounter)
+
+	// now this trigger should not be loaded anymore
+	activeTriggers, err = psqlClient.LoadTriggersFromDB(trigger.WaC)
+	assert.NoError(t, err)
+
+	// check that batmanTriggerUUID is *NOT* present within activeTriggers
+	uuids = make([]string, len(activeTriggers))
+	for _, tg := range activeTriggers {
+		uuids = append(uuids, tg.TriggerUUID)
+	}
+	assert.False(t, utils.IsIn(batmanTriggerUUID, uuids))
 }

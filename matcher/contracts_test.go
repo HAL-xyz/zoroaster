@@ -77,7 +77,7 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	}
 
 	// load a User
-	userUUID, err := psqlClient.SaveUser()
+	userUUID, err := psqlClient.SaveUser(100, 0)
 	assert.NoError(t, err)
 
 	// load a Trigger

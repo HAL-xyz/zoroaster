@@ -7,6 +7,7 @@
     "tableOutcomes": "outcomes",
     "tableState": "state",
     "tableActions": "actions",
+    "tableUsers": "users",
     "host": "",
     "name": "hal_test",
     "port": 5432

@@ -32,17 +32,6 @@ func (cli PostgresClient) LogAnalytics(tgType trigger.TgType, blockNo, triggersN
 	return err
 }
 
-func (cli PostgresClient) TruncateTables(tables []string) error {
-	for _, t := range tables {
-		q := fmt.Sprintf(`TRUNCATE table %s CASCADE`, t)
-		_, err := db.Exec(q)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 func (cli PostgresClient) GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, error) {
 	q := fmt.Sprintf(
 		`SELECT uuid FROM %s
@@ -175,15 +164,25 @@ func (cli PostgresClient) LogMatch(match trigger.IMatch) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	// also update user's counter
+	upQ := fmt.Sprintf(`UPDATE "%s"
+                SET counter_current_month = counter_current_month + 1 
+				WHERE uuid = '%s' `, cli.conf.TableUsers, match.GetUserUUID())
+	_, err = db.Exec(upQ)
+	if err != nil {
+		return "", err
+	}
 	return lastUUID, nil
 }
 
 func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error) {
 	q := fmt.Sprintf(
-		`SELECT uuid, trigger_data, user_uuid
-				FROM %s AS t
-				WHERE (t.trigger_data ->> 'TriggerType')::text = '%s'
-				AND t.is_active = true`, cli.conf.TableTriggers, trigger.TgTypeToString(tgType))
+		`SELECT tg_table.uuid, trigger_data, user_uuid
+				FROM %s AS tg_table, %s AS usr_table
+				WHERE (tg_table.trigger_data ->> 'TriggerType')::text = '%s'
+				AND tg_table.user_uuid = usr_table.uuid
+				AND counter_current_month < actions_monthly_cap
+				AND tg_table.is_active = true`, cli.conf.TableTriggers, cli.conf.TableUsers, trigger.TgTypeToString(tgType))
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err

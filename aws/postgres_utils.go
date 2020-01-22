@@ -16,7 +16,7 @@ func (cli PostgresClient) ReadString(query string) (string, error) {
 	return output, nil
 }
 
-func (cli PostgresClient) SaveUser() (string, error) {
+func (cli PostgresClient) SaveUser(actionsCap int, counterCurrent int) (string, error) {
 	q := fmt.Sprintf(
 		`INSERT INTO users (
 			"display_name", 
@@ -26,7 +26,7 @@ func (cli PostgresClient) SaveUser() (string, error) {
 			"created_at",
 			"counter_current_month") VALUES ($1, $2, $3, $4, $5, $6) RETURNING uuid`)
 	var lastUUID string
-	err := db.QueryRow(q, "batman", "email@lol.com", 1, "admin", time.Now(), 1).Scan(&lastUUID)
+	err := db.QueryRow(q, "batman", "email@lol.com", actionsCap, "admin", time.Now(), counterCurrent).Scan(&lastUUID)
 	return lastUUID, err
 }
 
@@ -61,5 +61,15 @@ func (cli PostgresClient) SaveAction(triggerUUID string) (string, error) {
 }`
 	err := db.QueryRow(q, actionData, true, triggerUUID, time.Now(), time.Now()).Scan(&lastUUID)
 	return lastUUID, err
+}
 
+func (cli PostgresClient) TruncateTables(tables []string) error {
+	for _, t := range tables {
+		q := fmt.Sprintf(`TRUNCATE table %s CASCADE`, t)
+		_, err := db.Exec(q)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

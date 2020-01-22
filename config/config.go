@@ -26,6 +26,7 @@ type ZoroDB struct {
 	TableOutcomes string
 	TableState    string
 	TableActions  string
+	TableUsers    string
 	Host          string
 	User          string
 	Name          string
