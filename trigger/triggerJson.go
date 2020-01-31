@@ -128,11 +128,12 @@ func (fjs FilterJson) ToFilter() (*Filter, error) {
 func makeCondition(fjs FilterJson) (Conditioner, error) {
 
 	predicate := unpackPredicate(fjs.Condition.Predicate)
-	if predicate < 0 && fjs.FilterType != "CheckFunctionCalled" {
+	if predicate < 0 && !utils.IsIn(fjs.FilterType, []string{"CheckFunctionCalled", "CheckEventEmitted"}) {
+		fmt.Println("DIO CANE: ", fjs.FilterType)
 		return nil, fmt.Errorf("unsupported predicate type %s", fjs.Condition.Predicate)
 	}
 	attribute := fjs.Condition.Attribute
-	if len(attribute) < 1 && fjs.FilterType != "CheckFunctionCalled" {
+	if len(attribute) < 1 && !utils.IsIn(fjs.FilterType, []string{"CheckFunctionCalled", "CheckEventEmitted"}) {
 		return nil, fmt.Errorf("unsupported attribute type %s", attribute)
 	}
 
@@ -183,7 +184,10 @@ func makeCondition(fjs FilterJson) (Conditioner, error) {
 	if fjs.FilterType == "CheckEventParameter" {
 		c := ConditionEvent{Condition{}, predicate, fjs.Condition.Attribute}
 		return c, nil
-
+	}
+	if fjs.FilterType == "CheckEventEmitted" {
+		c := ConditionEvent{Condition{}, predicate, fjs.Condition.Attribute}
+		return c, nil
 	}
 	return nil, fmt.Errorf("unsupported filter type %s", fjs.FilterType)
 }

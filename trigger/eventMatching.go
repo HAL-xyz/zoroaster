@@ -28,7 +28,7 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 	// EventName must be the same for every Filter, so we just get the first one
 	var eventName string
 	for _, f := range tg.Filters {
-		if f.FilterType == "CheckEventParameter" {
+		if f.FilterType == "CheckEventParameter" || f.FilterType == "CheckEventEmitted" {
 			eventName = f.EventName
 			break
 		}
@@ -40,7 +40,7 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 
 	var eventMatches []*EventMatch
 	for _, log := range logs {
-		if validateTriggerLog(&log, tg, &abiObj, eventName) {
+		if validateTriggerLog(&log, tg, &abiObj, eventName) || validateEmittedEvent(&log, tg, eventName) {
 			decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
 			topicsMap := getTopicsMap(&abiObj, eventName, &log)
 			ev := EventMatch{
@@ -53,6 +53,20 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 		}
 	}
 	return eventMatches
+}
+
+func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger, eventName string) bool {
+	if len(tg.Filters) > 0 && tg.Filters[0].FilterType == "CheckEventEmitted" {
+		eventSignature, err := getEventSignature(tg.ContractABI, eventName)
+		if err != nil {
+			logrus.Debug(err)
+			return false
+		}
+		if evLog.Topics[0] == eventSignature {
+			return true
+		}
+	}
+	return false
 }
 
 func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI, eventName string) bool {
