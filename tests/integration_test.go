@@ -50,7 +50,7 @@ func TestIntegration(t *testing.T) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			block, err := config.CliTest.EthGetBlockByNumber(rule.BlockNo, true)
+			block, err := config.CliMain.EthGetBlockByNumber(rule.BlockNo, true)
 			if err != nil {
 				log.Fatal(err)
 			}

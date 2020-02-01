@@ -7,5 +7,4 @@ import "github.com/onrik/ethrpc"
 var Zconf = Load()
 
 var CliMain = ethrpc.New(Zconf.EthNode)
-var CliTest = ethrpc.New(Zconf.TestNode)
 var CliRinkeby = ethrpc.New(Zconf.RinkebyNode)

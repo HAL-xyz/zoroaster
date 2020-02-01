@@ -18,6 +18,7 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 		logrus.Debugf("cannot get events for trigger %s, %s", tg.TriggerUUID, err)
 		return []*EventMatch{}
 	}
+	// fmt.Println(utils.GimmePrettyJson(logs))
 
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 	if err != nil {
@@ -39,13 +40,13 @@ func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []
 	}
 
 	var eventMatches []*EventMatch
-	for _, log := range logs {
+	for i, log := range logs {
 		if validateTriggerLog(&log, tg, &abiObj, eventName) || validateEmittedEvent(&log, tg, eventName) {
 			decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
 			topicsMap := getTopicsMap(&abiObj, eventName, &log)
 			ev := EventMatch{
 				Tg:             tg,
-				Log:            &log,
+				Log:            &logs[i],
 				BlockTimestamp: blockTimestamp,
 				EventParams:    makeEventParams(decodedData, topicsMap),
 			}

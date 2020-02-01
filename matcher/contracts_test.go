@@ -54,17 +54,19 @@ func TestMatchContractsForBlock(t *testing.T) {
 	mockGetModAccounts := func(a, b int, node string) []string {
 		return []string{"0xbb9bc244d798123fde783fcc1c72d3bb8c189413"}
 	}
+	lastBlock, err := config.CliMain.EthBlockNumber()
+	assert.NoError(t, err)
 
 	cnMatches := matchContractsForBlock(
-		8081000,
+		lastBlock,
 		1554828248,
 		"0x",
 		mockGetModAccounts,
 		mockDB{},
-		config.CliTest)
+		config.CliMain)
 
 	assert.Equal(t, 1, len(cnMatches))
-	assert.Equal(t, 8081000, cnMatches[0].BlockNumber)
+	assert.Equal(t, lastBlock, cnMatches[0].BlockNumber)
 }
 
 func TestMatchContractsWithRealDB(t *testing.T) {
@@ -95,16 +97,19 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		return []string{"0x09cabec1ead1c0ba254b09efb3ee13841712be14"}
 	}
 
+	lastBlock, err := config.CliMain.EthBlockNumber()
+	assert.NoError(t, err)
+
 	// here we call getTokenToEthOutputPrice(1) which returns the
 	// current ETH price in USD; since the trigger condition is "biggerThan 3"
 	// we expect this trigger to always match
 	cnMatches := matchContractsForBlock(
-		8081000,
+		lastBlock,
 		1554828248,
 		"0x",
 		mockGetModAccounts,
 		&psqlClient,
-		config.CliTest)
+		config.CliMain)
 
 	assert.Equal(t, 1, len(cnMatches))
 
@@ -121,12 +126,12 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 
 	// subsequent calls won't match, because triggered is set to true
 	cnMatches = matchContractsForBlock(
-		8081000,
+		lastBlock,
 		1554828248,
 		"0x",
 		mockGetModAccounts,
 		&psqlClient,
-		config.CliTest)
+		config.CliMain)
 
 	assert.Equal(t, 0, len(cnMatches))
 

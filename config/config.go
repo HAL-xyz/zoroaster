@@ -3,8 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
@@ -12,7 +12,6 @@ type ZConfiguration struct {
 	Stage       Stage
 	ConfigFile  string
 	EthNode     string // the main eth node
-	TestNode    string // additional node used for tests
 	RinkebyNode string // Rinkeby network, used for tests
 	LogsPath    string
 	LogsFile    string
@@ -105,16 +104,11 @@ func Load() *ZConfiguration {
 		log.Fatal("no eth node set in local env ", ethNode)
 	}
 
-	// extra nodes are only required for running tests
-
-	zconfig.TestNode = os.Getenv(testNode)
-	if zconfig.Stage == TEST && zconfig.EthNode == "" {
-		log.Fatal("no test node set in local env ", testNode)
-	}
+	// Rinkeby node is only required for tests
 
 	zconfig.RinkebyNode = os.Getenv(rinkebyNode)
 	if zconfig.Stage == TEST && zconfig.EthNode == "" {
-		log.Fatal("no Rinkeby node set in local env ", rinkebyNode)
+		log.Error("no Rinkeby node set in local env ", rinkebyNode)
 	}
 
 	return &zconfig

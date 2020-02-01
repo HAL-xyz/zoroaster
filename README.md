@@ -26,8 +26,7 @@ into your local `/etc/` directory.
    * `DB_USR` 
    * `DB_PWD`
    * `ETH_NODE` - a valid Ethereum node
-   * `TEST_NODE` - can be the same as the main `ETH_NODE`
-   * `RINKEBY_NODE` - valid Ethereum Rinkeby node
+   * `RINKEBY_NODE` - Rinkeby node, used for tests only
    
 Then you need to create a suitable database schema.
 Fill in the `db/migrate_up.sh` script, then run it like this:
