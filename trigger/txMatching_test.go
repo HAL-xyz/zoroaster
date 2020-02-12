@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
+	"zoroaster/config"
 	"zoroaster/utils"
 )
 
@@ -259,6 +260,20 @@ func TestValidateTrigger2(t *testing.T) {
 	assert.Equal(t, validateTrigger(trigger, &block.Transactions[6]), true)
 	assert.Equal(t, validateTrigger(trigger, &block.Transactions[1]), false)
 	assert.Equal(t, validateTrigger(trigger, &block.Transactions[8]), true)
+}
+
+func TestValidateTriggerWithNoInputData(t *testing.T) {
+
+	trigger, err := GetTriggerFromFile("../resources/triggers/t15.json")
+	assert.NoError(t, err)
+
+	block, err := config.CliMain.EthGetBlockByNumber(9466264, true)
+	res := MatchTransaction(trigger, block)
+
+	assert.Equal(t, 1, len(res))
+	assert.Equal(t, "0xd11c6e75052c838c944608c478da95c09c2d239e417afbcb869c87469643ce57", res[0].Tx.Hash)
+	assert.Nil(t, res[0].DecodedFnName)
+	assert.Nil(t, res[0].DecodedFnArgs)
 }
 
 // Testing one Trigger vs one Block

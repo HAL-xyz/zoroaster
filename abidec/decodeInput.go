@@ -3,6 +3,7 @@ package abidec
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"strings"
 )
@@ -19,6 +20,10 @@ func DecodeInputData(data string, cntABI string) (map[string]interface{}, error)
 	// strip hex prefix (0x)
 	// signature is the first 32 bits of the hash of the function
 	// in HEX 1 char = 4 bits, so 32 bits = 8 hex chars
+	if len(data) <= 2 {
+		return nil, fmt.Errorf("no input data")
+	}
+
 	decodedSig, err := hex.DecodeString(data[2:10])
 	if err != nil {
 		return nil, err
@@ -68,6 +73,13 @@ func DecodeInputMethod(data *string, cntABI *string) (*string, error) {
 	xabi, err := abi.JSON(strings.NewReader(*cntABI))
 	if err != nil {
 		return nil, err
+	}
+
+	if data == nil {
+		return nil, fmt.Errorf("no input data")
+	}
+	if len(*data) <= 2 {
+		return nil, fmt.Errorf("no input data")
 	}
 
 	decodedSig, err := hex.DecodeString((*data)[2:10])
