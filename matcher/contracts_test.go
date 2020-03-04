@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -53,6 +54,27 @@ func TestMatchContractsForBlock(t *testing.T) {
 	// mocks
 	mockGetModAccounts := func(a, b int, node string) ([]string, error) {
 		return []string{"0xbb9bc244d798123fde783fcc1c72d3bb8c189413"}, nil
+	}
+	lastBlock, err := config.CliMain.EthBlockNumber()
+	assert.NoError(t, err)
+
+	cnMatches := matchContractsForBlock(
+		lastBlock,
+		1554828248,
+		"0x",
+		mockGetModAccounts,
+		mockDB{},
+		config.CliMain)
+
+	assert.Equal(t, 1, len(cnMatches))
+	assert.Equal(t, lastBlock, cnMatches[0].BlockNumber)
+}
+
+func TestMatchContractsForBlockWithBrokenGetModAccount(t *testing.T) {
+
+	// mocks
+	mockGetModAccounts := func(a, b int, node string) ([]string, error) {
+		return nil, errors.New("some ugly error")
 	}
 	lastBlock, err := config.CliMain.EthBlockNumber()
 	assert.NoError(t, err)

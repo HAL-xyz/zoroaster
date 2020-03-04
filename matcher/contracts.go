@@ -64,11 +64,9 @@ func matchContractsForBlock(
 	start := time.Now()
 
 	log.Debug("\t...getting modified accounts...")
-	modAccounts, err := getModAccounts(blockNo-1, blockNo, client.URL())
-	if err != nil {
-		log.Warn("\t", err)
-		// TODO: if getModAccounts fails, and it will fail bc it's so fragile,
-		// we want to simply MatchContract with all WaC triggers.
+	modAccounts, modAccountErr := getModAccounts(blockNo-1, blockNo, client.URL())
+	if modAccountErr != nil {
+		log.Warn("\t", modAccountErr)
 	}
 	log.Debug("\tmodified accounts: ", len(modAccounts))
 
@@ -78,13 +76,18 @@ func matchContractsForBlock(
 	}
 	log.Debug("\ttriggers from IDB: ", len(allTriggers))
 
+	// if getModifiedAccounts fails, we need to check all our WaC triggers
 	var triggersToCheck []*trigger.Trigger
-	for i, t := range allTriggers {
-		if utils.IsIn(strings.ToLower(t.ContractAdd), modAccounts) {
-			triggersToCheck = append(triggersToCheck, allTriggers[i])
+	if modAccountErr != nil {
+		triggersToCheck = allTriggers
+	} else {
+		for i, t := range allTriggers {
+			if utils.IsIn(strings.ToLower(t.ContractAdd), modAccounts) {
+				triggersToCheck = append(triggersToCheck, allTriggers[i])
+			}
 		}
 	}
-	log.Debug("\ttriggers pointing to a modified account: ", len(triggersToCheck))
+	log.Debug("\ttriggers to check: ", len(triggersToCheck))
 
 	var cnMatches []*trigger.CnMatch
 	for _, tg := range triggersToCheck {
