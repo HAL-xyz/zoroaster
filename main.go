@@ -44,7 +44,6 @@ func main() {
 
 	// ETH client
 	ethClient := ethrpc.New(config.Zconf.EthNode)
-
 	// Run monthly matches update
 	go db.MatchesMonthlyUpdate(&psqlClient)
 
@@ -63,7 +62,7 @@ func main() {
 	go matcher.TxMatcher(txBlocksChan, matchesChan, &psqlClient)
 
 	// Watch a Contract
-	go matcher.ContractMatcher(cnBlocksChan, matchesChan, eth.GetModifiedAccounts, &psqlClient, ethClient)
+	go matcher.ContractMatcher(cnBlocksChan, matchesChan, matcher.GetModifiedAccounts, &psqlClient, ethClient)
 
 	// Watch an Event
 	go matcher.EventMatcher(evBlocksChan, matchesChan, &psqlClient, ethClient)

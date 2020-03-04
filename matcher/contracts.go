@@ -1,8 +1,13 @@
 package matcher
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"time"
 	"zoroaster/aws"
@@ -13,7 +18,7 @@ import (
 func ContractMatcher(
 	blocksChan chan *ethrpc.Block,
 	matchesChan chan trigger.IMatch,
-	getModifiedAccounts func(prevBlock, currBlock int, nodeURI string) []string,
+	getModifiedAccounts func(prevBlock, currBlock int, nodeURI string) ([]string, error),
 	idb aws.IDB,
 	client *ethrpc.EthRPC) {
 
@@ -52,18 +57,18 @@ func matchContractsForBlock(
 	blockNo int,
 	blockTimestamp int,
 	blockHash string,
-	getModAccounts func(prevBlock, currBlock int, nodeURI string) []string,
+	getModAccounts func(prevBlock, currBlock int, nodeURI string) ([]string, error),
 	idb aws.IDB,
 	client *ethrpc.EthRPC) []*trigger.CnMatch {
 
 	start := time.Now()
 
 	log.Debug("\t...getting modified accounts...")
-	modAccounts := getModAccounts(blockNo-1, blockNo, client.URL())
-	for len(modAccounts) == 0 {
-		log.Warn("\tdidn't get any modified accounts, retrying in a few seconds")
-		time.Sleep(10 * time.Second)
-		modAccounts = getModAccounts(blockNo-1, blockNo, client.URL())
+	modAccounts, err := getModAccounts(blockNo-1, blockNo, client.URL())
+	if err != nil {
+		log.Warn("\t", err)
+		// TODO: if getModAccounts fails, and it will fail bc it's so fragile,
+		// we want to simply MatchContract with all WaC triggers.
 	}
 	log.Debug("\tmodified accounts: ", len(modAccounts))
 
@@ -152,4 +157,70 @@ func updateStatusForNonMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch,
 	nonMatchingTriggersIds := utils.GetSliceFromIntSet(utils.SetDifference(setAll, setMatches))
 
 	idb.UpdateNonMatchingTriggers(nonMatchingTriggersIds)
+}
+
+func GetModifiedAccounts(blockMinusOneNo, blockNo int, nodeURI string) ([]string, error) {
+
+	type ethRequest struct {
+		ID      int    `json:"id"`
+		JSONRPC string `json:"jsonrpc"`
+		Method  string `json:"method"`
+		Params  []int  `json:"params"`
+	}
+
+	p := []int{blockMinusOneNo, blockNo}
+
+	request := ethRequest{
+		ID:      1,
+		JSONRPC: "2.0",
+		Method:  "debug_getModifiedAccountsByNumber",
+		Params:  p,
+	}
+
+	body, err := json.Marshal(request)
+
+	if err != nil {
+		return nil, nil
+	}
+
+	response, err := http.Post(nodeURI, "application/json", bytes.NewBuffer(body))
+
+	if response != nil {
+		defer response.Body.Close()
+	}
+	if err != nil {
+		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
+	}
+
+	data, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
+	}
+
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
+	}
+
+	// result be like
+	// {"jsonrpc":"2.0","id":1,"result":["0x31b93ca83b5ad17582e886c400667c6f698b8ccd",...]}
+
+	type ethResponse struct {
+		Result []string `json:"result"`
+		Error  struct {
+			Message string `json:"message"`
+		} `json:"error"`
+	}
+
+	var ethResp ethResponse
+
+	err = json.Unmarshal(data, &ethResp)
+	if err != nil {
+		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
+	}
+
+	if ethResp.Error.Message != "" {
+		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
+	}
+
+	return ethResp.Result, nil
 }

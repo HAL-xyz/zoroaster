@@ -51,8 +51,8 @@ func (db mockDB) GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, 
 func TestMatchContractsForBlock(t *testing.T) {
 
 	// mocks
-	mockGetModAccounts := func(a, b int, node string) []string {
-		return []string{"0xbb9bc244d798123fde783fcc1c72d3bb8c189413"}
+	mockGetModAccounts := func(a, b int, node string) ([]string, error) {
+		return []string{"0xbb9bc244d798123fde783fcc1c72d3bb8c189413"}, nil
 	}
 	lastBlock, err := config.CliMain.EthBlockNumber()
 	assert.NoError(t, err)
@@ -93,8 +93,8 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, status, "false")
 
-	mockGetModAccounts := func(a, b int, node string) []string {
-		return []string{"0x09cabec1ead1c0ba254b09efb3ee13841712be14"}
+	mockGetModAccounts := func(a, b int, node string) ([]string, error) {
+		return []string{"0x09cabec1ead1c0ba254b09efb3ee13841712be14"}, nil
 	}
 
 	lastBlock, err := config.CliMain.EthBlockNumber()
