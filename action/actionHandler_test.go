@@ -329,3 +329,28 @@ func TestHandleEmailWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, ok)
 }
+
+func TestHandleSlackBot(t *testing.T) {
+
+	slackMsg := AttributeSlackBot{
+		URI:  "http://...",
+		Body: "Hello World Test on block $BlockNumber$",
+	}
+
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
+
+	match := trigger.CnMatch{
+		Trigger:        tg,
+		MatchUUID:      "",
+		BlockNumber:    777,
+		MatchedValues:  []string{},
+		AllValues:      []interface{}{"marco@atomic.eu.com"},
+		BlockTimestamp: 123,
+		BlockHash:      "0x",
+	}
+	outcome := handleSlackBot(slackMsg, match, &mockHttpClient{})
+
+	expectedPayload := `{"text":"Hello World Test on block 777"}`
+	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
+	assert.True(t, ok)
+}

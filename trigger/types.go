@@ -363,17 +363,6 @@ type Outcome struct {
 	Outcome string
 }
 
-type WebhookResponse struct {
-	HttpCode int
-	Response string
-}
-
-type EmailPayload struct {
-	Recipients []string
-	Body       string
-	Subject    string
-}
-
 type TgType int
 
 const (

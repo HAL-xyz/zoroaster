@@ -80,7 +80,7 @@ func assembleEmail(recipients []string, subject, body string) *ses.SendEmailInpu
 	return input
 }
 
-func fillEmailTemplate(text string, payload trigger.IMatch) string {
+func fillBodyTemplate(text string, payload trigger.IMatch) string {
 	switch m := payload.(type) {
 	case trigger.TxMatch:
 		return templateTransaction(text, m)
