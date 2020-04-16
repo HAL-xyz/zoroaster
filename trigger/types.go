@@ -354,13 +354,14 @@ func (m EventMatch) GetUserUUID() string {
 	return m.Tg.UserUUID
 }
 
-// Outcome is the result of executing an Action;
-// it includes a payload (the body of the action request)
-// and the actual outcome of that request.
-// Both fields are represented as a json struct.
+// Outcome is the result of executing an Action; it includes:
+// - a payload (the body of the action request, as json
+// - the actual outcome of that request, as json
+// - a success boolean flag
 type Outcome struct {
 	Payload string
 	Outcome string
+	Success bool
 }
 
 type TgType int

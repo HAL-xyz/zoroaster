@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE outcomes DROP COLUMN success;
+
+COMMIT;

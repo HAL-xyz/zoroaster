@@ -32,7 +32,11 @@ func ProcessActions(
 		case AttributeSlackBot:
 			out = handleSlackBot(v, match, httpCli)
 		default:
-			out = &trigger.Outcome{fmt.Sprintf("unsupported ActionType: %s", a.ActionType), ""}
+			out = &trigger.Outcome{
+				Payload: "",
+				Outcome: fmt.Sprintf("unsupported ActionType: %s", a.ActionType),
+				Success: false,
+			}
 		}
 		outcomes[i] = out
 	}
@@ -75,6 +79,7 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 		return &trigger.Outcome{
 			Payload: fmt.Sprintf("%v", match.ToPostPayload()),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	resp, err := httpCli.Post(awp.URI, "application/json", bytes.NewBuffer(postData))
@@ -82,6 +87,7 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 		return &trigger.Outcome{
 			Payload: string(postData),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	defer resp.Body.Close()
@@ -91,6 +97,7 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 	return &trigger.Outcome{
 		Payload: string(postData),
 		Outcome: string(jsonRespCode),
+		Success: true,
 	}
 }
 
@@ -106,6 +113,7 @@ func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli a
 		return &trigger.Outcome{
 			Payload: fmt.Sprintf("%s", slackAttr.Body),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	resp, err := httpCli.Post(slackAttr.URI, "application/json", bytes.NewBuffer(postData))
@@ -113,6 +121,7 @@ func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli a
 		return &trigger.Outcome{
 			Payload: string(postData),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	defer resp.Body.Close()
@@ -122,6 +131,7 @@ func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli a
 	return &trigger.Outcome{
 		Payload: string(postData),
 		Outcome: string(jsonRespCode),
+		Success: true,
 	}
 }
 
@@ -147,6 +157,7 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 		return &trigger.Outcome{
 			Payload: fmt.Sprintf("%s", emailPayload),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	result, err := sendEmail(iemail, allRecipients, email.Subject, email.Body)
@@ -154,12 +165,14 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 		return &trigger.Outcome{
 			Payload: string(emailPayloadJson),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	outcomeJsn, _ := json.Marshal(result)
 	return &trigger.Outcome{
 		Payload: string(emailPayloadJson),
 		Outcome: string(outcomeJsn),
+		Success: true,
 	}
 }
 
