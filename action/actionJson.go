@@ -84,7 +84,7 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 			Subject: ajs.Attributes.Subject,
 			Body:    ajs.Attributes.Body,
 		}
-	case "slack_bot":
+	case "slack":
 		action.Attribute = AttributeSlackBot{
 			URI:  ajs.Attributes.URI,
 			Body: ajs.Attributes.Body,

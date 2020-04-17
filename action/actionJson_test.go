@@ -66,7 +66,7 @@ func TestGetSlackActionFromJson(t *testing.T) {
 	{  
 	   "UserUUID":1,
 	   "TriggerUUID":30,
-	   "ActionType":"slack_bot",
+	   "ActionType":"slack",
 	   "Attributes":{  
 		  "URI":"https://hooks.slack.com/services/blahblah",
 		  "Body":"just nod if you can here me"
