@@ -62,6 +62,7 @@ func TestHandleWebHookPost(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, areEq)
 	assert.Equal(t, `{"HttpCode":200,"Response":"200 OK"}`, outcome.Outcome)
+	assert.Equal(t, true, outcome.Success)
 }
 
 func TestHandleWebhookPostWithTxMatch(t *testing.T) {
@@ -105,6 +106,7 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 	ok, err := utils.AreEqualJSON(outcome.Payload, expectedPayload)
 	assert.NoError(t, err)
 	assert.True(t, ok)
+	assert.Equal(t, true, outcome.Success)
 }
 
 func TestHandleWebHookWrongStuff(t *testing.T) {
@@ -123,6 +125,7 @@ func TestHandleWebHookWrongStuff(t *testing.T) {
 
 	notFoundPattern := strings.HasPrefix(outcome.Outcome, `{"error":"Post https://foo.zyusfddsiu:`)
 	assert.True(t, notFoundPattern)
+	assert.Equal(t, false, outcome.Success)
 }
 
 type EthMock struct{}
@@ -170,6 +173,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
 	ok, err := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.NoError(t, err)
 	assert.True(t, ok)
+	assert.Equal(t, true, outcome.Success)
 }
 
 // EMAIL TESTS
@@ -215,6 +219,7 @@ func TestHandleEmail1(t *testing.T) {
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
+	assert.Equal(t, true, outcome.Success)
 }
 
 func TestHandleEmail2(t *testing.T) {
@@ -250,6 +255,7 @@ func TestHandleEmail2(t *testing.T) {
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
+	assert.Equal(t, true, outcome.Success)
 }
 
 func TestHandleEmail3(t *testing.T) {
@@ -283,6 +289,7 @@ func TestHandleEmail3(t *testing.T) {
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
+	assert.Equal(t, true, outcome.Success)
 }
 
 func TestHandleEmailWithEvents(t *testing.T) {
@@ -328,4 +335,31 @@ func TestHandleEmailWithEvents(t *testing.T) {
 	ok, err = utils.AreEqualJSON(expPayload, outcome.Payload)
 	assert.NoError(t, err)
 	assert.True(t, ok)
+	assert.Equal(t, true, outcome.Success)
+}
+
+func TestHandleSlackBot(t *testing.T) {
+
+	slackMsg := AttributeSlackBot{
+		URI:  "http://...",
+		Body: "Hello World Test on block $BlockNumber$",
+	}
+
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
+
+	match := trigger.CnMatch{
+		Trigger:        tg,
+		MatchUUID:      "",
+		BlockNumber:    777,
+		MatchedValues:  []string{},
+		AllValues:      []interface{}{"marco@atomic.eu.com"},
+		BlockTimestamp: 123,
+		BlockHash:      "0x",
+	}
+	outcome := handleSlackBot(slackMsg, match, &mockHttpClient{})
+
+	expectedPayload := `{"text":"Hello World Test on block 777"}`
+	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
+	assert.True(t, ok)
+	assert.Equal(t, true, outcome.Success)
 }

@@ -29,8 +29,14 @@ func ProcessActions(
 			out = handleWebHookPost(v, match, httpCli)
 		case AttributeEmail:
 			out = handleEmail(v, match, iEmail)
+		case AttributeSlackBot:
+			out = handleSlackBot(v, match, httpCli)
 		default:
-			out = &trigger.Outcome{fmt.Sprintf("unsupported ActionType: %s", a.ActionType), ""}
+			out = &trigger.Outcome{
+				Payload: "",
+				Outcome: fmt.Sprintf("unsupported ActionType: %s", a.ActionType),
+				Success: false,
+			}
 		}
 		outcomes[i] = out
 	}
@@ -61,6 +67,11 @@ func makeErrorResponse(e string) string {
 	return string(errJsn)
 }
 
+type WebhookResponse struct {
+	HttpCode int
+	Response string
+}
+
 func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
 
 	postData, err := json.Marshal(match.ToPostPayload())
@@ -68,6 +79,7 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 		return &trigger.Outcome{
 			Payload: fmt.Sprintf("%v", match.ToPostPayload()),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	resp, err := httpCli.Post(awp.URI, "application/json", bytes.NewBuffer(postData))
@@ -75,25 +87,67 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 		return &trigger.Outcome{
 			Payload: string(postData),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	defer resp.Body.Close()
 
-	responseCode := trigger.WebhookResponse{resp.StatusCode, resp.Status}
+	responseCode := WebhookResponse{resp.StatusCode, resp.Status}
 	jsonRespCode, _ := json.Marshal(responseCode)
 	return &trigger.Outcome{
 		Payload: string(postData),
 		Outcome: string(jsonRespCode),
+		Success: true,
 	}
+}
+
+type SlackPayload struct {
+	Text string `json:"text"`
+}
+
+func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
+	txt := SlackPayload{fillBodyTemplate(slackAttr.Body, match)}
+
+	postData, err := json.Marshal(txt)
+	if err != nil {
+		return &trigger.Outcome{
+			Payload: fmt.Sprintf("%s", slackAttr.Body),
+			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
+		}
+	}
+	resp, err := httpCli.Post(slackAttr.URI, "application/json", bytes.NewBuffer(postData))
+	if err != nil {
+		return &trigger.Outcome{
+			Payload: string(postData),
+			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
+		}
+	}
+	defer resp.Body.Close()
+
+	responseCode := WebhookResponse{resp.StatusCode, resp.Status}
+	jsonRespCode, _ := json.Marshal(responseCode)
+	return &trigger.Outcome{
+		Payload: string(postData),
+		Outcome: string(jsonRespCode),
+		Success: true,
+	}
+}
+
+type EmailPayload struct {
+	Recipients []string
+	Body       string
+	Subject    string
 }
 
 func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SESAPI) *trigger.Outcome {
 
-	email.Body = fillEmailTemplate(email.Body, match)
-	email.Subject = fillEmailTemplate(email.Subject, match)
+	email.Body = fillBodyTemplate(email.Body, match)
+	email.Subject = fillBodyTemplate(email.Subject, match)
 	allRecipients := getAllRecipients(email.To, match)
 
-	emailPayload := trigger.EmailPayload{
+	emailPayload := EmailPayload{
 		Recipients: allRecipients,
 		Body:       email.Body,
 		Subject:    email.Subject,
@@ -103,6 +157,7 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 		return &trigger.Outcome{
 			Payload: fmt.Sprintf("%s", emailPayload),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	result, err := sendEmail(iemail, allRecipients, email.Subject, email.Body)
@@ -110,12 +165,14 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 		return &trigger.Outcome{
 			Payload: string(emailPayloadJson),
 			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
 		}
 	}
 	outcomeJsn, _ := json.Marshal(result)
 	return &trigger.Outcome{
 		Payload: string(emailPayloadJson),
 		Outcome: string(outcomeJsn),
+		Success: true,
 	}
 }
 
@@ -125,7 +182,7 @@ func getAllRecipients(emailTo []string, match trigger.IMatch) []string {
 	extraRecipients = append(extraRecipients, emailTo...)
 
 	for _, r := range emailTo {
-		templatedString := fillEmailTemplate(r, match)
+		templatedString := fillBodyTemplate(r, match)
 		cleanString := utils.RemoveCharacters(templatedString, "[]")
 		for _, email := range strings.Split(cleanString, " ") {
 			if !utils.IsIn(email, extraRecipients) {

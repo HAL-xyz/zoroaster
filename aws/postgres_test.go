@@ -117,7 +117,7 @@ func TestPostgresClient_All(t *testing.T) {
   "BlockTimestamp":8888
 }`
 	outcome := `{"HttpCode":200}`
-	o1 := trigger.Outcome{payload, outcome}
+	o1 := trigger.Outcome{payload, outcome, true}
 	err = psqlClient.LogOutcome(&o1, matchUUID)
 	assert.NoError(t, err)
 

@@ -117,9 +117,10 @@ func (cli PostgresClient) LogOutcome(outcome *trigger.Outcome, matchUUID string)
 			"match_uuid",
 			"payload_data",
 			"outcome_data",
-			"created_at") VALUES ($1::uuid, $2, $3, $4)`, cli.conf.TableOutcomes)
+			"created_at",
+			"success") VALUES ($1::uuid, $2, $3, $4, $5)`, cli.conf.TableOutcomes)
 
-	_, err := db.Exec(q, matchUUID, outcome.Payload, outcome.Outcome, time.Now())
+	_, err := db.Exec(q, matchUUID, outcome.Payload, outcome.Outcome, time.Now(), outcome.Success)
 	if err != nil {
 		return fmt.Errorf("cannot log outcome with payload: %s; outcome: %s; error: %s", outcome.Payload, outcome.Outcome, err)
 	}

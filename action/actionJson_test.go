@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestNewActionJson(t *testing.T) {
+func TestGetProxyActionFromJson(t *testing.T) {
 	var s = `{
    "UserUUID":1,
    "TriggerUUID":30,
@@ -19,7 +19,7 @@ func TestNewActionJson(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestAction_Webhook(t *testing.T) {
+func TestGetWebhookActionFromJson(t *testing.T) {
 	var s = `{
    "UserUUID":1,
    "TriggerUUID":30,
@@ -37,7 +37,7 @@ func TestAction_Webhook(t *testing.T) {
 	assert.True(t, ok)
 }
 
-func TestAction_Email(t *testing.T) {
+func TestGetEmailActionFromJson(t *testing.T) {
 	var s = `
 	{  
 	   "UserUUID":1,
@@ -58,5 +58,25 @@ func TestAction_Email(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, ok := a.Attribute.(AttributeEmail)
+	assert.True(t, ok)
+}
+
+func TestGetSlackActionFromJson(t *testing.T) {
+	var s = `
+	{  
+	   "UserUUID":1,
+	   "TriggerUUID":30,
+	   "ActionType":"slack_bot",
+	   "Attributes":{  
+		  "URI":"https://hooks.slack.com/services/blahblah",
+		  "Body":"just nod if you can here me"
+	   }
+	}`
+	a := Action{}
+
+	err := json.Unmarshal([]byte(s), &a)
+	assert.NoError(t, err)
+
+	_, ok := a.Attribute.(AttributeSlackBot)
 	assert.True(t, ok)
 }
