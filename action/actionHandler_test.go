@@ -28,6 +28,16 @@ func (m mockHttpClient) Post(url, contentType string, body io.Reader) (*http.Res
 	return &resp, nil
 }
 
+type mockHttpClient400 struct{}
+
+func (m mockHttpClient400) Post(url, contentType string, body io.Reader) (*http.Response, error) {
+	resp := http.Response{
+		StatusCode: 400,
+		Status:     "400 BAD REQUEST",
+		Body:       ioutil.NopCloser(bytes.NewBufferString("Hello World"))}
+	return &resp, nil
+}
+
 func TestHandleWebHookPost(t *testing.T) {
 
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
@@ -362,4 +372,58 @@ func TestHandleSlackBot(t *testing.T) {
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
 	assert.Equal(t, true, outcome.Success)
+}
+
+func TestHandleTelegramBot(t *testing.T) {
+
+	payload := AttributeTelegramBot{
+		Token:  "123...:xxxxxxxx",
+		Body:   "block $BlockNumber$ and some *bold stuff*",
+		ChatId: "-408369342",
+		Format: "Markdown",
+	}
+
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
+
+	match := trigger.CnMatch{
+		Trigger:        tg,
+		MatchUUID:      "",
+		BlockNumber:    777,
+		MatchedValues:  []string{},
+		AllValues:      []interface{}{"marco@atomic.eu.com"},
+		BlockTimestamp: 123,
+		BlockHash:      "0x",
+	}
+
+	outcome := handleTelegramBot(payload, match, &mockHttpClient{})
+
+	expectedPayload := `{"chat_id":"-408369342","text":"block 777 and some *bold stuff*","parse_mode":"Markdown"}`
+	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
+	assert.True(t, ok)
+	assert.Equal(t, true, outcome.Success)
+
+	// test some broken cases
+
+	// 400
+	outcomeBadRequest := handleTelegramBot(payload, match, &mockHttpClient400{})
+	assert.Equal(t, false, outcomeBadRequest.Success)
+
+	// wrong chat id
+	brokenChatId := AttributeTelegramBot{
+		Token:  "123...:xxxxxxxx",
+		Body:   "Hello World Test on block $BlockNumber$",
+		ChatId: "408369343", // missing `-` or `@` prefix
+	}
+	failedOutcome := handleTelegramBot(brokenChatId, match, &mockHttpClient{})
+	assert.Equal(t, false, failedOutcome.Success)
+
+	// wrong formatting
+	brokenFormatting := AttributeTelegramBot{
+		Token:  "123...:xxxxxxxx",
+		Body:   "Hello World Test on block $BlockNumber$",
+		ChatId: "-408369343",
+		Format: "whoops", // wrong formatting option
+	}
+	anotherFail := handleTelegramBot(brokenFormatting, match, &mockHttpClient{})
+	assert.Equal(t, false, anotherFail.Success)
 }

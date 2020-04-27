@@ -80,3 +80,25 @@ func TestGetSlackActionFromJson(t *testing.T) {
 	_, ok := a.Attribute.(AttributeSlackBot)
 	assert.True(t, ok)
 }
+
+func TestGetTelegramActionFromJson(t *testing.T) {
+	var s = `
+	{  
+	   "UserUUID":1,
+	   "TriggerUUID":30,
+	   "ActionType":"telegram",
+	   "Attributes":{  
+		  "Token":"1257633922:AAEGOUi0pbcJvitDGblnFdnHhVLzjYuhBU0",
+		  "Body":"hey jude",
+		  "ChatId": "408369342",
+		  "Format": "MarkdownV2"
+	   }
+	}`
+	a := Action{}
+
+	err := json.Unmarshal([]byte(s), &a)
+	assert.NoError(t, err)
+
+	_, ok := a.Attribute.(AttributeTelegramBot)
+	assert.True(t, ok)
+}

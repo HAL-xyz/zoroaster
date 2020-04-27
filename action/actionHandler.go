@@ -135,6 +135,66 @@ func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli a
 	}
 }
 
+type TelegramPayload struct {
+	ChatId string `json:"chat_id"`
+	Text   string `json:"text"`
+	Format string `json:"parse_mode"`
+}
+
+func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
+	payload := TelegramPayload{
+		Text:   fillBodyTemplate(telegramAttr.Body, match),
+		ChatId: telegramAttr.ChatId,
+		Format: telegramAttr.Format,
+	}
+
+	if !(strings.HasPrefix(payload.ChatId, "-") || (strings.HasPrefix(payload.ChatId, "@"))) {
+		return &trigger.Outcome{
+			Payload: fmt.Sprintf("%s", payload),
+			Outcome: makeErrorResponse("Invalid chat ID"),
+			Success: false,
+		}
+	}
+
+	validFormats := []string{"Markdown", "MarkdownV2", "HTML"}
+	if !utils.IsIn(payload.Format, validFormats) {
+		return &trigger.Outcome{
+			Payload: fmt.Sprintf("%s", payload),
+			Outcome: makeErrorResponse("Invalid formatting directive"),
+			Success: false,
+		}
+	}
+
+	postData, err := json.Marshal(payload)
+	if err != nil {
+		return &trigger.Outcome{
+			Payload: fmt.Sprintf("%s", payload),
+			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
+		}
+	}
+
+	URI := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", telegramAttr.Token)
+
+	resp, err := httpCli.Post(URI, "application/json", bytes.NewBuffer(postData))
+	if err != nil {
+		return &trigger.Outcome{
+			Payload: string(postData),
+			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
+		}
+	}
+	defer resp.Body.Close()
+
+	responseCode := WebhookResponse{resp.StatusCode, resp.Status}
+	jsonRespCode, _ := json.Marshal(responseCode)
+	return &trigger.Outcome{
+		Payload: string(postData),
+		Outcome: string(jsonRespCode),
+		Success: resp.StatusCode == 200,
+	}
+}
+
 type EmailPayload struct {
 	Recipients []string
 	Body       string
