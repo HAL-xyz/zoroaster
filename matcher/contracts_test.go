@@ -64,7 +64,8 @@ func TestMatchContractsForBlock(t *testing.T) {
 		"0x",
 		mockGetModAccounts,
 		mockDB{},
-		config.CliMain)
+		config.CliMain,
+		true)
 
 	assert.Equal(t, 1, len(cnMatches))
 	assert.Equal(t, lastBlock, cnMatches[0].BlockNumber)
@@ -85,12 +86,35 @@ func TestMatchContractsForBlockWithBrokenGetModAccount(t *testing.T) {
 		"0x",
 		mockGetModAccounts,
 		mockDB{},
-		config.CliMain)
+		config.CliMain,
+		true)
 
 	assert.Equal(t, 1, len(cnMatches))
 	assert.Equal(t, lastBlock, cnMatches[0].BlockNumber)
 }
 
+func TestMatchContractsForBlockWithModAccountDisabled(t *testing.T) {
+
+	// mocks getModAccount to return empty set; but since the
+	// useGetModAccounts flag is set to false, we want to see one match anyway
+	mockGetModAccounts := func(a, b int, node string) ([]string, error) {
+		return []string{}, nil
+	}
+	lastBlock, err := config.CliMain.EthBlockNumber()
+	assert.NoError(t, err)
+
+	cnMatches := matchContractsForBlock(
+		lastBlock,
+		1554828248,
+		"0x",
+		mockGetModAccounts,
+		mockDB{},
+		config.CliMain,
+		false)
+
+	assert.Equal(t, 1, len(cnMatches))
+	assert.Equal(t, lastBlock, cnMatches[0].BlockNumber)
+}
 func TestMatchContractsWithRealDB(t *testing.T) {
 
 	// clear up the database
@@ -131,7 +155,8 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		"0x",
 		mockGetModAccounts,
 		&psqlClient,
-		config.CliMain)
+		config.CliMain,
+		true)
 
 	assert.Equal(t, 1, len(cnMatches))
 
@@ -153,7 +178,8 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		"0x",
 		mockGetModAccounts,
 		&psqlClient,
-		config.CliMain)
+		config.CliMain,
+		true)
 
 	assert.Equal(t, 0, len(cnMatches))
 
