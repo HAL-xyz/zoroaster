@@ -20,7 +20,8 @@ func ContractMatcher(
 	matchesChan chan trigger.IMatch,
 	getModifiedAccounts func(prevBlock, currBlock int, nodeURI string) ([]string, error),
 	idb aws.IDB,
-	client *ethrpc.EthRPC) {
+	client *ethrpc.EthRPC,
+	useGetModAccount bool) {
 
 	for {
 		block := <-blocksChan
@@ -32,7 +33,7 @@ func ContractMatcher(
 			log.Fatal(err)
 		}
 
-		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, getModifiedAccounts, idb, client)
+		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, getModifiedAccounts, idb, client, useGetModAccount)
 		for _, m := range cnMatches {
 			matchUUID, err := idb.LogMatch(*m)
 			if err != nil {
@@ -59,34 +60,42 @@ func matchContractsForBlock(
 	blockHash string,
 	getModAccounts func(prevBlock, currBlock int, nodeURI string) ([]string, error),
 	idb aws.IDB,
-	client *ethrpc.EthRPC) []*trigger.CnMatch {
+	client *ethrpc.EthRPC,
+	useGetModAccounts bool) []*trigger.CnMatch {
 
 	start := time.Now()
-
-	log.Debug("\t...getting modified accounts...")
-	modAccounts, modAccountErr := getModAccounts(blockNo-1, blockNo, client.URL())
-	if modAccountErr != nil {
-		log.Warn("\t", modAccountErr)
-	}
-	log.Debug("\tmodified accounts: ", len(modAccounts))
 
 	allTriggers, err := idb.LoadTriggersFromDB(trigger.WaC)
 	if err != nil {
 		log.Fatal(err)
 	}
+	log.Debug("\tuseGetModAccount flag set to: ", useGetModAccounts)
 	log.Debug("\ttriggers from IDB: ", len(allTriggers))
 
-	// if getModifiedAccounts fails, we need to check all our WaC triggers
 	var triggersToCheck []*trigger.Trigger
-	if modAccountErr != nil {
-		triggersToCheck = allTriggers
-	} else {
-		for i, t := range allTriggers {
-			if utils.IsIn(strings.ToLower(t.ContractAdd), modAccounts) {
-				triggersToCheck = append(triggersToCheck, allTriggers[i])
+
+	if useGetModAccounts {
+		log.Debug("\t...getting modified accounts...")
+		modAccounts, modAccountErr := getModAccounts(blockNo-1, blockNo, client.URL())
+		if modAccountErr != nil {
+			log.Warn("\t", modAccountErr)
+		}
+		log.Debug("\tmodified accounts: ", len(modAccounts))
+
+		// if getModifiedAccounts fails, we need to check all our WaC triggers
+		if modAccountErr != nil {
+			triggersToCheck = allTriggers
+		} else {
+			for i, t := range allTriggers {
+				if utils.IsIn(strings.ToLower(t.ContractAdd), modAccounts) {
+					triggersToCheck = append(triggersToCheck, allTriggers[i])
+				}
 			}
 		}
+	} else { // useGetModAccounts set to false
+		triggersToCheck = allTriggers
 	}
+
 	log.Debug("\ttriggers to check: ", len(triggersToCheck))
 
 	var cnMatches []*trigger.CnMatch

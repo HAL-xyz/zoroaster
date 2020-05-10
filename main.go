@@ -62,7 +62,7 @@ func main() {
 	go matcher.TxMatcher(txBlocksChan, matchesChan, &psqlClient)
 
 	// Watch a Contract
-	go matcher.ContractMatcher(cnBlocksChan, matchesChan, matcher.GetModifiedAccounts, &psqlClient, ethClient)
+	go matcher.ContractMatcher(cnBlocksChan, matchesChan, matcher.GetModifiedAccounts, &psqlClient, ethClient, config.Zconf.UseGetModAccounts)
 
 	// Watch an Event
 	go matcher.EventMatcher(evBlocksChan, matchesChan, &psqlClient, ethClient)

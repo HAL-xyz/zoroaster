@@ -9,14 +9,15 @@ import (
 )
 
 type ZConfiguration struct {
-	Stage       Stage
-	ConfigFile  string
-	EthNode     string // the main eth node
-	RinkebyNode string // Rinkeby network, used for tests
-	LogsPath    string
-	LogsFile    string
-	Database    ZoroDB
-	BlocksDelay int
+	Stage             Stage
+	ConfigFile        string
+	EthNode           string // the main eth node
+	RinkebyNode       string // Rinkeby network, used for tests
+	LogsPath          string
+	LogsFile          string
+	Database          ZoroDB
+	BlocksDelay       int
+	UseGetModAccounts bool
 }
 
 type ZoroDB struct {
@@ -105,7 +106,6 @@ func Load() *ZConfiguration {
 	}
 
 	// Rinkeby node is only required for tests
-
 	zconfig.RinkebyNode = os.Getenv(rinkebyNode)
 	if zconfig.Stage == TEST && zconfig.EthNode == "" {
 		log.Error("no Rinkeby node set in local env ", rinkebyNode)
