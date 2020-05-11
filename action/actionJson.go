@@ -36,6 +36,12 @@ type AttributeTelegramBot struct {
 	Format string
 }
 
+type AttributeTweet struct {
+	Body   string
+	Token  string
+	Secret string
+}
+
 // Implements the json.Unmarshaler interface
 func (a *Action) UnmarshalJSON(data []byte) error {
 	proxy, err := NewActionJson(data)
@@ -63,6 +69,7 @@ type ActionJson struct {
 		Body    string   `json:"Body"`
 		ChatId  string   `json:"ChatId"`
 		Token   string   `json:"Token"`
+		Secret  string   `json:"Secret"`
 		Format  string   `json:"Format"`
 	} `json:"Attributes"`
 }
@@ -105,6 +112,12 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 			Body:   ajs.Attributes.Body,
 			ChatId: ajs.Attributes.ChatId,
 			Format: ajs.Attributes.Format,
+		}
+	case "twitter":
+		action.Attribute = AttributeTweet{
+			Token:  ajs.Attributes.Token,
+			Secret: ajs.Attributes.Secret,
+			Body:   ajs.Attributes.Body,
 		}
 	default:
 		return nil, fmt.Errorf("invalid ActionType %s", ajs.ActionType)

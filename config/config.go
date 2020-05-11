@@ -9,15 +9,17 @@ import (
 )
 
 type ZConfiguration struct {
-	Stage             Stage
-	ConfigFile        string
-	EthNode           string // the main eth node
-	RinkebyNode       string // Rinkeby network, used for tests
-	LogsPath          string
-	LogsFile          string
-	Database          ZoroDB
-	BlocksDelay       int
-	UseGetModAccounts bool
+	Stage                 Stage
+	ConfigFile            string
+	EthNode               string // the main eth node
+	RinkebyNode           string // Rinkeby network, used for tests
+	LogsPath              string
+	LogsFile              string
+	Database              ZoroDB
+	BlocksDelay           int
+	UseGetModAccounts     bool
+	TwitterConsumerKey    string
+	TwitterConsumerSecret string
 }
 
 type ZoroDB struct {
@@ -49,11 +51,12 @@ func (s Stage) String() string {
 }
 
 const (
-	dbUsr       = "DB_USR"
-	dbPwd       = "DB_PWD"
-	ethNode     = "ETH_NODE"
-	testNode    = "TEST_NODE"
-	rinkebyNode = "RINKEBY_NODE"
+	dbUsr                 = "DB_USR"
+	dbPwd                 = "DB_PWD"
+	ethNode               = "ETH_NODE"
+	rinkebyNode           = "RINKEBY_NODE"
+	twitterConsumerKey    = "TWITTER_CONSUMER_KEY"
+	twitterConsumerSecret = "TWITTER_CONSUMER_SECRET"
 )
 
 func readStage() ZConfiguration {
@@ -109,6 +112,16 @@ func Load() *ZConfiguration {
 	zconfig.RinkebyNode = os.Getenv(rinkebyNode)
 	if zconfig.Stage == TEST && zconfig.EthNode == "" {
 		log.Error("no Rinkeby node set in local env ", rinkebyNode)
+	}
+
+	zconfig.TwitterConsumerKey = os.Getenv(twitterConsumerKey)
+	if zconfig.Database.Password == "" {
+		log.Fatal("no twitter consumer key set in local env ", twitterConsumerKey)
+	}
+
+	zconfig.TwitterConsumerSecret = os.Getenv(twitterConsumerSecret)
+	if zconfig.Database.Password == "" {
+		log.Fatal("no twitter consumer secret set in local env ", twitterConsumerSecret)
 	}
 
 	return &zconfig
