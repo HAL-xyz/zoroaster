@@ -115,12 +115,12 @@ func Load() *ZConfiguration {
 	}
 
 	zconfig.TwitterConsumerKey = os.Getenv(twitterConsumerKey)
-	if zconfig.Database.Password == "" {
+	if zconfig.TwitterConsumerKey == "" {
 		log.Fatal("no twitter consumer key set in local env ", twitterConsumerKey)
 	}
 
 	zconfig.TwitterConsumerSecret = os.Getenv(twitterConsumerSecret)
-	if zconfig.Database.Password == "" {
+	if zconfig.TwitterConsumerSecret == "" {
 		log.Fatal("no twitter consumer secret set in local env ", twitterConsumerSecret)
 	}
 
