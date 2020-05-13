@@ -88,7 +88,7 @@ func TestGetTelegramActionFromJson(t *testing.T) {
 	   "TriggerUUID":30,
 	   "ActionType":"telegram",
 	   "Attributes":{  
-		  "Token":"1257633922:AAEGOUi0pbcJvitDGblnFdnHhVLzjYuhBU0",
+		  "Token":"2932842309482309482394823",
 		  "Body":"hey jude",
 		  "ChatId": "408369342",
 		  "Format": "MarkdownV2"
@@ -100,5 +100,26 @@ func TestGetTelegramActionFromJson(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, ok := a.Attribute.(AttributeTelegramBot)
+	assert.True(t, ok)
+}
+
+func TestGetTwitterActionFromJson(t *testing.T) {
+	var s = `
+	{  
+	   "UserUUID":1,
+	   "TriggerUUID":30,
+	   "ActionType":"twitter",
+	   "Attributes":{  
+		  "Token":"2329323098204983204983",
+		  "Secret":"sssssssssssht",
+		  "Body":"hey jude "
+	   }
+	}`
+	a := Action{}
+
+	err := json.Unmarshal([]byte(s), &a)
+	assert.NoError(t, err)
+
+	_, ok := a.Attribute.(AttributeTweet)
 	assert.True(t, ok)
 }

@@ -5,10 +5,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
+	"github.com/dghubble/go-twitter/twitter"
+	"github.com/dghubble/oauth1"
 	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
 	"zoroaster/aws"
+	"zoroaster/config"
 	"zoroaster/trigger"
 	"zoroaster/utils"
 )
@@ -33,6 +36,8 @@ func ProcessActions(
 			out = handleSlackBot(v, match, httpCli)
 		case AttributeTelegramBot:
 			out = handleTelegramBot(v, match, httpCli)
+		case AttributeTweet:
+			out = handleTweet(v, match)
 		default:
 			out = &trigger.Outcome{
 				Payload: "",
@@ -99,7 +104,7 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 	return &trigger.Outcome{
 		Payload: string(postData),
 		Outcome: string(jsonRespCode),
-		Success: true,
+		Success: resp.StatusCode == 200,
 	}
 }
 
@@ -133,7 +138,7 @@ func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli a
 	return &trigger.Outcome{
 		Payload: string(postData),
 		Outcome: string(jsonRespCode),
-		Success: true,
+		Success: resp.StatusCode == 200,
 	}
 }
 
@@ -185,6 +190,43 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 			Outcome: makeErrorResponse(err.Error()),
 			Success: false,
 		}
+	}
+	defer resp.Body.Close()
+
+	responseCode := WebhookResponse{resp.StatusCode, resp.Status}
+	jsonRespCode, _ := json.Marshal(responseCode)
+	return &trigger.Outcome{
+		Payload: string(postData),
+		Outcome: string(jsonRespCode),
+		Success: resp.StatusCode == 200,
+	}
+}
+
+type TwitterPayload struct {
+	Text string
+}
+
+func handleTweet(tweetAttr AttributeTweet, match trigger.IMatch) *trigger.Outcome {
+	payload := TwitterPayload{
+		Text: fillBodyTemplate(tweetAttr.Body, match),
+	}
+
+	postData, _ := json.Marshal(payload)
+
+	authconfig := oauth1.NewConfig(config.Zconf.TwitterConsumerKey, config.Zconf.TwitterConsumerSecret)
+	token := oauth1.NewToken(tweetAttr.Token, tweetAttr.Secret)
+	httpClient := authconfig.Client(oauth1.NoContext, token)
+	twitterClient := twitter.NewClient(httpClient)
+
+	_, resp, err := twitterClient.Statuses.Update(payload.Text, nil)
+
+	if err != nil {
+		return &trigger.Outcome{
+			Payload: string(postData),
+			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
+		}
+
 	}
 	defer resp.Body.Close()
 

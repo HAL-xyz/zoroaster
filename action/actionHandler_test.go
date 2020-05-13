@@ -427,3 +427,30 @@ func TestHandleTelegramBot(t *testing.T) {
 	anotherFail := handleTelegramBot(brokenFormatting, match, &mockHttpClient{})
 	assert.Equal(t, false, anotherFail.Success)
 }
+
+// Mocking the twitter library isn't really worth it atm,
+// so we just checked it works once in real life and call it a day.
+
+//func TestHandleTweet(t *testing.T) {
+//
+//	payload := AttributeTweet{
+//		Token:  "",
+//		Secret: "",
+//		Body:   "la la la la laaaaaa hey juuuude",
+//	}
+//
+//	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
+//
+//	match := trigger.CnMatch{
+//		Trigger:        tg,
+//		MatchUUID:      "",
+//		BlockNumber:    777,
+//		MatchedValues:  []string{},
+//		AllValues:      []interface{}{"marco@atomic.eu.com"},
+//		BlockTimestamp: 123,
+//		BlockHash:      "0x",
+//	}
+//
+//	outcome := handleTweet(payload, match)
+//	_ = outcome
+//}
