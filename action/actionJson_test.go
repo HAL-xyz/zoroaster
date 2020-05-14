@@ -112,7 +112,7 @@ func TestGetTwitterActionFromJson(t *testing.T) {
 	   "Attributes":{  
 		  "Token":"2329323098204983204983",
 		  "Secret":"sssssssssssht",
-		  "Body":"hey jude "
+		  "Status":"hey jude "
 	   }
 	}`
 	a := Action{}

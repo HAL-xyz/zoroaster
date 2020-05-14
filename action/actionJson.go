@@ -37,7 +37,7 @@ type AttributeTelegramBot struct {
 }
 
 type AttributeTweet struct {
-	Body   string
+	Status string
 	Token  string
 	Secret string
 }
@@ -70,6 +70,7 @@ type ActionJson struct {
 		ChatId  string   `json:"ChatId"`
 		Token   string   `json:"Token"`
 		Secret  string   `json:"Secret"`
+		Status  string   `json:"Status"`
 		Format  string   `json:"Format"`
 	} `json:"Attributes"`
 }
@@ -117,7 +118,7 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 		action.Attribute = AttributeTweet{
 			Token:  ajs.Attributes.Token,
 			Secret: ajs.Attributes.Secret,
-			Body:   ajs.Attributes.Body,
+			Status: ajs.Attributes.Status,
 		}
 	default:
 		return nil, fmt.Errorf("invalid ActionType %s", ajs.ActionType)

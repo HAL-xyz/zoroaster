@@ -203,12 +203,12 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 }
 
 type TwitterPayload struct {
-	Text string
+	Status string
 }
 
 func handleTweet(tweetAttr AttributeTweet, match trigger.IMatch) *trigger.Outcome {
 	payload := TwitterPayload{
-		Text: fillBodyTemplate(tweetAttr.Body, match),
+		Status: fillBodyTemplate(tweetAttr.Status, match),
 	}
 
 	postData, _ := json.Marshal(payload)
@@ -218,7 +218,7 @@ func handleTweet(tweetAttr AttributeTweet, match trigger.IMatch) *trigger.Outcom
 	httpClient := authconfig.Client(oauth1.NoContext, token)
 	twitterClient := twitter.NewClient(httpClient)
 
-	_, resp, err := twitterClient.Statuses.Update(payload.Text, nil)
+	_, resp, err := twitterClient.Statuses.Update(payload.Status, nil)
 
 	if err != nil {
 		return &trigger.Outcome{
