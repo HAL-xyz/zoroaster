@@ -12,6 +12,16 @@ import (
 	"strings"
 )
 
+func ComposeStringFns(fns ...func(string) string) func(string) string {
+
+	return func(s string) string {
+		for _, f := range fns {
+			s = f(s)
+		}
+		return s
+	}
+}
+
 // encodes a [][]byte into a []string of hex values
 func ByteArraysToHex(array [][]byte) []string {
 	out := make([]string, len(array))

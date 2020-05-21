@@ -10,18 +10,21 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 	"zoroaster/trigger"
 	"zoroaster/utils"
 )
 
+var applyAllTemplateConversions = utils.ComposeStringFns(fillDecimalConversion, fillHumanTime)
+
 func fillBodyTemplate(text string, payload trigger.IMatch) string {
 	switch m := payload.(type) {
 	case trigger.TxMatch:
-		return fillDecimalConversion(templateTransaction(text, m))
+		return applyAllTemplateConversions(templateTransaction(text, m))
 	case trigger.CnMatch:
-		return fillDecimalConversion(templateContract(text, m))
+		return applyAllTemplateConversions(templateContract(text, m))
 	case trigger.EventMatch:
-		return fillDecimalConversion(templateEvent(text, m))
+		return applyAllTemplateConversions(templateEvent(text, m))
 	default:
 		logrus.Warnf("Invalid match type %T", payload)
 		return text
@@ -48,6 +51,25 @@ func decAmount(text string) string {
 	res, _ := new(big.Float).Quo(v, scale).Float64()
 
 	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", math.Ceil(res*100)/100), "0"), ".")
+}
+
+func fillHumanTime(text string) string {
+	r := regexp.MustCompile(`humanTime\((\d*)(\))`)
+	matches := r.FindAllStringSubmatch(text, -1)
+
+	for _, g := range matches {
+		text = strings.ReplaceAll(text, g[0], unixToHumanTime(g[1]))
+	}
+	return text
+}
+
+func unixToHumanTime(timestamp string) string {
+	i, err := strconv.ParseInt(timestamp, 10, 64)
+	if err != nil {
+		return timestamp
+	}
+	unixTimeUTC := time.Unix(i, 0)
+	return unixTimeUTC.Format(time.RFC822)
 }
 
 func templateEvent(text string, match trigger.EventMatch) string {

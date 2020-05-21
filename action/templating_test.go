@@ -8,11 +8,32 @@ import (
 	"zoroaster/trigger"
 )
 
+func TestHumanTimeConverter(t *testing.T) {
+
+	assert.Equal(t, "14 Oct 20 00:32 BST", unixToHumanTime("1602631929"))
+	assert.Equal(t, "la la la", unixToHumanTime("la la la"))
+}
+
 func TestDecAmount(t *testing.T) {
 
 	assert.Equal(t, "0.63", decAmount("629000000000000000"))
 	assert.Equal(t, "la la la", decAmount("la la la"))
-	
+}
+
+func TestTemplateWithDecConversionAndHumanTime(t *testing.T) {
+
+	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
+	assert.NoError(t, err)
+	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
+
+	matches[0].EventParams["someBigNumber"] = "629000000000000000"
+	matches[0].EventParams["unixTimestamp"] = "1602631929"
+
+	template := `the first is: decAmount(!someBigNumber); The second is: humanTime(!unixTimestamp)`
+
+	body := fillBodyTemplate(template, *matches[0])
+
+	assert.Equal(t, "the first is: 0.63; The second is: 14 Oct 20 00:32 BST", body)
 }
 
 func TestTemplateWithDecConversion(t *testing.T) {
