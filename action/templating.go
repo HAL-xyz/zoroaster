@@ -15,7 +15,7 @@ import (
 	"zoroaster/utils"
 )
 
-var applyAllTemplateConversions = utils.ComposeStringFns(fillDecimalConversion, fillHumanTime)
+var applyAllTemplateConversions = utils.ComposeStringFns(fillDecimalConversion, fillHumanTime, fillOctConversion)
 
 func fillBodyTemplate(text string, payload trigger.IMatch) string {
 	switch m := payload.(type) {
@@ -48,6 +48,29 @@ func decAmount(text string) string {
 		return text
 	}
 	scale, _ := new(big.Float).SetString("1000000000000000000")
+	res, _ := new(big.Float).Quo(v, scale).Float64()
+
+	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", math.Ceil(res*100)/100), "0"), ".")
+}
+
+func fillOctConversion(text string) string {
+	r := regexp.MustCompile(`octAmount\((\d*)(\))`)
+	matches := r.FindAllStringSubmatch(text, -1)
+
+	for _, g := range matches {
+		text = strings.ReplaceAll(text, g[0], octAmount(g[1]))
+	}
+	return text
+}
+
+
+func octAmount(text string) string {
+	v := new(big.Float)
+	v, ok := v.SetString(text)
+	if !ok {
+		return text
+	}
+	scale, _ := new(big.Float).SetString("100000000")
 	res, _ := new(big.Float).Quo(v, scale).Float64()
 
 	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", math.Ceil(res*100)/100), "0"), ".")
