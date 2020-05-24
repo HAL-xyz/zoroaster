@@ -25,7 +25,7 @@ func TestGetWebhookActionFromJson(t *testing.T) {
    "TriggerUUID":30,
    "ActionType":"webhook_post",
    "Attributes":{
-      "URI":"https://webhook.site/202d0fac-4bfa-43f5-8ad0-c791cf051e5f"
+      "URI":"uri"
    }
 }`
 	a := Action{}
@@ -33,8 +33,10 @@ func TestGetWebhookActionFromJson(t *testing.T) {
 	err := json.Unmarshal([]byte(s), &a)
 	assert.NoError(t, err)
 
-	_, ok := a.Attribute.(AttributeWebhookPost)
+	v, ok := a.Attribute.(AttributeWebhookPost)
 	assert.True(t, ok)
+
+	assert.Equal(t, "uri", v.URI)
 }
 
 func TestGetEmailActionFromJson(t *testing.T) {
@@ -57,8 +59,12 @@ func TestGetEmailActionFromJson(t *testing.T) {
 	err := json.Unmarshal([]byte(s), &a)
 	assert.NoError(t, err)
 
-	_, ok := a.Attribute.(AttributeEmail)
+	v, ok := a.Attribute.(AttributeEmail)
 	assert.True(t, ok)
+
+	assert.Equal(t, 2, len(v.To))
+	assert.Equal(t, "YO from Zoroaster", v.Subject)
+	assert.Equal(t, "yo yo yo and a bottle of rum", v.Body)
 }
 
 func TestGetSlackActionFromJson(t *testing.T) {
@@ -77,8 +83,11 @@ func TestGetSlackActionFromJson(t *testing.T) {
 	err := json.Unmarshal([]byte(s), &a)
 	assert.NoError(t, err)
 
-	_, ok := a.Attribute.(AttributeSlackBot)
+	v, ok := a.Attribute.(AttributeSlackBot)
 	assert.True(t, ok)
+
+	assert.Equal(t, "just nod if you can here me", v.Body)
+	assert.Equal(t, "https://hooks.slack.com/services/blahblah", v.URI)
 }
 
 func TestGetTelegramActionFromJson(t *testing.T) {
@@ -99,8 +108,13 @@ func TestGetTelegramActionFromJson(t *testing.T) {
 	err := json.Unmarshal([]byte(s), &a)
 	assert.NoError(t, err)
 
-	_, ok := a.Attribute.(AttributeTelegramBot)
+	v, ok := a.Attribute.(AttributeTelegramBot)
 	assert.True(t, ok)
+
+	assert.Equal(t, "hey jude", v.Body)
+	assert.Equal(t, "2932842309482309482394823", v.Token)
+	assert.Equal(t, "MarkdownV2", v.Format)
+	assert.Equal(t, "408369342", v.ChatId)
 }
 
 func TestGetTwitterActionFromJson(t *testing.T) {
@@ -112,7 +126,7 @@ func TestGetTwitterActionFromJson(t *testing.T) {
 	   "Attributes":{  
 		  "Token":"2329323098204983204983",
 		  "Secret":"sssssssssssht",
-		  "Status":"hey jude "
+		  "Status":"hey jude"
 	   }
 	}`
 	a := Action{}
@@ -120,6 +134,33 @@ func TestGetTwitterActionFromJson(t *testing.T) {
 	err := json.Unmarshal([]byte(s), &a)
 	assert.NoError(t, err)
 
-	_, ok := a.Attribute.(AttributeTweet)
+	v, ok := a.Attribute.(AttributeTweet)
 	assert.True(t, ok)
+
+	assert.Equal(t, "hey jude", v.Status)
+	assert.Equal(t, "2329323098204983204983", v.Token)
+	assert.Equal(t, "sssssssssssht", v.Secret)
+}
+
+func TestGetDiscordActionFromJson(t *testing.T) {
+	var s = `
+	{
+	   "UserUUID":1,
+	   "TriggerUUID":30,
+	   "ActionType":"discord",
+	   "Attributes":{
+		  "DiscordURI":"uri",
+		  "Body":"body"
+	   }
+	}`
+	a := Action{}
+
+	err := json.Unmarshal([]byte(s), &a)
+	assert.NoError(t, err)
+
+	v, ok := a.Attribute.(AttributeDiscord)
+	assert.True(t, ok)
+
+	assert.Equal(t, "uri", v.DiscordURI)
+	assert.Equal(t, "body", v.Body)
 }

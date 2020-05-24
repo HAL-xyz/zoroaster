@@ -38,6 +38,8 @@ func ProcessActions(
 			out = handleTelegramBot(v, match, httpCli)
 		case AttributeTweet:
 			out = handleTweet(v, match)
+		case AttributeDiscord:
+			out = handleDiscord(v, match, httpCli)
 		default:
 			out = &trigger.Outcome{
 				Payload: "",
@@ -108,17 +110,51 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 	}
 }
 
+type DiscordPayload struct {
+	Content string `json:"content"`
+}
+
+func handleDiscord(discAttr AttributeDiscord, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
+	payload := DiscordPayload{fillBodyTemplate(discAttr.Body, match)}
+
+	postData, err := json.Marshal(payload)
+	if err != nil {
+		return &trigger.Outcome{
+			Payload: fmt.Sprintf("%s", payload),
+			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
+		}
+	}
+	resp, err := httpCli.Post(discAttr.DiscordURI, "application/json", bytes.NewBuffer(postData))
+	if err != nil {
+		return &trigger.Outcome{
+			Payload: string(postData),
+			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
+		}
+	}
+	defer resp.Body.Close()
+
+	responseCode := WebhookResponse{resp.StatusCode, resp.Status}
+	jsonRespCode, _ := json.Marshal(responseCode)
+	return &trigger.Outcome{
+		Payload: string(postData),
+		Outcome: string(jsonRespCode),
+		Success: resp.StatusCode == 204 || resp.StatusCode == 200, // Discord returns "No Content" instead of 200
+	}
+}
+
 type SlackPayload struct {
 	Text string `json:"text"`
 }
 
 func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
-	txt := SlackPayload{fillBodyTemplate(slackAttr.Body, match)}
+	payload := SlackPayload{fillBodyTemplate(slackAttr.Body, match)}
 
-	postData, err := json.Marshal(txt)
+	postData, err := json.Marshal(payload)
 	if err != nil {
 		return &trigger.Outcome{
-			Payload: fmt.Sprintf("%s", slackAttr.Body),
+			Payload: fmt.Sprintf("%s", payload),
 			Outcome: makeErrorResponse(err.Error()),
 			Success: false,
 		}
