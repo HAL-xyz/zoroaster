@@ -17,6 +17,11 @@ type AttributeWebhookPost struct {
 	URI string
 }
 
+type AttributeDiscord struct {
+	DiscordURI string
+	Body       string
+}
+
 type AttributeEmail struct {
 	From    string
 	To      []string
@@ -63,15 +68,16 @@ type ActionJson struct {
 	UserID     int    `json:"UserUUID"`
 	ActionType string `json:"ActionType"`
 	Attributes struct {
-		URI     string   `json:"URI"`
-		To      []string `json:"To"`
-		Subject string   `json:"Subject"`
-		Body    string   `json:"Body"`
-		ChatId  string   `json:"ChatId"`
-		Token   string   `json:"Token"`
-		Secret  string   `json:"Secret"`
-		Status  string   `json:"Status"`
-		Format  string   `json:"Format"`
+		URI        string   `json:"URI"`
+		To         []string `json:"To"`
+		Subject    string   `json:"Subject"`
+		Body       string   `json:"Body"`
+		ChatId     string   `json:"ChatId"`
+		Token      string   `json:"Token"`
+		Secret     string   `json:"Secret"`
+		Status     string   `json:"Status"`
+		Format     string   `json:"Format"`
+		DiscordURI string   `json:"DiscordURI"`
 	} `json:"Attributes"`
 }
 
@@ -120,6 +126,12 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 			Secret: ajs.Attributes.Secret,
 			Status: ajs.Attributes.Status,
 		}
+	case "discord":
+		action.Attribute = AttributeDiscord{
+			DiscordURI: ajs.Attributes.DiscordURI,
+			Body:       ajs.Attributes.Body,
+		}
+
 	default:
 		return nil, fmt.Errorf("invalid ActionType %s", ajs.ActionType)
 	}

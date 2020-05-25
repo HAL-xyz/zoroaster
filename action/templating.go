@@ -63,7 +63,6 @@ func fillOctConversion(text string) string {
 	return text
 }
 
-
 func octAmount(text string) string {
 	v := new(big.Float)
 	v, ok := v.SetString(text)

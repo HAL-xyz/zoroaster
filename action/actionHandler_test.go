@@ -348,6 +348,32 @@ func TestHandleEmailWithEvents(t *testing.T) {
 	assert.Equal(t, true, outcome.Success)
 }
 
+func TestHandleDiscord(t *testing.T) {
+
+	discordMsg := AttributeDiscord{
+		DiscordURI: "312931209381209381",
+		Body:       "Hello World Test on block $BlockNumber$",
+	}
+
+	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
+
+	match := trigger.CnMatch{
+		Trigger:        tg,
+		MatchUUID:      "",
+		BlockNumber:    777,
+		MatchedValues:  []string{},
+		AllValues:      []interface{}{"marco@atomic.eu.com"},
+		BlockTimestamp: 123,
+		BlockHash:      "0x",
+	}
+	outcome := handleDiscord(discordMsg, match, &mockHttpClient{})
+
+	expectedPayload := `{"content":"Hello World Test on block 777"}`
+	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
+	assert.True(t, ok)
+	assert.Equal(t, true, outcome.Success)
+}
+
 func TestHandleSlackBot(t *testing.T) {
 
 	slackMsg := AttributeSlackBot{
