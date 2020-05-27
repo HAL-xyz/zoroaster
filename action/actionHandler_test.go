@@ -261,7 +261,7 @@ func TestHandleEmail2(t *testing.T) {
      "matteo@atomic.eu.com"
   ],
   "Body":"body",
-  "Subject":"Matched value is [0x000]"
+  "Subject":"Matched value is 0x000"
 }`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)

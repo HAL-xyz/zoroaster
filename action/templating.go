@@ -141,7 +141,7 @@ func templateContract(text string, match trigger.CnMatch) string {
 	text = strings.ReplaceAll(text, "$ContractAddress$", match.Trigger.ContractAdd)
 
 	// matched value
-	text = strings.ReplaceAll(text, "$MatchedValue$", fmt.Sprintf("%s", match.MatchedValues))
+	text = strings.ReplaceAll(text, "$MatchedValue$", utils.RemoveCharacters(fmt.Sprintf("%s", match.MatchedValues), "[]"))
 
 	// all values
 	text = strings.ReplaceAll(text, "$ReturnedValues$", fmt.Sprintf("%s", match.AllValues))

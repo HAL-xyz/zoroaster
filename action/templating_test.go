@@ -132,6 +132,10 @@ func TestFillTemplate2(t *testing.T) {
 	template = "found: $ReturnedValues[1]$; not found: $ReturnedValues[33]$"
 	body = fillBodyTemplate(template, cnMatch)
 	assert.Equal(t, "found: 8; not found: $ReturnedValues[33]$", body)
+
+	template = "$MatchedValue$"
+	body = fillBodyTemplate(template, cnMatch)
+	assert.Equal(t, "4", body)
 }
 
 func TestFillTemplate3(t *testing.T) {
