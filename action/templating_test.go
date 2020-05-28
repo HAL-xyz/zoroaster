@@ -14,19 +14,7 @@ func TestHumanTimeConverter(t *testing.T) {
 	assert.Equal(t, "la la la", unixToHumanTime("la la la"))
 }
 
-func TestDecAmount(t *testing.T) {
-
-	assert.Equal(t, "0.63", decAmount("629000000000000000"))
-	assert.Equal(t, "la la la", decAmount("la la la"))
-}
-
-func TestOctAmount(t *testing.T) {
-
-	assert.Equal(t, "6290000000", octAmount("629000000000000000"))
-	assert.Equal(t, "la la la", octAmount("la la la"))
-}
-
-func TestTemplateWithDecConversionAndHumanTime(t *testing.T) {
+func TestTemplateWithAllConversions(t *testing.T) {
 
 	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
@@ -36,11 +24,11 @@ func TestTemplateWithDecConversionAndHumanTime(t *testing.T) {
 	matches[0].EventParams["unixTimestamp"] = "1602631929"
 	matches[0].EventParams["someOtherNumber"] = "1602631929"
 
-	template := `the first is: decAmount(!someBigNumber); The second is: humanTime(!unixTimestamp); the third is: octAmount(!someOtherNumber)`
+	template := `the first is: decAmount(!someBigNumber); The second is: humanTime(!unixTimestamp); the third is: octAmount(!someOtherNumber); then hexAmount(!someOtherNumber)`
 
 	body := fillBodyTemplate(template, *matches[0])
 
-	assert.Equal(t, "the first is: 0.63; The second is: 14 Oct 20 00:32 BST; the third is: 16.03", body)
+	assert.Equal(t, "the first is: 0.63; The second is: 14 Oct 20 00:32 BST; the third is: 16.03; then 1602.64", body)
 }
 
 func TestTemplateWithDecConversion(t *testing.T) {

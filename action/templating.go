@@ -15,7 +15,7 @@ import (
 	"zoroaster/utils"
 )
 
-var applyAllTemplateConversions = utils.ComposeStringFns(fillDecimalConversion, fillHumanTime, fillOctConversion)
+var applyAllTemplateConversions = utils.ComposeStringFns(scaleAmounts, fillHumanTime)
 
 func fillBodyTemplate(text string, payload trigger.IMatch) string {
 	switch m := payload.(type) {
@@ -31,48 +31,35 @@ func fillBodyTemplate(text string, payload trigger.IMatch) string {
 	}
 }
 
-func fillDecimalConversion(text string) string {
-	r := regexp.MustCompile(`decAmount\((\d*)(\))`)
-	matches := r.FindAllStringSubmatch(text, -1)
-
-	for _, g := range matches {
-		text = strings.ReplaceAll(text, g[0], decAmount(g[1]))
-	}
-	return text
-}
-
-func decAmount(text string) string {
+func scaleBy(text, scaleBy string) string {
 	v := new(big.Float)
 	v, ok := v.SetString(text)
 	if !ok {
 		return text
 	}
-	scale, _ := new(big.Float).SetString("1000000000000000000")
+	scale, _ := new(big.Float).SetString(scaleBy)
 	res, _ := new(big.Float).Quo(v, scale).Float64()
 
 	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", math.Ceil(res*100)/100), "0"), ".")
 }
 
-func fillOctConversion(text string) string {
-	r := regexp.MustCompile(`octAmount\((\d*)(\))`)
+func scaleAmounts(text string) string {
+	r := regexp.MustCompile(`(.{3})Amount\((\d*)(\))`)
 	matches := r.FindAllStringSubmatch(text, -1)
 
 	for _, g := range matches {
-		text = strings.ReplaceAll(text, g[0], octAmount(g[1]))
+		switch g[1] {
+		case "dec":
+			text = strings.ReplaceAll(text, g[0], scaleBy(g[2], "1000000000000000000"))
+		case "oct":
+			text = strings.ReplaceAll(text, g[0], scaleBy(g[2], "100000000"))
+		case "hex":
+			text = strings.ReplaceAll(text, g[0], scaleBy(g[2], "1000000"))
+		default:
+			continue
+		}
 	}
 	return text
-}
-
-func octAmount(text string) string {
-	v := new(big.Float)
-	v, ok := v.SetString(text)
-	if !ok {
-		return text
-	}
-	scale, _ := new(big.Float).SetString("100000000")
-	res, _ := new(big.Float).Quo(v, scale).Float64()
-
-	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", math.Ceil(res*100)/100), "0"), ".")
 }
 
 func fillHumanTime(text string) string {
