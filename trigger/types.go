@@ -10,6 +10,7 @@ import (
 type IMatch interface {
 	ToPersistent() IPersistableMatch
 	ToPostPayload() IPostablePaylaod
+	ToTemplateMatch() TemplateMatch
 	GetTriggerUUID() string
 	GetUserUUID() string
 	GetMatchUUID() string

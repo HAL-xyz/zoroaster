@@ -31,15 +31,15 @@ func ProcessActions(
 		case AttributeWebhookPost:
 			out = handleWebHookPost(v, match, httpCli)
 		case AttributeEmail:
-			out = handleEmail(v, match, iEmail)
+			out = handleEmail(v, match, iEmail, a.TemplateVersion)
 		case AttributeSlackBot:
-			out = handleSlackBot(v, match, httpCli)
+			out = handleSlackBot(v, match, httpCli, a.TemplateVersion)
 		case AttributeTelegramBot:
-			out = handleTelegramBot(v, match, httpCli)
+			out = handleTelegramBot(v, match, httpCli, a.TemplateVersion)
 		case AttributeTweet:
-			out = handleTweet(v, match)
+			out = handleTweet(v, match, a.TemplateVersion)
 		case AttributeDiscord:
-			out = handleDiscord(v, match, httpCli)
+			out = handleDiscord(v, match, httpCli, a.TemplateVersion)
 		default:
 			out = &trigger.Outcome{
 				Payload: "",
@@ -114,8 +114,8 @@ type DiscordPayload struct {
 	Content string `json:"content"`
 }
 
-func handleDiscord(discAttr AttributeDiscord, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
-	payload := DiscordPayload{fillBodyTemplate(discAttr.Body, match)}
+func handleDiscord(discAttr AttributeDiscord, match trigger.IMatch, httpCli aws.IHttpClient, templVersion string) *trigger.Outcome {
+	payload := DiscordPayload{fillBodyTemplate(discAttr.Body, match, templVersion)}
 
 	postData, err := json.Marshal(payload)
 	if err != nil {
@@ -148,8 +148,8 @@ type SlackPayload struct {
 	Text string `json:"text"`
 }
 
-func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
-	payload := SlackPayload{fillBodyTemplate(slackAttr.Body, match)}
+func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli aws.IHttpClient, templVersion string) *trigger.Outcome {
+	payload := SlackPayload{fillBodyTemplate(slackAttr.Body, match, templVersion)}
 
 	postData, err := json.Marshal(payload)
 	if err != nil {
@@ -184,9 +184,9 @@ type TelegramPayload struct {
 	Format string `json:"parse_mode"`
 }
 
-func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
+func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, httpCli aws.IHttpClient, templVersion string) *trigger.Outcome {
 	payload := TelegramPayload{
-		Text:   fillBodyTemplate(telegramAttr.Body, match),
+		Text:   fillBodyTemplate(telegramAttr.Body, match, templVersion),
 		ChatId: telegramAttr.ChatId,
 		Format: telegramAttr.Format,
 	}
@@ -242,9 +242,9 @@ type TwitterPayload struct {
 	Status string
 }
 
-func handleTweet(tweetAttr AttributeTweet, match trigger.IMatch) *trigger.Outcome {
+func handleTweet(tweetAttr AttributeTweet, match trigger.IMatch, templVersion string) *trigger.Outcome {
 	payload := TwitterPayload{
-		Status: fillBodyTemplate(tweetAttr.Status, match),
+		Status: fillBodyTemplate(tweetAttr.Status, match, templVersion),
 	}
 
 	postData, _ := json.Marshal(payload)
@@ -281,11 +281,11 @@ type EmailPayload struct {
 	Subject    string
 }
 
-func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SESAPI) *trigger.Outcome {
+func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SESAPI, templVersion string) *trigger.Outcome {
 
-	email.Body = fillBodyTemplate(email.Body, match)
-	email.Subject = fillBodyTemplate(email.Subject, match)
-	allRecipients := getAllRecipients(email.To, match)
+	email.Body = fillBodyTemplate(email.Body, match, templVersion)
+	email.Subject = fillBodyTemplate(email.Subject, match, templVersion)
+	allRecipients := getAllRecipients(email.To, match, templVersion)
 
 	emailPayload := EmailPayload{
 		Recipients: allRecipients,
@@ -317,12 +317,12 @@ func handleEmail(email AttributeEmail, match trigger.IMatch, iemail sesiface.SES
 }
 
 // get extra recipients from the TO field
-func getAllRecipients(emailTo []string, match trigger.IMatch) []string {
+func getAllRecipients(emailTo []string, match trigger.IMatch, templVersion string) []string {
 	extraRecipients := make([]string, 0)
 	extraRecipients = append(extraRecipients, emailTo...)
 
 	for _, r := range emailTo {
-		templatedString := fillBodyTemplate(r, match)
+		templatedString := fillBodyTemplate(r, match, templVersion)
 		cleanString := utils.RemoveCharacters(templatedString, "[]")
 		for _, email := range strings.Split(cleanString, " ") {
 			if !utils.IsIn(email, extraRecipients) {

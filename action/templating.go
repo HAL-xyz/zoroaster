@@ -17,7 +17,13 @@ import (
 
 var applyAllTemplateConversions = utils.ComposeStringFns(scaleAmounts, fillHumanTime)
 
-func fillBodyTemplate(text string, payload trigger.IMatch) string {
+func fillBodyTemplate(text string, payload trigger.IMatch, templateVersion string) string {
+	// new template system
+	if templateVersion == "v2" {
+		rendered, _ := renderTemplateWithData(text, payload.ToTemplateMatch())
+		return rendered
+	}
+	// legacy template system
 	switch m := payload.(type) {
 	case trigger.TxMatch:
 		return applyAllTemplateConversions(templateTransaction(text, m))
