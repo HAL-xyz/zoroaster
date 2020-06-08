@@ -124,3 +124,46 @@ Missing param is:
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutcome, rendered)
 }
+
+func TestTemplateFunctions(t *testing.T) {
+
+	template := "{{ hexToASCII . }}"
+	rendered, err := renderTemplateWithData(template, "0x4920686176652031303021")
+	assert.NoError(t, err)
+	assert.Equal(t, "I have 100!", rendered)
+
+	template = "{{ hexToInt . }}"
+	rendered, err = renderTemplateWithData(template, "0xEA")
+	assert.NoError(t, err)
+	assert.Equal(t, "234", rendered)
+
+	template = "{{ etherscanTxLink . }}"
+	rendered, err = renderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	assert.NoError(t, err)
+	assert.Equal(t, "https://etherscan.io/tx/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
+
+	template = "{{ etherscanAddressLink . }}"
+	rendered, err = renderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	assert.NoError(t, err)
+	assert.Equal(t, "https://etherscan.io/address/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
+
+	template = "{{ etherscanTokenLink . }}"
+	rendered, err = renderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	assert.NoError(t, err)
+	assert.Equal(t, "https://etherscan.io/token/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
+
+	template = "{{ fromWei . 18 }}"
+	rendered, err = renderTemplateWithData(template, "629000000000000000")
+	assert.NoError(t, err)
+	assert.Equal(t, "0.63", rendered)
+
+	template = "{{ fromWei . 6 }}"
+	rendered, err = renderTemplateWithData(template, "629000000000000000")
+	assert.NoError(t, err)
+	assert.Equal(t, "629000000000", rendered)
+
+	template = "{{ humanTime . }}"
+	rendered, err = renderTemplateWithData(template, "1602631929")
+	assert.NoError(t, err)
+	assert.Equal(t, "14 Oct 20 00:32 BST", rendered)
+}
