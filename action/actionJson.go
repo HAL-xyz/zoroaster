@@ -7,10 +7,11 @@ import (
 )
 
 type Action struct {
-	TriggerID  int
-	UserID     int
-	ActionType string
-	Attribute  interface{}
+	TriggerID       int
+	UserID          int
+	ActionType      string
+	Attribute       interface{}
+	TemplateVersion string
 }
 
 type AttributeWebhookPost struct {
@@ -64,10 +65,11 @@ func (a *Action) UnmarshalJSON(data []byte) error {
 
 // proxy struct
 type ActionJson struct {
-	TriggerID  int    `json:"TriggerUUID"`
-	UserID     int    `json:"UserUUID"`
-	ActionType string `json:"ActionType"`
-	Attributes struct {
+	TriggerID       int    `json:"TriggerUUID"`
+	UserID          int    `json:"UserUUID"`
+	ActionType      string `json:"ActionType"`
+	TemplateVersion string `json:"TemplateVersion"`
+	Attributes      struct {
 		URI        string   `json:"URI"`
 		To         []string `json:"To"`
 		Subject    string   `json:"Subject"`
@@ -94,9 +96,10 @@ func NewActionJson(input []byte) (*ActionJson, error) {
 // converts an ActionJson to an Action
 func (ajs *ActionJson) ToAction() (*Action, error) {
 	action := Action{
-		TriggerID:  ajs.TriggerID,
-		UserID:     ajs.UserID,
-		ActionType: ajs.ActionType,
+		TriggerID:       ajs.TriggerID,
+		UserID:          ajs.UserID,
+		ActionType:      ajs.ActionType,
+		TemplateVersion: ajs.TemplateVersion,
 	}
 
 	switch strings.ToLower(ajs.ActionType) {

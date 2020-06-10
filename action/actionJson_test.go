@@ -164,3 +164,28 @@ func TestGetDiscordActionFromJson(t *testing.T) {
 	assert.Equal(t, "uri", v.DiscordURI)
 	assert.Equal(t, "body", v.Body)
 }
+
+func TestTemplateV2(t *testing.T) {
+	var s = `
+	{
+	   "UserUUID":1,
+	   "TriggerUUID":30,
+	   "ActionType":"discord",
+       "TemplateVersion":"v2",
+	   "Attributes":{
+		  "DiscordURI":"uri",
+		  "Body":"body"
+	   }
+	}`
+	a := Action{}
+
+	err := json.Unmarshal([]byte(s), &a)
+	assert.NoError(t, err)
+
+	v, ok := a.Attribute.(AttributeDiscord)
+	assert.True(t, ok)
+
+	assert.Equal(t, "uri", v.DiscordURI)
+	assert.Equal(t, "body", v.Body)
+	assert.Equal(t, "v2", a.TemplateVersion)
+}

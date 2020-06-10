@@ -26,7 +26,7 @@ func TestTemplateWithAllConversions(t *testing.T) {
 
 	template := `the first is: decAmount(!someBigNumber); The second is: humanTime(!unixTimestamp); the third is: octAmount(!someOtherNumber); then hexAmount(!someOtherNumber)`
 
-	body := fillBodyTemplate(template, *matches[0])
+	body := fillBodyTemplate(template, *matches[0], "")
 
 	assert.Equal(t, "the first is: 0.63; The second is: 14 Oct 20 00:32 BST; the third is: 16.03; then 1602.64", body)
 }
@@ -42,7 +42,7 @@ func TestTemplateWithDecConversion(t *testing.T) {
 
 	template := `the first is: decAmount(!someBigNumber); The second is: decAmount(!smallerNumber)`
 
-	body := fillBodyTemplate(template, *matches[0])
+	body := fillBodyTemplate(template, *matches[0], "")
 
 	assert.Equal(t, "the first is: 0.63; The second is: 0.01", body)
 }
@@ -81,7 +81,7 @@ func TestFillTemplate1(t *testing.T) {
 	template, err := ioutil.ReadFile("../resources/emails/1-wat-templ.txt")
 	assert.NoError(t, err)
 
-	body := fillBodyTemplate(string(template), match)
+	body := fillBodyTemplate(string(template), match, "")
 
 	expected, err := ioutil.ReadFile("../resources/emails/1-wat-exp.txt")
 
@@ -106,23 +106,23 @@ func TestFillTemplate2(t *testing.T) {
 	cnMatch.AllValues = []interface{}{"4", "8", "12"}
 
 	template := "$ReturnedValues$"
-	body := fillBodyTemplate(template, cnMatch)
+	body := fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "[4 8 12]", body)
 
 	template = "$ReturnedValues[0]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "4", body)
 
 	template = "$ReturnedValues[2]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "12", body)
 
 	template = "found: $ReturnedValues[1]$; not found: $ReturnedValues[33]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "found: 8; not found: $ReturnedValues[33]$", body)
 
 	template = "$MatchedValue$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "4", body)
 }
 
@@ -131,19 +131,19 @@ func TestFillTemplate3(t *testing.T) {
 	cnMatch.AllValues = []interface{}{"4", "sailor", "moon"}
 
 	template := "$ReturnedValues$"
-	body := fillBodyTemplate(template, cnMatch)
+	body := fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "[4 sailor moon]", body)
 
 	template = "$ReturnedValues[0]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "4", body)
 
 	template = "$ReturnedValues[2]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "moon", body)
 
 	template = "$ReturnedValues[0]$, $ReturnedValues[1]$, $ReturnedValues[2]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "4, sailor, moon", body)
 }
 
@@ -152,7 +152,7 @@ func TestFillTemplate4(t *testing.T) {
 	cnMatch.AllValues = []interface{}{"0x4a574510c7014e4ae985403536074abe582adfc8", "0xffffffffffffffffffffffffffffffffffffffff"}
 
 	template := "$ReturnedValues[0]$"
-	body := fillBodyTemplate(template, cnMatch)
+	body := fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "0x4a574510c7014e4ae985403536074abe582adfc8", body)
 }
 
@@ -165,15 +165,15 @@ func TestFillTemplateAdd(t *testing.T) {
 		}}
 
 	template := "$ReturnedValues[0]$"
-	body := fillBodyTemplate(template, cnMatch)
+	body := fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "0x4a574510c7014e4ae985403536074abe582adfc8", body)
 
 	template = "$ReturnedValues[1]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "0xffffffffffffffffffffffffffffffffffffffff", body)
 
 	template = "$ReturnedValues[2]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "$ReturnedValues[2]$", body)
 }
 
@@ -190,19 +190,19 @@ func TestFillTemplate6(t *testing.T) {
 		}}
 
 	template := "$ReturnedValues[3]$"
-	body := fillBodyTemplate(template, cnMatch)
+	body := fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "[0x4a574510c7014e4ae985403536074abe582adfc8 0xffffffffffffffffffffffffffffffffffffffff]", body)
 
 	template = "$ReturnedValues[3][0]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "0x4a574510c7014e4ae985403536074abe582adfc8", body)
 
 	template = "$ReturnedValues[3][1]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "0xffffffffffffffffffffffffffffffffffffffff", body)
 
 	template = "$ReturnedValues[3][2]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "$ReturnedValues[3][2]$", body)
 }
 
@@ -216,39 +216,39 @@ func TestFillTemplate5(t *testing.T) {
 		[]string{"one", "two", "three"}}
 
 	template := "$ReturnedValues$"
-	body := fillBodyTemplate(template, cnMatch)
+	body := fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "[4 sailor moon [one two three]]", body)
 
 	template = "$ReturnedValues[3][0]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "one", body)
 
 	template = "$ReturnedValues[3][1]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "two", body)
 
 	template = "$ReturnedValues[3][9]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "$ReturnedValues[3][9]$", body)
 
 	template = "$ReturnedValues[3]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "[one two three]", body)
 
 	template = "$ReturnedValues[1]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "sailor", body)
 
 	template = "$ReturnedValues[10]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "$ReturnedValues[10]$", body)
 
 	template = "sailor: $ReturnedValues[1]$ and moon: $ReturnedValues[2]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "sailor: sailor and moon: moon", body)
 
 	template = "sailor: $ReturnedValues[1]$ and one: $ReturnedValues[3][0]$"
-	body = fillBodyTemplate(template, cnMatch)
+	body = fillBodyTemplate(template, cnMatch, "")
 	assert.Equal(t, "sailor: sailor and one: one", body)
 }
 
@@ -263,7 +263,7 @@ func TestFillTemplate7(t *testing.T) {
 	template, err := ioutil.ReadFile("../resources/emails/2-wac-templ.txt")
 	assert.NoError(t, err)
 
-	body := fillBodyTemplate(string(template), cnMatch)
+	body := fillBodyTemplate(string(template), cnMatch, "")
 
 	expected, err := ioutil.ReadFile("../resources/emails/2-wac-exp.txt")
 	assert.NoError(t, err)
@@ -285,7 +285,7 @@ func TestEmailTemplateEvent(t *testing.T) {
 	template, err := ioutil.ReadFile("../resources/emails/3-wae-templ.txt")
 	assert.NoError(t, err)
 
-	body := fillBodyTemplate(string(template), *matches[0])
+	body := fillBodyTemplate(string(template), *matches[0], "")
 
 	expected, err := ioutil.ReadFile("../resources/emails/3-wae-exp.txt")
 	assert.NoError(t, err)

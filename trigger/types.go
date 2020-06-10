@@ -10,6 +10,7 @@ import (
 type IMatch interface {
 	ToPersistent() IPersistableMatch
 	ToPostPayload() IPostablePaylaod
+	ToTemplateMatch() TemplateMatch
 	GetTriggerUUID() string
 	GetUserUUID() string
 	GetMatchUUID() string
@@ -25,6 +26,44 @@ type IPostablePaylaod interface {
 	isPostablePayload()
 }
 
+// The basic templateble match, shared between WaT/WaC/WaE
+// this is the interface users have access to when writing actions.
+type TemplateMatch struct {
+	Block    TemplateBlock
+	Contract TemplateContract
+	Tx       TemplateTx
+}
+
+// templating Block, shared between WaT/WaC/WaE
+type TemplateBlock struct {
+	Hash      string
+	Number    *int
+	Timestamp int
+}
+
+// templating Transaction, only used by WaT
+type TemplateTx struct {
+	From      string
+	Gas       int
+	GasPrice  *big.Int
+	Nonce     int
+	To        string
+	Hash      string
+	Value     *big.Int
+	InputData string
+}
+
+// templating Contract, shared between WaT/WaC/WaE
+type TemplateContract struct {
+	Address          string
+	MethodName       string                 // WaT only
+	MethodParameters map[string]interface{} // WaT only
+	MatchedValues    []string               // WaC only
+	ReturnedValues   []interface{}          // WaC only
+	EventName        string                 // WaE only
+	EventParameters  map[string]interface{} // WaE only
+}
+
 // TX MATCH
 
 type TxMatch struct {
@@ -34,6 +73,47 @@ type TxMatch struct {
 	DecodedFnArgs  *string `json:"DecodedFnArgs,omitempty"`
 	DecodedFnName  *string `json:"DecodedFnName,omitempty"`
 	Tx             *ethrpc.Transaction
+}
+
+func (m TxMatch) ToTemplateMatch() TemplateMatch {
+	var fnName string
+	if m.DecodedFnName != nil {
+		fnName = *(m.DecodedFnName)
+	}
+	var fnArgs string
+	if m.DecodedFnArgs != nil {
+		fnArgs = *(m.DecodedFnArgs)
+	}
+	var params map[string]interface{}
+	_ = json.Unmarshal([]byte(fnArgs), &params)
+
+	t := TemplateMatch{
+		Block: TemplateBlock{
+			Hash:      m.Tx.BlockHash,
+			Number:    m.Tx.BlockNumber,
+			Timestamp: m.BlockTimestamp,
+		},
+	}
+	c := TemplateContract{
+		Address:          m.Tg.ContractAdd,
+		MethodName:       fnName,
+		MethodParameters: params,
+	}
+	t.Contract = c
+
+	tx := TemplateTx{
+		From:      m.Tx.From,
+		Gas:       m.Tx.Gas,
+		GasPrice:  &m.Tx.GasPrice,
+		Nonce:     m.Tx.Nonce,
+		To:        m.Tx.To,
+		Hash:      m.Tx.Hash,
+		Value:     &m.Tx.Value,
+		InputData: m.Tx.Input,
+	}
+	t.Tx = tx
+
+	return t
 }
 
 type PersistentTx struct {
@@ -150,6 +230,24 @@ type CnMatch struct {
 	AllValues      []interface{}
 }
 
+func (m CnMatch) ToTemplateMatch() TemplateMatch {
+	b := TemplateBlock{
+		Hash:      m.BlockHash,
+		Number:    &m.BlockNumber,
+		Timestamp: m.BlockTimestamp,
+	}
+	c := TemplateContract{
+		Address:        m.Trigger.ContractAdd,
+		MatchedValues:  m.MatchedValues,
+		ReturnedValues: m.AllValues,
+	}
+	t := TemplateMatch{
+		Block:    b,
+		Contract: c,
+	}
+	return t
+}
+
 type PersistentCnMatch struct {
 	BlockNumber    int
 	BlockTimestamp int
@@ -244,6 +342,24 @@ type EventMatch struct {
 	Log            *ethrpc.Log
 	EventParams    map[string]interface{}
 	BlockTimestamp int
+}
+
+func (m EventMatch) ToTemplateMatch() TemplateMatch {
+	b := TemplateBlock{
+		Hash:      m.Log.BlockHash,
+		Number:    &m.Log.BlockNumber,
+		Timestamp: m.BlockTimestamp,
+	}
+	c := TemplateContract{
+		Address:         m.Log.Address,
+		EventName:       m.Tg.Filters[0].EventName,
+		EventParameters: m.EventParams,
+	}
+	t := TemplateMatch{
+		Block:    b,
+		Contract: c,
+	}
+	return t
 }
 
 type PersistentEventMatch struct {
