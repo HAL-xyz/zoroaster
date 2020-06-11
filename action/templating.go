@@ -1,7 +1,6 @@
 package action
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
@@ -207,45 +206,36 @@ func templateTransaction(text string, match trigger.TxMatch) string {
 		text = strings.ReplaceAll(text, "$MethodName$", *match.DecodedFnName)
 	}
 
-	// function params
-	if match.DecodedFnArgs != nil {
-		var args map[string]json.RawMessage
-		err := json.Unmarshal([]byte(*match.DecodedFnArgs), &args)
+	// replace !functionParams
+	for key, value := range match.DecodedFnArgs {
+		old := fmt.Sprintf("!%s", key)
+		new := fmt.Sprintf("%s", value)
+		text = strings.ReplaceAll(text, old, new)
+	}
+
+	// replace a function parameter with its indexed value, e.g. given
+	// ["0x0df721639ca2f7ff0e1f618b918a65ffb199ac4e",...][0] we want
+	// "0x0df721639ca2f7ff0e1f618b918a65ffb199ac4e"
+
+	indexedRgx := regexp.MustCompile(`\[\S*]\[\d*]`)
+	indexedParams := indexedRgx.FindAllString(text, -1)
+
+	arrayRgx := regexp.MustCompile(`]\[\d*]`)
+	for _, param := range indexedParams {
+		array := arrayRgx.FindString(param)         // matches ...][N]
+		array = utils.RemoveCharacters(array, "[]") // N
+		index, err := strconv.Atoi(array)
 		if err != nil {
-			logrus.Error(err)
 			return text
 		}
-
-		// replace !functionParams
-		for key, rawJson := range args {
-			old := fmt.Sprintf("!%s", key)
-			new := fmt.Sprintf("%s", rawJson)
-			text = strings.ReplaceAll(text, old, new)
+		splitElements := strings.Split(param, ",")
+		for i, e := range splitElements {
+			splitElements[i] = utils.RemoveCharacters(e, "[]")
 		}
-
-		// replace a function parameter with its indexed value, e.g. given
-		// ["0x0df721639ca2f7ff0e1f618b918a65ffb199ac4e",...][0] we want
-		// "0x0df721639ca2f7ff0e1f618b918a65ffb199ac4e"
-
-		indexedRgx := regexp.MustCompile(`\[\S*]\[\d*]`)
-		indexedParams := indexedRgx.FindAllString(text, -1)
-
-		arrayRgx := regexp.MustCompile(`]\[\d*]`)
-		for _, param := range indexedParams {
-			array := arrayRgx.FindString(param)         // matches ...][N]
-			array = utils.RemoveCharacters(array, "[]") // N
-			index, err := strconv.Atoi(array)
-			if err != nil {
-				return text
-			}
-			splitElements := strings.Split(param, ",")
-			for i, e := range splitElements {
-				splitElements[i] = utils.RemoveCharacters(e, "[]")
-			}
-			if index < len(splitElements) {
-				text = strings.Replace(text, param, splitElements[index], 1)
-			}
+		if index < len(splitElements) {
+			text = strings.Replace(text, param, splitElements[index], 1)
 		}
 	}
+
 	return text
 }

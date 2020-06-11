@@ -86,7 +86,7 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 	postData, err := json.Marshal(match.ToPostPayload())
 	if err != nil {
 		return &trigger.Outcome{
-			Payload: fmt.Sprintf("%v", match.ToPostPayload()),
+			Payload: fmt.Sprintf("%v", match.ToPostPayload()), // bc the marshaling failed
 			Outcome: makeErrorResponse(err.Error()),
 			Success: false,
 		}
@@ -103,6 +103,7 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli a
 
 	responseCode := WebhookResponse{resp.StatusCode, resp.Status}
 	jsonRespCode, _ := json.Marshal(responseCode)
+
 	return &trigger.Outcome{
 		Payload: string(postData),
 		Outcome: string(jsonRespCode),

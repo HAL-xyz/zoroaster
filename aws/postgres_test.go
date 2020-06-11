@@ -50,13 +50,13 @@ func TestPostgresClient_All(t *testing.T) {
 
 	tx, err := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
 	assert.NoError(t, err)
-	fnArgs := "{}"
+	fnName := ""
 	txMatch := trigger.TxMatch{
 		MatchUUID:      "3b29b0c3-e403-4103-81ef-6685cd391cdm",
 		BlockTimestamp: 1554828248,
 		Tg:             tg,
-		DecodedFnName:  &fnArgs,
-		DecodedFnArgs:  &fnArgs,
+		DecodedFnName:  &fnName,
+		DecodedFnArgs:  map[string]interface{}{},
 		Tx:             tx,
 	}
 	_, err = psqlClient.LogMatch(txMatch)

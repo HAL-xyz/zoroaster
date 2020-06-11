@@ -288,13 +288,18 @@ func TestMatchTrigger(t *testing.T) {
 	assert.Equal(t, *(matches[1].Tx.TransactionIndex), 8)
 
 	assert.Equal(t, *(matches[0].DecodedFnName), "transfer")
-	assert.Equal(t, *(matches[0].DecodedFnArgs), `{"_to":"0xfea2f9433058cd555fd67cdde8efd7e6031e56c0","_value":4000000000000000000}`)
+
+	assert.Equal(t, "0xfea2f9433058cd555fd67cdde8efd7e6031e56c0", matches[0].DecodedFnArgs["_to"])
+	assert.Equal(t, "4000000000000000000", matches[0].DecodedFnArgs["_value"])
 
 	// testing ToPersistent()
 	persistentJson, err := utils.GimmePrettyJson(matches[0].ToPersistent())
 	expectedJsn := `{
   "DecodedData": {
-    "FunctionArguments": "{\"_to\":\"0xfea2f9433058cd555fd67cdde8efd7e6031e56c0\",\"_value\":4000000000000000000}",
+    "FunctionArguments": {
+      "_to": "0xfea2f9433058cd555fd67cdde8efd7e6031e56c0",
+      "_value": "4000000000000000000"
+    },
     "FunctionName": "transfer"
   },
   "Transaction": {

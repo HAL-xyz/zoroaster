@@ -80,21 +80,22 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/t1.json")
 	tg.ContractABI = "" // otherwise it's a pain to test
 	tx, _ := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
-	fnArgs := "{}"
+	fnName := ""
 	txMatch := trigger.TxMatch{
 		MatchUUID:      "",
 		Tg:             tg,
 		BlockTimestamp: 1554828248,
-		DecodedFnName:  &fnArgs,
-		DecodedFnArgs:  &fnArgs,
+		DecodedFnName:  &fnName,
+		DecodedFnArgs:  map[string]interface{}{},
 		Tx:             tx,
 	}
 	outcome := handleWebHookPost(url, txMatch, mockHttpClient{})
 
 	expectedPayload := `{
   "DecodedData": {
-    "FunctionArguments": "{}",
-    "FunctionName": "{}"
+    "FunctionArguments": {
+	},
+    "FunctionName": ""
   },
   "Transaction": {
     "Hash": "0x0641bb18e73d9e874252d3de6993473d176200dc02f4482a64c6540749aecaff",

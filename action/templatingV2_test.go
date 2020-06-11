@@ -40,7 +40,7 @@ Block Hash is: 0xb972fb8fe7a2aca471fa649e790ac51f59f920a2b71ec522aee606f1ccc99f6
 Contract Address is: 0x174bfa6600bf90c885c7c01c7031389ed1461ab9
 Contract method name is: transfer
 Contract parameter "_to" is: 0xfea2f9433058cd555fd67cdde8efd7e6031e56c0
-Contract parameter "_value" is: 4e&#43;18
+Contract parameter "_value" is: 4000000000000000000
 Transaction from is: 0x3d2339bf362a9b0f8ef3ca0867bd73f350ed66ac
 Transaction gas is: 115960
 Transaction gas price is: 7000000000

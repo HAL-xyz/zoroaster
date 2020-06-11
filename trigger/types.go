@@ -70,8 +70,8 @@ type TxMatch struct {
 	MatchUUID      string
 	Tg             *Trigger
 	BlockTimestamp int
-	DecodedFnArgs  *string `json:"DecodedFnArgs,omitempty"`
-	DecodedFnName  *string `json:"DecodedFnName,omitempty"`
+	DecodedFnArgs  map[string]interface{} `json:"DecodedFnArgs,omitempty"`
+	DecodedFnName  *string                `json:"DecodedFnName,omitempty"`
 	Tx             *ethrpc.Transaction
 }
 
@@ -80,13 +80,6 @@ func (m TxMatch) ToTemplateMatch() TemplateMatch {
 	if m.DecodedFnName != nil {
 		fnName = *(m.DecodedFnName)
 	}
-	var fnArgs string
-	if m.DecodedFnArgs != nil {
-		fnArgs = *(m.DecodedFnArgs)
-	}
-	var params map[string]interface{}
-	_ = json.Unmarshal([]byte(fnArgs), &params)
-
 	t := TemplateMatch{
 		Block: TemplateBlock{
 			Hash:      m.Tx.BlockHash,
@@ -97,7 +90,7 @@ func (m TxMatch) ToTemplateMatch() TemplateMatch {
 	c := TemplateContract{
 		Address:          m.Tg.ContractAdd,
 		MethodName:       fnName,
-		MethodParameters: params,
+		MethodParameters: m.DecodedFnArgs,
 	}
 	t.Contract = c
 
@@ -132,7 +125,7 @@ type PersistentTx struct {
 
 type PersistentTxMatch struct {
 	DecodedData struct {
-		FunctionArguments *string
+		FunctionArguments map[string]interface{}
 		FunctionName      *string
 	}
 	PTx PersistentTx `json:"Transaction"`
@@ -154,7 +147,7 @@ func (m TxMatch) ToPersistent() IPersistableMatch {
 			InputData:      m.Tx.Input,
 		},
 		DecodedData: struct {
-			FunctionArguments *string
+			FunctionArguments map[string]interface{}
 			FunctionName      *string
 		}{
 			m.DecodedFnArgs,
@@ -177,7 +170,7 @@ func (m TxMatch) GetUserUUID() string {
 
 type TxPostPayload struct {
 	DecodedData struct {
-		FunctionArguments *string
+		FunctionArguments map[string]interface{}
 		FunctionName      *string
 	}
 	Transaction PersistentTx
@@ -204,7 +197,7 @@ func (m TxMatch) ToPostPayload() IPostablePaylaod {
 			InputData:      m.Tx.Input,
 		},
 		DecodedData: struct {
-			FunctionArguments *string
+			FunctionArguments map[string]interface{}
 			FunctionName      *string
 		}{
 			m.DecodedFnArgs,

@@ -1,7 +1,6 @@
 package trigger
 
 import (
-	"encoding/json"
 	"github.com/HAL-xyz/zoroaster/abidec"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
@@ -13,18 +12,15 @@ func MatchTransaction(trigger *Trigger, block *ethrpc.Block) []*TxMatch {
 	for i, tx := range block.Transactions {
 		if validateTrigger(trigger, &tx) {
 			// we discard errors here bc not every match will have input data
-			var fnArgs *string
 			fnArgsData, _ := abidec.DecodeInputData(tx.Input, trigger.ContractABI)
-			if fnArgsData != nil {
-				fnArgsBytes, _ := json.Marshal(fnArgsData)
-				fnArgsString := string(fnArgsBytes)
-				fnArgs = &fnArgsString
+			for k, v := range fnArgsData {
+				fnArgsData[k] = utils.SprintfInterfaces([]interface{}{v})[0]
 			}
 			fnName, _ := abidec.DecodeInputMethod(&tx.Input, &trigger.ContractABI)
 
 			match := TxMatch{
 				BlockTimestamp: block.Timestamp,
-				DecodedFnArgs:  fnArgs,
+				DecodedFnArgs:  fnArgsData,
 				DecodedFnName:  fnName,
 				Tx:             &block.Transactions[i],
 				Tg:             trigger,
