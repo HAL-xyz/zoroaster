@@ -2,10 +2,10 @@ package trigger
 
 import (
 	"encoding/json"
+	"github.com/HAL-xyz/zoroaster/abidec"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"strings"
-	"zoroaster/abidec"
 )
 
 func MatchTransaction(trigger *Trigger, block *ethrpc.Block) []*TxMatch {

@@ -1,11 +1,11 @@
 package matcher
 
 import (
+	"github.com/HAL-xyz/zoroaster/action"
+	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	log "github.com/sirupsen/logrus"
-	"zoroaster/action"
-	"zoroaster/aws"
-	"zoroaster/trigger"
 )
 
 func ProcessMatch(match trigger.IMatch, idb aws.IDB, iEmail sesiface.SESAPI, httpCli aws.IHttpClient) []*trigger.Outcome {

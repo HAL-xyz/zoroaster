@@ -4,12 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
 	"time"
-	"zoroaster/config"
-	"zoroaster/trigger"
 )
 
 var db *sql.DB

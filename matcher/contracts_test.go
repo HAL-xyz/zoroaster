@@ -3,13 +3,13 @@ package matcher
 import (
 	"errors"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
-	"zoroaster/aws"
-	"zoroaster/config"
-	"zoroaster/trigger"
 )
 
 var psqlClient = aws.PostgresClient{}

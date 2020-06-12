@@ -2,11 +2,11 @@ package db
 
 import (
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"zoroaster/aws"
-	"zoroaster/config"
 )
 
 var psqlClient = aws.PostgresClient{}

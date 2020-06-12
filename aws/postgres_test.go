@@ -2,14 +2,14 @@ package aws
 
 import (
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/trigger"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"log"
 	"testing"
 	"time"
-	"zoroaster/config"
-	"zoroaster/trigger"
-	"zoroaster/utils"
 )
 
 var psqlClient = PostgresClient{}

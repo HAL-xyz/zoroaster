@@ -2,6 +2,9 @@ package matcher
 
 import (
 	"bytes"
+	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/trigger"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	"github.com/stretchr/testify/assert"
@@ -9,9 +12,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"testing"
-	"zoroaster/aws"
-	"zoroaster/trigger"
-	"zoroaster/utils"
 )
 import log "github.com/sirupsen/logrus"
 

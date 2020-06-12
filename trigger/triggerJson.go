@@ -3,9 +3,9 @@ package trigger
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"math/big"
 	"strconv"
-	"zoroaster/utils"
 )
 
 type TriggerJson struct {

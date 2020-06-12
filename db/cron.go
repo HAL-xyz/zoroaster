@@ -1,9 +1,9 @@
 package db
 
 import (
+	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/sirupsen/logrus"
 	"time"
-	"zoroaster/aws"
 )
 
 // Every month we want to update the users table

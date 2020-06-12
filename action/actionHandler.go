@@ -4,16 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/trigger"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	log "github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
-	"zoroaster/aws"
-	"zoroaster/config"
-	"zoroaster/trigger"
-	"zoroaster/utils"
 )
 
 func ProcessActions(

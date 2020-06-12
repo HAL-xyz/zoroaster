@@ -3,13 +3,13 @@ package trigger
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"math/big"
 	"regexp"
 	"strconv"
 	"strings"
-	"zoroaster/utils"
 )
 
 // According to https://solidity.readthedocs.io/en/v0.5.3/abi-spec.html#abi-events

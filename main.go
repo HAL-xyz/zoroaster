@@ -1,17 +1,17 @@
 package main
 
 import (
+	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/db"
+	"github.com/HAL-xyz/zoroaster/eth"
+	"github.com/HAL-xyz/zoroaster/matcher"
+	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
 	"time"
-	"zoroaster/aws"
-	"zoroaster/config"
-	"zoroaster/db"
-	"zoroaster/eth"
-	"zoroaster/matcher"
-	"zoroaster/trigger"
 )
 
 func main() {

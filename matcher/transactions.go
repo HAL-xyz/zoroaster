@@ -1,11 +1,11 @@
 package matcher
 
 import (
+	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"time"
-	"zoroaster/aws"
-	"zoroaster/trigger"
 )
 
 func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, idb aws.IDB) {

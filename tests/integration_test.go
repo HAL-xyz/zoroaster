@@ -2,12 +2,12 @@ package tests
 
 import (
 	"encoding/json"
+	"github.com/HAL-xyz/zoroaster/config"
+	trig "github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"sync"
 	"testing"
-	"zoroaster/config"
-	trig "zoroaster/trigger"
 )
 
 type AllRules struct {

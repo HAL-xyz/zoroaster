@@ -1,9 +1,9 @@
 package aws
 
 import (
+	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/trigger"
 	"time"
-	"zoroaster/config"
-	"zoroaster/trigger"
 )
 
 type IDB interface {

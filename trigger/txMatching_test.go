@@ -1,11 +1,11 @@
 package trigger
 
 import (
+	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"zoroaster/config"
-	"zoroaster/utils"
 )
 
 func init() {

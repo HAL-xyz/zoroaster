@@ -3,12 +3,12 @@ package trigger
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"regexp"
 	"strconv"
 	"strings"
-	"zoroaster/utils"
 )
 
 func encodeMethod(methodName, cntABI string, inputs []Input) (string, error) {

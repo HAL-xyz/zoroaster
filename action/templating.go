@@ -3,6 +3,8 @@ package action
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/trigger"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/sirupsen/logrus"
 	"math"
 	"math/big"
@@ -11,8 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"zoroaster/trigger"
-	"zoroaster/utils"
 )
 
 var applyAllTemplateConversions = utils.ComposeStringFns(scaleAmounts, fillHumanTime)

@@ -4,11 +4,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/onrik/ethrpc"
 	"github.com/sirupsen/logrus"
 	"strings"
-	"zoroaster/utils"
 )
 
 func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []*EventMatch {
@@ -179,7 +179,6 @@ func getTopicsMap(abiObj *abi.ABI, eventName string, evLog *ethrpc.Log) map[stri
 }
 
 func getEventSignature(cntABI string, eventName string) (string, error) {
-
 	// let's find out the Event specified by our trigger
 	// this is equivalent to:
 	// eventSignature := []byte("ItemSet(bytes32,bytes32)")
@@ -191,12 +190,9 @@ func getEventSignature(cntABI string, eventName string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	var eventSignature string
 	for _, event := range abiObj.Events {
 		if event.Name == eventName {
-			eventSignature = event.ID().Hex()
-			return eventSignature, nil
+			return event.ID.Hex(), nil
 		}
 	}
 	return "", fmt.Errorf("cannot find event %s\n", eventName)

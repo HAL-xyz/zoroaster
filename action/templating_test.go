@@ -1,11 +1,11 @@
 package action
 
 import (
+	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
-	"zoroaster/trigger"
 )
 
 func TestHumanTimeConverter(t *testing.T) {

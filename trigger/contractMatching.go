@@ -3,11 +3,11 @@ package trigger
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/abidec"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"strings"
-	"zoroaster/abidec"
-	"zoroaster/utils"
 )
 
 func MatchContract(

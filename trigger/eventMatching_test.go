@@ -1,13 +1,13 @@
 package trigger
 
 import (
+	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
-	"zoroaster/config"
-	"zoroaster/utils"
 )
 
 func TestValidateFilterLog(t *testing.T) {
