@@ -1,0 +1,12 @@
+export STAGE=
+export DB_HOST=
+export DB_NAME=
+export DB_USR=
+export DB_PWD=
+export TEST_NODE=
+export ETH_NODE=
+export RINKEBY_NODE=
+export TWITTER_CONSUMER_KEY=
+export TWITTER_CONSUMER_SECRET=
+export LOGS_PATH=
+export BLOCKS_DELAY=

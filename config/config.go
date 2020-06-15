@@ -1,11 +1,10 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
 	"os"
+	"strconv"
 )
 
 type ZConfiguration struct {
@@ -36,8 +35,6 @@ type ZoroDB struct {
 	Password      string
 }
 
-// ENV variables
-
 type Stage int
 
 const (
@@ -50,7 +47,12 @@ func (s Stage) String() string {
 	return [...]string{"TEST", "DEV", "PROD"}[s]
 }
 
+// ENV variables
 const (
+	logsPath              = "LOGS_PATH"
+	blocksDelay           = "BLOCKS_DELAY"
+	dbHost                = "DB_HOST"
+	dbName                = "DB_NAME"
 	dbUsr                 = "DB_USR"
 	dbPwd                 = "DB_PWD"
 	ethNode               = "ETH_NODE"
@@ -59,39 +61,63 @@ const (
 	twitterConsumerSecret = "TWITTER_CONSUMER_SECRET"
 )
 
-func readStage() ZConfiguration {
-	zconf := ZConfiguration{}
+// DB tables
+const (
+	dbPort        = 5432
+	tableTriggers = "triggers"
+	tableMatches  = "matches"
+	tableOutcomes = "outcomes"
+	tableState    = "state"
+	tableActions  = "actions"
+	tableUsers    = "users"
+)
+
+func NewConfig() *ZConfiguration {
+
+	zconfig := ZConfiguration{}
+
 	stage := os.Getenv("STAGE")
 	switch stage {
 	case "TEST":
-		zconf.ConfigFile = fmt.Sprintf("/etc/zoro-test.json")
-		zconf.Stage = TEST
+		zconfig.Stage = TEST
 	case "DEV":
-		zconf.ConfigFile = fmt.Sprintf("/etc/zoro-dev.json")
-		zconf.Stage = DEV
+		zconfig.Stage = DEV
 	case "PROD":
-		zconf.ConfigFile = fmt.Sprintf("/etc/zoro-prod.json")
-		zconf.Stage = PROD
+		zconfig.Stage = PROD
 	default:
 		log.Fatal("local env STAGE must be TEST, DEV or PROD")
 	}
-	return zconf
-}
 
-func Load() *ZConfiguration {
+	zconfig.Database.TableTriggers = tableTriggers
+	zconfig.Database.TableMatches = tableMatches
+	zconfig.Database.TableOutcomes = tableOutcomes
+	zconfig.Database.TableState = tableState
+	zconfig.Database.TableActions = tableActions
+	zconfig.Database.TableUsers = tableUsers
+	zconfig.Database.Port = dbPort
 
-	zconfig := readStage()
-
-	f, err := ioutil.ReadFile(zconfig.ConfigFile)
-	if err != nil {
-		log.Fatalf("cannot open %s: %s", zconfig.ConfigFile, err)
+	zconfig.LogsFile = os.Getenv(logsPath)
+	if zconfig.LogsFile == "" {
+		log.Fatal("no logs path set in local env ", logsPath)
 	}
-	err = json.Unmarshal(f, &zconfig)
-	if err != nil {
-		log.Fatalf("cannot load %s: %s", zconfig.ConfigFile, err)
-	}
-
 	zconfig.LogsFile = fmt.Sprintf("%s/%s.log", zconfig.LogsPath, zconfig.Stage)
+
+	delay := os.Getenv(blocksDelay)
+	intDelay, err := strconv.Atoi(delay)
+	if delay == "" || err != nil {
+		log.Fatalf("cannot use %s as block delay", delay)
+	}
+	zconfig.BlocksDelay = intDelay
+
+	zconfig.Database.Host = os.Getenv(dbHost)
+	if zconfig.Database.Host == "" {
+		log.Fatal("no db host set in local env ", dbHost)
+	}
+
+	zconfig.Database.Name = os.Getenv(dbName)
+	if zconfig.Database.Name == "" {
+		log.Fatal("no db name set in local env ", dbName)
+	}
 
 	zconfig.Database.User = os.Getenv(dbUsr)
 	if zconfig.Database.User == "" {
@@ -123,6 +149,9 @@ func Load() *ZConfiguration {
 	if zconfig.TwitterConsumerSecret == "" {
 		log.Fatal("no twitter consumer secret set in local env ", twitterConsumerSecret)
 	}
+
+	// TODO: get rid of useGetModAccounts altogether
+	zconfig.UseGetModAccounts = false
 
 	return &zconfig
 }

@@ -1,0 +1,56 @@
+version: 2.1
+
+image_name: &image_name 'halxyz/zoroaster'
+
+orbs:
+  docker: circleci/docker@1.2.1
+  aws-ecs: circleci/aws-ecs@1.2.0
+
+jobs:
+  build-and-push:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - docker/build:
+          image: *image_name
+          tag: $CIRCLE_BRANCH
+      - docker/push:
+          digest-path: /tmp/digest.txt
+          image: *image_name
+          tag: $CIRCLE_BRANCH
+      - run:
+          command: |
+            echo "Digest is: $(</tmp/digest.txt)"
+
+
+workflows:
+  build-docker-image-only:
+    jobs:
+      - build-and-push:
+          filters:
+            branches:
+              only: staging
+      - aws-ecs/deploy-service-update:
+          family: "zoroaster-service"
+          cluster-name: "halxyz-staging-cluster"
+          container-image-name-updates: "container=zoroaster-service,tag=${CIRCLE_BRANCH}"
+          container-env-var-updates: "
+          container=zoroaster-service,name=STAGE,value=DEV,
+          container=zoroaster-service,name=DB_HOST,value=${DB_HOST},
+          container=zoroaster-service,name=DB_NAME,value=${DB_NAME},
+          container=zoroaster-service,name=DB_USR,value=${DB_USR},
+          container=zoroaster-service,name=DB_PWD,value=${DB_PWD},
+          container=zoroaster-service,name=TEST_NODE,value=${TEST_NODE},
+          container=zoroaster-service,name=ETH_NODE,value=${ETH_NODE},
+          container=zoroaster-service,name=RINKEBY_NODE,value=${RINKEBY_NODE},
+          container=zoroaster-service,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
+          container=zoroaster-service,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
+          container=zoroaster-service,name=LOGS_PATH,value=${LOGS_PATH},
+          container=zoroaster-service,name=BLOCKS_DELAY,value=${BLOCKS_DELAY}"
+          filters:
+            branches:
+              only: staging
+          requires:
+            - build-and-push

@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  zoroaster:
+    build: .
+    env_file:
+      - .env
+    depends_on:
+      - db
+  db:
+    image: postgres:12.3-alpine
+    restart: always
+    volumes:
+      - type: bind
+        source: $PWD/db_data
+        target: /var/lib/postgresql/data
+        consistency: delegated
+    environment:
+      POSTGRES_USER: "${DB_USR}"
+      POSTGRES_PASSWORD: "${DB_PWD}"
+      POSTGRES_DB: "${DB_NAME}"
