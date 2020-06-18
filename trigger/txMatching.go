@@ -2,6 +2,7 @@ package trigger
 
 import (
 	"github.com/HAL-xyz/zoroaster/abidec"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"strings"

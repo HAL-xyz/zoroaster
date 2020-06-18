@@ -1,9 +1,9 @@
 package action
 
 import (
+	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/stretchr/testify/assert"
 	"testing"
-	"zoroaster/trigger"
 )
 
 func TestTxMatching(t *testing.T) {
