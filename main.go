@@ -11,7 +11,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"
-	"time"
 )
 
 func main() {
@@ -19,19 +18,8 @@ func main() {
 	// Load AWS SES session
 	sesSession := aws.GetSESSession()
 
-	// Persist logs
-	log.SetFormatter(&log.TextFormatter{
-		ForceColors:     true,
-		FullTimestamp:   true,
-		TimestampFormat: time.Stamp,
-	})
 	log.SetLevel(log.DebugLevel)
-	f, err := os.OpenFile(config.Zconf.LogsFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	log.SetOutput(f)
+	log.SetOutput(os.Stdout)
 
 	log.Info("Starting up Zoroaster, stage = ", config.Zconf.Stage)
 
