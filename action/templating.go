@@ -56,6 +56,8 @@ func scaleAmounts(text string) string {
 		switch g[1] {
 		case "dec":
 			text = strings.ReplaceAll(text, g[0], scaleBy(g[2], "1000000000000000000"))
+		case "nin":
+			text = strings.ReplaceAll(text, g[0], scaleBy(g[2], "1000000000"))
 		case "oct":
 			text = strings.ReplaceAll(text, g[0], scaleBy(g[2], "100000000"))
 		case "hex":
