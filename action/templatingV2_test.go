@@ -3,12 +3,11 @@ package action
 import (
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/stretchr/testify/assert"
+	"math/big"
 	"testing"
 )
 
 func TestTxMatching(t *testing.T) {
-
-	// TODO big int json unmarshaling is broken
 
 	block, _ := trigger.GetBlockFromFile("../resources/blocks/block1.json")
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/t2.json")
@@ -53,6 +52,49 @@ Transaction input data is: 0xa9059cbb000000000000000000000000fea2f9433058cd555fd
 	rendered, err := renderTemplateWithData(templateText, matches[0].ToTemplateMatch())
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutcome, rendered)
+
+	exampleUI :=
+		`
+Hello, welcome to the new template system. It will be soon wrapped up in a nice UI, but for the time being you can access fields manually using the Go template syntax.
+
+You can also find the full documentation here: https://dev.hal.xyz/how-it-works/actions/templating
+
+Contract Address is: {{.Contract.Address}}
+Block Number is: {{.Block.Number}}
+Block Timestamp is: {{.Block.Timestamp}}
+Block Hash is: {{.Block.Hash }}
+Transaction from is: {{.Tx.From}}
+Transaction gas is: {{.Tx.Gas}}
+Transaction gas price is: {{.Tx.GasPrice}}
+Transaction nonce is: {{.Tx.Nonce}}
+Transaction to is: {{.Tx.To}}
+Transaction hash is: {{.Tx.Hash}}
+Transaction value is: {{.Tx.Value}}
+Transaction input data is: {{.Tx.InputData}}
+
+If the transaction calls a function, you can access the function name like this: {{ .Contract.MethodName }}
+
+You can also access the various function parameters like this: {{.Contract.MethodParameters.ParameterName}}
+
+We also support a bunch of handy functions to manipulate different values:
+
+{{ fromWei .Tx.Value 9 }} divides a value by 10^9.
+
+{{ humanTime .Block.Timestamp }} prints a timestamp in some human readable format 
+
+{{ hexToASCII "0x4920686176652031303021" }} guess ;) 
+
+{{ hexToInt "0xea" }}
+
+{{ etherscanTxLink .Tx.Hash }} creates an Etherscan transaction link 
+
+{{ etherscanTokenLink .Contract.Address }} 
+
+{{ etherscanAddressLink .Contract.Address }} 
+
+`
+	_, err = renderTemplateWithData(exampleUI, matches[0].ToTemplateMatch())
+	assert.NoError(t, err)
 }
 
 func TestContractMatching(t *testing.T) {
@@ -64,7 +106,7 @@ func TestContractMatching(t *testing.T) {
 		MatchedValues:  []string{},
 		BlockTimestamp: 123456,
 		AllValues:      []interface{}{},
-		BlockHash:      "0x",
+		BlockHash:      "0x66666",
 	}
 
 	cnMatch.MatchedValues = []string{"hello", "world"}
@@ -94,6 +136,39 @@ Out of bound value is `
 	rendered, err := renderTemplateWithData(templateText, cnMatch.ToTemplateMatch())
 	assert.Equal(t, expectedOutcome, rendered)
 	assert.Error(t, err) // error isn't nil because of the out of bound indexing
+
+	exampleUI :=
+		`
+Hello, welcome to the new template system. It will be soon wrapped up in a nice UI, but for the time being you can access fields manually using the Go template syntax.
+
+You can also find the full documentation here: https://dev.hal.xyz/how-it-works/actions/templating
+
+Block Number is: {{ .Block.Number }}
+Block Timestamp is: {{.Block.Timestamp}}
+Block Hash is: {{.Block.Hash }}
+
+Contract Address is: {{.Contract.Address}}
+All values returned by the function: {{ .Contract.ReturnedValues }}
+Matched values only are: {{ .Contract.MatchedValues }}
+
+If .Contract.ReturnedValues returns more than one value, you can access a specific value like this:
+First returned value is {{ index .Contract.ReturnedValues 0 }}
+Nesting also works: {{ index (index .Contract.ReturnedValues 3) 0 }}
+
+We also support a bunch of handy functions to manipulate different values:
+
+{{ humanTime .Block.Timestamp }} prints a timestamp in some human readable format 
+
+{{ hexToASCII "0x4920686176652031303021" }} guess ;) 
+
+{{ hexToInt "0xea" }}
+
+{{ etherscanTokenLink .Contract.Address }} 
+
+{{ etherscanAddressLink .Contract.Address }} 
+`
+	_, err = renderTemplateWithData(exampleUI, cnMatch.ToTemplateMatch())
+	assert.NoError(t, err)
 }
 
 func TestEventMatching(t *testing.T) {
@@ -107,10 +182,10 @@ func TestEventMatching(t *testing.T) {
 	templateText := `
 Block Number is: {{ .Block.Number }}
 Event name is {{ .Contract.EventName }}
-Event from param is: {{ index .Contract.EventParameters "to" }}
-Event value param is: {{ index .Contract.EventParameters "value" }}
-First element in array parameter is: {{ index (index .Contract.EventParameters "arrayParam") 0 }}
-Missing param is: {{ index .Contract.EventParameters "missing" }}
+Event from param is: {{ .Contract.EventParameters.to }}
+Event value param is: {{ .Contract.EventParameters.value }}
+First element in array parameter is: {{ index (.Contract.EventParameters.arrayParam) 0 }}
+Missing param is: {{ .Contract.EventParameters.missing }}
 `
 	expectedOutcome := `
 Block Number is: 8496661
@@ -123,6 +198,57 @@ Missing param is:
 	rendered, err := renderTemplateWithData(templateText, matches[0].ToTemplateMatch())
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutcome, rendered)
+
+	tmpl := `
+{{ if eq .Contract.EventParameters.to "0xcd95b32c98423172e04b1c76841e5a73f4532a7f" }}
+	the amount in DAI Is {{ fromWei .Contract.EventParameters.value 18 }}
+{{ else }}
+	{{ range .Contract.EventParameters.arrayParam }}
+		looping through: {{ . }}
+	{{ end }}
+{{ end }}
+`
+	_, err = renderTemplateWithData(tmpl, matches[0].ToTemplateMatch())
+	assert.NoError(t, err)
+
+	exampleUI :=
+		`Hello, welcome to the new template system. It will be soon wrapped up in a nice UI, but for the time being you can access fields manually using the Go template syntax.
+
+You can also find the full documentation here: https://dev.hal.xyz/how-it-works/actions/templating
+
+Block Number is: {{ .Block.Number }}
+Block Timestamp is: {{.Block.Timestamp}}
+Block Hash is: {{.Block.Hash }}
+
+Contract Address is: {{.Contract.Address}}
+
+Event name is {{ .Contract.EventName }}
+
+To access specific parameters of an event, such as "from" and "value":
+Event from param is: {{ .Contract.EventParameters.to }}
+Event value param is: {{ .Contract.EventParameters.value }}
+
+If the parameter of an event is an array, you can access specific values like this:
+First element in array parameter is: {{ index (.Contract.EventParameters.arrayParam) 0 }}
+
+We also support a bunch of handy functions to manipulate different values:
+
+{{ fromWei .Tx.Value 9 }} divides a value by 10^9.
+
+{{ humanTime .Block.Timestamp }} prints a timestamp in some human readable format 
+
+{{ hexToASCII "0x4920686176652031303021" }} guess ;) 
+
+{{ hexToInt "0xea" }}
+
+{{ etherscanTxLink "0x..." }} creates an Etherscan transaction link 
+
+{{ etherscanTokenLink .Contract.Address }} 
+
+{{ etherscanAddressLink .Contract.Address }} 
+`
+	_, err = renderTemplateWithData(exampleUI, matches[0].ToTemplateMatch())
+	assert.NoError(t, err)
 }
 
 func TestTemplateFunctions(t *testing.T) {
@@ -162,8 +288,23 @@ func TestTemplateFunctions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "629000000000", rendered)
 
+	template = "{{ fromWei . 6 }}"
+	rendered, err = renderTemplateWithData(template, big.NewInt(629000000000000000))
+	assert.NoError(t, err)
+	assert.Equal(t, "629000000000", rendered)
+
+	template = "{{ fromWei . 6 }}"
+	rendered, err = renderTemplateWithData(template, 629000000000000000)
+	assert.NoError(t, err)
+	assert.Equal(t, "629000000000", rendered)
+
 	template = "{{ humanTime . }}"
 	rendered, err = renderTemplateWithData(template, "1602631929")
+	assert.NoError(t, err)
+	assert.Equal(t, "14 Oct 20 00:32 BST", rendered)
+
+	template = "{{ humanTime . }}"
+	rendered, err = renderTemplateWithData(template, 1602631929)
 	assert.NoError(t, err)
 	assert.Equal(t, "14 Oct 20 00:32 BST", rendered)
 }
