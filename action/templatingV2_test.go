@@ -186,6 +186,7 @@ Event from param is: {{ .Contract.EventParameters.to }}
 Event value param is: {{ .Contract.EventParameters.value }}
 First element in array parameter is: {{ index (.Contract.EventParameters.arrayParam) 0 }}
 Missing param is: {{ .Contract.EventParameters.missing }}
+Transaction hash is {{ .Tx.Hash }}
 `
 	expectedOutcome := `
 Block Number is: 8496661
@@ -194,6 +195,7 @@ Event from param is: 0xcd95b32c98423172e04b1c76841e5a73f4532a7f
 Event value param is: 677420000
 First element in array parameter is: hello
 Missing param is: 
+Transaction hash is 0xf44984a4b533ac0e7b608c881a856eff44ee8c17b9f4dcf8b4ee74e9c10c0455
 `
 	rendered, err := renderTemplateWithData(templateText, matches[0].ToTemplateMatch())
 	assert.NoError(t, err)

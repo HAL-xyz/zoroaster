@@ -348,9 +348,14 @@ func (m EventMatch) ToTemplateMatch() TemplateMatch {
 		EventName:       m.Tg.Filters[0].EventName,
 		EventParameters: m.EventParams,
 	}
+	tx := TemplateTx{
+		Hash:      m.Log.TransactionHash,
+	}
+
 	t := TemplateMatch{
 		Block:    b,
 		Contract: c,
+		Tx: tx,
 	}
 	return t
 }
