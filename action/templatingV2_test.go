@@ -281,9 +281,9 @@ func TestTemplateFunctions(t *testing.T) {
 	assert.Equal(t, "https://etherscan.io/token/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
 
 	template = "{{ fromWei . 18 }}"
-	rendered, err = renderTemplateWithData(template, "629000000000000000")
+	rendered, err = renderTemplateWithData(template, "629700000000000000")
 	assert.NoError(t, err)
-	assert.Equal(t, "0.63", rendered)
+	assert.Equal(t, "0.6297", rendered)
 
 	template = "{{ fromWei . 6 }}"
 	rendered, err = renderTemplateWithData(template, "629000000000000000")

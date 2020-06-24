@@ -45,7 +45,7 @@ func scaleBy(text, scaleBy string) string {
 	scale, _ := new(big.Float).SetString(scaleBy)
 	res, _ := new(big.Float).Quo(v, scale).Float64()
 
-	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.2f", math.Ceil(res*100)/100), "0"), ".")
+	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.4f", math.Ceil(res*10000)/10000), "0"), ".")
 }
 
 func scaleAmounts(text string) string {
