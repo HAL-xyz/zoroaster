@@ -20,7 +20,7 @@ func MatchContract(
 		log.Debugf("trigger %s: cannot encode method: %s", tg.TriggerUUID, err)
 		return false, nil, nil
 	}
-	rawData, err := makeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)
+	rawData, err := MakeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)
 	if err != nil {
 		log.Debug("rpc call failed: ", err)
 		return false, nil, nil
@@ -57,7 +57,7 @@ func getRawParam(param interface{}) []byte {
 	return rawParamOut
 }
 
-func makeEthRpcCall(client *ethrpc.EthRPC, cntAddress, data string, blockNumber int) (string, error) {
+func MakeEthRpcCall(client *ethrpc.EthRPC, cntAddress, data string, blockNumber int) (string, error) {
 
 	params := ethrpc.T{
 		To: cntAddress,
