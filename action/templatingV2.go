@@ -29,7 +29,7 @@ func renderTemplateWithData(templateText string, data interface{}) (string, erro
 		"humanTime":            timestampToHumanTime,
 		"symbol":               symbol,
 		"decimals":             decimals,
-		"call":					call,
+		"call":                 call,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -76,16 +76,27 @@ func etherscanTokenLink(token string) string {
 	return fmt.Sprintf("https://etherscan.io/token/%s", token)
 }
 
-func fromWei(wei interface{}, units int) string {
+func fromWei(wei interface{}, units interface{}) string {
+	var unit int
+	switch t := units.(type) {
+	case string:
+		var err error
+		unit, err = strconv.Atoi(t)
+		if err != nil {
+			return fmt.Sprintf("cannot use %v of type %T as units", unit, unit)
+		}
+	case int:
+		unit = t
+	}
 	switch v := wei.(type) {
 	case *big.Int:
-		return scaleBy(v.String(), fmt.Sprintf("%f", math.Pow10(units)))
+		return scaleBy(v.String(), fmt.Sprintf("%f", math.Pow10(unit)))
 	case string:
-		return scaleBy(v, fmt.Sprintf("%f", math.Pow10(units)))
+		return scaleBy(v, fmt.Sprintf("%f", math.Pow10(unit)))
 	case int:
-		return scaleBy(strconv.Itoa(v), fmt.Sprintf("%f", math.Pow10(units)))
+		return scaleBy(strconv.Itoa(v), fmt.Sprintf("%f", math.Pow10(unit)))
 	default:
-		return fmt.Sprintf("cannot use %s of type %T as wei input", wei, wei)
+		return fmt.Sprintf("cannot use %v of type %T as wei input", wei, wei)
 	}
 }
 
@@ -182,4 +193,3 @@ func call(contractName, methodName string, params ...string) string {
 	}
 	return "only loopring supported now"
 }
-
