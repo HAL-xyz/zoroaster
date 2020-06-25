@@ -303,12 +303,17 @@ func TestTemplateFunctions(t *testing.T) {
 	template = "{{ humanTime . }}"
 	rendered, err = renderTemplateWithData(template, "1602631929")
 	assert.NoError(t, err)
-	assert.Equal(t, "14 Oct 20 00:32 BST", rendered)
+	assert.Equal(t, "13 Oct 20 23:32 UTC", rendered)
 
 	template = "{{ humanTime . }}"
 	rendered, err = renderTemplateWithData(template, 1602631929)
 	assert.NoError(t, err)
-	assert.Equal(t, "14 Oct 20 00:32 BST", rendered)
+	assert.Equal(t, "13 Oct 20 23:32 UTC", rendered)
+
+	template = `{{ humanTime . "3:04:05 PM" }}`
+	rendered, err = renderTemplateWithData(template, 1602631929)
+	assert.NoError(t, err)
+	assert.Equal(t, "11:32:09 PM", rendered)
 
 	template = "{{ symbol . }}"
 	rendered, err = renderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")

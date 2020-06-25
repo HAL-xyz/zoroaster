@@ -87,18 +87,24 @@ func fromWei(wei interface{}, units int) string {
 	}
 }
 
-func timestampToHumanTime(timestamp interface{}) string {
+func timestampToHumanTime(timestamp interface{}, optionalFormatting ...string) string {
+	var format string
+	if len(optionalFormatting) == 1 {
+		format = optionalFormatting[0]
+	} else {
+		format = time.RFC822
+	}
 	switch v := timestamp.(type) {
 	case int:
-		unixTimeUTC := time.Unix(int64(v), 0)
-		return unixTimeUTC.Format(time.RFC822)
+		unixTimeUTC := time.Unix(int64(v), 0).UTC()
+		return unixTimeUTC.Format(format)
 	case string:
 		i, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
 			return v
 		}
-		unixTimeUTC := time.Unix(i, 0)
-		return unixTimeUTC.Format(time.RFC822)
+		unixTimeUTC := time.Unix(i, 0).UTC()
+		return unixTimeUTC.Format(format)
 	default:
 		return fmt.Sprintf("cannot use %s of type %T as timestamp input", timestamp, timestamp)
 	}

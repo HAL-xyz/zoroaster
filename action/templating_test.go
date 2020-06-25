@@ -29,7 +29,7 @@ func TestTemplateWithAllConversions(t *testing.T) {
 
 	body := fillBodyTemplate(template, *matches[0], "")
 
-	assert.Equal(t, "the first is: 0.63; The second is: 14 Oct 20 00:32 BST; the third is: 16.03; then 1602.64", body)
+	assert.Equal(t, "the first is: 0.629; The second is: 14 Oct 20 00:32 BST; the third is: 16.0264; then 1602.632", body)
 }
 
 func TestTemplateWithDecConversion(t *testing.T) {
@@ -45,7 +45,7 @@ func TestTemplateWithDecConversion(t *testing.T) {
 
 	body := fillBodyTemplate(template, *matches[0], "")
 
-	assert.Equal(t, "the first is: 0.63; The second is: 0.01", body)
+	assert.Equal(t, "the first is: 0.629; The second is: 0.0001", body)
 }
 
 func TestFillTemplate1(t *testing.T) {
