@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func encodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
+func EncodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
 
 	xabi, err := abi.JSON(strings.NewReader(cntABI))
 	if err != nil {

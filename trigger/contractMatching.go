@@ -15,7 +15,7 @@ func MatchContract(
 	tg *Trigger,
 	blockNo int) (isMatch bool, allMatchingValues []string, allReturnedValues []interface{}) {
 
-	methodId, err := encodeMethod(tg.FunctionName, tg.ContractABI, tg.Inputs)
+	methodId, err := EncodeMethod(tg.FunctionName, tg.ContractABI, tg.Inputs)
 	if err != nil {
 		log.Debugf("trigger %s: cannot encode method: %s", tg.TriggerUUID, err)
 		return false, nil, nil
