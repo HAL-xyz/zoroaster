@@ -300,6 +300,11 @@ func TestTemplateFunctions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "629000000000", rendered)
 
+	template = `{{ fromWei . "6" }}`
+	rendered, err = renderTemplateWithData(template, 629000000000000000)
+	assert.NoError(t, err)
+	assert.Equal(t, "629000000000", rendered)
+
 	template = "{{ humanTime . }}"
 	rendered, err = renderTemplateWithData(template, "1602631929")
 	assert.NoError(t, err)
@@ -327,6 +332,11 @@ func TestTemplateFunctions(t *testing.T) {
 
 	template = "{{ decimals . }}"
 	rendered, err = renderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
+	assert.NoError(t, err)
+	assert.Equal(t, "18", rendered)
+
+	template = "{{ decimals . }}"
+	rendered, err = renderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
 	assert.NoError(t, err)
 	assert.Equal(t, "18", rendered)
 
