@@ -345,3 +345,35 @@ func TestTemplateFunctions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "0xdAC17F958D2ee523a2206206994597C13D831ec7", rendered)
 }
+
+func TestMathFunctions(t *testing.T) {
+	template := `{{ add 10 "20" 30 }}`
+	rendered, err := renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "60", rendered)
+
+	template = `{{ sub 100 "20" }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "80", rendered)
+
+	template = `{{ mul 10.55 "4" }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "42.2", rendered)
+
+	template = `{{ div 2 "3" }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "0.6666666666666666", rendered)
+
+	template = `{{ round (div 2 "3") 2 }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "0.67", rendered)
+
+	template = `{{ round (mul (div 2 3) 100) 3 }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "66.667", rendered)
+}

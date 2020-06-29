@@ -6,9 +6,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/common"
+	"math"
 	"math/big"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -31,10 +33,19 @@ func ByteArraysToHex(array [][]byte) []string {
 	return out
 }
 
-func MakeBigInt(s string) *big.Int {
-	ret := new(big.Int)
-	ret.SetString(s, 10)
-	return ret
+func MakeBigInt(i interface{}) *big.Int {
+	switch v := i.(type) {
+	case string:
+		ret := big.NewInt(0)
+		ret.SetString(v, 10)
+		return ret
+	case int64:
+		return big.NewInt(v)
+	case int:
+		return big.NewInt(int64(v))
+	default:
+		return big.NewInt(-1)
+	}
 }
 
 func MakeBigIntFromHex(s string) *big.Int {
@@ -42,6 +53,58 @@ func MakeBigIntFromHex(s string) *big.Int {
 	ret := new(big.Int)
 	ret.SetString(s, 16)
 	return ret
+}
+
+func Round(a interface{}, p int, r_opt ...float64) float64 {
+	roundOn := .5
+	if len(r_opt) > 0 {
+		roundOn = r_opt[0]
+	}
+	val := toFloat64(a)
+	places := toFloat64(p)
+
+	var round float64
+	pow := math.Pow(10, places)
+	digit := pow * val
+	_, div := math.Modf(digit)
+	if div >= roundOn {
+		round = math.Ceil(digit)
+	} else {
+		round = math.Floor(digit)
+	}
+	return round / pow
+}
+
+func toFloat64(v interface{}) float64 {
+	if str, ok := v.(string); ok {
+		iv, err := strconv.ParseFloat(str, 64)
+		if err != nil {
+			return 0
+		}
+		return iv
+	}
+	if bigF, ok := v.(*big.Float); ok {
+		v, _ := bigF.Float64()
+		return v
+	}
+	val := reflect.Indirect(reflect.ValueOf(v))
+	switch val.Kind() {
+	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Int:
+		return float64(val.Int())
+	case reflect.Uint8, reflect.Uint16, reflect.Uint32:
+		return float64(val.Uint())
+	case reflect.Uint, reflect.Uint64:
+		return float64(val.Uint())
+	case reflect.Float32, reflect.Float64:
+		return val.Float()
+	case reflect.Bool:
+		if val.Bool() == true {
+			return 1
+		}
+		return 0
+	default:
+		return 0
+	}
 }
 
 func StripCtlAndExtFromUTF8(s string) string {

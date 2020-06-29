@@ -7,6 +7,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/abidec"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/trigger"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"html/template"
 	"math"
@@ -30,6 +31,11 @@ func renderTemplateWithData(templateText string, data interface{}) (string, erro
 		"symbol":               symbol,
 		"decimals":             decimals,
 		"call":                 call,
+		"add":                  add,
+		"sub":                  sub,
+		"mul":                  mul,
+		"div":                  div,
+		"round":                utils.Round,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -135,6 +141,57 @@ func decimals(address string) string {
 		return "18"
 	}
 	return callERC20(address, "0x313ce567", "decimals")
+}
+
+func add(nums ...interface{}) *big.Int {
+	total := big.NewInt(0)
+	for _, i := range nums {
+		total = total.Add(total, utils.MakeBigInt(i))
+	}
+	return total
+}
+
+func sub(a, b interface{}) *big.Int {
+	total := utils.MakeBigInt(a)
+	return total.Sub(total, utils.MakeBigInt(b))
+}
+
+func mul(a, b interface{}) *big.Float {
+	x := new(big.Float)
+	y := new(big.Float)
+
+	if str, ok := a.(string); ok {
+		x.SetString(str)
+	} else {
+		x.SetString(fmt.Sprintf("%v", a))
+	}
+
+	if str, ok := b.(string); ok {
+		y.SetString(str)
+	} else {
+		y.SetString(fmt.Sprintf("%v", b))
+	}
+	return x.Mul(x, y)
+}
+
+func div(a, b interface{}) float64 {
+	x := new(big.Float)
+	y := new(big.Float)
+
+	if str, ok := a.(string); ok {
+		x.SetString(str)
+	} else {
+		x.SetString(fmt.Sprintf("%v", a))
+	}
+
+	if str, ok := b.(string); ok {
+		y.SetString(str)
+	} else {
+		y.SetString(fmt.Sprintf("%v", b))
+	}
+
+	res, _ := new(big.Float).Quo(x, y).Float64()
+	return res
 }
 
 func callERC20(address, methodHash, methodName string) string {
