@@ -36,6 +36,7 @@ func renderTemplateWithData(templateText string, data interface{}) (string, erro
 		"mul":                  mul,
 		"div":                  div,
 		"round":                utils.Round,
+		"pow":                  pow,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -143,55 +144,47 @@ func decimals(address string) string {
 	return callERC20(address, "0x313ce567", "decimals")
 }
 
-func add(nums ...interface{}) *big.Int {
-	total := big.NewInt(0)
+func add(nums ...interface{}) *big.Float {
+	total := big.NewFloat(0)
 	for _, i := range nums {
-		total = total.Add(total, utils.MakeBigInt(i))
+		total = total.Add(total, utils.MakeBigFloat(i))
 	}
 	return total
 }
 
-func sub(a, b interface{}) *big.Int {
-	total := utils.MakeBigInt(a)
-	return total.Sub(total, utils.MakeBigInt(b))
+func sub(a, b interface{}) *big.Float {
+	total := utils.MakeBigFloat(a)
+	return total.Sub(total, utils.MakeBigFloat(b))
 }
 
 func mul(a, b interface{}) *big.Float {
-	x := new(big.Float)
-	y := new(big.Float)
-
-	if str, ok := a.(string); ok {
-		x.SetString(str)
-	} else {
-		x.SetString(fmt.Sprintf("%v", a))
-	}
-
-	if str, ok := b.(string); ok {
-		y.SetString(str)
-	} else {
-		y.SetString(fmt.Sprintf("%v", b))
-	}
+	x := utils.MakeBigFloat(a)
+	y := utils.MakeBigFloat(b)
 	return x.Mul(x, y)
 }
 
-func div(a, b interface{}) float64 {
-	x := new(big.Float)
-	y := new(big.Float)
+func div(a, b interface{}) *big.Float {
+	x := utils.MakeBigFloat(a)
+	y := utils.MakeBigFloat(b)
+	return new(big.Float).Quo(x, y)
+}
 
-	if str, ok := a.(string); ok {
-		x.SetString(str)
-	} else {
-		x.SetString(fmt.Sprintf("%v", a))
+func pow(a, b interface{}) *big.Float {
+	x := utils.MakeBigFloat(a)
+
+	var y int
+	if v, ok := b.(int); ok {
+		y = v
+	}
+	if v, err := strconv.Atoi(fmt.Sprintf("%v", b)); err == nil {
+		y = v
 	}
 
-	if str, ok := b.(string); ok {
-		y.SetString(str)
-	} else {
-		y.SetString(fmt.Sprintf("%v", b))
+	var result = big.NewFloat(0.0).Copy(x)
+	for i := 0; i < y-1; i++ {
+		result = big.NewFloat(0.0).SetPrec(256).Mul(result, x)
 	}
-
-	res, _ := new(big.Float).Quo(x, y).Float64()
-	return res
+	return result
 }
 
 func callERC20(address, methodHash, methodName string) string {

@@ -33,6 +33,16 @@ func ByteArraysToHex(array [][]byte) []string {
 	return out
 }
 
+func MakeBigFloat(a interface{}) *big.Float {
+	bf := new(big.Float)
+	if str, ok := a.(string); ok {
+		bf.SetString(str)
+	} else {
+		bf.SetString(fmt.Sprintf("%v", a))
+	}
+	return bf
+}
+
 func MakeBigInt(i interface{}) *big.Int {
 	switch v := i.(type) {
 	case string:

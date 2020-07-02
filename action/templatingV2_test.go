@@ -365,7 +365,7 @@ func TestMathFunctions(t *testing.T) {
 	template = `{{ div 2 "3" }}`
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
-	assert.Equal(t, "0.6666666666666666", rendered)
+	assert.Equal(t, "0.6666666666666666667", rendered)
 
 	template = `{{ round (div 2 "3") 2 }}`
 	rendered, err = renderTemplateWithData(template, nil)
@@ -376,4 +376,24 @@ func TestMathFunctions(t *testing.T) {
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "66.667", rendered)
+
+	template = `{{ pow 2 8 }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "256", rendered)
+
+	template = `{{ pow "2" "8" }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "256", rendered)
+
+	template = `{{ pow 1.0000560291 355 }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "1.02008889279936419637271196253370647336257590813508215370058066207976589819699", rendered)
+
+	template = `{{ round (mul (sub (pow (add (mul (div 9727274683 1000000000000000000) 5760) 1) 364) 1) 100) 2 }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "2.06", rendered)
 }
