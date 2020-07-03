@@ -260,6 +260,11 @@ func TestTemplateFunctions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "I have 100!", rendered)
 
+	template = "{{ hexToASCII . }}"
+	rendered, err = renderTemplateWithData(template, "0x534e580000000000000000000000000000000000000000000000000000000000")
+	assert.NoError(t, err)
+	assert.Equal(t, "SNX", rendered)
+
 	template = "{{ hexToInt . }}"
 	rendered, err = renderTemplateWithData(template, "0xEA")
 	assert.NoError(t, err)

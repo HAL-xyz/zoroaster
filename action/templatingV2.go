@@ -58,6 +58,7 @@ func hexToASCII(s string) string {
 	if err != nil {
 		return s
 	}
+	bs = bytes.Trim(bs, "\x00")
 	return string(bs)
 }
 
