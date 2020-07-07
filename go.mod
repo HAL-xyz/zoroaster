@@ -8,6 +8,7 @@ require (
 	github.com/dghubble/oauth1 v0.6.0
 	github.com/ethereum/go-ethereum v1.9.15
 	github.com/jarcoal/httpmock v1.0.5 // indirect
+	github.com/leekchan/accounting v0.0.0-20191218023648-17a4ce5f94d4
 	github.com/lib/pq v1.7.0
 	github.com/onrik/ethrpc v1.0.0
 	github.com/sirupsen/logrus v1.6.0

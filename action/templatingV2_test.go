@@ -354,6 +354,11 @@ func TestTemplateFunctions(t *testing.T) {
     rendered, err = renderTemplateWithData(template, nil)
     assert.NoError(t, err)
     assert.Equal(t, "100000000000000", rendered)
+
+    template = `{{ formatNumber "10000" 2 }}`
+    rendered, err = renderTemplateWithData(template, nil)
+    assert.NoError(t, err)
+    assert.Equal(t, "10,000.00", rendered)
 }
 
 func TestMathFunctions(t *testing.T) {

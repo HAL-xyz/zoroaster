@@ -9,6 +9,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/leekchan/accounting"
 	"html/template"
 	"math"
 	"math/big"
@@ -38,6 +39,7 @@ func renderTemplateWithData(templateText string, data interface{}) (string, erro
 		"div":                  div,
 		"round":                utils.Round,
 		"pow":                  pow,
+		"formatNumber":         formatNumber,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -209,6 +211,10 @@ func pow(a, b interface{}) *big.Float {
 		result = big.NewFloat(0.0).SetPrec(256).Mul(result, x)
 	}
 	return result
+}
+
+func formatNumber(number interface{}, precision int) string {
+    return accounting.FormatNumberBigFloat(utils.MakeBigFloat(number), precision, ",", ".")
 }
 
 func callERC20(address, methodHash, methodName string) string {
