@@ -11,7 +11,7 @@ import (
 
 func TestHumanTimeConverter(t *testing.T) {
 
-	assert.Equal(t, "14 Oct 20 00:32 BST", unixToHumanTime("1602631929"))
+	assert.Equal(t, "13 Oct 20 23:32 UTC", unixToHumanTime("1602631929"))
 	assert.Equal(t, "la la la", unixToHumanTime("la la la"))
 }
 
@@ -29,7 +29,7 @@ func TestTemplateWithAllConversions(t *testing.T) {
 
 	body := fillBodyTemplate(template, *matches[0], "")
 
-	assert.Equal(t, "the first is: 0.629; The second is: 14 Oct 20 00:32 BST; the third is: 16.0264; then 1602.632", body)
+	assert.Equal(t, "the first is: 0.629; The second is: 13 Oct 20 23:32 UTC; the third is: 16.0264; then 1602.632", body)
 }
 
 func TestTemplateWithDecConversion(t *testing.T) {

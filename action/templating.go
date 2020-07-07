@@ -84,7 +84,7 @@ func unixToHumanTime(timestamp string) string {
 	if err != nil {
 		return timestamp
 	}
-	unixTimeUTC := time.Unix(i, 0)
+	unixTimeUTC := time.Unix(i, 0).UTC()
 	return unixTimeUTC.Format(time.RFC822)
 }
 
