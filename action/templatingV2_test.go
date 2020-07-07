@@ -80,17 +80,17 @@ We also support a bunch of handy functions to manipulate different values:
 
 {{ fromWei .Tx.Value 9 }} divides a value by 10^9.
 
-{{ humanTime .Block.Timestamp }} prints a timestamp in some human readable format 
+{{ humanTime .Block.Timestamp }} prints a timestamp in some human readable format
 
-{{ hexToASCII "0x4920686176652031303021" }} guess ;) 
+{{ hexToASCII "0x4920686176652031303021" }} guess ;)
 
 {{ hexToInt "0xea" }}
 
-{{ etherscanTxLink .Tx.Hash }} creates an Etherscan transaction link 
+{{ etherscanTxLink .Tx.Hash }} creates an Etherscan transaction link
 
-{{ etherscanTokenLink .Contract.Address }} 
+{{ etherscanTokenLink .Contract.Address }}
 
-{{ etherscanAddressLink .Contract.Address }} 
+{{ etherscanAddressLink .Contract.Address }}
 
 `
 	_, err = renderTemplateWithData(exampleUI, matches[0].ToTemplateMatch())
@@ -157,15 +157,15 @@ Nesting also works: {{ index (index .Contract.ReturnedValues 3) 0 }}
 
 We also support a bunch of handy functions to manipulate different values:
 
-{{ humanTime .Block.Timestamp }} prints a timestamp in some human readable format 
+{{ humanTime .Block.Timestamp }} prints a timestamp in some human readable format
 
-{{ hexToASCII "0x4920686176652031303021" }} guess ;) 
+{{ hexToASCII "0x4920686176652031303021" }} guess ;)
 
 {{ hexToInt "0xea" }}
 
-{{ etherscanTokenLink .Contract.Address }} 
+{{ etherscanTokenLink .Contract.Address }}
 
-{{ etherscanAddressLink .Contract.Address }} 
+{{ etherscanAddressLink .Contract.Address }}
 `
 	_, err = renderTemplateWithData(exampleUI, cnMatch.ToTemplateMatch())
 	assert.NoError(t, err)
@@ -194,7 +194,7 @@ Event name is Transfer
 Event from param is: 0xcd95b32c98423172e04b1c76841e5a73f4532a7f
 Event value param is: 677420000
 First element in array parameter is: hello
-Missing param is: 
+Missing param is:
 Transaction hash is 0xf44984a4b533ac0e7b608c881a856eff44ee8c17b9f4dcf8b4ee74e9c10c0455
 `
 	rendered, err := renderTemplateWithData(templateText, matches[0].ToTemplateMatch())
@@ -237,17 +237,17 @@ We also support a bunch of handy functions to manipulate different values:
 
 {{ fromWei .Tx.Value 9 }} divides a value by 10^9.
 
-{{ humanTime .Block.Timestamp }} prints a timestamp in some human readable format 
+{{ humanTime .Block.Timestamp }} prints a timestamp in some human readable format
 
-{{ hexToASCII "0x4920686176652031303021" }} guess ;) 
+{{ hexToASCII "0x4920686176652031303021" }} guess ;)
 
 {{ hexToInt "0xea" }}
 
-{{ etherscanTxLink "0x..." }} creates an Etherscan transaction link 
+{{ etherscanTxLink "0x..." }} creates an Etherscan transaction link
 
-{{ etherscanTokenLink .Contract.Address }} 
+{{ etherscanTokenLink .Contract.Address }}
 
-{{ etherscanAddressLink .Contract.Address }} 
+{{ etherscanAddressLink .Contract.Address }}
 `
 	_, err = renderTemplateWithData(exampleUI, matches[0].ToTemplateMatch())
 	assert.NoError(t, err)
@@ -349,6 +349,11 @@ func TestTemplateFunctions(t *testing.T) {
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "0xdAC17F958D2ee523a2206206994597C13D831ec7", rendered)
+
+    template = `{{ balanceOf "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2" "0x6b175474e89094c44da98b954eedeac495271d0f" }}`
+    rendered, err = renderTemplateWithData(template, nil)
+    assert.NoError(t, err)
+    assert.Equal(t, "100000000000000", rendered)
 }
 
 func TestMathFunctions(t *testing.T) {
