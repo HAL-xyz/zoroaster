@@ -9,13 +9,14 @@ import (
 	"github.com/onrik/ethrpc"
 	"github.com/sirupsen/logrus"
 	"strings"
+	"time"
 )
 
 func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []*EventMatch {
 
 	logs, err := getLogsForBlock(client, blockNo, tg.ContractAdd)
 	if err != nil {
-		logrus.Debugf("cannot get events for trigger %s, %s", tg.TriggerUUID, err)
+		logrus.Fatalf("cannot get events for trigger %s, %s", tg.TriggerUUID, err)
 		return []*EventMatch{}
 	}
 	// fmt.Println(utils.GimmePrettyJson(logs))
@@ -147,11 +148,15 @@ func getLogsForBlock(client IEthRpc, blockNo int, address string) ([]ethrpc.Log,
 		// TODO: perhaps address should be an array, so I only make one RPC call?
 		// this implies that MatchEvent is against []*Trigger and not a single *Trigger
 	}
-	logs, err := client.EthGetLogs(filter)
-	if err != nil {
-		return nil, err
+	// try 3 times before giving up.
+	for i := 0; i <= 2; i++ {
+		logs, err := client.EthGetLogs(filter)
+		if err == nil {
+			return logs, err
+		}
+		time.Sleep(5 * time.Second)
 	}
-	return logs, nil
+	return client.EthGetLogs(filter)
 }
 
 // a topicsMap is a map where
