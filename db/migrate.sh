@@ -8,12 +8,14 @@ if [[ -z "$1" ]]
     exit
 fi
 
-POSTGRESQL_URL="postgres://${DB_USR}:${DB_PWD}@${DB_URI}/${DB_NAME}?sslmode=disable"
+POSTGRESQL_URL="postgres://${DB_USR}:${DB_PWD}@${DB_HOST}:5432/${DB_NAME}?sslmode=disable"
 
+echo "using postgres url:" "${POSTGRESQL_URL}"
+echo
 read -p "You are going to migrate the db ${DB_NAME}; continue? [y\n] " CHOICE
 if [[ "$CHOICE" != "y" ]]; then
     echo "Aborting"
     exit
 fi
 
-migrate -database ${POSTGRESQL_URL} -path migrations $1
+migrate -database "${POSTGRESQL_URL}" -path migrations $1
