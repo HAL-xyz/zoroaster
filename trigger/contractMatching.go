@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/abidec"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
@@ -11,7 +12,7 @@ import (
 )
 
 func MatchContract(
-	client *ethrpc.EthRPC,
+	client rpc.IEthRpc,
 	tg *Trigger,
 	blockNo int) (isMatch bool, allMatchingValues []string, allReturnedValues []interface{}) {
 
@@ -57,7 +58,7 @@ func getRawParam(param interface{}) []byte {
 	return rawParamOut
 }
 
-func MakeEthRpcCall(client *ethrpc.EthRPC, cntAddress, data string, blockNumber int) (string, error) {
+func MakeEthRpcCall(client rpc.IEthRpc, cntAddress, data string, blockNumber int) (string, error) {
 
 	params := ethrpc.T{
 		To: cntAddress,

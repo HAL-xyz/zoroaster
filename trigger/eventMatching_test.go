@@ -2,6 +2,7 @@ package trigger
 
 import (
 	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/onrik/ethrpc"
@@ -37,13 +38,17 @@ func TestValidateFilterLog(t *testing.T) {
 	assert.False(t, res4)
 }
 
-type EthMock struct{}
+type EthMock struct {
+	*rpc.ZoroRPC
+}
 
 func (cli EthMock) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
 	return GetLogsFromFile("../resources/events/logs1.json")
 }
 
-type EthMock2 struct{}
+type EthMock2 struct {
+	*rpc.ZoroRPC
+}
 
 func (cli EthMock2) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
 	return GetLogsFromFile("../resources/events/logs2.json")
@@ -2033,7 +2038,9 @@ func TestUint256EqBytes32EqAddressEq(t *testing.T) {
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
 }
 
-type EthMock3 struct{}
+type EthMock3 struct {
+	*rpc.ZoroRPC
+}
 
 func (cli EthMock3) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
 	return GetLogsFromFile("../resources/events/logs3.json")

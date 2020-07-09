@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/onrik/ethrpc"
@@ -12,7 +13,7 @@ import (
 	"time"
 )
 
-func MatchEvent(client IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []*EventMatch {
+func MatchEvent(client rpc.IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []*EventMatch {
 
 	logs, err := getLogsForBlock(client, blockNo, tg.ContractAdd)
 	if err != nil {
@@ -137,7 +138,7 @@ func validateFilterLog(
 	return false, nil
 }
 
-func getLogsForBlock(client IEthRpc, blockNo int, address string) ([]ethrpc.Log, error) {
+func getLogsForBlock(client rpc.IEthRpc, blockNo int, address string) ([]ethrpc.Log, error) {
 	fromBlock := fmt.Sprintf("0x%x", blockNo)
 	toBlock := fmt.Sprintf("0x%x", blockNo)
 

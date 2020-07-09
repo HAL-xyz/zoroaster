@@ -1,7 +1,8 @@
-package eth
+package poller
 
 import (
 	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
@@ -12,7 +13,7 @@ func BlocksPoller(
 	txChan chan *ethrpc.Block,
 	cnChan chan *ethrpc.Block,
 	evChan chan *ethrpc.Block,
-	client *ethrpc.EthRPC,
+	client rpc.IEthRpc,
 	idb aws.IDB,
 	blocksDelay int) {
 
@@ -24,7 +25,7 @@ func BlocksPoller(
 		log.Fatal(err1, err2, err3)
 	}
 
-	ticker := time.NewTicker(500 * time.Millisecond)
+	ticker := time.NewTicker(2000 * time.Millisecond)
 	for range ticker.C {
 		lastBlockSeen, err := client.EthBlockNumber()
 		if err != nil {
@@ -48,7 +49,7 @@ func fetchLastBlock(
 	lastBlockSeen int,
 	lastBlockProcessed *int,
 	ch chan *ethrpc.Block,
-	client *ethrpc.EthRPC,
+	client rpc.IEthRpc,
 	withTxs bool,
 	blocksDelay int) {
 
@@ -58,6 +59,7 @@ func fetchLastBlock(
 	}
 
 	if lastBlockSeen-blocksDelay > *lastBlockProcessed {
+		client.ResetCounterAndLogStats(*lastBlockProcessed)
 		block, err := client.EthGetBlockByNumber(*lastBlockProcessed+1, withTxs)
 		if err != nil {
 			log.Warnf("failed to get block %d -> %s", *lastBlockProcessed+1, err)

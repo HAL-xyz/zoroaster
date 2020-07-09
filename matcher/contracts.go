@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/onrik/ethrpc"
@@ -20,11 +21,12 @@ func ContractMatcher(
 	matchesChan chan trigger.IMatch,
 	getModifiedAccounts func(prevBlock, currBlock int, nodeURI string) ([]string, error),
 	idb aws.IDB,
-	client *ethrpc.EthRPC,
+	client rpc.IEthRpc,
 	useGetModAccount bool) {
 
 	for {
 		block := <-blocksChan
+		client.ResetCounterAndLogStats(block.Number - 1)
 		start := time.Now()
 		log.Info("CN: new -> ", block.Number)
 
@@ -60,7 +62,7 @@ func matchContractsForBlock(
 	blockHash string,
 	getModAccounts func(prevBlock, currBlock int, nodeURI string) ([]string, error),
 	idb aws.IDB,
-	client *ethrpc.EthRPC,
+	client rpc.IEthRpc,
 	useGetModAccounts bool) []*trigger.CnMatch {
 
 	start := time.Now()

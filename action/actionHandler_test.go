@@ -2,6 +2,7 @@ package action
 
 import (
 	"bytes"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/aws/aws-sdk-go/service/ses"
@@ -139,7 +140,9 @@ func TestHandleWebHookWrongStuff(t *testing.T) {
 	assert.Equal(t, false, outcome.Success)
 }
 
-type EthMock struct{}
+type EthMock struct {
+	*rpc.ZoroRPC
+}
 
 func (cli EthMock) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
 	return trigger.GetLogsFromFile("../resources/events/logs1.json")

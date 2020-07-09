@@ -2,6 +2,7 @@ package matcher
 
 import (
 	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/onrik/ethrpc"
 	"github.com/sirupsen/logrus"
@@ -12,10 +13,11 @@ func EventMatcher(
 	blocksChan chan *ethrpc.Block,
 	matchesChan chan trigger.IMatch,
 	idb aws.IDB,
-	rpcCli trigger.IEthRpc) {
+	rpcCli rpc.IEthRpc) {
 
 	for {
 		block := <-blocksChan
+		rpcCli.ResetCounterAndLogStats(block.Number - 1)
 		start := time.Now()
 		logrus.Info("Events: new -> ", block.Number)
 

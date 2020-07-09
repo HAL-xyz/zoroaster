@@ -4,8 +4,9 @@ import (
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/db"
-	"github.com/HAL-xyz/zoroaster/eth"
 	"github.com/HAL-xyz/zoroaster/matcher"
+	"github.com/HAL-xyz/zoroaster/poller"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
@@ -32,6 +33,7 @@ func main() {
 
 	// ETH client
 	ethClient := ethrpc.New(config.Zconf.EthNode)
+
 	// Run monthly matches update
 	go db.MatchesMonthlyUpdate(&psqlClient)
 
@@ -44,16 +46,19 @@ func main() {
 	matchesChan := make(chan trigger.IMatch)
 
 	// Poll ETH node
-	go eth.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, ethClient, &psqlClient, config.Zconf.BlocksDelay)
+	pollerCli := rpc.New(ethClient, "BlocksPoller")
+	go poller.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, pollerCli, &psqlClient, config.Zconf.BlocksDelay)
 
 	// Watch a Transaction
 	go matcher.TxMatcher(txBlocksChan, matchesChan, &psqlClient)
 
 	// Watch a Contract
-	go matcher.ContractMatcher(cnBlocksChan, matchesChan, matcher.GetModifiedAccounts, &psqlClient, ethClient, config.Zconf.UseGetModAccounts)
+	wacCli := rpc.New(ethClient, "Watch a Contract")
+	go matcher.ContractMatcher(cnBlocksChan, matchesChan, matcher.GetModifiedAccounts, &psqlClient, wacCli, config.Zconf.UseGetModAccounts)
 
 	// Watch an Event
-	go matcher.EventMatcher(evBlocksChan, matchesChan, &psqlClient, ethClient)
+	waeCli := rpc.New(ethClient, "Watch an Event")
+	go matcher.EventMatcher(evBlocksChan, matchesChan, &psqlClient, waeCli)
 
 	// Main routine - process matches
 	for {
