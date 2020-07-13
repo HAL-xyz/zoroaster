@@ -10,7 +10,6 @@ import (
 	"github.com/onrik/ethrpc"
 	"github.com/sirupsen/logrus"
 	"strings"
-	"time"
 )
 
 func MatchEvent(client rpc.IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []*EventMatch {
@@ -148,14 +147,6 @@ func getLogsForBlock(client rpc.IEthRpc, blockNo int, address string) ([]ethrpc.
 		Address:   []string{address},
 		// TODO: perhaps address should be an array, so I only make one RPC call?
 		// this implies that MatchEvent is against []*Trigger and not a single *Trigger
-	}
-	// try 3 times before giving up.
-	for i := 0; i <= 2; i++ {
-		logs, err := client.EthGetLogs(filter)
-		if err == nil {
-			return logs, err
-		}
-		time.Sleep(5 * time.Second)
 	}
 	return client.EthGetLogs(filter)
 }

@@ -2,6 +2,7 @@ package poller
 
 import (
 	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/onrik/ethrpc"
@@ -29,9 +30,7 @@ func BlocksPoller(
 	for range ticker.C {
 		lastBlockSeen, err := client.EthBlockNumber()
 		if err != nil {
-			log.Warn("failed to poll ETH node -> ", err)
-			time.Sleep(5 * time.Second)
-			continue
+			log.Fatal("failed to poll ETH node -> ", err)
 		}
 
 		// Watch a Transaction
@@ -60,10 +59,11 @@ func fetchLastBlock(
 
 	if lastBlockSeen-blocksDelay > *lastBlockProcessed {
 		client.ResetCounterAndLogStats(*lastBlockProcessed)
+		config.TemplateCli.ResetCounterAndLogStats(*lastBlockProcessed)
+
 		block, err := client.EthGetBlockByNumber(*lastBlockProcessed+1, withTxs)
 		if err != nil {
-			log.Warnf("failed to get block %d -> %s", *lastBlockProcessed+1, err)
-			time.Sleep(5 * time.Second)
+			log.Fatalf("failed to get block %d -> %s", *lastBlockProcessed+1, err)
 		} else {
 			*lastBlockProcessed += 1
 			ch <- block

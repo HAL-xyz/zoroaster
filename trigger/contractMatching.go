@@ -23,8 +23,7 @@ func MatchContract(
 	}
 	rawData, err := MakeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)
 	if err != nil {
-		log.Debug("rpc call failed: ", err)
-		return false, nil, nil
+		log.Errorf("rpc call failed for trigger %s with error : %s", tg.TriggerUUID, err)
 	}
 
 	//log.Debug("result from call is -> ", rawData)
@@ -71,9 +70,5 @@ func MakeEthRpcCall(client rpc.IEthRpc, cntAddress, data string, blockNumber int
 
 	hexBlockNo := fmt.Sprintf("0x%x", blockNumber)
 
-	ret, err := client.EthCall(params, hexBlockNo)
-	if err != nil {
-		return "", err
-	}
-	return ret, nil
+	return client.EthCall(params, hexBlockNo)
 }
