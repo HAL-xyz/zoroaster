@@ -2,7 +2,9 @@ package rpc
 
 import (
 	"github.com/HAL-xyz/ethrpc"
+	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
+	"time"
 )
 
 // An interface for eth rpc clients, as used within Zoroaster
@@ -20,6 +22,7 @@ type ZoroRPC struct {
 	cli   *ethrpc.EthRPC
 	label string
 	calls int
+	cache *cache.Cache
 }
 
 // Returns a new ZoroRPC client
@@ -28,6 +31,7 @@ func New(ethCli *ethrpc.EthRPC, label string) *ZoroRPC {
 		cli:   ethCli,
 		label: label,
 		calls: 0,
+		cache: cache.New(5*time.Minute, 10*time.Minute),
 	}
 }
 
@@ -67,6 +71,17 @@ func (z *ZoroRPC) URL() string {
 }
 
 func (z *ZoroRPC) EthCall(transaction ethrpc.T, tag string) (string, error) {
+	key := transaction.To + transaction.Data + tag
+	val, found := z.cache.Get(key)
+	if found {
+		return val.(string), nil
+	}
+
 	z.increaseCounterByOne()
-	return z.cli.EthCall(transaction, tag)
+	res, err := z.cli.EthCall(transaction, tag)
+	if err == nil {
+		z.cache.Set(key, res, cache.DefaultExpiration)
+	}
+	return res, err
 }
+

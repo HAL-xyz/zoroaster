@@ -11,6 +11,7 @@ require (
 	github.com/leekchan/accounting v0.0.0-20191218023648-17a4ce5f94d4
 	github.com/lib/pq v1.7.0
 	github.com/onrik/ethrpc v1.0.0
+	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/sirupsen/logrus v1.6.0
 	github.com/stretchr/testify v1.6.1
 )
