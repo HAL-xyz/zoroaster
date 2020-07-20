@@ -19,7 +19,9 @@ func TestTemplateWithAllConversions(t *testing.T) {
 
 	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
+	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
+	assert.NoError(t, err)
+	matches := trigger.MatchEvent(tg1, 1572344236, logs)
 
 	matches[0].EventParams["someBigNumber"] = "629000000000000000"
 	matches[0].EventParams["unixTimestamp"] = "1602631929"
@@ -36,7 +38,9 @@ func TestTemplateWithDecConversion(t *testing.T) {
 
 	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
+	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
+	assert.NoError(t, err)
+	matches := trigger.MatchEvent(tg1, 1572344236, logs)
 
 	matches[0].EventParams["someBigNumber"] = "629000000000000000"
 	matches[0].EventParams["smallerNumber"] = "21000000000000"
@@ -296,7 +300,9 @@ func TestEmailTemplateEvent(t *testing.T) {
 
 	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
+	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
+	assert.NoError(t, err)
+	matches := trigger.MatchEvent(tg1, 1572344236, logs)
 
 	matches[0].EventParams["arrayParam"] = []string{"hello", "world", "yo yo"}
 

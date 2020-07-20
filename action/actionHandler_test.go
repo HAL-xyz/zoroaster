@@ -2,12 +2,10 @@ package action
 
 import (
 	"bytes"
-	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
-	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
 	"io"
 	"io/ioutil"
@@ -140,21 +138,14 @@ func TestHandleWebHookWrongStuff(t *testing.T) {
 	assert.Equal(t, false, outcome.Success)
 }
 
-type EthMock struct {
-	*rpc.ZoroRPC
-}
-
-func (cli EthMock) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
-	return trigger.GetLogsFromFile("../resources/events/logs1.json")
-}
-
 func TestHandleWebhookWithEvents(t *testing.T) {
 
-	var client EthMock
 	url := AttributeWebhookPost{URI: "https://hal.xyz"}
 	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
-	matches1 := trigger.MatchEvent(client, tg1, 8496661, 1572344236)
+	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
+	assert.NoError(t, err)
+	matches1 := trigger.MatchEvent(tg1, 1572344236, logs)
 
 	outcome := handleWebHookPost(url, matches1[0], mockHttpClient{})
 
@@ -310,7 +301,9 @@ func TestHandleEmailWithEvents(t *testing.T) {
 
 	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
+	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
+	assert.NoError(t, err)
+	matches := trigger.MatchEvent(tg1, 1572344236, logs)
 
 	matches[0].EventParams["extraAddresses"] = []string{"yes@hal.xyz", "nope@hal.xyz"}
 

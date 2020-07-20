@@ -232,6 +232,18 @@ func SetDifference(s1 map[string]struct{}, s2 map[string]struct{}) map[string]st
 	return diff
 }
 
+func Uniques(strSlice []string) []string {
+	keys := make(map[string]bool)
+	var uniques []string
+	for _, s := range strSlice {
+		if _, found := keys[s]; !found {
+			keys[s] = true
+			uniques = append(uniques, s)
+		}
+	}
+	return uniques
+}
+
 // sometimes addresses (40 hex chars) are padded with 0s to
 // make them 64 chars long. In this case we want to strip them.
 func NormalizeAddress(add string) string {

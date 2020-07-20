@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/onrik/ethrpc"
@@ -12,15 +11,7 @@ import (
 	"strings"
 )
 
-func MatchEvent(client rpc.IEthRpc, tg *Trigger, blockNo int, blockTimestamp int) []*EventMatch {
-
-	logs, err := getLogsForBlock(client, blockNo, tg.ContractAdd)
-	if err != nil {
-		logrus.Fatalf("cannot get events for trigger %s, %s", tg.TriggerUUID, err)
-		return []*EventMatch{}
-	}
-	// fmt.Println(utils.GimmePrettyJson(logs))
-
+func MatchEvent(tg *Trigger, blockTimestamp int, logs []ethrpc.Log) []*EventMatch {
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 	if err != nil {
 		logrus.Debug(err)
@@ -135,20 +126,6 @@ func validateFilterLog(
 	}
 	// parameter name not found in topics nor in data
 	return false, nil
-}
-
-func getLogsForBlock(client rpc.IEthRpc, blockNo int, address string) ([]ethrpc.Log, error) {
-	fromBlock := fmt.Sprintf("0x%x", blockNo)
-	toBlock := fmt.Sprintf("0x%x", blockNo)
-
-	filter := ethrpc.FilterParams{
-		FromBlock: fromBlock,
-		ToBlock:   toBlock,
-		Address:   []string{address},
-		// TODO: perhaps address should be an array, so I only make one RPC call?
-		// this implies that MatchEvent is against []*Trigger and not a single *Trigger
-	}
-	return client.EthGetLogs(filter)
 }
 
 // a topicsMap is a map where

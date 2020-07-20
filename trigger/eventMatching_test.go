@@ -1,6 +1,7 @@
 package trigger
 
 import (
+	"fmt"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/utils"
@@ -11,16 +12,27 @@ import (
 	"testing"
 )
 
+func getLogsForBlock(client rpc.IEthRpc, blockNo int, addresses []string) ([]ethrpc.Log, error) {
+	filter := ethrpc.FilterParams{
+		FromBlock: fmt.Sprintf("0x%x", blockNo),
+		ToBlock:   fmt.Sprintf("0x%x", blockNo),
+		Address:   addresses,
+	}
+	return client.EthGetLogs(filter)
+}
+
+var logs550, _ = getLogsForBlock(config.CliRinkeby, 5690550, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
+var logs551, _ = getLogsForBlock(config.CliRinkeby, 5690551, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
+var logs552, _ = getLogsForBlock(config.CliRinkeby, 5690552, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
+
 func TestValidateFilterLog(t *testing.T) {
 
 	logs, err := GetLogsFromFile("../resources/events/logs1.json")
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
+
 	tg, err := GetTriggerFromFile("../resources/triggers/ev1.json")
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NoError(t, err)
+
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 
 	res, err := validateFilterLog(&logs[0], &tg.Filters[0], &abiObj, tg.Filters[0].EventName)
@@ -36,22 +48,6 @@ func TestValidateFilterLog(t *testing.T) {
 
 	res4 := validateTriggerLog(&logs[1], tg, &abiObj, "Transfer")
 	assert.False(t, res4)
-}
-
-type EthMock struct {
-	*rpc.ZoroRPC
-}
-
-func (cli EthMock) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
-	return GetLogsFromFile("../resources/events/logs1.json")
-}
-
-type EthMock2 struct {
-	*rpc.ZoroRPC
-}
-
-func (cli EthMock2) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
-	return GetLogsFromFile("../resources/events/logs2.json")
 }
 
 // https://rinkeby.etherscan.io/tx/0x1e5aebb232ae66459d6c6144e6bfe8269362db01ae47a7a8f89b4df6feff8271
@@ -79,7 +75,7 @@ func TestAddressFixedArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -109,7 +105,7 @@ func TestAddressFixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -143,7 +139,7 @@ func TestAddressFixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -173,7 +169,7 @@ func TestAddressFixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -203,7 +199,7 @@ func TestAddressFixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -233,7 +229,7 @@ func TestAddressFixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -264,7 +260,7 @@ func TestAddressDynamicArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -294,7 +290,7 @@ func TestAddressDynamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -328,7 +324,7 @@ func TestAddressDynamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -358,7 +354,7 @@ func TestAddressDynamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -388,7 +384,7 @@ func TestAddressDynamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -418,7 +414,7 @@ func TestAddressDynamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -449,7 +445,7 @@ func TestBoolFixedArrayEqAtPosition1(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -479,7 +475,7 @@ func TestBoolFixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -513,7 +509,7 @@ func TestBoolFixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -543,7 +539,7 @@ func TestBoolFixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -573,7 +569,7 @@ func TestBoolFixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -603,7 +599,7 @@ func TestBoolFixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -634,7 +630,7 @@ func TestBoolDynamicArrayEqAtPosition1(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -664,7 +660,7 @@ func TestBoolDynamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -698,7 +694,7 @@ func TestBoolDynamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -728,7 +724,7 @@ func TestBoolDynamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -758,7 +754,7 @@ func TestBoolDynamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -788,7 +784,7 @@ func TestBoolDynamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690550, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs550)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -818,7 +814,7 @@ func TestBytes16EqWithOX(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -848,7 +844,7 @@ func TestBytes16Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -878,7 +874,7 @@ func TestInt256FixedArrayEqAtPosition1(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -907,7 +903,7 @@ func TestInt256FixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -940,7 +936,7 @@ func TestInt256FixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -969,7 +965,7 @@ func TestInt256FixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -998,7 +994,7 @@ func TestInt256FixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1027,7 +1023,7 @@ func TestInt256FixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1057,7 +1053,7 @@ func TestInt256DinamicArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1086,7 +1082,7 @@ func TestInt256DinamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1119,7 +1115,7 @@ func TestInt256DinamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1148,7 +1144,7 @@ func TestInt256DinamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1177,7 +1173,7 @@ func TestInt256DinamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1206,7 +1202,7 @@ func TestInt256DinamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690551, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs551)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1235,7 +1231,7 @@ func TestStringFixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1265,7 +1261,7 @@ func TestStringFixedArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1298,7 +1294,7 @@ func TestStringFixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1327,7 +1323,7 @@ func TestStringFixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1356,7 +1352,7 @@ func TestStringFixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1385,7 +1381,7 @@ func TestStringFixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1418,7 +1414,7 @@ func TestStringDinamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1447,7 +1443,7 @@ func TestStringDinamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1476,7 +1472,7 @@ func TestStringDinamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1505,7 +1501,7 @@ func TestStringDinamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1535,7 +1531,7 @@ func TestStringDinamicArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1564,7 +1560,7 @@ func TestStringDinamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1593,7 +1589,7 @@ func TestStringEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5690552, 1572344236)
+	matches := MatchEvent(tg, 1572344236, logs552)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1601,28 +1597,31 @@ func TestStringEq(t *testing.T) {
 
 func TestUint8Eq(t *testing.T) {
 	js := `{
-        "Filters": [
-            {
-                "Condition": {
-                    "Attribute": "0000000000000000000000000000000000000000000000000000000000000001",
-                    "Predicate": "Eq"
-                },
-                "EventName": "OrderApprovedPartOne",
-                "FilterType": "CheckEventParameter",
-                "ParameterName": "side",
-                "ParameterType": "uint8"
-            }
-        ],
-        "ContractABI": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"tokenTransferProxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"target\",\"type\":\"address\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"extradata\",\"type\":\"bytes\"}],\"name\":\"staticCall\",\"outputs\":[{\"name\":\"result\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newMinimumMakerProtocolFee\",\"type\":\"uint256\"}],\"name\":\"changeMinimumMakerProtocolFee\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newMinimumTakerProtocolFee\",\"type\":\"uint256\"}],\"name\":\"changeMinimumTakerProtocolFee\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"array\",\"type\":\"bytes\"},{\"name\":\"desired\",\"type\":\"bytes\"},{\"name\":\"mask\",\"type\":\"bytes\"}],\"name\":\"guardedArrayReplace\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumTakerProtocolFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"codename\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"testCopyAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"arrToCopy\",\"type\":\"bytes\"}],\"name\":\"testCopy\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"}],\"name\":\"calculateCurrentPrice_\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newProtocolFeeRecipient\",\"type\":\"address\"}],\"name\":\"changeProtocolFeeRecipient\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"buyCalldata\",\"type\":\"bytes\"},{\"name\":\"buyReplacementPattern\",\"type\":\"bytes\"},{\"name\":\"sellCalldata\",\"type\":\"bytes\"},{\"name\":\"sellReplacementPattern\",\"type\":\"bytes\"}],\"name\":\"orderCalldataCanMatch\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"validateOrder_\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"basePrice\",\"type\":\"uint256\"},{\"name\":\"extra\",\"type\":\"uint256\"},{\"name\":\"listingTime\",\"type\":\"uint256\"},{\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"calculateFinalPrice\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"protocolFeeRecipient\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"}],\"name\":\"hashOrder_\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[14]\"},{\"name\":\"uints\",\"type\":\"uint256[18]\"},{\"name\":\"feeMethodsSidesKindsHowToCalls\",\"type\":\"uint8[8]\"},{\"name\":\"calldataBuy\",\"type\":\"bytes\"},{\"name\":\"calldataSell\",\"type\":\"bytes\"},{\"name\":\"replacementPatternBuy\",\"type\":\"bytes\"},{\"name\":\"replacementPatternSell\",\"type\":\"bytes\"},{\"name\":\"staticExtradataBuy\",\"type\":\"bytes\"},{\"name\":\"staticExtradataSell\",\"type\":\"bytes\"}],\"name\":\"ordersCanMatch_\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"},{\"name\":\"orderbookInclusionDesired\",\"type\":\"bool\"}],\"name\":\"approveOrder_\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"registry\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumMakerProtocolFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"}],\"name\":\"hashToSign_\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"cancelledOrFinalized\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"exchangeToken\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"cancelOrder_\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[14]\"},{\"name\":\"uints\",\"type\":\"uint256[18]\"},{\"name\":\"feeMethodsSidesKindsHowToCalls\",\"type\":\"uint8[8]\"},{\"name\":\"calldataBuy\",\"type\":\"bytes\"},{\"name\":\"calldataSell\",\"type\":\"bytes\"},{\"name\":\"replacementPatternBuy\",\"type\":\"bytes\"},{\"name\":\"replacementPatternSell\",\"type\":\"bytes\"},{\"name\":\"staticExtradataBuy\",\"type\":\"bytes\"},{\"name\":\"staticExtradataSell\",\"type\":\"bytes\"},{\"name\":\"vs\",\"type\":\"uint8[2]\"},{\"name\":\"rssMetadata\",\"type\":\"bytes32[5]\"}],\"name\":\"atomicMatch_\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"}],\"name\":\"validateOrderParameters_\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"INVERSE_BASIS_POINT\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[14]\"},{\"name\":\"uints\",\"type\":\"uint256[18]\"},{\"name\":\"feeMethodsSidesKindsHowToCalls\",\"type\":\"uint8[8]\"},{\"name\":\"calldataBuy\",\"type\":\"bytes\"},{\"name\":\"calldataSell\",\"type\":\"bytes\"},{\"name\":\"replacementPatternBuy\",\"type\":\"bytes\"},{\"name\":\"replacementPatternSell\",\"type\":\"bytes\"},{\"name\":\"staticExtradataBuy\",\"type\":\"bytes\"},{\"name\":\"staticExtradataSell\",\"type\":\"bytes\"}],\"name\":\"calculateMatchPrice_\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"approvedOrders\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"registryAddress\",\"type\":\"address\"},{\"name\":\"tokenTransferProxyAddress\",\"type\":\"address\"},{\"name\":\"tokenAddress\",\"type\":\"address\"},{\"name\":\"protocolFeeAddress\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"exchange\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"maker\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"taker\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"makerRelayerFee\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"takerRelayerFee\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"makerProtocolFee\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"takerProtocolFee\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"feeRecipient\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"side\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"saleKind\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"target\",\"type\":\"address\"}],\"name\":\"OrderApprovedPartOne\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"howToCall\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"calldata\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"staticTarget\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"staticExtradata\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"paymentToken\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"basePrice\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"extra\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"listingTime\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"expirationTime\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"salt\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"orderbookInclusionDesired\",\"type\":\"bool\"}],\"name\":\"OrderApprovedPartTwo\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"OrderCancelled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"buyHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"sellHash\",\"type\":\"bytes32\"},{\"indexed\":true,\"name\":\"maker\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"taker\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"metadata\",\"type\":\"bytes32\"}],\"name\":\"OrdersMatched\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"}],\"name\":\"OwnershipRenounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"}]",
-        "ContractAdd": "0x7be8076f4ea4a4ad08075c2508e481d6c946d12b",
-        "TriggerName": "WAE - TestUint8Eq",
-        "TriggerType": "WatchEvents"
-    }`
+       "Filters": [
+           {
+               "Condition": {
+                   "Attribute": "0000000000000000000000000000000000000000000000000000000000000001",
+                   "Predicate": "Eq"
+               },
+               "EventName": "OrderApprovedPartOne",
+               "FilterType": "CheckEventParameter",
+               "ParameterName": "side",
+               "ParameterType": "uint8"
+           }
+       ],
+       "ContractABI": "[{\"constant\":true,\"inputs\":[],\"name\":\"name\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"tokenTransferProxy\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"target\",\"type\":\"address\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"extradata\",\"type\":\"bytes\"}],\"name\":\"staticCall\",\"outputs\":[{\"name\":\"result\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newMinimumMakerProtocolFee\",\"type\":\"uint256\"}],\"name\":\"changeMinimumMakerProtocolFee\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newMinimumTakerProtocolFee\",\"type\":\"uint256\"}],\"name\":\"changeMinimumTakerProtocolFee\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"array\",\"type\":\"bytes\"},{\"name\":\"desired\",\"type\":\"bytes\"},{\"name\":\"mask\",\"type\":\"bytes\"}],\"name\":\"guardedArrayReplace\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumTakerProtocolFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"codename\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addr\",\"type\":\"address\"}],\"name\":\"testCopyAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"arrToCopy\",\"type\":\"bytes\"}],\"name\":\"testCopy\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"}],\"name\":\"calculateCurrentPrice_\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newProtocolFeeRecipient\",\"type\":\"address\"}],\"name\":\"changeProtocolFeeRecipient\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"name\":\"\",\"type\":\"string\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"buyCalldata\",\"type\":\"bytes\"},{\"name\":\"buyReplacementPattern\",\"type\":\"bytes\"},{\"name\":\"sellCalldata\",\"type\":\"bytes\"},{\"name\":\"sellReplacementPattern\",\"type\":\"bytes\"}],\"name\":\"orderCalldataCanMatch\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"validateOrder_\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"basePrice\",\"type\":\"uint256\"},{\"name\":\"extra\",\"type\":\"uint256\"},{\"name\":\"listingTime\",\"type\":\"uint256\"},{\"name\":\"expirationTime\",\"type\":\"uint256\"}],\"name\":\"calculateFinalPrice\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"protocolFeeRecipient\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"}],\"name\":\"hashOrder_\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[14]\"},{\"name\":\"uints\",\"type\":\"uint256[18]\"},{\"name\":\"feeMethodsSidesKindsHowToCalls\",\"type\":\"uint8[8]\"},{\"name\":\"calldataBuy\",\"type\":\"bytes\"},{\"name\":\"calldataSell\",\"type\":\"bytes\"},{\"name\":\"replacementPatternBuy\",\"type\":\"bytes\"},{\"name\":\"replacementPatternSell\",\"type\":\"bytes\"},{\"name\":\"staticExtradataBuy\",\"type\":\"bytes\"},{\"name\":\"staticExtradataSell\",\"type\":\"bytes\"}],\"name\":\"ordersCanMatch_\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"},{\"name\":\"orderbookInclusionDesired\",\"type\":\"bool\"}],\"name\":\"approveOrder_\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"registry\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minimumMakerProtocolFee\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"}],\"name\":\"hashToSign_\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"cancelledOrFinalized\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"exchangeToken\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"},{\"name\":\"v\",\"type\":\"uint8\"},{\"name\":\"r\",\"type\":\"bytes32\"},{\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"cancelOrder_\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[14]\"},{\"name\":\"uints\",\"type\":\"uint256[18]\"},{\"name\":\"feeMethodsSidesKindsHowToCalls\",\"type\":\"uint8[8]\"},{\"name\":\"calldataBuy\",\"type\":\"bytes\"},{\"name\":\"calldataSell\",\"type\":\"bytes\"},{\"name\":\"replacementPatternBuy\",\"type\":\"bytes\"},{\"name\":\"replacementPatternSell\",\"type\":\"bytes\"},{\"name\":\"staticExtradataBuy\",\"type\":\"bytes\"},{\"name\":\"staticExtradataSell\",\"type\":\"bytes\"},{\"name\":\"vs\",\"type\":\"uint8[2]\"},{\"name\":\"rssMetadata\",\"type\":\"bytes32[5]\"}],\"name\":\"atomicMatch_\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[7]\"},{\"name\":\"uints\",\"type\":\"uint256[9]\"},{\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"name\":\"side\",\"type\":\"uint8\"},{\"name\":\"saleKind\",\"type\":\"uint8\"},{\"name\":\"howToCall\",\"type\":\"uint8\"},{\"name\":\"calldata\",\"type\":\"bytes\"},{\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"name\":\"staticExtradata\",\"type\":\"bytes\"}],\"name\":\"validateOrderParameters_\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"INVERSE_BASIS_POINT\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addrs\",\"type\":\"address[14]\"},{\"name\":\"uints\",\"type\":\"uint256[18]\"},{\"name\":\"feeMethodsSidesKindsHowToCalls\",\"type\":\"uint8[8]\"},{\"name\":\"calldataBuy\",\"type\":\"bytes\"},{\"name\":\"calldataSell\",\"type\":\"bytes\"},{\"name\":\"replacementPatternBuy\",\"type\":\"bytes\"},{\"name\":\"replacementPatternSell\",\"type\":\"bytes\"},{\"name\":\"staticExtradataBuy\",\"type\":\"bytes\"},{\"name\":\"staticExtradataSell\",\"type\":\"bytes\"}],\"name\":\"calculateMatchPrice_\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"name\":\"approvedOrders\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"registryAddress\",\"type\":\"address\"},{\"name\":\"tokenTransferProxyAddress\",\"type\":\"address\"},{\"name\":\"tokenAddress\",\"type\":\"address\"},{\"name\":\"protocolFeeAddress\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"exchange\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"maker\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"taker\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"makerRelayerFee\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"takerRelayerFee\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"makerProtocolFee\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"takerProtocolFee\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"feeRecipient\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"feeMethod\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"side\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"saleKind\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"target\",\"type\":\"address\"}],\"name\":\"OrderApprovedPartOne\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"howToCall\",\"type\":\"uint8\"},{\"indexed\":false,\"name\":\"calldata\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"replacementPattern\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"staticTarget\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"staticExtradata\",\"type\":\"bytes\"},{\"indexed\":false,\"name\":\"paymentToken\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"basePrice\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"extra\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"listingTime\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"expirationTime\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"salt\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"orderbookInclusionDesired\",\"type\":\"bool\"}],\"name\":\"OrderApprovedPartTwo\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"hash\",\"type\":\"bytes32\"}],\"name\":\"OrderCancelled\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"buyHash\",\"type\":\"bytes32\"},{\"indexed\":false,\"name\":\"sellHash\",\"type\":\"bytes32\"},{\"indexed\":true,\"name\":\"maker\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"taker\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"metadata\",\"type\":\"bytes32\"}],\"name\":\"OrdersMatched\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"}],\"name\":\"OwnershipRenounced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"}]",
+       "ContractAdd": "0x7be8076f4ea4a4ad08075c2508e481d6c946d12b",
+       "TriggerName": "WAE - TestUint8Eq",
+       "TriggerType": "WatchEvents"
+   }`
 
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9252401, 1572344236)
+	logs, err := getLogsForBlock(config.CliMain, 9252401, []string{"0x7be8076f4ea4a4ad08075c2508e481d6c946d12b"})
+	assert.NoError(t, err)
+
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 2, len(matches))
 	assert.Equal(t, 9252401, matches[0].Log.BlockNumber)
@@ -1651,7 +1650,8 @@ func TestBytes32Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9252045, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9252045, []string{"0x7a6425c9b3f5521bfa5d71df710a2fb80508319b"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252045, matches[0].Log.BlockNumber)
@@ -1681,7 +1681,8 @@ func TestBytesEqStartingWith0x(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9243327, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9243327, []string{"0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
@@ -1711,7 +1712,8 @@ func TestBytesEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9243327, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9243327, []string{"0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
@@ -1740,7 +1742,8 @@ func TestBoolEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9133542, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9133542, []string{"0x73866e69c6f6f74fc48539dd541a6df8c8059e04"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9133542, matches[0].Log.BlockNumber)
@@ -1769,7 +1772,8 @@ func TestUint64Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9252369, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9252369, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
@@ -1798,7 +1802,8 @@ func TestUint128Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9252369, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9252369, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
@@ -1827,7 +1832,8 @@ func XXXTestUint128EqBis(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9252460, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9252460, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 2, len(matches))
 	assert.Equal(t, 9252460, matches[0].Log.BlockNumber)
@@ -1856,7 +1862,8 @@ func TestAddressEqNotDecoded(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9252175, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9252175, []string{"0x14094949152eddbfcd073717200da82fed8dc960"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252175, matches[0].Log.BlockNumber)
@@ -1915,7 +1922,8 @@ func TestUint256Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9252357, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9252357, []string{"0xc7af99fe5513eb6710e6d5f44f9989da40f27f26"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252357, matches[0].Log.BlockNumber)
@@ -1954,7 +1962,8 @@ func TestUint256InBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9130794, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
@@ -1983,7 +1992,8 @@ func TestUint256BiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9130794, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
@@ -2032,24 +2042,14 @@ func TestUint256EqBytes32EqAddressEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9130794, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
 }
 
-type EthMock3 struct {
-	*rpc.ZoroRPC
-}
-
-func (cli EthMock3) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
-	return GetLogsFromFile("../resources/events/logs3.json")
-}
-
 func TestMatchEvent9(t *testing.T) {
-
-	var cli EthMock3
-
 	js := `{
     "Filters": [
         {
@@ -2072,7 +2072,9 @@ func TestMatchEvent9(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(cli, tg, 9351495, 1572344236)
+	logs, _ := GetLogsFromFile("../resources/events/logs3.json")
+	matches := MatchEvent(tg, 1572344236, logs)
+
 	assert.Equal(t, 2, len(matches))
 	assert.Equal(t, "0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7", matches[0].Log.Topics[0])
 	assert.Equal(t, "0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7", matches[1].Log.Topics[0])
@@ -2109,7 +2111,8 @@ func TestMatchEvent8(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9222611, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9222611, []string{"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9222611, matches[0].Log.BlockNumber)
@@ -2137,7 +2140,8 @@ func TestMatchEvent7(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5693736, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliRinkeby, 5693736, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693736, matches[0].Log.BlockNumber)
@@ -2175,7 +2179,8 @@ func TestMatchEvent6(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5693736, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliRinkeby, 5693736, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693736, matches[0].Log.BlockNumber)
@@ -2203,7 +2208,8 @@ func TestMatchEvent5(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5693738, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliRinkeby, 5693738, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693738, matches[0].Log.BlockNumber)
@@ -2251,7 +2257,8 @@ func TestMatchEvent4(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliRinkeby, tg, 5693738, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliRinkeby, 5693738, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693738, matches[0].Log.BlockNumber)
@@ -2307,7 +2314,8 @@ func TestMatchEvent3(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(EthMock2{}, tg, 9098826, 1572344236)
+	logs, _ := GetLogsFromFile("../resources/events/logs2.json")
+	matches := MatchEvent(tg, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9098826, matches[0].Log.BlockNumber)
@@ -2345,25 +2353,27 @@ func TestMatchEvent2(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(config.CliMain, tg, 9099675, 1572344236)
+	var logs, _ = getLogsForBlock(config.CliMain, 9099675, []string{"0x080bf510fcbf18b91105470639e9561022937712"})
+	matches := MatchEvent(tg, 1572344236, logs)
+
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9099675, matches[0].Log.BlockNumber)
 }
 
 func TestMatchEvent1(t *testing.T) {
 
-	var client EthMock
+	logs, _ := GetLogsFromFile("../resources/events/logs1.json")
 
 	tg1, err := GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
-	matches1 := MatchEvent(client, tg1, 8496661, 1572344236)
+	matches1 := MatchEvent(tg1, 1572344236, logs)
 
 	assert.Equal(t, 1, len(matches1))
 	assert.Equal(t, "677420000", matches1[0].EventParams["value"])
 
 	tg2, err := GetTriggerFromFile("../resources/triggers/ev2.json")
 	assert.NoError(t, err)
-	matches2 := MatchEvent(client, tg2, 8496661, 1572344236)
+	matches2 := MatchEvent(tg2, 1572344236, logs)
 
 	assert.Equal(t, 3, len(matches2))
 	assert.Equal(t, "677420000", matches2[0].EventParams["value"])
@@ -2408,8 +2418,6 @@ func TestMatchEvent1(t *testing.T) {
 
 func TestMatchEventEmitted(t *testing.T) {
 
-	var client EthMock
-
 	js := `{
   "TriggerName":"Watch an Event",
   "TriggerType":"WatchEvents",
@@ -2426,6 +2434,8 @@ func TestMatchEventEmitted(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(client, tg, 8496661, 1572344236)
+	logs, _ := GetLogsFromFile("../resources/events/logs1.json")
+
+	matches := MatchEvent(tg, 1572344236, logs)
 	assert.Equal(t, 7, len(matches))
 }

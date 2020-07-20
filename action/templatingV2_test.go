@@ -175,7 +175,9 @@ func TestEventMatching(t *testing.T) {
 
 	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(EthMock{}, tg1, 8496661, 1572344236)
+	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
+	assert.NoError(t, err)
+	matches := trigger.MatchEvent(tg1, 1572344236, logs)
 
 	matches[0].EventParams["arrayParam"] = []string{"hello", "world", "yo yo"}
 
