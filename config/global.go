@@ -1,8 +1,8 @@
 package config
 
 import (
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/rpc"
-	"github.com/onrik/ethrpc"
 )
 
 // global variables across Zoroaster

@@ -2,11 +2,11 @@ package matcher
 
 import (
 	"fmt"
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
-	"github.com/onrik/ethrpc"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -28,7 +28,7 @@ func EventMatcher(
 			logrus.Fatal(err)
 		}
 
-		logs, err := getLogsForBlock(rpcCli, block.Number, getUniqueTriggerAddresses(triggers))
+		logs, err := getLogsForBlock(rpcCli, block.Hash, getUniqueTriggerAddresses(triggers))
 		logrus.Debugf("fetched %d logs\n", len(logs))
 		if err != nil {
 			logrus.Fatalf("cannot fetch logs for block %d: %s\n", block.Number, err)
@@ -60,10 +60,9 @@ func EventMatcher(
 	}
 }
 
-func getLogsForBlock(client rpc.IEthRpc, blockNo int, addresses []string) ([]ethrpc.Log, error) {
+func getLogsForBlock(client rpc.IEthRpc, blockHash string, addresses []string) ([]ethrpc.Log, error) {
 	filter := ethrpc.FilterParams{
-		FromBlock: fmt.Sprintf("0x%x", blockNo),
-		ToBlock:   fmt.Sprintf("0x%x", blockNo),
+		BlockHash: blockHash,
 		Address:   addresses,
 	}
 	return client.EthGetLogs(filter)

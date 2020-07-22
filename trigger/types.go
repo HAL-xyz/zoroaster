@@ -2,7 +2,7 @@ package trigger
 
 import (
 	"encoding/json"
-	"github.com/onrik/ethrpc"
+	"github.com/HAL-xyz/ethrpc"
 	"math/big"
 )
 

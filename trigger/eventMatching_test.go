@@ -2,11 +2,11 @@ package trigger
 
 import (
 	"fmt"
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"

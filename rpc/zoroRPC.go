@@ -1,7 +1,7 @@
 package rpc
 
 import (
-	"github.com/onrik/ethrpc"
+	"github.com/HAL-xyz/ethrpc"
 	log "github.com/sirupsen/logrus"
 )
 

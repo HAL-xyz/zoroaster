@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/db"
@@ -8,7 +9,6 @@ import (
 	"github.com/HAL-xyz/zoroaster/poller"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
-	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"os"

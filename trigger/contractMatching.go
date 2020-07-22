@@ -3,10 +3,10 @@ package trigger
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/abidec"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/utils"
-	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"strings"
 )

@@ -3,7 +3,7 @@ package trigger
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/onrik/ethrpc"
+	"github.com/HAL-xyz/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"strconv"

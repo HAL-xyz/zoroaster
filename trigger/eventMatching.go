@@ -4,9 +4,9 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/onrik/ethrpc"
 	"github.com/sirupsen/logrus"
 	"strings"
 )

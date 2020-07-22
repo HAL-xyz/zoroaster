@@ -1,9 +1,9 @@
 package matcher
 
 import (
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/trigger"
-	"github.com/onrik/ethrpc"
 	log "github.com/sirupsen/logrus"
 	"time"
 )

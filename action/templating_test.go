@@ -1,9 +1,9 @@
 package action
 
 import (
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/onrik/ethrpc"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"testing"
