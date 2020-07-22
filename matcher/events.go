@@ -1,13 +1,13 @@
 package matcher
 
 import (
-	"fmt"
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/sirupsen/logrus"
+	"strings"
 	"time"
 )
 
@@ -28,8 +28,7 @@ func EventMatcher(
 			logrus.Fatal(err)
 		}
 
-		logs, err := getLogsForBlock(rpcCli, block.Hash, getUniqueTriggerAddresses(triggers))
-		logrus.Debugf("fetched %d logs\n", len(logs))
+		logs, err := getLogsForBlock(rpcCli, block.Hash, triggers)
 		if err != nil {
 			logrus.Fatalf("cannot fetch logs for block %d: %s\n", block.Number, err)
 		}
@@ -60,18 +59,29 @@ func EventMatcher(
 	}
 }
 
-func getLogsForBlock(client rpc.IEthRpc, blockHash string, addresses []string) ([]ethrpc.Log, error) {
+func getLogsForBlock(client rpc.IEthRpc, blockHash string, triggers []*trigger.Trigger) ([]ethrpc.Log, error) {
 	filter := ethrpc.FilterParams{
 		BlockHash: blockHash,
-		Address:   addresses,
 	}
-	return client.EthGetLogs(filter)
+	logs, err := client.EthGetLogs(filter)
+	if err != nil {
+		return nil, err
+	}
+	var relevantLogs []ethrpc.Log
+	uniqueTgAddresses := getUniqueTriggerAddresses(triggers)
+	for i, log := range logs {
+		if utils.IsIn(strings.ToLower(log.Address), uniqueTgAddresses) {
+			relevantLogs = append(relevantLogs, logs[i])
+		}
+	}
+	logrus.Debugf("fetched %d total logs and %d relevant logs\n", len(logs), len(relevantLogs))
+	return relevantLogs, nil
 }
 
 func getUniqueTriggerAddresses(tgs []*trigger.Trigger) []string {
 	var ads = make([]string, len(tgs))
 	for i, tg := range tgs {
-		ads[i] = tg.ContractAdd
+		ads[i] = strings.ToLower(tg.ContractAdd)
 	}
 	return utils.Uniques(ads)
 }

@@ -33,16 +33,18 @@ func MatchEvent(tg *Trigger, blockTimestamp int, logs []ethrpc.Log) []*EventMatc
 
 	var eventMatches []*EventMatch
 	for i, log := range logs {
-		if validateTriggerLog(&log, tg, &abiObj, eventName) || validateEmittedEvent(&log, tg, eventName) {
-			decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
-			topicsMap := getTopicsMap(&abiObj, eventName, &log)
-			ev := EventMatch{
-				Tg:             tg,
-				Log:            &logs[i],
-				BlockTimestamp: blockTimestamp,
-				EventParams:    makeEventParams(decodedData, topicsMap),
+		if strings.ToLower(log.Address) == strings.ToLower(tg.ContractAdd) {
+			if validateTriggerLog(&log, tg, &abiObj, eventName) || validateEmittedEvent(&log, tg, eventName) {
+				decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
+				topicsMap := getTopicsMap(&abiObj, eventName, &log)
+				ev := EventMatch{
+					Tg:             tg,
+					Log:            &logs[i],
+					BlockTimestamp: blockTimestamp,
+					EventParams:    makeEventParams(decodedData, topicsMap),
+				}
+				eventMatches = append(eventMatches, &ev)
 			}
-			eventMatches = append(eventMatches, &ev)
 		}
 	}
 	return eventMatches
