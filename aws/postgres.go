@@ -187,7 +187,7 @@ func (cli PostgresClient) LogMatch(match trigger.IMatch) (string, error) {
 			"trigger_uuid", "match_data", "created_at")
 			VALUES ($1, $2, $3) RETURNING uuid`, cli.conf.TableMatches)
 	var lastUUID string
-	logrus.Debug(match.GetTriggerUUID())
+	log.Debug(match.GetTriggerUUID())
 	err = db.QueryRow(q, match.GetTriggerUUID(), matchData, time.Now()).Scan(&lastUUID)
 	if err != nil {
 		return "", err
