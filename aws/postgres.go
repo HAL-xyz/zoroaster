@@ -9,6 +9,7 @@ import (
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
+	"strings"
 	"time"
 )
 
@@ -188,7 +189,7 @@ func (cli PostgresClient) LogMatch(match trigger.IMatch) (string, error) {
 			VALUES ($1, $2, $3) RETURNING uuid`, cli.conf.TableMatches)
 	var lastUUID string
 	log.Debug(match.GetTriggerUUID())
-	err = db.QueryRow(q, match.GetTriggerUUID(), matchData, time.Now()).Scan(&lastUUID)
+	err = db.QueryRow(q, match.GetTriggerUUID(), strings.ReplaceAll(string(matchData), "\\u0000", ""), time.Now()).Scan(&lastUUID)
 	if err != nil {
 		return "", err
 	}

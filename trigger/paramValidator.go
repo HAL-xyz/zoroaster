@@ -107,6 +107,7 @@ func ValidateParam(rawParam []byte, parameterType string, attribute string, pred
 			log.Debug(err)
 			return false, nil
 		}
+		param = strings.ReplaceAll(param, "\x00", "")
 		return strings.ToLower(param) == strings.ToLower(attribute), param
 	}
 	// bool
