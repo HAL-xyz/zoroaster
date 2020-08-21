@@ -66,6 +66,9 @@ func hexToASCII(s string) string {
 }
 
 func hexToInt(s string) string {
+	if !strings.HasPrefix(s, "0x") {
+		return s
+	}
 	s = strings.TrimPrefix(s, "0x")
 	i := new(big.Int)
 	_, ok := i.SetString(s, 16)

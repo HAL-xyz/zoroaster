@@ -272,6 +272,11 @@ func TestTemplateFunctions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "234", rendered)
 
+	template = "{{ hexToInt . }}"
+	rendered, err = renderTemplateWithData(template, "100")
+	assert.NoError(t, err)
+	assert.Equal(t, "100", rendered)
+
 	template = "{{ etherscanTxLink . }}"
 	rendered, err = renderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
 	assert.NoError(t, err)
