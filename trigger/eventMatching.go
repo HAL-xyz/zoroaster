@@ -8,6 +8,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/sirupsen/logrus"
+	"regexp"
 	"strings"
 )
 
@@ -143,11 +144,16 @@ func validateFilterLog(
 func getTopicsMap(abiObj *abi.ABI, eventName string, evLog *ethrpc.Log) map[string]string {
 	finalMap := make(map[string]string)
 	myEvent := abiObj.Events[eventName]
+	intRgx := regexp.MustCompile(`u?int\d*$`)
 
 	var i = 1 // topic_name_0 is the event signature so we start from 1
 	for _, input := range myEvent.Inputs {
 		if input.Indexed {
-			finalMap[input.Name] = evLog.Topics[i]
+			if intRgx.MatchString(input.Type.String()) {
+				finalMap[input.Name] = utils.MakeBigIntFromHex(evLog.Topics[i]).String()
+			} else {
+				finalMap[input.Name] = evLog.Topics[i]
+			}
 			i += 1
 		}
 	}

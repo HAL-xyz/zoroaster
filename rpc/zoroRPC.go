@@ -84,4 +84,3 @@ func (z *ZoroRPC) EthCall(transaction ethrpc.T, tag string) (string, error) {
 	}
 	return res, err
 }
-

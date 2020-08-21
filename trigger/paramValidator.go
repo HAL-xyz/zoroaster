@@ -62,7 +62,7 @@ func ValidateTopicParam(topicParam string, paramType string, attribute string, p
 	// int
 	intRgx := regexp.MustCompile(`u?int\d*$`)
 	if intRgx.MatchString(paramType) {
-		return validatePredBigInt(predicate, utils.MakeBigIntFromHex(topicParam), utils.MakeBigInt(attribute)), topicParam
+		return validatePredBigInt(predicate, utils.MakeBigInt(topicParam), utils.MakeBigInt(attribute)), topicParam
 	}
 
 	// int[N] and int[] - Keccak hash, only Eq supported
