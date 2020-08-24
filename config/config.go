@@ -16,7 +16,6 @@ type ZConfiguration struct {
 	LogsFile              string
 	Database              ZoroDB
 	BlocksDelay           int
-	UseGetModAccounts     bool
 	TwitterConsumerKey    string
 	TwitterConsumerSecret string
 }
@@ -149,9 +148,6 @@ func NewConfig() *ZConfiguration {
 	if zconfig.TwitterConsumerSecret == "" {
 		log.Fatal("no twitter consumer secret set in local env ", twitterConsumerSecret)
 	}
-
-	// TODO: get rid of useGetModAccounts altogether
-	zconfig.UseGetModAccounts = false
 
 	return &zconfig
 }

@@ -1,28 +1,21 @@
 package matcher
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
-	"net/http"
-	"strings"
 	"time"
 )
 
 func ContractMatcher(
 	blocksChan chan *ethrpc.Block,
 	matchesChan chan trigger.IMatch,
-	getModifiedAccounts func(prevBlock, currBlock int, nodeURI string) ([]string, error),
 	idb aws.IDB,
 	client rpc.IEthRpc,
-	useGetModAccount bool) {
+) {
 
 	for {
 		block := <-blocksChan
@@ -35,7 +28,7 @@ func ContractMatcher(
 			log.Fatal(err)
 		}
 
-		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, getModifiedAccounts, idb, client, useGetModAccount)
+		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, idb, client)
 		for _, m := range cnMatches {
 			matchUUID, err := idb.LogMatch(*m)
 			if err != nil {
@@ -60,10 +53,9 @@ func matchContractsForBlock(
 	blockNo int,
 	blockTimestamp int,
 	blockHash string,
-	getModAccounts func(prevBlock, currBlock int, nodeURI string) ([]string, error),
 	idb aws.IDB,
 	client rpc.IEthRpc,
-	useGetModAccounts bool) []*trigger.CnMatch {
+) []*trigger.CnMatch {
 
 	start := time.Now()
 
@@ -71,37 +63,9 @@ func matchContractsForBlock(
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Debug("\tuseGetModAccount flag set to: ", useGetModAccounts)
-	log.Debug("\ttriggers from IDB: ", len(allTriggers))
-
-	var triggersToCheck []*trigger.Trigger
-
-	if useGetModAccounts {
-		log.Debug("\t...getting modified accounts...")
-		modAccounts, modAccountErr := getModAccounts(blockNo-1, blockNo, client.URL())
-		if modAccountErr != nil {
-			log.Warn("\t", modAccountErr)
-		}
-		log.Debug("\tmodified accounts: ", len(modAccounts))
-
-		// if getModifiedAccounts fails, we need to check all our WaC triggers
-		if modAccountErr != nil {
-			triggersToCheck = allTriggers
-		} else {
-			for i, t := range allTriggers {
-				if utils.IsIn(strings.ToLower(t.ContractAdd), modAccounts) {
-					triggersToCheck = append(triggersToCheck, allTriggers[i])
-				}
-			}
-		}
-	} else { // useGetModAccounts set to false
-		triggersToCheck = allTriggers
-	}
-
-	log.Debug("\ttriggers to check: ", len(triggersToCheck))
 
 	var cnMatches []*trigger.CnMatch
-	for _, tg := range triggersToCheck {
+	for _, tg := range allTriggers {
 		isMatch, matchedValues, allValues := trigger.MatchContract(client, tg, blockNo)
 		if isMatch {
 			match := &trigger.CnMatch{
@@ -120,9 +84,9 @@ func matchContractsForBlock(
 	matchesToActUpon := getMatchesToActUpon(idb, cnMatches)
 
 	updateStatusForMatchingTriggers(idb, cnMatches)
-	updateStatusForNonMatchingTriggers(idb, cnMatches, triggersToCheck)
+	updateStatusForNonMatchingTriggers(idb, cnMatches, allTriggers)
 
-	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(triggersToCheck), time.Since(start), blockNo)
+	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(allTriggers), time.Since(start), blockNo)
 	return matchesToActUpon
 }
 
@@ -171,70 +135,4 @@ func updateStatusForNonMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch,
 	nonMatchingTriggersIds := utils.GetSliceFromIntSet(utils.SetDifference(setAll, setMatches))
 
 	idb.UpdateNonMatchingTriggers(nonMatchingTriggersIds)
-}
-
-func GetModifiedAccounts(blockMinusOneNo, blockNo int, nodeURI string) ([]string, error) {
-
-	type ethRequest struct {
-		ID      int    `json:"id"`
-		JSONRPC string `json:"jsonrpc"`
-		Method  string `json:"method"`
-		Params  []int  `json:"params"`
-	}
-
-	p := []int{blockMinusOneNo, blockNo}
-
-	request := ethRequest{
-		ID:      1,
-		JSONRPC: "2.0",
-		Method:  "debug_getModifiedAccountsByNumber",
-		Params:  p,
-	}
-
-	body, err := json.Marshal(request)
-
-	if err != nil {
-		return nil, nil
-	}
-
-	response, err := http.Post(nodeURI, "application/json", bytes.NewBuffer(body))
-
-	if response != nil {
-		defer response.Body.Close()
-	}
-	if err != nil {
-		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
-	}
-
-	data, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
-	}
-
-	if response.StatusCode != 200 {
-		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
-	}
-
-	// result be like
-	// {"jsonrpc":"2.0","id":1,"result":["0x31b93ca83b5ad17582e886c400667c6f698b8ccd",...]}
-
-	type ethResponse struct {
-		Result []string `json:"result"`
-		Error  struct {
-			Message string `json:"message"`
-		} `json:"error"`
-	}
-
-	var ethResp ethResponse
-
-	err = json.Unmarshal(data, &ethResp)
-	if err != nil {
-		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
-	}
-
-	if ethResp.Error.Message != "" {
-		return nil, fmt.Errorf("%s - request was: %s", err, string(body))
-	}
-
-	return ethResp.Result, nil
 }

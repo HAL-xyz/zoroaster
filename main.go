@@ -54,7 +54,7 @@ func main() {
 
 	// Watch a Contract
 	wacCli := rpc.New(ethClient, "Watch a Contract")
-	go matcher.ContractMatcher(cnBlocksChan, matchesChan, matcher.GetModifiedAccounts, &psqlClient, wacCli, config.Zconf.UseGetModAccounts)
+	go matcher.ContractMatcher(cnBlocksChan, matchesChan, &psqlClient, wacCli)
 
 	// Watch an Event
 	waeCli := rpc.New(ethClient, "Watch an Event")

@@ -1,7 +1,6 @@
 package matcher
 
 import (
-	"errors"
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/config"
@@ -51,10 +50,6 @@ func (db mockDB) GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, 
 
 func TestMatchContractsForBlock(t *testing.T) {
 
-	// mocks
-	mockGetModAccounts := func(a, b int, node string) ([]string, error) {
-		return []string{"0xbb9bc244d798123fde783fcc1c72d3bb8c189413"}, nil
-	}
 	lastBlock, err := config.CliMain.EthBlockNumber()
 	assert.NoError(t, err)
 
@@ -62,59 +57,14 @@ func TestMatchContractsForBlock(t *testing.T) {
 		lastBlock,
 		1554828248,
 		"0x",
-		mockGetModAccounts,
 		mockDB{},
-		config.CliMain,
-		true)
+		config.CliMain)
 
 	assert.Equal(t, 1, len(cnMatches))
 	assert.Equal(t, lastBlock, cnMatches[0].BlockNumber)
+	fmt.Println(cnMatches[0].AllValues)
 }
 
-func TestMatchContractsForBlockWithBrokenGetModAccount(t *testing.T) {
-
-	// mocks
-	mockGetModAccounts := func(a, b int, node string) ([]string, error) {
-		return nil, errors.New("some ugly error")
-	}
-	lastBlock, err := config.CliMain.EthBlockNumber()
-	assert.NoError(t, err)
-
-	cnMatches := matchContractsForBlock(
-		lastBlock,
-		1554828248,
-		"0x",
-		mockGetModAccounts,
-		mockDB{},
-		config.CliMain,
-		true)
-
-	assert.Equal(t, 1, len(cnMatches))
-	assert.Equal(t, lastBlock, cnMatches[0].BlockNumber)
-}
-
-func TestMatchContractsForBlockWithModAccountDisabled(t *testing.T) {
-
-	// mocks getModAccount to return empty set; but since the
-	// useGetModAccounts flag is set to false, we want to see one match anyway
-	mockGetModAccounts := func(a, b int, node string) ([]string, error) {
-		return []string{}, nil
-	}
-	lastBlock, err := config.CliMain.EthBlockNumber()
-	assert.NoError(t, err)
-
-	cnMatches := matchContractsForBlock(
-		lastBlock,
-		1554828248,
-		"0x",
-		mockGetModAccounts,
-		mockDB{},
-		config.CliMain,
-		false)
-
-	assert.Equal(t, 1, len(cnMatches))
-	assert.Equal(t, lastBlock, cnMatches[0].BlockNumber)
-}
 func TestMatchContractsWithRealDB(t *testing.T) {
 
 	// clear up the database
@@ -139,10 +89,6 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, status, "false")
 
-	mockGetModAccounts := func(a, b int, node string) ([]string, error) {
-		return []string{"0x09cabec1ead1c0ba254b09efb3ee13841712be14"}, nil
-	}
-
 	lastBlock, err := config.CliMain.EthBlockNumber()
 	assert.NoError(t, err)
 
@@ -153,10 +99,9 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		lastBlock,
 		1554828248,
 		"0x",
-		mockGetModAccounts,
 		&psqlClient,
 		config.CliMain,
-		true)
+	)
 
 	assert.Equal(t, 1, len(cnMatches))
 
@@ -176,10 +121,9 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 		lastBlock,
 		1554828248,
 		"0x",
-		mockGetModAccounts,
 		&psqlClient,
 		config.CliMain,
-		true)
+	)
 
 	assert.Equal(t, 0, len(cnMatches))
 
