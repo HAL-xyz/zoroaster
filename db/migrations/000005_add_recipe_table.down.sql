@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE triggers DROP COLUMN recipe_uuid;
+DROP TABLE IF EXISTS recipes;
+
+COMMIT;
