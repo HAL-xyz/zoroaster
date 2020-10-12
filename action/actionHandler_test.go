@@ -145,7 +145,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches1 := trigger.MatchEvent(tg1, 1572344236, logs)
+	matches1 := trigger.MatchEvent(tg1, 1572344236, logs, nil)
 
 	outcome := handleWebHookPost(url, matches1[0], mockHttpClient{})
 
@@ -303,7 +303,7 @@ func TestHandleEmailWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, 1572344236, logs)
+	matches := trigger.MatchEvent(tg1, 1572344236, logs, nil)
 
 	matches[0].EventParams["extraAddresses"] = []string{"yes@hal.xyz", "nope@hal.xyz"}
 

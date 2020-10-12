@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/ethrpc"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/sirupsen/logrus"
@@ -12,7 +13,7 @@ import (
 	"strings"
 )
 
-func MatchEvent(tg *Trigger, blockTimestamp int, logs []ethrpc.Log) []*EventMatch {
+func MatchEvent(tg *Trigger, blockTimestamp int, logs []ethrpc.Log, rpcCli rpc.IEthRpc) []*EventMatch {
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 	if err != nil {
 		logrus.Debug(err)
@@ -34,21 +35,51 @@ func MatchEvent(tg *Trigger, blockTimestamp int, logs []ethrpc.Log) []*EventMatc
 
 	var eventMatches []*EventMatch
 	for i, log := range logs {
-		if strings.ToLower(log.Address) == strings.ToLower(tg.ContractAdd) {
-			if validateTriggerLog(&log, tg, &abiObj, eventName) || validateEmittedEvent(&log, tg, eventName) {
-				decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
-				topicsMap := getTopicsMap(&abiObj, eventName, &log)
-				ev := EventMatch{
-					Tg:             tg,
-					Log:            &logs[i],
-					BlockTimestamp: blockTimestamp,
-					EventParams:    makeEventParams(decodedData, topicsMap),
+		var txFrom, txTo string
+		if utils.NormalizeAddress(log.Address) != utils.NormalizeAddress(tg.ContractAdd) {
+			continue
+		}
+		if validateTriggerLog(&log, tg, &abiObj, eventName) || validateEmittedEvent(&log, tg, eventName) {
+			if tg.hasBasicFilters() {
+				tx, err := rpcCli.EthGetTransactionByHash(log.TransactionHash)
+				if err != nil {
+					logrus.Error("cannot fetch tx by hash: ", err)
+					continue
 				}
-				eventMatches = append(eventMatches, &ev)
+				if !validateBasicFiltersForEvent(tg, tx) {
+					continue
+				}
+				txTo, txFrom = tx.To, tx.From
 			}
+			decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
+			topicsMap := getTopicsMap(&abiObj, eventName, &log)
+			ev := EventMatch{
+				Tg:             tg,
+				Log:            &logs[i],
+				BlockTimestamp: blockTimestamp,
+				EventParams:    makeEventParams(decodedData, topicsMap),
+				TxTo:           txTo,
+				TxFrom:         txFrom,
+			}
+			eventMatches = append(eventMatches, &ev)
 		}
 	}
 	return eventMatches
+}
+
+func validateBasicFiltersForEvent(tg *Trigger, tx *ethrpc.Transaction) bool {
+	allFiltersMatch := true
+	for _, f := range tg.Filters {
+		switch v := f.Condition.(type) {
+		case ConditionFrom:
+			allFiltersMatch = allFiltersMatch && (utils.NormalizeAddress(v.Attribute) == utils.NormalizeAddress(tx.From))
+		case ConditionTo:
+			allFiltersMatch = allFiltersMatch && (utils.NormalizeAddress(v.Attribute) == utils.NormalizeAddress(tx.To))
+		default:
+			continue
+		}
+	}
+	return allFiltersMatch
 }
 
 func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger, eventName string) bool {

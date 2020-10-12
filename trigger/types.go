@@ -41,7 +41,7 @@ type TemplateBlock struct {
 	Timestamp int
 }
 
-// templating Transaction, only used by WaT
+// templating Transaction
 type TemplateTx struct {
 	From      string
 	Gas       int
@@ -335,6 +335,8 @@ type EventMatch struct {
 	Log            *ethrpc.Log
 	EventParams    map[string]interface{}
 	BlockTimestamp int
+	TxTo           string
+	TxFrom         string
 }
 
 func (m EventMatch) ToTemplateMatch() TemplateMatch {
@@ -350,6 +352,8 @@ func (m EventMatch) ToTemplateMatch() TemplateMatch {
 	}
 	tx := TemplateTx{
 		Hash: m.Log.TransactionHash,
+		From: m.TxFrom,
+		To:   m.TxTo,
 	}
 
 	t := TemplateMatch{

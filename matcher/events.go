@@ -35,7 +35,7 @@ func EventMatcher(
 		// fmt.Println(utils.GimmePrettyJson(logs))
 
 		for _, tg := range triggers {
-			matchingEvents := trigger.MatchEvent(tg, block.Timestamp, logs)
+			matchingEvents := trigger.MatchEvent(tg, block.Timestamp, logs, rpcCli)
 			for _, match := range matchingEvents {
 				matchUUID, err := idb.LogMatch(match)
 				if err != nil {

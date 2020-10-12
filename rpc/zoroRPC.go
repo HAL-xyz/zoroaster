@@ -11,6 +11,7 @@ import (
 type IEthRpc interface {
 	EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error)
 	EthGetBlockByNumber(number int, withTransactions bool) (*ethrpc.Block, error)
+	EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error)
 	EthBlockNumber() (int, error)
 	URL() string
 	EthCall(transaction ethrpc.T, tag string) (string, error)
@@ -49,6 +50,11 @@ func (z *ZoroRPC) ResetCounterAndLogStats(blockNo int) {
 	}
 	log.Infof("RPCStats: %s made %d calls for block %d\n", z.label, z.calls, blockNo)
 	z.resetCounter()
+}
+
+func (z *ZoroRPC) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error) {
+	z.increaseCounterByOne()
+	return z.cli.EthGetTransactionByHash(hash)
 }
 
 func (z *ZoroRPC) EthGetBlockByNumber(number int, withTransactions bool) (*ethrpc.Block, error) {

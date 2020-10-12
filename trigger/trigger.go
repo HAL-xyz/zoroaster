@@ -18,6 +18,15 @@ type Trigger struct {
 	UserUUID     string
 }
 
+func (tg Trigger) hasBasicFilters() bool {
+	for _, f := range tg.Filters {
+		if f.FilterType == "BasicFilter" {
+			return true
+		}
+	}
+	return false
+}
+
 type Filter struct {
 	FilterType    string
 	ParameterName string

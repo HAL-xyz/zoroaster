@@ -21,7 +21,7 @@ func TestTemplateWithAllConversions(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, 1572344236, logs)
+	matches := trigger.MatchEvent(tg1, 1572344236, logs, nil)
 
 	matches[0].EventParams["someBigNumber"] = "629000000000000000"
 	matches[0].EventParams["unixTimestamp"] = "1602631929"
@@ -40,7 +40,7 @@ func TestTemplateWithDecConversion(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, 1572344236, logs)
+	matches := trigger.MatchEvent(tg1, 1572344236, logs, nil)
 
 	matches[0].EventParams["someBigNumber"] = "629000000000000000"
 	matches[0].EventParams["smallerNumber"] = "21000000000000"
@@ -302,7 +302,7 @@ func TestEmailTemplateEvent(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, 1572344236, logs)
+	matches := trigger.MatchEvent(tg1, 1572344236, logs, nil)
 
 	matches[0].EventParams["arrayParam"] = []string{"hello", "world", "yo yo"}
 
