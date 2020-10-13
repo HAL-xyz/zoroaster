@@ -35,13 +35,14 @@ func EventMatcher(
 		// fmt.Println(utils.GimmePrettyJson(logs))
 
 		for _, tg := range triggers {
-			matchingEvents := trigger.MatchEvent(tg, block.Timestamp, logs, rpcCli)
+			matchingEvents := trigger.MatchEvent(tg, logs, rpcCli)
 			for _, match := range matchingEvents {
 				matchUUID, err := idb.LogMatch(match)
 				if err != nil {
 					logrus.Fatal(err)
 				}
 				match.MatchUUID = matchUUID
+				match.BlockTimestamp = block.Timestamp
 				logrus.Debug("\tlogged one event with id ", matchUUID)
 				matchesChan <- *match
 			}

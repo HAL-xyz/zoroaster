@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func MatchEvent(tg *Trigger, blockTimestamp int, logs []ethrpc.Log, rpcCli rpc.IEthRpc) []*EventMatch {
+func MatchEvent(tg *Trigger, logs []ethrpc.Log, rpcCli rpc.IEthRpc) []*EventMatch {
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 	if err != nil {
 		logrus.Debug(err)
@@ -54,12 +54,11 @@ func MatchEvent(tg *Trigger, blockTimestamp int, logs []ethrpc.Log, rpcCli rpc.I
 			decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
 			topicsMap := getTopicsMap(&abiObj, eventName, &log)
 			ev := EventMatch{
-				Tg:             tg,
-				Log:            &logs[i],
-				BlockTimestamp: blockTimestamp,
-				EventParams:    makeEventParams(decodedData, topicsMap),
-				TxTo:           txTo,
-				TxFrom:         txFrom,
+				Tg:          tg,
+				Log:         &logs[i],
+				EventParams: makeEventParams(decodedData, topicsMap),
+				TxTo:        txTo,
+				TxFrom:      txFrom,
 			}
 			eventMatches = append(eventMatches, &ev)
 		}

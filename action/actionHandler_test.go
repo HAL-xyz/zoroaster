@@ -145,7 +145,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches1 := trigger.MatchEvent(tg1, 1572344236, logs, nil)
+	matches1 := trigger.MatchEvent(tg1, logs, nil)
 
 	outcome := handleWebHookPost(url, matches1[0], mockHttpClient{})
 
@@ -168,7 +168,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
    "Transaction":{
       "BlockHash":"0xf3d70d822816015f26843d378b8c1d5d5da62f5d346f3e86d91a0c2463d30543",
       "BlockNumber":8496661,
-      "BlockTimestamp":1572344236,
+      "BlockTimestamp":0,
       "Hash":"0xf44984a4b533ac0e7b608c881a856eff44ee8c17b9f4dcf8b4ee74e9c10c0455"
    },
    "TriggerName":"Watch an Event",
@@ -303,7 +303,7 @@ func TestHandleEmailWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, 1572344236, logs, nil)
+	matches := trigger.MatchEvent(tg1, logs, nil)
 
 	matches[0].EventParams["extraAddresses"] = []string{"yes@hal.xyz", "nope@hal.xyz"}
 
