@@ -118,6 +118,10 @@ func NewConfig() *ZConfiguration {
 		log.Fatal("no db name set in local env ", dbName)
 	}
 
+	if zconfig.Stage == TEST && zconfig.Database.Name != "hal_test" {
+		log.Fatalf("cannot use db %s with stage set to TEST\n", zconfig.Database.Name)
+	}
+
 	zconfig.Database.User = os.Getenv(dbUsr)
 	if zconfig.Database.User == "" {
 		log.Fatal("no db user set in local env ", dbUsr)
