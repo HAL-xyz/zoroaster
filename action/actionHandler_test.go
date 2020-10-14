@@ -2,6 +2,8 @@ package action
 
 import (
 	"bytes"
+	"github.com/HAL-xyz/ethrpc"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/aws/aws-sdk-go/service/ses"
@@ -36,6 +38,20 @@ func (m mockHttpClient400) Post(url, contentType string, body io.Reader) (*http.
 		Body:       ioutil.NopCloser(bytes.NewBufferString("Hello World"))}
 	return &resp, nil
 }
+
+// ETHRPC Client mock
+type mockETHCli struct {
+	rpc.IEthRpc
+}
+
+func (z mockETHCli) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error) {
+	return &ethrpc.Transaction{
+		From: "0x000",
+		To:   "0x111",
+	}, nil
+}
+
+var mockCli mockETHCli
 
 func TestHandleWebHookPost(t *testing.T) {
 
@@ -145,7 +161,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches1 := trigger.MatchEvent(tg1, logs, nil)
+	matches1 := trigger.MatchEvent(tg1, logs, mockCli)
 
 	outcome := handleWebHookPost(url, matches1[0], mockHttpClient{})
 
@@ -303,7 +319,7 @@ func TestHandleEmailWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, logs, nil)
+	matches := trigger.MatchEvent(tg1, logs, mockCli)
 
 	matches[0].EventParams["extraAddresses"] = []string{"yes@hal.xyz", "nope@hal.xyz"}
 

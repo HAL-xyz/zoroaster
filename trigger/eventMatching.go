@@ -35,21 +35,19 @@ func MatchEvent(tg *Trigger, logs []ethrpc.Log, rpcCli rpc.IEthRpc) []*EventMatc
 
 	var eventMatches []*EventMatch
 	for i, log := range logs {
-		var txFrom, txTo string
 		if utils.NormalizeAddress(log.Address) != utils.NormalizeAddress(tg.ContractAdd) {
 			continue
 		}
 		if validateTriggerLog(&log, tg, &abiObj, eventName) || validateEmittedEvent(&log, tg, eventName) {
+			tx, err := rpcCli.EthGetTransactionByHash(log.TransactionHash)
+			if err != nil {
+				logrus.Error("cannot fetch tx by hash: ", err)
+				continue
+			}
 			if tg.hasBasicFilters() {
-				tx, err := rpcCli.EthGetTransactionByHash(log.TransactionHash)
-				if err != nil {
-					logrus.Error("cannot fetch tx by hash: ", err)
-					continue
-				}
 				if !validateBasicFiltersForEvent(tg, tx) {
 					continue
 				}
-				txTo, txFrom = tx.To, tx.From
 			}
 			decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
 			topicsMap := getTopicsMap(&abiObj, eventName, &log)
@@ -57,8 +55,8 @@ func MatchEvent(tg *Trigger, logs []ethrpc.Log, rpcCli rpc.IEthRpc) []*EventMatc
 				Tg:          tg,
 				Log:         &logs[i],
 				EventParams: makeEventParams(decodedData, topicsMap),
-				TxTo:        txTo,
-				TxFrom:      txFrom,
+				TxTo:        tx.To,
+				TxFrom:      tx.From,
 			}
 			eventMatches = append(eventMatches, &ev)
 		}
@@ -82,14 +80,12 @@ func validateBasicFiltersForEvent(tg *Trigger, tx *ethrpc.Transaction) bool {
 }
 
 func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger, eventName string) bool {
-	if len(tg.Filters) > 0 && tg.Filters[0].FilterType == "CheckEventEmitted" {
-		eventSignature, err := getEventSignature(tg.ContractABI, eventName)
-		if err != nil {
-			logrus.Debug(err)
-			return false
-		}
-		if evLog.Topics[0] == eventSignature {
-			return true
+	for _, f := range tg.Filters {
+		if f.FilterType == "CheckEventEmitted" {
+			eventSignature, _ := getEventSignature(tg.ContractABI, eventName)
+			if evLog.Topics[0] == eventSignature {
+				return true
+			}
 		}
 	}
 	return false
