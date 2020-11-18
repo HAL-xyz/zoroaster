@@ -15,8 +15,8 @@
       "ReturnType": "uint256",
       "ReturnIndex": 0,
       "Condition": {
-        "Predicate": "BiggerThan",
-        "Attribute": "3"
+        "Predicate": "Eq",
+        "Attribute": "189"
       }
     }
   ]

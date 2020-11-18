@@ -1,6 +1,7 @@
 package matcher
 
 import (
+	"fmt"
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/rpc"
@@ -49,13 +50,7 @@ func ContractMatcher(
 	}
 }
 
-func matchContractsForBlock(
-	blockNo int,
-	blockTimestamp int,
-	blockHash string,
-	idb aws.IDB,
-	client rpc.IEthRpc,
-) []*trigger.CnMatch {
+func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb aws.IDB, client rpc.IEthRpc) []*trigger.CnMatch {
 
 	start := time.Now()
 
@@ -65,18 +60,16 @@ func matchContractsForBlock(
 	}
 
 	var cnMatches []*trigger.CnMatch
+	var triggersWithErrorsUUIDs []string
 	for _, tg := range allTriggers {
-		isMatch, matchedValues, allValues := trigger.MatchContract(client, tg, blockNo)
-		if isMatch {
-			match := &trigger.CnMatch{
-				Trigger:        tg,
-				MatchUUID:      "", // this will be set by Postgres once we persist
-				BlockNumber:    blockNo,
-				BlockHash:      blockHash,
-				MatchedValues:  matchedValues,
-				AllValues:      allValues,
-				BlockTimestamp: blockTimestamp,
-			}
+		match, err := trigger.MatchContract(client, tg, blockNo)
+		if err != nil {
+			log.Debug(err.Error())
+			triggersWithErrorsUUIDs = append(triggersWithErrorsUUIDs, tg.TriggerUUID)
+			continue
+		}
+		if match != nil {
+			match.BlockTimestamp, match.BlockNumber, match.BlockHash = blockTimestamp, blockNo, blockHash
 			cnMatches = append(cnMatches, match)
 			log.Debugf("\tCN: Trigger %s matched on block %d\n", tg.TriggerUUID, blockNo)
 		}
@@ -84,7 +77,7 @@ func matchContractsForBlock(
 	matchesToActUpon := getMatchesToActUpon(idb, cnMatches)
 
 	updateStatusForMatchingTriggers(idb, cnMatches)
-	updateStatusForNonMatchingTriggers(idb, cnMatches, allTriggers)
+	updateStatusForNonMatchingTriggers(idb, cnMatches, allTriggers, triggersWithErrorsUUIDs)
 
 	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(allTriggers), time.Since(start), blockNo)
 	return matchesToActUpon
@@ -94,6 +87,7 @@ func matchContractsForBlock(
 func getMatchesToActUpon(idb aws.IDB, cnMatches []*trigger.CnMatch) []*trigger.CnMatch {
 	var matchingTriggersUUIDs []string
 	for _, m := range cnMatches {
+		fmt.Println("match is: ", m)
 		matchingTriggersUUIDs = append(matchingTriggersUUIDs, m.Trigger.TriggerUUID)
 	}
 
@@ -120,10 +114,11 @@ func updateStatusForMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch) {
 	idb.UpdateMatchingTriggers(matchingTriggersIds)
 }
 
-// set triggered flag to false for all non-matching 'true' triggers
-func updateStatusForNonMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch, allTriggers []*trigger.Trigger) {
+// set triggered flag to false for all non-matching 'true' triggers, but excluding triggers with errors
+func updateStatusForNonMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch, allTriggers []*trigger.Trigger, triggersWithErrors []string) {
 	setAll := make(map[string]struct{})
 	setMatches := make(map[string]struct{})
+	setErrors := make(map[string]struct{})
 
 	for _, t := range allTriggers {
 		setAll[t.TriggerUUID] = struct{}{}
@@ -131,8 +126,10 @@ func updateStatusForNonMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch,
 	for _, m := range matches {
 		setMatches[m.Trigger.TriggerUUID] = struct{}{}
 	}
-
-	nonMatchingTriggersIds := utils.GetSliceFromIntSet(utils.SetDifference(setAll, setMatches))
-
-	idb.UpdateNonMatchingTriggers(nonMatchingTriggersIds)
+	for _, e := range triggersWithErrors {
+		setErrors[e] = struct{}{}
+	}
+	allTriggersWithoutErrors := utils.SetDifference(setAll, setErrors)
+	nonMatchingTriggersIds := utils.SetDifference(allTriggersWithoutErrors, setMatches)
+	idb.UpdateNonMatchingTriggers(utils.GetSliceFromIntSet(nonMatchingTriggersIds))
 }

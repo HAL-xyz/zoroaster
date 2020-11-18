@@ -11,26 +11,22 @@ import (
 	"strings"
 )
 
-func MatchContract(
-	client rpc.IEthRpc,
-	tg *Trigger,
-	blockNo int) (isMatch bool, allMatchingValues []string, allReturnedValues []interface{}) {
+func MatchContract(client rpc.IEthRpc, tg *Trigger, blockNo int) (*CnMatch, error) {
 
 	methodId, err := EncodeMethod(tg.FunctionName, tg.ContractABI, tg.Inputs)
 	if err != nil {
-		log.Debugf("trigger %s: cannot encode method: %s", tg.TriggerUUID, err)
-		return false, nil, nil
+		return nil, fmt.Errorf("trigger %s: cannot encode method: %s", tg.TriggerUUID, err)
 	}
 	rawData, err := MakeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)
 	if err != nil {
-		log.Errorf("rpc call failed for trigger %s with error : %s", tg.TriggerUUID, err)
+		return nil, fmt.Errorf("rpc call failed for trigger %s with error : %s", tg.TriggerUUID, err)
 	}
 
 	//log.Debug("result from call is -> ", rawData)
 
 	allValuesLs, err := abidec.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), tg.ContractABI, tg.FunctionName)
 	if err != nil {
-		log.Debug(err)
+		return nil, fmt.Errorf(err.Error())
 	}
 
 	matchingValues := make([]string, 0)
@@ -44,7 +40,15 @@ func MatchContract(
 			}
 		}
 	}
-	return len(matchingValues) == len(tg.Outputs), matchingValues, utils.SprintfInterfaces(allValuesLs)
+	if len(matchingValues) == len(tg.Outputs) { // all filters match
+		return &CnMatch{
+			MatchUUID:     "", // this will be set by Postgres once we persist
+			Trigger:       tg,
+			MatchedValues: matchingValues,
+			AllValues:     utils.SprintfInterfaces(allValuesLs),
+		}, nil
+	}
+	return nil, nil
 }
 
 func getRawParam(param interface{}) []byte {
