@@ -1,7 +1,6 @@
 package matcher
 
 import (
-	"fmt"
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/rpc"
@@ -87,7 +86,6 @@ func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb a
 func getMatchesToActUpon(idb aws.IDB, cnMatches []*trigger.CnMatch) []*trigger.CnMatch {
 	var matchingTriggersUUIDs []string
 	for _, m := range cnMatches {
-		fmt.Println("match is: ", m)
 		matchingTriggersUUIDs = append(matchingTriggersUUIDs, m.Trigger.TriggerUUID)
 	}
 
