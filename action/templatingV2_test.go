@@ -177,7 +177,7 @@ func TestEventMatching(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, logs, nil)
+	matches := trigger.MatchEvent(tg1, logs, mockETHCli{})
 
 	matches[0].EventParams["arrayParam"] = []string{"hello", "world", "yo yo"}
 
