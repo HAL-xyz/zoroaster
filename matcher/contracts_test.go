@@ -119,7 +119,7 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	ethSuccessMock := mockETHCli{}
 
 	// success
-	cnMatches := matchContractsForBlock(lastBlock, 1554828248, "0x", &psqlClient, config.CliMain)
+	cnMatches := matchContractsForBlock(lastBlock, 1554828248, "0x", &psqlClient, ethSuccessMock)
 	assert.Equal(t, 1, len(cnMatches))
 
 	// now trigger status will be triggered=true

@@ -293,13 +293,3 @@ func TestMatchContract19(t *testing.T) {
 	assert.Equal(t, "0x68656c6c6f20776f726c640000000000", match.MatchedValues[0])
 	assert.Equal(t, []interface{}{"68656c6c6f20776f726c640000000000"}, match.AllValues)
 }
-
-func TestMatchContractUniswap(t *testing.T) {
-
-	tg, err := GetTriggerFromFile("../resources/triggers/wac-uniswap.json")
-	assert.NoError(t, err)
-
-	match, err := MatchContract(config.CliMain, tg, lastBlockMainnet)
-
-	assert.NotNil(t, match)
-}
