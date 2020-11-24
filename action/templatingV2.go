@@ -138,21 +138,21 @@ func timestampToHumanTime(timestamp interface{}, optionalFormatting ...string) s
 }
 
 func symbol(address string) string {
-	if address == "0x0000000000000000000000000000000000000000" {
+	if address == "0x0000000000000000000000000000000000000000" || address == "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" {
 		return "ETH"
 	}
 	return callERC20(address, "0x95d89b41", "symbol")
 }
 
 func decimals(address string) string {
-	if address == "0x0000000000000000000000000000000000000000" {
+	if address == "0x0000000000000000000000000000000000000000" || address == "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" {
 		return "18"
 	}
 	return callERC20(address, "0x313ce567", "decimals")
 }
 
 func balanceOf(token string, user string) string {
-	if token == "0x0000000000000000000000000000000000000000" {
+	if token == "0x0000000000000000000000000000000000000000" || token == "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" {
 		return "0"
 	}
 

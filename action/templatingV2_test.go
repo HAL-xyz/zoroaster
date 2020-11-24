@@ -342,6 +342,11 @@ func TestTemplateFunctions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "ETH", rendered)
 
+	template = "{{ symbol . }}"
+	rendered, err = renderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+	assert.NoError(t, err)
+	assert.Equal(t, "ETH", rendered)
+
 	template = "{{ decimals . }}"
 	rendered, err = renderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
 	assert.NoError(t, err)
@@ -350,6 +355,11 @@ func TestTemplateFunctions(t *testing.T) {
 	template = "{{ decimals . }}"
 	rendered, err = renderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
 	assert.NoError(t, err)
+	assert.Equal(t, "18", rendered)
+
+	template = "{{ decimals . }}"
+	assert.NoError(t, err)
+	rendered, err = renderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
 	assert.Equal(t, "18", rendered)
 
 	template = `{{ call "LoopringDex" "getTokenAddress" "3" }}`
