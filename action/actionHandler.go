@@ -180,21 +180,23 @@ func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli a
 }
 
 type TelegramPayload struct {
-	ChatId string `json:"chat_id"`
-	Text   string `json:"text"`
-	Format string `json:"parse_mode"`
+	ChatId       string `json:"chat_id"`
+	Text         string `json:"text"`
+	Format       string `json:"parse_mode"`
+	LinksPreview bool   `json:"disable_web_page_preview"`
 }
 
 func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, httpCli aws.IHttpClient, templVersion string) *trigger.Outcome {
 	payload := TelegramPayload{
-		Text:   fillBodyTemplate(telegramAttr.Body, match, templVersion),
-		ChatId: telegramAttr.ChatId,
-		Format: telegramAttr.Format,
+		Text:         fillBodyTemplate(telegramAttr.Body, match, templVersion),
+		ChatId:       telegramAttr.ChatId,
+		Format:       telegramAttr.Format,
+		LinksPreview: telegramAttr.DisableLinksPreview,
 	}
 
 	if !(strings.HasPrefix(payload.ChatId, "-") || (strings.HasPrefix(payload.ChatId, "@"))) {
 		return &trigger.Outcome{
-			Payload: fmt.Sprintf("%s", payload),
+			Payload: fmt.Sprintf("%v", payload),
 			Outcome: makeErrorResponse("Invalid chat ID"),
 			Success: false,
 		}
@@ -203,7 +205,7 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 	validFormats := []string{"Markdown", "MarkdownV2", "HTML"}
 	if !utils.IsIn(payload.Format, validFormats) {
 		return &trigger.Outcome{
-			Payload: fmt.Sprintf("%s", payload),
+			Payload: fmt.Sprintf("%v", payload),
 			Outcome: makeErrorResponse("Invalid formatting directive"),
 			Success: false,
 		}
@@ -212,7 +214,7 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 	postData, err := json.Marshal(payload)
 	if err != nil {
 		return &trigger.Outcome{
-			Payload: fmt.Sprintf("%s", payload),
+			Payload: fmt.Sprintf("%v", payload),
 			Outcome: makeErrorResponse(err.Error()),
 			Success: false,
 		}

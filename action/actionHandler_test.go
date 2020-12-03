@@ -2,6 +2,7 @@ package action
 
 import (
 	"bytes"
+	"encoding/json"
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
@@ -415,12 +416,23 @@ func TestHandleSlackBot(t *testing.T) {
 
 func TestHandleTelegramBot(t *testing.T) {
 
-	payload := AttributeTelegramBot{
-		Token:  "123...:xxxxxxxx",
-		Body:   "block $BlockNumber$ and some *bold stuff*",
-		ChatId: "-408369342",
-		Format: "Markdown",
-	}
+	js := `	{  
+	   "UserUUID":1,
+	   "TriggerUUID":30,
+	   "ActionType":"telegram",
+	   "Attributes":{  
+		  "Token":"123...:xxxxxxxx",
+		  "Body":"block $BlockNumber$ and some *bold stuff*",
+		  "ChatId": "-408369342",
+		  "Format": "Markdown"
+	   }
+	}`
+
+	a := Action{}
+	err := json.Unmarshal([]byte(js), &a)
+	assert.NoError(t, err)
+	payload, ok := a.Attribute.(AttributeTelegramBot)
+	assert.True(t, ok)
 
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
 
@@ -436,8 +448,15 @@ func TestHandleTelegramBot(t *testing.T) {
 
 	outcome := handleTelegramBot(payload, match, &mockHttpClient{}, "")
 
-	expectedPayload := `{"chat_id":"-408369342","text":"block 777 and some *bold stuff*","parse_mode":"Markdown"}`
-	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
+	expectedPayload := `
+{
+   "chat_id":"-408369342",
+   "text":"block 777 and some *bold stuff*",
+   "parse_mode":"Markdown",
+   "disable_web_page_preview": true
+}
+`
+	ok, _ = utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.True(t, ok)
 	assert.Equal(t, true, outcome.Success)
 

@@ -115,6 +115,36 @@ func TestGetTelegramActionFromJson(t *testing.T) {
 	assert.Equal(t, "2932842309482309482394823", v.Token)
 	assert.Equal(t, "MarkdownV2", v.Format)
 	assert.Equal(t, "408369342", v.ChatId)
+	assert.Equal(t, true, v.DisableLinksPreview) // disable preview is true by default
+}
+
+func TestGetTelegramActionWithPreview(t *testing.T) {
+	var s = `
+	{  
+	   "UserUUID":1,
+	   "TriggerUUID":30,
+	   "ActionType":"telegram",
+	   "Attributes":{  
+		  "Token":"2932842309482309482394823",
+		  "Body":"hey jude",
+		  "ChatId": "408369342",
+		  "Format": "MarkdownV2",
+          "DisableTelegramLinksPreview": false
+	   }
+	}`
+	a := Action{}
+
+	err := json.Unmarshal([]byte(s), &a)
+	assert.NoError(t, err)
+
+	v, ok := a.Attribute.(AttributeTelegramBot)
+	assert.True(t, ok)
+
+	assert.Equal(t, "hey jude", v.Body)
+	assert.Equal(t, "2932842309482309482394823", v.Token)
+	assert.Equal(t, "MarkdownV2", v.Format)
+	assert.Equal(t, "408369342", v.ChatId)
+	assert.Equal(t, false, v.DisableLinksPreview) // explicitly set
 }
 
 func TestGetTwitterActionFromJson(t *testing.T) {

@@ -36,10 +36,11 @@ type AttributeSlackBot struct {
 }
 
 type AttributeTelegramBot struct {
-	Body   string
-	Token  string
-	ChatId string
-	Format string
+	Body                string
+	Token               string
+	ChatId              string
+	Format              string
+	DisableLinksPreview bool
 }
 
 type AttributeTweet struct {
@@ -70,16 +71,17 @@ type ActionJson struct {
 	ActionType      string `json:"ActionType"`
 	TemplateVersion string `json:"TemplateVersion"`
 	Attributes      struct {
-		URI        string   `json:"URI"`
-		To         []string `json:"To"`
-		Subject    string   `json:"Subject"`
-		Body       string   `json:"Body"`
-		ChatId     string   `json:"ChatId"`
-		Token      string   `json:"Token"`
-		Secret     string   `json:"Secret"`
-		Status     string   `json:"Status"`
-		Format     string   `json:"Format"`
-		DiscordURI string   `json:"DiscordURI"`
+		URI                         string   `json:"URI"`
+		To                          []string `json:"To"`
+		Subject                     string   `json:"Subject"`
+		Body                        string   `json:"Body"`
+		ChatId                      string   `json:"ChatId"`
+		Token                       string   `json:"Token"`
+		Secret                      string   `json:"Secret"`
+		Status                      string   `json:"Status"`
+		Format                      string   `json:"Format"`
+		DiscordURI                  string   `json:"DiscordURI"`
+		DisableTelegramLinksPreview *bool    `json:"DisableTelegramLinksPreview",omitempty`
 	} `json:"Attributes"`
 }
 
@@ -117,11 +119,16 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 			Body: ajs.Attributes.Body,
 		}
 	case "telegram":
+		disableLinksPreview := true
+		if ajs.Attributes.DisableTelegramLinksPreview != nil {
+			disableLinksPreview = *(ajs.Attributes.DisableTelegramLinksPreview)
+		}
 		action.Attribute = AttributeTelegramBot{
-			Token:  ajs.Attributes.Token,
-			Body:   ajs.Attributes.Body,
-			ChatId: ajs.Attributes.ChatId,
-			Format: ajs.Attributes.Format,
+			Token:               ajs.Attributes.Token,
+			Body:                ajs.Attributes.Body,
+			ChatId:              ajs.Attributes.ChatId,
+			Format:              ajs.Attributes.Format,
+			DisableLinksPreview: disableLinksPreview,
 		}
 	case "twitter":
 		action.Attribute = AttributeTweet{
