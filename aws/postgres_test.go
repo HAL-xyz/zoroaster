@@ -12,13 +12,15 @@ import (
 	"time"
 )
 
-var psqlClient = PostgresClient{}
+var psqlClient = NewPostgresClient(config.Zconf)
 
 func init() {
 	if config.Zconf.Stage != config.TEST {
 		log.Fatal("$STAGE must be TEST to run db tests")
 	}
-	psqlClient.InitDB(config.Zconf)
+	if config.Zconf.Database.Network != "1_eth_mainnet" {
+		log.Fatal("$NETWORK must be 1_eth_mainnet to run tests ")
+	}
 }
 
 func TestPostgresClient_All(t *testing.T) {
@@ -28,15 +30,35 @@ func TestPostgresClient_All(t *testing.T) {
 
 	defer psqlClient.Close()
 
-	// load a User
-	userUUID, err := psqlClient.SaveUser(1, 1)
+	// clear up the database
+	err := psqlClient.TruncateTables([]string{"triggers", "matches", "users", "state"})
 	assert.NoError(t, err)
 
-	// load a Trigger
+	// load Networks
+	err = psqlClient.SetString("INSERT INTO networks(network_id_name, friendly_name, technology, network_name, endpoint) VALUES ('1_eth_mainnet', '', '', '', '') ON CONFLICT (network_id_name) DO NOTHING")
+	err = psqlClient.SetString("INSERT INTO networks(network_id_name, friendly_name, technology, network_name, endpoint) VALUES ('2_eth_rinkeby', '', '', '', '') ON CONFLICT (network_id_name) DO NOTHING")
+	assert.NoError(t, err)
+
+	// load States
+	err = psqlClient.SetString("INSERT INTO state(id, network_id) VALUES (1, '1_eth_mainnet')")
+	err = psqlClient.SetString("INSERT INTO state(id, network_id, wat_last_block_processed) VALUES (2, '2_eth_rinkeby', 10)")
+
+	// load a User
+	userUUID, err := psqlClient.SaveUser(1000, 1)
+	assert.NoError(t, err)
+
+	// load two Triggers, one in 1_eth_mainnet (default network), one in 2_eth_rinkeby
 	triggerSrc, err := ioutil.ReadFile("../resources/triggers/wac-uniswap.json")
 	assert.NoError(t, err)
-	triggerUUID, err := psqlClient.SaveTrigger(string(triggerSrc), true, false, userUUID)
+	triggerUUID, err := psqlClient.SaveTrigger(string(triggerSrc), true, false, userUUID, "1_eth_mainnet")
 	assert.NoError(t, err)
+	_, err = psqlClient.SaveTrigger(string(triggerSrc), true, false, userUUID, "2_eth_rinkeby")
+	assert.NoError(t, err)
+
+	// Load all the active triggers
+	tgs, err := psqlClient.LoadTriggersFromDB(trigger.WaC)
+	assert.NoError(t, err)
+	assert.Len(t, tgs, 1) // only 1 bc the tests run with network = 1_eth_mainnet
 
 	// load two Actions
 	_, err = psqlClient.SaveAction(triggerUUID)
@@ -121,21 +143,17 @@ func TestPostgresClient_All(t *testing.T) {
 	err = psqlClient.LogOutcome(&o1, matchUUID)
 	assert.NoError(t, err)
 
-	// Load all the active triggers
-	_, err = psqlClient.LoadTriggersFromDB(trigger.WaT)
-	assert.NoError(t, err)
-
 	// Get all the active actions
 	actions, err := psqlClient.GetActions(triggerUUID, userUUID)
 	assert.NoError(t, err)
 	assert.Equal(t, 2, len(actions))
 
 	// Set and read app state
-	err = psqlClient.SetLastBlockProcessed(0, trigger.WaT)
+	err = psqlClient.SetLastBlockProcessed(99, trigger.WaT)
 	assert.NoError(t, err)
 	blockNo, err := psqlClient.ReadLastBlockProcessed(trigger.WaT)
 	assert.NoError(t, err)
-	assert.Equal(t, 0, blockNo)
+	assert.Equal(t, 99, blockNo)
 
 	err = psqlClient.SetLastBlockProcessed(0, trigger.WaC)
 	assert.NoError(t, err)
@@ -148,6 +166,11 @@ func TestPostgresClient_All(t *testing.T) {
 	blockNo, err = psqlClient.ReadLastBlockProcessed(trigger.WaE)
 	assert.NoError(t, err)
 	assert.Equal(t, 0, blockNo)
+
+	// make sure the state has NOT been changed for other networks
+	v, err := psqlClient.ReadString("SELECT wat_last_block_processed FROM state WHERE network_id='2_eth_rinkeby'")
+	assert.NoError(t, err)
+	assert.Equal(t, "10", v) // this was set at the beginning
 
 	// Write analytics
 	err = psqlClient.LogAnalytics(trigger.WaT, 9999, 100, int(time.Now().Unix()), time.Now(), time.Now().Add(10*time.Second))
@@ -162,7 +185,7 @@ func TestPostgresClient_All(t *testing.T) {
 	// load a Trigger
 	batmanTriggerSrc, err := ioutil.ReadFile("../resources/triggers/wac-uniswap.json")
 	assert.NoError(t, err)
-	batmanTriggerUUID, err := psqlClient.SaveTrigger(string(batmanTriggerSrc), true, false, batmanUUID)
+	batmanTriggerUUID, err := psqlClient.SaveTrigger(string(batmanTriggerSrc), true, false, batmanUUID, "1_eth_mainnet")
 	assert.NoError(t, err)
 
 	activeTriggers, err := psqlClient.LoadTriggersFromDB(trigger.WaC)

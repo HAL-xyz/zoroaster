@@ -38,7 +38,7 @@ func (cli PostgresClient) SaveUser(actionsCap int, counterCurrent int) (string, 
 	return lastUUID, err
 }
 
-func (cli PostgresClient) SaveTrigger(triggerData string, isActive, triggered bool, userId string) (string, error) {
+func (cli PostgresClient) SaveTrigger(triggerData string, isActive, triggered bool, userId string, network string) (string, error) {
 	q := fmt.Sprintf(
 		`INSERT INTO triggers (
 			"trigger_data", 
@@ -46,9 +46,10 @@ func (cli PostgresClient) SaveTrigger(triggerData string, isActive, triggered bo
 			"created_at",
 			"updated_at",
 			"triggered",
-			"user_uuid") VALUES ($1, $2, $3, $4, $5, $6) RETURNING uuid`)
+			"user_uuid",
+            "network_id") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING uuid`)
 	var lastUUID string
-	err := db.QueryRow(q, triggerData, isActive, time.Now(), time.Now(), triggered, userId).Scan(&lastUUID)
+	err := db.QueryRow(q, triggerData, isActive, time.Now(), time.Now(), triggered, userId, network).Scan(&lastUUID)
 	return lastUUID, err
 }
 

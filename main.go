@@ -22,11 +22,10 @@ func main() {
 	log.SetLevel(log.DebugLevel)
 	log.SetOutput(os.Stdout)
 
-	log.Info("Starting up Zoroaster, stage = ", config.Zconf.Stage)
+	log.Infof("Starting up Zoroaster, stage = %s, network = %s\n", config.Zconf.Stage, config.Zconf.Database.Network)
 
-	// Init Postgres DB client
-	psqlClient := aws.PostgresClient{}
-	psqlClient.InitDB(config.Zconf)
+	// Postgres DB client
+	psqlClient := aws.NewPostgresClient(config.Zconf)
 
 	// HTTP client
 	httpClient := http.Client{}
@@ -35,7 +34,7 @@ func main() {
 	ethClient := ethrpc.New(config.Zconf.EthNode)
 
 	// Run monthly matches update
-	go db.MatchesMonthlyUpdate(&psqlClient)
+	go db.MatchesMonthlyUpdate(psqlClient)
 
 	// Channels are buffered so the poller doesn't stop queueing blocks
 	// if one of the Matcher isn't up (during tests) of if WaC is very slow (which it is)
@@ -47,22 +46,22 @@ func main() {
 
 	// Poll ETH node
 	pollerCli := rpc.New(ethClient, "BlocksPoller")
-	go poller.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, pollerCli, &psqlClient, config.Zconf.BlocksDelay)
+	go poller.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, pollerCli, psqlClient, config.Zconf.BlocksDelay)
 
 	// Watch a Transaction
-	go matcher.TxMatcher(txBlocksChan, matchesChan, &psqlClient)
+	go matcher.TxMatcher(txBlocksChan, matchesChan, psqlClient)
 
 	// Watch a Contract
 	wacCli := rpc.New(ethClient, "Watch a Contract")
-	go matcher.ContractMatcher(cnBlocksChan, matchesChan, &psqlClient, wacCli)
+	go matcher.ContractMatcher(cnBlocksChan, matchesChan, psqlClient, wacCli)
 
 	// Watch an Event
 	waeCli := rpc.New(ethClient, "Watch an Event")
-	go matcher.EventMatcher(evBlocksChan, matchesChan, &psqlClient, waeCli)
+	go matcher.EventMatcher(evBlocksChan, matchesChan, psqlClient, waeCli)
 
 	// Main routine - process matches
 	for {
 		match := <-matchesChan
-		go matcher.ProcessMatch(match, &psqlClient, sesSession, &httpClient)
+		go matcher.ProcessMatch(match, psqlClient, sesSession, &httpClient)
 	}
 }

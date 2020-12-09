@@ -25,15 +25,15 @@ func MatchesMonthlyUpdate(idb aws.IDB) {
 
 func monthlyDbUpdate(idb aws.IDB, currentMonth time.Month) error {
 
-	savedMonth, err := idb.ReadSavedMonth()
+	persistedMonth, err := idb.ReadSavedMonth()
 	if err != nil {
 		return err
 	}
 
-	if savedMonth < int(currentMonth) {
+	if persistedMonth < int(currentMonth) {
 		err = idb.UpdateSavedMonth(int(currentMonth))
 		if err != nil {
-			logrus.Fatal(err)
+			return err
 		}
 		logrus.Info("Updated state month to be ", currentMonth)
 		logrus.Info("counter_current_month reset for all users successfully")

@@ -19,6 +19,12 @@ type PostgresClient struct {
 	conf *config.ZoroDB
 }
 
+func NewPostgresClient(c *config.ZConfiguration) *PostgresClient {
+	client := PostgresClient{}
+	client.initDB(c)
+	return &client
+}
+
 func (cli PostgresClient) UpdateSavedMonth(newMonth int) error {
 	// update current month
 	q := fmt.Sprintf(`UPDATE "%s" SET current_month = $1`, cli.conf.TableState)
@@ -160,7 +166,10 @@ func (cli PostgresClient) GetActions(tgUUID string, userUUID string) ([]string, 
 
 func (cli PostgresClient) ReadLastBlockProcessed(tgType trigger.TgType) (int, error) {
 	var blockNo int
-	q := fmt.Sprintf("SELECT %s_last_block_processed FROM %s", trigger.TgTypeToPrefix(tgType), cli.conf.TableState)
+	q := fmt.Sprintf(
+		`SELECT %s_last_block_processed
+			FROM %s
+		    WHERE network_id = '%s'`, trigger.TgTypeToPrefix(tgType), cli.conf.TableState, cli.conf.Network)
 	err := db.QueryRow(q).Scan(&blockNo)
 	if err != nil {
 		return 0, fmt.Errorf("cannot read last block processed: %s", err)
@@ -170,7 +179,9 @@ func (cli PostgresClient) ReadLastBlockProcessed(tgType trigger.TgType) (int, er
 
 func (cli PostgresClient) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error {
 	stringTgType := trigger.TgTypeToPrefix(tgType)
-	q := fmt.Sprintf(`UPDATE "%s" SET %s_last_block_processed = $1, %s_date = $2`, cli.conf.TableState, stringTgType, stringTgType)
+	q := fmt.Sprintf(`UPDATE "%s" 
+		SET %s_last_block_processed = $1, %s_date = $2
+	    WHERE network_id = '%s'`, cli.conf.TableState, stringTgType, stringTgType, cli.conf.Network)
 	_, err := db.Exec(q, blockNo, time.Now())
 	if err != nil {
 		return fmt.Errorf("cannot set last block processed: %s", err)
@@ -211,7 +222,8 @@ func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.
 				WHERE (tg_table.trigger_data ->> 'TriggerType')::text = '%s'
 				AND tg_table.user_uuid = usr_table.uuid
 				AND counter_current_month < actions_monthly_cap
-				AND tg_table.is_active = true`, cli.conf.TableTriggers, cli.conf.TableUsers, trigger.TgTypeToString(tgType))
+				AND tg_table.is_active = true
+                AND tg_table.network_id = '%s'`, cli.conf.TableTriggers, cli.conf.TableUsers, trigger.TgTypeToString(tgType), cli.conf.Network)
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err
@@ -240,7 +252,14 @@ func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.
 	return triggers, nil
 }
 
-func (cli *PostgresClient) InitDB(c *config.ZConfiguration) {
+func (cli PostgresClient) Close() {
+	err := db.Close()
+	if err != nil {
+		log.Error(err)
+	}
+}
+
+func (cli *PostgresClient) initDB(c *config.ZConfiguration) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		c.Database.Host, c.Database.Port, c.Database.User, c.Database.Password, c.Database.Name)
 
@@ -252,16 +271,9 @@ func (cli *PostgresClient) InitDB(c *config.ZConfiguration) {
 
 	err = db.Ping()
 	if err != nil {
-		fmt.Println(psqlInfo)
+		log.Debug(psqlInfo)
 		log.Fatal("cannot connect to the DB -> ", err)
 	}
 
 	cli.conf = &c.Database
-}
-
-func (cli PostgresClient) Close() {
-	err := db.Close()
-	if err != nil {
-		log.Error(err)
-	}
 }

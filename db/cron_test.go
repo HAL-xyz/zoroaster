@@ -9,13 +9,12 @@ import (
 	"testing"
 )
 
-var psqlClient = aws.PostgresClient{}
+var psqlClient = aws.NewPostgresClient(config.Zconf)
 
 func init() {
 	if config.Zconf.Stage != config.TEST {
 		logrus.Fatal("$STAGE must be TEST to run db tests")
 	}
-	psqlClient.InitDB(config.Zconf)
 }
 
 func TestMonthlyRun(t *testing.T) {
@@ -32,7 +31,7 @@ func TestMonthlyRun(t *testing.T) {
 	err = psqlClient.SetString(fmt.Sprintf(`UPDATE state SET current_month = 7`))
 	assert.NoError(t, err)
 
-	err = monthlyDbUpdate(&psqlClient, 7)
+	err = monthlyDbUpdate(psqlClient, 7)
 	assert.NoError(t, err)
 
 	currMonth, err := psqlClient.ReadString(fmt.Sprintf(`SELECT current_month FROM state`))
@@ -40,7 +39,7 @@ func TestMonthlyRun(t *testing.T) {
 	assert.Equal(t, "7", currMonth)
 
 	// now let's run it when we're in August
-	err = monthlyDbUpdate(&psqlClient, 8)
+	err = monthlyDbUpdate(psqlClient, 8)
 	assert.NoError(t, err)
 
 	currMonth, err = psqlClient.ReadString(fmt.Sprintf(`SELECT current_month FROM state`))

@@ -32,6 +32,7 @@ type ZoroDB struct {
 	Name          string
 	Port          int
 	Password      string
+	Network       string
 }
 
 type Stage int
@@ -58,6 +59,7 @@ const (
 	rinkebyNode           = "RINKEBY_NODE"
 	twitterConsumerKey    = "TWITTER_CONSUMER_KEY"
 	twitterConsumerSecret = "TWITTER_CONSUMER_SECRET"
+	network               = "NETWORK"
 )
 
 // DB tables
@@ -130,6 +132,11 @@ func NewConfig() *ZConfiguration {
 	zconfig.Database.Password = os.Getenv(dbPwd)
 	if zconfig.Database.Password == "" {
 		log.Fatal("no db password set in local env ", dbPwd)
+	}
+
+	zconfig.Database.Network = os.Getenv(network)
+	if zconfig.Database.Network == "" {
+		log.Fatal("no network set in local env ", network)
 	}
 
 	zconfig.EthNode = os.Getenv(ethNode)

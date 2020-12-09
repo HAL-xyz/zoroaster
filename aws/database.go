@@ -7,7 +7,7 @@ import (
 )
 
 type IDB interface {
-	InitDB(c *config.ZConfiguration)
+	initDB(c *config.ZConfiguration)
 
 	Close()
 

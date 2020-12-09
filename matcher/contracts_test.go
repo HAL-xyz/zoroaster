@@ -13,13 +13,12 @@ import (
 	"testing"
 )
 
-var psqlClient = aws.PostgresClient{}
+var psqlClient = aws.NewPostgresClient(config.Zconf)
 
 func init() {
 	if config.Zconf.Stage != config.TEST {
 		log.Fatal("$STAGE must be TEST to run tests")
 	}
-	psqlClient.InitDB(config.Zconf)
 	log.SetLevel(log.DebugLevel)
 }
 
@@ -94,18 +93,17 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	// clear up the database
 	err := psqlClient.TruncateTables([]string{"triggers", "matches"})
 	assert.NoError(t, err)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	// load a User
 	userUUID, err := psqlClient.SaveUser(100, 0)
 	assert.NoError(t, err)
 
-	// load a Trigger
+	// load two Trigger, different networks
 	triggerSrc, err := ioutil.ReadFile("../resources/triggers/wac-uniswap.json")
 	assert.NoError(t, err)
-	triggerUUID, err := psqlClient.SaveTrigger(string(triggerSrc), true, false, userUUID)
+	triggerUUID, err := psqlClient.SaveTrigger(string(triggerSrc), true, false, userUUID, "1_eth_mainnet")
+	assert.NoError(t, err)
+	rinkebyUUID, err := psqlClient.SaveTrigger(string(triggerSrc), true, false, userUUID, "2_eth_rinkeby")
 	assert.NoError(t, err)
 
 	// at creation, triggered=false
@@ -113,19 +111,21 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "false", status)
 
-	lastBlock, err := config.CliMain.EthBlockNumber()
-	assert.NoError(t, err)
-
 	ethSuccessMock := mockETHCli{}
 
 	// success
-	cnMatches := matchContractsForBlock(lastBlock, 1554828248, "0x", &psqlClient, ethSuccessMock)
+	cnMatches := matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethSuccessMock)
 	assert.Equal(t, 1, len(cnMatches))
 
 	// now trigger status will be triggered=true
 	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
 	assert.NoError(t, err)
 	assert.Equal(t, "true", status)
+
+	// ... but only for the trigger on Mainnet; the trigger on Rinkeby should still be false
+	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", rinkebyUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, "false", status)
 
 	// just write the matches to the db
 	for _, m := range cnMatches {
@@ -135,7 +135,7 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	}
 
 	// subsequent calls won't match, because triggered is set to true
-	cnMatches = matchContractsForBlock(lastBlock, 1554828248, "0x", &psqlClient, ethSuccessMock)
+	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethSuccessMock)
 	assert.Equal(t, 0, len(cnMatches))
 
 	// trigger is still set to true
@@ -143,29 +143,49 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "true", status)
 
-	// the rpc call fails and match contract returns an error. triggered remains true
+	// ... and the Rinkeby trigger is still set to false
+	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", rinkebyUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, "false", status)
+
+	// the rpc call fails and MatchContracts() returns an error; triggered remains true
 	ethErrorMock := mockETHCliWithError{}
-	cnMatches = matchContractsForBlock(lastBlock, 1554828248, "0x", &psqlClient, ethErrorMock)
+	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethErrorMock)
 	assert.Equal(t, 0, len(cnMatches))
 
 	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
 	assert.NoError(t, err)
 	assert.Equal(t, "true", status)
 
+	// ... and the Rinkeby trigger is still set to false
+	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", rinkebyUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, "false", status)
+
 	// now the eth cli returns a non-matching value, matches should be zero, triggered=false
 	ethNoMatchMock := mockETHCliNoMatch{}
-	cnMatches = matchContractsForBlock(lastBlock, 1554828248, "0x", &psqlClient, ethNoMatchMock)
+	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethNoMatchMock)
 	assert.Equal(t, 0, len(cnMatches))
 
 	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
 	assert.NoError(t, err)
 	assert.Equal(t, "false", status)
 
+	// ... and the Rinkeby trigger is still set to false
+	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", rinkebyUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, "false", status)
+
 	// back to success, matches=1, triggered=true
-	cnMatches = matchContractsForBlock(lastBlock, 1554828248, "0x", &psqlClient, ethSuccessMock)
+	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethSuccessMock)
 	assert.Equal(t, 1, len(cnMatches))
 
 	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
 	assert.NoError(t, err)
 	assert.Equal(t, "true", status)
+
+	// ... and the Rinkeby trigger is still set to false
+	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", rinkebyUUID))
+	assert.NoError(t, err)
+	assert.Equal(t, "false", status)
 }
