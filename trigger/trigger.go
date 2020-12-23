@@ -47,6 +47,12 @@ type Output struct {
 	ReturnIndex int
 	ReturnType  string
 	Condition   Conditioner
+	Component   Component
+}
+
+type Component struct {
+	Type string
+	Name string
 }
 
 type Conditioner interface {

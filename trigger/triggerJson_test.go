@@ -38,6 +38,39 @@ func TestTriggerJson_ToTrigger2(t *testing.T) {
 	assert.True(t, ok)
 }
 
+// WaC with Components
+func TestWaCWithComponents(t *testing.T) {
+	js := `
+{
+   "Inputs":[
+   ],
+   "Outputs":[
+      {
+         "Condition":{
+            "Attribute":"10000000000000",
+            "Predicate":"BiggerThan"
+         },
+         "ReturnType":"tuple",
+         "ReturnIndex":0,
+         "Component":{
+               "Name":"d",
+               "Type":"uint256"
+		 }
+      }
+   ],
+   "ContractABI":"[{\"inputs\":[],\"name\":\"getSpotPrice\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"d\",\"type\":\"uint256\"}],\"internalType\":\"struct Decimal.decimal\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+   "ContractAdd":"0x8d22F1a9dCe724D8c1B4c688D75f17A2fE2D32df",
+   "TriggerName":"some trigger",
+   "TriggerType":"WatchContracts",
+   "FunctionName":"getSpotPrice"
+}
+`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+	assert.Equal(t, "d", tg.Outputs[0].Component.Name)
+	assert.Equal(t, "uint256", tg.Outputs[0].Component.Type)
+}
+
 // WaE
 func TestTriggerJson_ToTrigger3(t *testing.T) {
 	json, _ := ioutil.ReadFile("../resources/triggers/ev1.json")

@@ -150,7 +150,7 @@ func validateFilterLog(
 		if err != nil {
 			return false, err
 		}
-		isValid, _ := ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
+		isValid, _ := ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index, Component{})
 		return isValid, nil
 	}
 	// parameter name not found in topics nor in data

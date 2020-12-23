@@ -91,7 +91,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			cxtLog.Debugf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
 			return false
 		}
-		isValid, _ := ValidateParam(rawParam, f.ParameterType, v.Attribute, v.Predicate, f.Index)
+		isValid, _ := ValidateParam(rawParam, f.ParameterType, v.Attribute, v.Predicate, f.Index, Component{})
 		return isValid
 	case ConditionFunctionCalled:
 		if !isValidContractAbi(abi, cnt, ts.To, tgUUID) {

@@ -34,7 +34,7 @@ func MatchContract(client rpc.IEthRpc, tg *Trigger, blockNo int) (*CnMatch, erro
 		if expectedOutput.ReturnIndex < len(allValuesLs) {
 			rawParam := getRawParam(allValuesLs[expectedOutput.ReturnIndex])
 			cond := expectedOutput.Condition.(ConditionOutput)
-			yes, matchedValue := ValidateParam(rawParam, expectedOutput.ReturnType, cond.Attribute, cond.Predicate, expectedOutput.Index)
+			yes, matchedValue := ValidateParam(rawParam, expectedOutput.ReturnType, cond.Attribute, cond.Predicate, expectedOutput.Index, expectedOutput.Component)
 			if yes {
 				matchingValues = append(matchingValues, fmt.Sprintf("%v", matchedValue))
 			}

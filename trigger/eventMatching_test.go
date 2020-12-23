@@ -25,6 +25,10 @@ type mockETHCli struct {
 	rpc.IEthRpc
 }
 
+func (cli mockETHCli) EthCall(transaction ethrpc.T, tag string) (string, error) {
+	return "0x0000000000000000000000000000000000000000000000212321d502f10fbc4a", nil
+}
+
 func (z mockETHCli) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error) {
 	return &ethrpc.Transaction{
 		From: "0x000",

@@ -293,3 +293,44 @@ func TestMatchContract19(t *testing.T) {
 	assert.Equal(t, "0x68656c6c6f20776f726c640000000000", match.MatchedValues[0])
 	assert.Equal(t, []interface{}{"68656c6c6f20776f726c640000000000"}, match.AllValues)
 }
+
+func TestMatchContractTuple(t *testing.T) {
+
+	logrus.SetLevel(logrus.DebugLevel)
+
+	js := `
+{
+   "Inputs":[
+   ],
+   "Outputs":[
+      {
+         "Condition":{
+            "Attribute":"10000000000000",
+            "Predicate":"BiggerThan"
+         },
+         "ReturnType":"tuple",
+         "ReturnIndex":0,
+         "Component":{
+               "Name":"d",
+               "Type":"uint256"
+		 }
+      }
+   ],
+   "ContractABI":"[{\"inputs\":[],\"name\":\"getSpotPrice\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"d\",\"type\":\"uint256\"}],\"internalType\":\"struct Decimal.decimal\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+   "ContractAdd":"0x8d22F1a9dCe724D8c1B4c688D75f17A2fE2D32df",
+   "TriggerName":"some trigger",
+   "TriggerType":"WatchContracts",
+   "FunctionName":"getSpotPrice"
+}
+`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	var mockCli mockETHCli
+	match, err := MatchContract(mockCli, tg, 1999999)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, match)
+	assert.Len(t, match.MatchedValues, 1)
+	assert.Equal(t, "611274093106585100000", match.MatchedValues[0])
+}

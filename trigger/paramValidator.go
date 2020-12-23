@@ -75,10 +75,25 @@ func ValidateTopicParam(topicParam string, paramType string, attribute string, p
 	return false, ""
 }
 
-func ValidateParam(rawParam []byte, parameterType string, attribute string, predicate Predicate, index *int) (bool, interface{}) {
+func ValidateParam(
+	rawParam []byte,
+	parameterType, attribute string,
+	predicate Predicate,
+	index *int,
+	component Component) (bool, interface{}) {
 
 	var err error
 
+	// tuple
+	if parameterType == "tuple" {
+		var param interface{}
+		if err = json.Unmarshal(rawParam, &param); err != nil {
+			log.Debug(err)
+			return false, nil
+		}
+		compValue := param.(map[string]interface{})[component.Name]
+		return ValidateParam(getRawParam(compValue), component.Type, attribute, predicate, index, Component{})
+	}
 	// uint8
 	if parameterType == "uint8[]" {
 		var param []uint8

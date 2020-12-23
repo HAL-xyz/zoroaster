@@ -46,6 +46,12 @@ type OutputJson struct {
 	ReturnIndex int           `json:"ReturnIndex"`
 	ReturnType  string        `json:"ReturnType"`
 	Condition   ConditionJson `json:"Condition"`
+	Component   ComponentJson `json:"Component"`
+}
+
+type ComponentJson struct {
+	Name string
+	Type string
 }
 
 // creates a new TriggerJson from JSON
@@ -91,6 +97,10 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 			ReturnIndex: outputJs.ReturnIndex,
 			ReturnType:  outputJs.ReturnType,
 			Condition:   cond,
+			Component: Component{
+				Type: outputJs.Component.Type,
+				Name: outputJs.Component.Name,
+			},
 		}
 		trigger.Outputs = append(trigger.Outputs, out)
 	}
