@@ -1,6 +1,7 @@
 package action
 
 import (
+	"fmt"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/stretchr/testify/assert"
 	"math/big"
@@ -428,4 +429,22 @@ func TestMathFunctions(t *testing.T) {
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "2.06", rendered)
+}
+
+func TestTokenAPI(t *testing.T) {
+	template := `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "usd" }}`
+	rendered, err := renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.NotEqual(t, "0", rendered)
+
+	template = `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "USD" }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.NotEqual(t, "0", rendered)
+
+	template = `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "xxx" }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.Error(t, err)
+	fmt.Println(rendered)
+	assert.Equal(t, "", rendered)
 }

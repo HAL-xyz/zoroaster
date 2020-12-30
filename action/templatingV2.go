@@ -3,6 +3,7 @@ package action
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/abidec"
 	"github.com/HAL-xyz/zoroaster/config"
@@ -10,9 +11,12 @@ import (
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/leekchan/accounting"
+	"github.com/patrickmn/go-cache"
 	"html/template"
+	"io/ioutil"
 	"math"
 	"math/big"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -40,6 +44,7 @@ func renderTemplateWithData(templateText string, data interface{}) (string, erro
 		"round":                utils.Round,
 		"pow":                  pow,
 		"formatNumber":         formatNumber,
+		"toFiat":               GetTokenAPI().addressToFiat,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -278,4 +283,58 @@ func call(contractName, methodName string, params ...string) string {
 		return "aaaand it's broken"
 	}
 	return "only loopring supported now"
+}
+
+type TokenAPI struct {
+	tokenAddToPrice *cache.Cache
+	httpCli         *http.Client
+}
+
+// package-level singleton accessed through GetTokenAPI()
+var tokenApi = &TokenAPI{
+	tokenAddToPrice: cache.New(5*time.Minute, 5*time.Minute),
+	httpCli:         &http.Client{},
+}
+
+func GetTokenAPI() *TokenAPI {
+	return tokenApi
+}
+
+func (t TokenAPI) addressToFiat(tokenAddress, fiatCurrency string) (float32, error) {
+	tokenAddress = strings.ToLower(tokenAddress)
+	fiatCurrency = strings.ToLower(fiatCurrency)
+	url := fmt.Sprintf("https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=%s&vs_currencies=%s", tokenAddress, fiatCurrency)
+
+	key := tokenAddress + fiatCurrency
+
+	// try cache first
+	val, found := t.tokenAddToPrice.Get(key)
+	if found {
+		return val.(float32), nil
+	}
+
+	// no luck, call Coingecko API
+	resp, err := t.httpCli.Get(url)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	var currencyMap map[string]map[string]float32
+	err = json.Unmarshal(body, &currencyMap)
+	if err != nil {
+		return 0, err
+	}
+
+	val, ok := currencyMap[tokenAddress][fiatCurrency]
+	if ok {
+		t.tokenAddToPrice.Set(key, val, 5*time.Minute)
+		return val.(float32), nil
+	}
+	return 0, fmt.Errorf("unexpected json response")
 }
