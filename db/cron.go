@@ -14,7 +14,7 @@ import (
 
 func MatchesMonthlyUpdate(idb aws.IDB) {
 
-	ticker := time.NewTicker(1 * time.Hour)
+	ticker := time.NewTicker(1 * time.Minute)
 	for range ticker.C {
 		err := monthlyDbUpdate(idb, time.Now().Month())
 		if err != nil {
@@ -30,7 +30,7 @@ func monthlyDbUpdate(idb aws.IDB, currentMonth time.Month) error {
 		return err
 	}
 
-	if persistedMonth < int(currentMonth) {
+	if persistedMonth < int(currentMonth) || (persistedMonth == 12 && currentMonth == 1){
 		err = idb.UpdateSavedMonth(int(currentMonth))
 		if err != nil {
 			return err
