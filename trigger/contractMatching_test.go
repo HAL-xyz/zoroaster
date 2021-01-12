@@ -14,11 +14,11 @@ func init() {
 	var err error
 	lastBlockRinkeby, err = config.CliRinkeby.EthBlockNumber()
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatal("err fetching last block on Rinkeby: ", err)
 	}
 	lastBlockMainnet, err = config.CliMain.EthBlockNumber()
 	if err != nil {
-		logrus.Fatal(err)
+		logrus.Fatal("err fetching last block on Mainnet: ", err)
 	}
 }
 

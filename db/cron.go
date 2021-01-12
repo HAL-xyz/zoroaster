@@ -30,7 +30,7 @@ func monthlyDbUpdate(idb aws.IDB, currentMonth time.Month) error {
 		return err
 	}
 
-	if persistedMonth < int(currentMonth) || (persistedMonth == 12 && currentMonth == 1){
+	if persistedMonth < int(currentMonth) || (persistedMonth == 12 && currentMonth == 1) {
 		err = idb.UpdateSavedMonth(int(currentMonth))
 		if err != nil {
 			return err

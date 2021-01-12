@@ -470,7 +470,8 @@ func TestHandleTelegramBot(t *testing.T) {
 	brokenChatId := AttributeTelegramBot{
 		Token:  "123...:xxxxxxxx",
 		Body:   "Hello World Test on block $BlockNumber$",
-		ChatId: "408369343", // missing `-` or `@` prefix
+		ChatId: "wrong", // missing @
+		Format: "HTML",
 	}
 	failedOutcome := handleTelegramBot(brokenChatId, match, &mockHttpClient{}, "")
 	assert.Equal(t, false, failedOutcome.Success)

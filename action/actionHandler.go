@@ -194,7 +194,8 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 		LinksPreview: telegramAttr.DisableLinksPreview,
 	}
 
-	if !(strings.HasPrefix(payload.ChatId, "-") || (strings.HasPrefix(payload.ChatId, "@"))) {
+	chatIdRegex := regexp.MustCompile(`-\d+$|@.+|\d+$`)
+	if !chatIdRegex.MatchString(payload.ChatId) {
 		return &trigger.Outcome{
 			Payload: fmt.Sprintf("%v", payload),
 			Outcome: makeErrorResponse("Invalid chat ID"),
