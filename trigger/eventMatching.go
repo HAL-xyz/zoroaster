@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/sirupsen/logrus"
@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-func MatchEvent(tg *Trigger, logs []ethrpc.Log, rpcCli rpc.IEthRpc) []*EventMatch {
+func MatchEvent(tg *Trigger, logs []ethrpc.Log, tokenApi tokenapi.ITokenAPI) []*EventMatch {
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 	if err != nil {
 		logrus.Debug(err)
@@ -38,8 +38,8 @@ func MatchEvent(tg *Trigger, logs []ethrpc.Log, rpcCli rpc.IEthRpc) []*EventMatc
 		if utils.NormalizeAddress(log.Address) != utils.NormalizeAddress(tg.ContractAdd) {
 			continue
 		}
-		if validateTriggerLog(&log, tg, &abiObj, eventName) || validateEmittedEvent(&log, tg, eventName) {
-			tx, err := rpcCli.EthGetTransactionByHash(log.TransactionHash)
+		if validateTriggerLog(&log, tg, &abiObj, eventName, tokenApi) || validateEmittedEvent(&log, tg, eventName) {
+			tx, err := tokenApi.GetRPCCli().EthGetTransactionByHash(log.TransactionHash)
 			if err != nil {
 				logrus.Error("cannot fetch tx by hash: ", err)
 				continue
@@ -91,7 +91,7 @@ func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger, eventName string) bool
 	return false
 }
 
-func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI, eventName string) bool {
+func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI, eventName string, tokenApi tokenapi.ITokenAPI) bool {
 	cxtLog := logrus.WithFields(logrus.Fields{
 		"trigger_id": tg.TriggerUUID,
 		"tx_hash":    evLog.TransactionHash,
@@ -107,7 +107,7 @@ func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI, eventNa
 	match := true
 	if evLog.Topics[0] == eventSignature {
 		for _, f := range tg.Filters {
-			filterMatch, err := validateFilterLog(evLog, &f, abiObj, eventName)
+			filterMatch, err := validateFilterLog(evLog, &f, abiObj, eventName, tokenApi)
 			if err != nil {
 				cxtLog.Debug(err)
 			}
@@ -123,7 +123,8 @@ func validateFilterLog(
 	evLog *ethrpc.Log,
 	filter *Filter,
 	abiObj *abi.ABI,
-	eventName string) (bool, error) {
+	eventName string,
+	tokenApi tokenapi.ITokenAPI) (bool, error) {
 
 	condition, ok := filter.Condition.(ConditionEvent)
 	if !ok {
@@ -131,16 +132,29 @@ func validateFilterLog(
 		return true, nil
 	}
 
-	// validate TOPICS
 	topicsMap := getTopicsMap(abiObj, eventName, evLog)
+	decodedData, err := decodeDataField(evLog.Data, eventName, abiObj)
+
+	// handle implicit currencies, where ParameterCurrency is an Event field name
+	if filter.ParameterCurrency != "" && !strings.HasPrefix(filter.ParameterCurrency, "0x") {
+		tv, ok := topicsMap[filter.ParameterCurrency]
+		if ok {
+			filter.ParameterCurrency = utils.NormalizeAddress(tv)
+		}
+		dv, ok := decodedData[filter.ParameterCurrency]
+		if ok {
+			filter.ParameterCurrency = utils.NormalizeAddress(fmt.Sprintf("%v", dv))
+		}
+	}
+
+	// validate TOPICS
 	param, ok := topicsMap[filter.ParameterName]
 	if ok {
-		isValid, _ := ValidateTopicParam(param, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index)
+		isValid, _ := ValidateTopicParam(param, filter.ParameterType, filter.ParameterCurrency, condition, tokenApi)
 		return isValid, nil
 	}
 
 	// validate DATA field
-	decodedData, err := decodeDataField(evLog.Data, eventName, abiObj)
 	if err != nil {
 		return false, err
 	}
@@ -150,11 +164,11 @@ func validateFilterLog(
 		if err != nil {
 			return false, err
 		}
-		isValid, _ := ValidateParam(jsn, filter.ParameterType, condition.Attribute, condition.Predicate, filter.Index, Component{})
+		isValid, _ := ValidateParam(jsn, filter.ParameterType, filter.ParameterCurrency, condition.Attribute, condition.AttributeCurrency, condition.Predicate, filter.Index, Component{}, tokenApi)
 		return isValid, nil
 	}
-	// parameter name not found in topics nor in data
-	return false, nil
+
+	return false, nil // parameter name not found in topics nor in data
 }
 
 // a topicsMap is a map where

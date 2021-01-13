@@ -3,7 +3,7 @@ package matcher
 import (
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
-	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	log "github.com/sirupsen/logrus"
@@ -14,12 +14,12 @@ func ContractMatcher(
 	blocksChan chan *ethrpc.Block,
 	matchesChan chan trigger.IMatch,
 	idb aws.IDB,
-	client rpc.IEthRpc,
+	tokenApi tokenapi.ITokenAPI,
 ) {
 
 	for {
 		block := <-blocksChan
-		client.ResetCounterAndLogStats(block.Number - 1)
+		tokenApi.GetRPCCli().ResetCounterAndLogStats(block.Number - 1)
 		start := time.Now()
 		log.Info("CN: new -> ", block.Number)
 
@@ -28,7 +28,7 @@ func ContractMatcher(
 			log.Fatal(err)
 		}
 
-		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, idb, client)
+		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
 		for _, m := range cnMatches {
 			matchUUID, err := idb.LogMatch(*m)
 			if err != nil {
@@ -49,7 +49,7 @@ func ContractMatcher(
 	}
 }
 
-func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb aws.IDB, client rpc.IEthRpc) []*trigger.CnMatch {
+func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb aws.IDB, tokenApi tokenapi.ITokenAPI) []*trigger.CnMatch {
 
 	start := time.Now()
 
@@ -61,9 +61,9 @@ func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb a
 	var cnMatches []*trigger.CnMatch
 	var triggersWithErrorsUUIDs []string
 	for _, tg := range allTriggers {
-		match, err := trigger.MatchContract(client, tg, blockNo)
+		match, err := trigger.MatchContract(tokenApi, tg, blockNo)
 		if err != nil {
-			log.Debug(err.Error())
+			log.Infof("WaC error for trigger %s: %s", tg.TriggerUUID, err.Error())
 			triggersWithErrorsUUIDs = append(triggersWithErrorsUUIDs, tg.TriggerUUID)
 			continue
 		}

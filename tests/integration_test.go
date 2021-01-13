@@ -2,13 +2,17 @@ package tests
 
 import (
 	"encoding/json"
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/rpc"
 	trig "github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"sync"
 	"testing"
 )
+
+var CliMain = rpc.New(ethrpc.New(config.Zconf.EthNode), "mainnet test client")
 
 type AllRules struct {
 	Rules []Rule
@@ -50,11 +54,11 @@ func TestIntegration(t *testing.T) {
 			if err != nil {
 				log.Fatal(err)
 			}
-			block, err := config.CliMain.EthGetBlockByNumber(rule.BlockNo, true)
+			block, err := CliMain.EthGetBlockByNumber(rule.BlockNo, true)
 			if err != nil {
 				log.Fatal(err)
 			}
-			txs := trig.MatchTransaction(trigger, block)
+			txs := trig.MatchTransaction(trigger, block, nil)
 
 			if len(txs) != rule.Occurrences {
 				log.Errorf("%s failed (expected %d, got %d instead)\n", rule.Assert, rule.Occurrences, len(txs))

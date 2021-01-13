@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/utils"
+	"github.com/ethereum/go-ethereum/common"
 	"math/big"
 	"strconv"
 )
@@ -21,18 +22,20 @@ type TriggerJson struct {
 }
 
 type FilterJson struct {
-	FilterType    string        `json:"FilterType"`
-	ParameterName string        `json:"ParameterName"`
-	ParameterType string        `json:"ParameterType"`
-	FunctionName  string        `json:"FunctionName,omitempty"`
-	EventName     string        `json:"EventName,omitempty"`
-	Index         *int          `json:"Index"`
-	Condition     ConditionJson `json:"Condition"`
+	FilterType        string        `json:"FilterType"`
+	ParameterName     string        `json:"ParameterName"`
+	ParameterType     string        `json:"ParameterType"`
+	ParameterCurrency string        `json:"ParameterCurrency,omitempty"`
+	FunctionName      string        `json:"FunctionName,omitempty"`
+	EventName         string        `json:"EventName,omitempty"`
+	Index             *int          `json:"Index"`
+	Condition         ConditionJson `json:"Condition"`
 }
 
 type ConditionJson struct {
-	Predicate string `json:"Predicate"`
-	Attribute string `json:"Attribute"`
+	Predicate         string `json:"Predicate"`
+	Attribute         string `json:"Attribute"`
+	AttributeCurrency string `json:"AttributeCurrency,omitempty"`
 }
 
 type InputJson struct {
@@ -42,11 +45,12 @@ type InputJson struct {
 }
 
 type OutputJson struct {
-	Index       *int          `json:"Index"`
-	ReturnIndex int           `json:"ReturnIndex"`
-	ReturnType  string        `json:"ReturnType"`
-	Condition   ConditionJson `json:"Condition"`
-	Component   ComponentJson `json:"Component"`
+	Index          *int          `json:"Index"`
+	ReturnIndex    int           `json:"ReturnIndex"`
+	ReturnType     string        `json:"ReturnType"`
+	Condition      ConditionJson `json:"Condition"`
+	Component      ComponentJson `json:"Component"`
+	ReturnCurrency string        `json:"ReturnCurrency,omitempty"`
 }
 
 type ComponentJson struct {
@@ -91,7 +95,15 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 		trigger.Inputs = append(trigger.Inputs, in)
 	}
 	for _, outputJs := range tjs.Outputs {
-		cond := ConditionOutput{Condition{}, unpackPredicate(outputJs.Condition.Predicate), outputJs.Condition.Attribute}
+		cond := ConditionOutput{Condition{}, unpackPredicate(outputJs.Condition.Predicate), outputJs.Condition.Attribute, outputJs.Condition.AttributeCurrency}
+		if outputJs.Condition.AttributeCurrency != "" {
+			if outputJs.ReturnCurrency == "" {
+				return nil, fmt.Errorf("missing ReturnCurrency")
+			}
+			if !common.IsHexAddress(utils.NormalizeAddress(outputJs.ReturnCurrency)) {
+				return nil, fmt.Errorf("invalid ReturnCurrency %s", outputJs.ReturnCurrency)
+			}
+		}
 		out := Output{
 			Index:       outputJs.Index,
 			ReturnIndex: outputJs.ReturnIndex,
@@ -101,11 +113,12 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 				Type: outputJs.Component.Type,
 				Name: outputJs.Component.Name,
 			},
+			ReturnCurrency: outputJs.ReturnCurrency,
 		}
 		trigger.Outputs = append(trigger.Outputs, out)
 	}
 
-	// populate Filters for Watch a Transaction
+	// populate Filters for WaT and WaE
 	for _, fjs := range tjs.Filters {
 		f, err := fjs.ToFilter()
 		if err != nil {
@@ -118,19 +131,25 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 
 // converts a FilterJson to a Filter
 func (fjs FilterJson) ToFilter() (*Filter, error) {
-
+	if fjs.ParameterCurrency != "" && fjs.Condition.AttributeCurrency == "" {
+		return nil, fmt.Errorf("missing AttributeCurrency")
+	}
+	if fjs.ParameterCurrency == "" && fjs.Condition.AttributeCurrency != "" {
+		return nil, fmt.Errorf("missing ParameterCurrency")
+	}
 	condition, err := makeCondition(fjs)
 	if err != nil {
 		return nil, err
 	}
 	f := Filter{
-		FilterType:    fjs.FilterType,
-		ParameterName: fjs.ParameterName,
-		ParameterType: fjs.ParameterType,
-		FunctionName:  fjs.FunctionName,
-		EventName:     fjs.EventName,
-		Index:         fjs.Index,
-		Condition:     condition,
+		FilterType:        fjs.FilterType,
+		ParameterName:     fjs.ParameterName,
+		ParameterType:     fjs.ParameterType,
+		ParameterCurrency: fjs.ParameterCurrency,
+		FunctionName:      fjs.FunctionName,
+		EventName:         fjs.EventName,
+		Index:             fjs.Index,
+		Condition:         condition,
 	}
 	return &f, nil
 }
@@ -139,7 +158,6 @@ func makeCondition(fjs FilterJson) (Conditioner, error) {
 
 	predicate := unpackPredicate(fjs.Condition.Predicate)
 	if predicate < 0 && !utils.IsIn(fjs.FilterType, []string{"CheckFunctionCalled", "CheckEventEmitted"}) {
-		fmt.Println("DIO CANE: ", fjs.FilterType)
 		return nil, fmt.Errorf("unsupported predicate type %s", fjs.Condition.Predicate)
 	}
 	attribute := fjs.Condition.Attribute
@@ -192,11 +210,11 @@ func makeCondition(fjs FilterJson) (Conditioner, error) {
 		return c, nil
 	}
 	if fjs.FilterType == "CheckEventParameter" {
-		c := ConditionEvent{Condition{}, predicate, fjs.Condition.Attribute}
+		c := ConditionEvent{Condition{}, predicate, fjs.Condition.Attribute, fjs.Condition.AttributeCurrency}
 		return c, nil
 	}
 	if fjs.FilterType == "CheckEventEmitted" {
-		c := ConditionEvent{Condition{}, predicate, fjs.Condition.Attribute}
+		c := ConditionEvent{Condition{}, predicate, fjs.Condition.Attribute, fjs.Condition.AttributeCurrency}
 		return c, nil
 	}
 	return nil, fmt.Errorf("unsupported filter type %s", fjs.FilterType)

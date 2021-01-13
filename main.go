@@ -8,6 +8,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/matcher"
 	"github.com/HAL-xyz/zoroaster/poller"
 	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -49,15 +50,16 @@ func main() {
 	go poller.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, pollerCli, psqlClient, config.Zconf.BlocksDelay)
 
 	// Watch a Transaction
-	go matcher.TxMatcher(txBlocksChan, matchesChan, psqlClient)
+	watApi := tokenapi.New(rpc.New(ethClient, "Watch a Transaction"))
+	go matcher.TxMatcher(txBlocksChan, matchesChan, psqlClient, watApi)
 
 	// Watch a Contract
-	wacCli := rpc.New(ethClient, "Watch a Contract")
-	go matcher.ContractMatcher(cnBlocksChan, matchesChan, psqlClient, wacCli)
+	wacApi := tokenapi.New(rpc.New(ethClient, "Watch a Contract"))
+	go matcher.ContractMatcher(cnBlocksChan, matchesChan, psqlClient, wacApi)
 
 	// Watch an Event
-	waeCli := rpc.New(ethClient, "Watch an Event")
-	go matcher.EventMatcher(evBlocksChan, matchesChan, psqlClient, waeCli)
+	waeApi := tokenapi.New(rpc.New(ethClient, "Watch an Event"))
+	go matcher.EventMatcher(evBlocksChan, matchesChan, psqlClient, waeApi)
 
 	// Main routine - process matches
 	for {

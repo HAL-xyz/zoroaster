@@ -3,8 +3,8 @@ package trigger
 import (
 	"fmt"
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/stretchr/testify/assert"
@@ -38,9 +38,41 @@ func (z mockETHCli) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, e
 
 var mockCli mockETHCli
 
-var logs550, _ = getLogsForBlock(config.CliRinkeby, 5690550, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
-var logs551, _ = getLogsForBlock(config.CliRinkeby, 5690551, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
-var logs552, _ = getLogsForBlock(config.CliRinkeby, 5690552, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
+var mockTokenApi = tokenapi.New(mockCli)
+
+type mockTApiCurrency struct {
+	tokenapi.ITokenAPI
+}
+
+func (t mockTApiCurrency) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error) {
+	return float32(202.37), nil
+}
+
+func (t mockTApiCurrency) Decimals(address string) string {
+	return "6"
+}
+
+func (t mockTApiCurrency) FromWei(wei interface{}, units interface{}) string {
+	return mockTokenApi.FromWei(wei, units)
+}
+
+func (t mockTApiCurrency) GetRPCCli() rpc.IEthRpc {
+	return TokenApiMainnet.GetRPCCli()
+}
+
+func (t mockTApiCurrency) EncodeMethod(methodName, cntABI string, inputs []tokenapi.Input) (string, error) {
+	return "0x", nil
+}
+
+func (t mockTApiCurrency) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
+	return "0x0000000000000000000000000000000000000000000000212321d502f10fbc4a", nil
+}
+
+var mockTApiCurr mockTApiCurrency
+
+var logs550, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5690550, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
+var logs551, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5690551, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
+var logs552, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5690552, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
 
 func TestValidateFilterLog(t *testing.T) {
 
@@ -52,18 +84,18 @@ func TestValidateFilterLog(t *testing.T) {
 
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 
-	res, err := validateFilterLog(&logs[0], &tg.Filters[0], &abiObj, tg.Filters[0].EventName)
+	res, err := validateFilterLog(&logs[0], &tg.Filters[0], &abiObj, tg.Filters[0].EventName, mockTokenApi)
 	assert.NoError(t, err)
 	assert.True(t, res)
 
-	res2, err := validateFilterLog(&logs[0], &tg.Filters[1], &abiObj, tg.Filters[0].EventName)
+	res2, err := validateFilterLog(&logs[0], &tg.Filters[1], &abiObj, tg.Filters[0].EventName, mockTokenApi)
 	assert.NoError(t, err)
 	assert.True(t, res2)
 
-	res3 := validateTriggerLog(&logs[0], tg, &abiObj, "Transfer")
+	res3 := validateTriggerLog(&logs[0], tg, &abiObj, "Transfer", mockTokenApi)
 	assert.True(t, res3)
 
-	res4 := validateTriggerLog(&logs[1], tg, &abiObj, "Transfer")
+	res4 := validateTriggerLog(&logs[1], tg, &abiObj, "Transfer", mockTokenApi)
 	assert.False(t, res4)
 }
 
@@ -92,7 +124,7 @@ func TestAddressFixedArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -122,7 +154,7 @@ func TestAddressFixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -156,7 +188,7 @@ func TestAddressFixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -186,7 +218,7 @@ func TestAddressFixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -216,7 +248,7 @@ func TestAddressFixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -246,7 +278,7 @@ func TestAddressFixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -277,7 +309,7 @@ func TestAddressDynamicArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -307,7 +339,7 @@ func TestAddressDynamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -341,7 +373,7 @@ func TestAddressDynamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -371,7 +403,7 @@ func TestAddressDynamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -401,7 +433,7 @@ func TestAddressDynamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -431,7 +463,7 @@ func TestAddressDynamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -462,7 +494,7 @@ func TestBoolFixedArrayEqAtPosition1(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -492,7 +524,7 @@ func TestBoolFixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -526,7 +558,7 @@ func TestBoolFixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -556,7 +588,7 @@ func TestBoolFixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -586,7 +618,7 @@ func TestBoolFixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -616,7 +648,7 @@ func TestBoolFixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -647,7 +679,7 @@ func TestBoolDynamicArrayEqAtPosition1(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -677,7 +709,7 @@ func TestBoolDynamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -711,7 +743,7 @@ func TestBoolDynamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -741,7 +773,7 @@ func TestBoolDynamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -771,7 +803,7 @@ func TestBoolDynamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -801,7 +833,7 @@ func TestBoolDynamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockCli)
+	matches := MatchEvent(tg, logs550, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -831,7 +863,7 @@ func TestBytes16EqWithOX(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -861,7 +893,7 @@ func TestBytes16Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -891,7 +923,7 @@ func TestInt256FixedArrayEqAtPosition1(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -920,7 +952,7 @@ func TestInt256FixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -953,7 +985,7 @@ func TestInt256FixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -982,7 +1014,7 @@ func TestInt256FixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1011,7 +1043,7 @@ func TestInt256FixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1040,7 +1072,7 @@ func TestInt256FixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1070,7 +1102,7 @@ func TestInt256DinamicArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1099,7 +1131,7 @@ func TestInt256DinamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1132,7 +1164,7 @@ func TestInt256DinamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1161,7 +1193,7 @@ func TestInt256DinamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1190,7 +1222,7 @@ func TestInt256DinamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1219,7 +1251,7 @@ func TestInt256DinamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockCli)
+	matches := MatchEvent(tg, logs551, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1248,7 +1280,7 @@ func TestStringFixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1278,7 +1310,7 @@ func TestStringFixedArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1311,7 +1343,7 @@ func TestStringFixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1340,7 +1372,7 @@ func TestStringFixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1369,7 +1401,7 @@ func TestStringFixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1398,7 +1430,7 @@ func TestStringFixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1431,7 +1463,7 @@ func TestStringDinamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1460,7 +1492,7 @@ func TestStringDinamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1489,7 +1521,7 @@ func TestStringDinamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1518,7 +1550,7 @@ func TestStringDinamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1548,7 +1580,7 @@ func TestStringDinamicArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1577,7 +1609,7 @@ func TestStringDinamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1606,7 +1638,7 @@ func TestStringEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockCli)
+	matches := MatchEvent(tg, logs552, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1635,10 +1667,10 @@ func TestUint8Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	logs, err := getLogsForBlock(config.CliMain, 9252401, []string{"0x7be8076f4ea4a4ad08075c2508e481d6c946d12b"})
+	logs, err := getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252401, []string{"0x7be8076f4ea4a4ad08075c2508e481d6c946d12b"})
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs, mockCli)
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 2, len(matches))
 	assert.Equal(t, 9252401, matches[0].Log.BlockNumber)
@@ -1667,8 +1699,8 @@ func TestBytes32Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9252045, []string{"0x7a6425c9b3f5521bfa5d71df710a2fb80508319b"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252045, []string{"0x7a6425c9b3f5521bfa5d71df710a2fb80508319b"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252045, matches[0].Log.BlockNumber)
@@ -1698,8 +1730,8 @@ func TestBytesEqStartingWith0x(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9243327, []string{"0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9243327, []string{"0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
@@ -1729,8 +1761,8 @@ func TestBytesEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9243327, []string{"0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9243327, []string{"0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
@@ -1759,8 +1791,8 @@ func TestBoolEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9133542, []string{"0x73866e69c6f6f74fc48539dd541a6df8c8059e04"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9133542, []string{"0x73866e69c6f6f74fc48539dd541a6df8c8059e04"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9133542, matches[0].Log.BlockNumber)
@@ -1789,8 +1821,8 @@ func TestUint64Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9252369, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252369, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
@@ -1819,8 +1851,8 @@ func TestUint128Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9252369, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252369, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
@@ -1849,8 +1881,8 @@ func XXXTestUint128EqBis(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9252460, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252460, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 2, len(matches))
 	assert.Equal(t, 9252460, matches[0].Log.BlockNumber)
@@ -1879,8 +1911,8 @@ func TestAddressEqNotDecoded(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9252175, []string{"0x14094949152eddbfcd073717200da82fed8dc960"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252175, []string{"0x14094949152eddbfcd073717200da82fed8dc960"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252175, matches[0].Log.BlockNumber)
@@ -1939,8 +1971,8 @@ func TestUint256Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9252357, []string{"0xc7af99fe5513eb6710e6d5f44f9989da40f27f26"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252357, []string{"0xc7af99fe5513eb6710e6d5f44f9989da40f27f26"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252357, matches[0].Log.BlockNumber)
@@ -1979,8 +2011,8 @@ func TestUint256InBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
@@ -2009,8 +2041,8 @@ func TestUint256BiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
@@ -2059,8 +2091,8 @@ func TestUint256EqBytes32EqAddressEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
@@ -2090,7 +2122,7 @@ func TestMatchEvent9(t *testing.T) {
 	assert.NoError(t, err)
 
 	logs, _ := GetLogsFromFile("../resources/events/logs3.json")
-	matches := MatchEvent(tg, logs, mockCli)
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 2, len(matches))
 	assert.Equal(t, "0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7", matches[0].Log.Topics[0])
@@ -2120,8 +2152,8 @@ func TestMatchEvent8(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9222611, []string{"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9222611, []string{"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9222611, matches[0].Log.BlockNumber)
@@ -2149,8 +2181,8 @@ func TestMatchEvent7(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliRinkeby, 5693736, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5693736, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693736, matches[0].Log.BlockNumber)
@@ -2188,8 +2220,8 @@ func TestMatchEvent6(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliRinkeby, 5693736, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5693736, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693736, matches[0].Log.BlockNumber)
@@ -2217,8 +2249,8 @@ func TestMatchEvent5(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliRinkeby, 5693738, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5693738, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693738, matches[0].Log.BlockNumber)
@@ -2266,8 +2298,8 @@ func TestMatchEvent4(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliRinkeby, 5693738, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5693738, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693738, matches[0].Log.BlockNumber)
@@ -2324,7 +2356,7 @@ func TestMatchEvent3(t *testing.T) {
 	assert.NoError(t, err)
 
 	logs, _ := GetLogsFromFile("../resources/events/logs2.json")
-	matches := MatchEvent(tg, logs, config.CliMain)
+	matches := MatchEvent(tg, logs, TokenApiMainnet)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9098826, matches[0].Log.BlockNumber)
@@ -2362,8 +2394,8 @@ func TestMatchEvent2(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 9099675, []string{"0x080bf510fcbf18b91105470639e9561022937712"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9099675, []string{"0x080bf510fcbf18b91105470639e9561022937712"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9099675, matches[0].Log.BlockNumber)
@@ -2375,14 +2407,14 @@ func TestMatchEvent1(t *testing.T) {
 
 	tg1, err := GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
-	matches1 := MatchEvent(tg1, logs, mockCli)
+	matches1 := MatchEvent(tg1, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches1))
 	assert.Equal(t, "677420000", matches1[0].EventParams["value"])
 
 	tg2, err := GetTriggerFromFile("../resources/triggers/ev2.json")
 	assert.NoError(t, err)
-	matches2 := MatchEvent(tg2, logs, mockCli)
+	matches2 := MatchEvent(tg2, logs, mockTokenApi)
 
 	assert.Equal(t, 3, len(matches2))
 	assert.Equal(t, "677420000", matches2[0].EventParams["value"])
@@ -2445,7 +2477,7 @@ func TestMatchEventEmitted(t *testing.T) {
 
 	logs, _ := GetLogsFromFile("../resources/events/logs1.json")
 
-	matches := MatchEvent(tg, logs, mockCli)
+	matches := MatchEvent(tg, logs, mockTokenApi)
 	assert.Equal(t, 7, len(matches))
 }
 
@@ -2474,8 +2506,8 @@ func TestHandleNullTerminatedStrings(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 10679595, []string{"0x9ceb5486eD0F3F2DBCaE906E4192472e88657983"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 10679595, []string{"0x9ceb5486eD0F3F2DBCaE906E4192472e88657983"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Len(t, matches, 1)
 }
@@ -2505,8 +2537,8 @@ func TestIntConversion(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 10696118, []string{"0x1d681d76ce96E4d70a88A00EBbcfc1E47808d0b8"})
-	matches := MatchEvent(tg, logs, mockCli)
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 10696118, []string{"0x1d681d76ce96E4d70a88A00EBbcfc1E47808d0b8"})
+	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Len(t, matches, 1)
 	assert.Equal(t, "68", matches[0].EventParams["taskReceiptId"])
@@ -2548,9 +2580,9 @@ func TestBasicFilters(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
 
-	matches := MatchEvent(tg, logs, config.CliMain)
+	matches := MatchEvent(tg, logs, TokenApiMainnet)
 
 	assert.Len(t, matches, 1)
 	assert.Equal(t, "0xf3ad7a80c7debe37db5cee1e3ed45f31a5629e5e", matches[0].TxFrom)
@@ -2591,9 +2623,9 @@ func TestBasicFilters2(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
 
-	matches := MatchEvent(tg, logs, config.CliMain)
+	matches := MatchEvent(tg, logs, TokenApiMainnet)
 
 	assert.Len(t, matches, 0)
 }
@@ -2633,9 +2665,9 @@ func TestBasicFilters3(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
 
-	matches := MatchEvent(tg, logs, config.CliMain)
+	matches := MatchEvent(tg, logs, TokenApiMainnet)
 
 	assert.Len(t, matches, 1)
 	assert.Equal(t, "0xf3ad7a80c7debe37db5cee1e3ed45f31a5629e5e", matches[0].TxFrom)
@@ -2660,10 +2692,144 @@ func TestTxFromAndToWithoutBasicFilters(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(config.CliMain, 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
 
-	matches := MatchEvent(tg, logs, config.CliMain)
+	matches := MatchEvent(tg, logs, TokenApiMainnet)
 
 	assert.Len(t, matches, 1)
 	assert.Equal(t, "0xf3ad7a80c7debe37db5cee1e3ed45f31a5629e5e", matches[0].TxFrom)
+}
+
+func TestCurrencyWithExplicitCurrenciesData(t *testing.T) {
+	// where ParameterCurrency is a token address (AAVE), and AttributeCurrency is a fiat symbol (USD)
+	// ParameterName is in the data field as a single integer
+	js := `
+{
+  "Filters": [
+	{
+	  "FilterType":"CheckEventParameter",
+	  "EventName": "ProtectionAdded",
+	  "ParameterName":"_reserveAmount",
+	  "ParameterType":"uint256",
+	  "ParameterCurrency": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+	  "Condition":{
+		"Predicate":"Eq",
+		"Attribute":"5622040970000000",
+		"AttributeCurrency": "usd"
+	  }
+	}
+  ],
+  "ContractABI": "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_expirationTime\",\"type\":\"uint256\"}],\"name\":\"BalanceLocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"BalanceUnlocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_prevOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"OwnerUpdate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"contract IConverterAnchor\",\"name\":\"_poolAnchor\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"_added\",\"type\":\"bool\"}],\"name\":\"PoolWhitelistUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"contract IERC20Token\",\"name\":\"_reserveToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_poolAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_reserveAmount\",\"type\":\"uint256\"}],\"name\":\"ProtectionAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"contract IERC20Token\",\"name\":\"_reserveToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_poolAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_reserveAmount\",\"type\":\"uint256\"}],\"name\":\"ProtectionRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_prevPoolAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_prevReserveAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_newPoolAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_newReserveAmount\",\"type\":\"uint256\"}],\"name\":\"ProtectionUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_prevAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_newAmount\",\"type\":\"uint256\"}],\"name\":\"SystemBalanceUpdated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"acceptOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_expirationTime\",\"type\":\"uint256\"}],\"name\":\"addLockedBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IConverterAnchor\",\"name\":\"_poolAnchor\",\"type\":\"address\"}],\"name\":\"addPoolToWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"},{\"internalType\":\"contract IERC20Token\",\"name\":\"_reserveToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_poolAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_reserveAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_reserveRateN\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_reserveRateD\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_timestamp\",\"type\":\"uint256\"}],\"name\":\"addProtectedLiquidity\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"decSystemBalance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"incSystemBalance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IConverterAnchor\",\"name\":\"_poolAnchor\",\"type\":\"address\"}],\"name\":\"isPoolWhitelisted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"lockedBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"}],\"name\":\"lockedBalanceCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_startIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_endIndex\",\"type\":\"uint256\"}],\"name\":\"lockedBalanceRange\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"newOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_id\",\"type\":\"uint256\"}],\"name\":\"protectedLiquidity\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"contract IDSToken\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"contract IERC20Token\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"}],\"name\":\"protectedLiquidityCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"protectedLiquidityId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"}],\"name\":\"protectedLiquidityIds\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"removeLockedBalance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IConverterAnchor\",\"name\":\"_poolAnchor\",\"type\":\"address\"}],\"name\":\"removePoolFromWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_id\",\"type\":\"uint256\"}],\"name\":\"removeProtectedLiquidity\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"systemBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"}],\"name\":\"totalProtectedPoolAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"},{\"internalType\":\"contract IERC20Token\",\"name\":\"_reserveToken\",\"type\":\"address\"}],\"name\":\"totalProtectedReserveAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_newPoolAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_newReserveAmount\",\"type\":\"uint256\"}],\"name\":\"updateProtectedLiquidityAmounts\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"whitelistedPool\",\"outputs\":[{\"internalType\":\"contract IConverterAnchor\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"whitelistedPoolCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"whitelistedPools\",\"outputs\":[{\"internalType\":\"contract IConverterAnchor[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"withdrawTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+  "ContractAdd": "0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55",
+  "TriggerName": "NewAdd1",
+  "TriggerType": "WatchEvents"
+}
+`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11646700, []string{"0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55"})
+
+	matches := MatchEvent(tg, logs, mockTApiCurr)
+	assert.Len(t, matches, 1)
+}
+
+func TestCurrencyWithImplicitCurrenciesData(t *testing.T) {
+	// where ParameterCurrency is an event field (_reserveToken), and AttributeCurrency is a fiat symbol (USD)
+	// ParamaterName is in the data field
+	js := `
+{
+  "Filters": [
+	{
+	  "FilterType":"CheckEventParameter",
+	  "EventName": "ProtectionAdded",
+	  "ParameterName":"_reserveAmount",
+	  "ParameterType":"uint256",
+	  "ParameterCurrency": "_reserveToken",
+	  "Condition":{
+		"Predicate":"Eq",
+		"Attribute":"5622040970000000",
+		"AttributeCurrency": "usd"
+	  }
+	}
+  ],
+  "ContractABI": "[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_expirationTime\",\"type\":\"uint256\"}],\"name\":\"BalanceLocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"BalanceUnlocked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_prevOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"OwnerUpdate\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"contract IConverterAnchor\",\"name\":\"_poolAnchor\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"_added\",\"type\":\"bool\"}],\"name\":\"PoolWhitelistUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"contract IERC20Token\",\"name\":\"_reserveToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_poolAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_reserveAmount\",\"type\":\"uint256\"}],\"name\":\"ProtectionAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"contract IERC20Token\",\"name\":\"_reserveToken\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_poolAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_reserveAmount\",\"type\":\"uint256\"}],\"name\":\"ProtectionRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_prevPoolAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_prevReserveAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_newPoolAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_newReserveAmount\",\"type\":\"uint256\"}],\"name\":\"ProtectionUpdated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_prevAmount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"_newAmount\",\"type\":\"uint256\"}],\"name\":\"SystemBalanceUpdated\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"acceptOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_expirationTime\",\"type\":\"uint256\"}],\"name\":\"addLockedBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IConverterAnchor\",\"name\":\"_poolAnchor\",\"type\":\"address\"}],\"name\":\"addPoolToWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"},{\"internalType\":\"contract IERC20Token\",\"name\":\"_reserveToken\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_poolAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_reserveAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_reserveRateN\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_reserveRateD\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_timestamp\",\"type\":\"uint256\"}],\"name\":\"addProtectedLiquidity\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"decSystemBalance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"incSystemBalance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IConverterAnchor\",\"name\":\"_poolAnchor\",\"type\":\"address\"}],\"name\":\"isPoolWhitelisted\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"lockedBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"}],\"name\":\"lockedBalanceCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_startIndex\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_endIndex\",\"type\":\"uint256\"}],\"name\":\"lockedBalanceRange\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"newOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_id\",\"type\":\"uint256\"}],\"name\":\"protectedLiquidity\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"contract IDSToken\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"contract IERC20Token\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"}],\"name\":\"protectedLiquidityCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"protectedLiquidityId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"}],\"name\":\"protectedLiquidityIds\",\"outputs\":[{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_provider\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"removeLockedBalance\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IConverterAnchor\",\"name\":\"_poolAnchor\",\"type\":\"address\"}],\"name\":\"removePoolFromWhitelist\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_id\",\"type\":\"uint256\"}],\"name\":\"removeProtectedLiquidity\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"}],\"name\":\"systemBalance\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"}],\"name\":\"totalProtectedPoolAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IDSToken\",\"name\":\"_poolToken\",\"type\":\"address\"},{\"internalType\":\"contract IERC20Token\",\"name\":\"_reserveToken\",\"type\":\"address\"}],\"name\":\"totalProtectedReserveAmount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_id\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_newPoolAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"_newReserveAmount\",\"type\":\"uint256\"}],\"name\":\"updateProtectedLiquidityAmounts\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"_index\",\"type\":\"uint256\"}],\"name\":\"whitelistedPool\",\"outputs\":[{\"internalType\":\"contract IConverterAnchor\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"whitelistedPoolCount\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"whitelistedPools\",\"outputs\":[{\"internalType\":\"contract IConverterAnchor[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"contract IERC20Token\",\"name\":\"_token\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"_amount\",\"type\":\"uint256\"}],\"name\":\"withdrawTokens\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}]",
+  "ContractAdd": "0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55",
+  "TriggerName": "NewAdd1",
+  "TriggerType": "WatchEvents"
+}
+`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11646700, []string{"0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55"})
+
+	matches := MatchEvent(tg, logs, mockTApiCurr)
+	assert.Len(t, matches, 1)
+}
+
+func TestCurrencyWithExplicitCurrenciesDataArray(t *testing.T) {
+	// where ParameterCurrency is a token address (AAVE), and AttributeCurrency is a fiat symbol
+	// ParameterName is in the data field as an []int
+
+	js := `{
+        "Filters": [
+            {
+                "Condition": {
+                    "Attribute": "20.479844",
+                    "Predicate": "Eq",
+					"AttributeCurrency": "usd"
+                },
+                "EventName": "int_event",
+                "FilterType": "CheckEventParameter",
+                "ParameterName": "v7",
+                "ParameterType": "int256[3]",
+			    "ParameterCurrency": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9",
+                "Index": 1
+            }
+        ],
+        "ContractABI": "[{\"constant\":false,\"inputs\":[],\"name\":\"bool_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"address_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"string_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"bytes_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"int_event_f\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"string\",\"name\":\"v1\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"string[]\",\"name\":\"v2\",\"type\":\"string[]\"},{\"indexed\":false,\"internalType\":\"string[3]\",\"name\":\"v3\",\"type\":\"string[3]\"}],\"name\":\"string_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"v4\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"address[3]\",\"name\":\"v5\",\"type\":\"address[3]\"}],\"name\":\"address_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"int256[]\",\"name\":\"v6\",\"type\":\"int256[]\"},{\"indexed\":false,\"internalType\":\"int256[3]\",\"name\":\"v7\",\"type\":\"int256[3]\"}],\"name\":\"int_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"v8\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bool[]\",\"name\":\"v9\",\"type\":\"bool[]\"},{\"indexed\":false,\"internalType\":\"bool[3]\",\"name\":\"v10\",\"type\":\"bool[3]\"}],\"name\":\"bool_event\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bytes16\",\"name\":\"v11\",\"type\":\"bytes16\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"v12\",\"type\":\"bytes\"}],\"name\":\"bytes_event\",\"type\":\"event\"}]",
+        "ContractAdd": "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1",
+        "TriggerName": "WAE - TestInt256FixedArrayEqAtPosition1",
+        "TriggerType": "WatchEvents"
+    }`
+
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	matches := MatchEvent(tg, logs551, mockTApiCurr)
+
+	assert.Equal(t, 1, len(matches))
+}
+
+func TestCurrencyWithExplicitCurrenciesTopicInt(t *testing.T) {
+	// where ParameterCurrency is a token address (AAVE), and AttributeCurrency is a fiat symbol
+	// ParameterName is in the topic field as an uint256
+	js := `{
+	"Filters": [
+		{
+			"Condition": {
+				"Attribute": "67.935608999999999996",
+				"Predicate": "Eq",
+				"AttributeCurrency": "usd"
+			},
+			"EventName": "LogResult",
+			"FilterType": "CheckEventParameter",
+			"ParameterName": "ResultSerialNumber",
+			"ParameterType": "uint256",
+			"ParameterCurrency": "0x7Fc66500c84A76Ad7e9c93437bFc5Ac33E2DDaE9"
+		}
+	],
+    "ContractABI": "[{\"constant\":false,\"inputs\":[{\"name\":\"newCallbackGasPrice\",\"type\":\"uint256\"}],\"name\":\"ownerSetCallbackGasPrice\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalWeiWon\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxProfitAsPercentOfHouse\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newHouseEdge\",\"type\":\"uint256\"}],\"name\":\"ownerSetHouseEdge\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"myid\",\"type\":\"bytes32\"},{\"name\":\"result\",\"type\":\"string\"}],\"name\":\"__callback\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"payoutsPaused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newTreasury\",\"type\":\"address\"}],\"name\":\"ownerSetTreasury\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"myid\",\"type\":\"bytes32\"},{\"name\":\"result\",\"type\":\"string\"},{\"name\":\"proof\",\"type\":\"bytes\"}],\"name\":\"__callback\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxNumber\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"addressToCheck\",\"type\":\"address\"}],\"name\":\"playerGetPendingTxByAddress\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newContractBalanceInWei\",\"type\":\"uint256\"}],\"name\":\"ownerUpdateContractBalance\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxProfitDivisor\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newPayoutStatus\",\"type\":\"bool\"}],\"name\":\"ownerPausePayouts\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"ownerChangeOwner\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minNumber\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newMaxProfitAsPercent\",\"type\":\"uint256\"}],\"name\":\"ownerSetMaxProfitAsPercentOfHouse\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"treasury\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalWeiWagered\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newMinimumBet\",\"type\":\"uint256\"}],\"name\":\"ownerSetMinBet\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newStatus\",\"type\":\"bool\"}],\"name\":\"ownerPauseGame\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"gasForOraclize\",\"outputs\":[{\"name\":\"\",\"type\":\"uint32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"sendTo\",\"type\":\"address\"},{\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"ownerTransferEther\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"contractBalance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"minBet\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"playerWithdrawPendingTransactions\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxProfit\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"totalBets\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"randomQueryID\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"gamePaused\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"originalPlayerBetId\",\"type\":\"bytes32\"},{\"name\":\"sendTo\",\"type\":\"address\"},{\"name\":\"originalPlayerProfit\",\"type\":\"uint256\"},{\"name\":\"originalPlayerBetValue\",\"type\":\"uint256\"}],\"name\":\"ownerRefundPlayer\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newSafeGasToOraclize\",\"type\":\"uint32\"}],\"name\":\"ownerSetOraclizeSafeGas\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[],\"name\":\"ownerkill\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"houseEdge\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"rollUnder\",\"type\":\"uint256\"}],\"name\":\"playerRollDice\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"houseEdgeDivisor\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"maxPendingPayouts\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"BetID\",\"type\":\"bytes32\"},{\"indexed\":true,\"name\":\"PlayerAddress\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"RewardValue\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"ProfitValue\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"BetValue\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"PlayerNumber\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"RandomQueryID\",\"type\":\"uint256\"}],\"name\":\"LogBet\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"ResultSerialNumber\",\"type\":\"uint256\"},{\"indexed\":true,\"name\":\"BetID\",\"type\":\"bytes32\"},{\"indexed\":true,\"name\":\"PlayerAddress\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"PlayerNumber\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"DiceResult\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"Value\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"Status\",\"type\":\"int256\"},{\"indexed\":false,\"name\":\"Proof\",\"type\":\"bytes\"}],\"name\":\"LogResult\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"BetID\",\"type\":\"bytes32\"},{\"indexed\":true,\"name\":\"PlayerAddress\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"RefundValue\",\"type\":\"uint256\"}],\"name\":\"LogRefund\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"SentToAddress\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"AmountTransferred\",\"type\":\"uint256\"}],\"name\":\"LogOwnerTransfer\",\"type\":\"event\"}]",
+    "ContractAdd": "0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d",
+    "TriggerName": "WAE",
+    "TriggerType": "WatchEvents"
+}`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	logs, _ := GetLogsFromFile("../resources/events/logs2.json")
+	matches := MatchEvent(tg, logs, mockTApiCurr)
+
+	assert.Equal(t, 1, len(matches))
 }

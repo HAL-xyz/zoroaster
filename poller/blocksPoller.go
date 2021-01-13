@@ -3,8 +3,8 @@ package poller
 import (
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
-	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
 	"time"
@@ -59,7 +59,7 @@ func fetchLastBlock(
 
 	if lastBlockSeen-blocksDelay > *lastBlockProcessed {
 		client.ResetCounterAndLogStats(*lastBlockProcessed)
-		config.TemplateCli.ResetCounterAndLogStats(*lastBlockProcessed)
+		tokenapi.GetTokenAPI().ResetETHRPCstats(*lastBlockProcessed)
 
 		block, err := client.EthGetBlockByNumber(*lastBlockProcessed+1, withTxs)
 		if err != nil {

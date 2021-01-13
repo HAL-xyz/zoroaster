@@ -28,13 +28,14 @@ func (tg Trigger) hasBasicFilters() bool {
 }
 
 type Filter struct {
-	FilterType    string
-	ParameterName string
-	ParameterType string
-	FunctionName  string
-	EventName     string
-	Condition     Conditioner
-	Index         *int
+	FilterType        string
+	ParameterName     string
+	ParameterType     string
+	ParameterCurrency string
+	FunctionName      string
+	EventName         string
+	Condition         Conditioner
+	Index             *int
 }
 
 type Input struct {
@@ -43,11 +44,12 @@ type Input struct {
 }
 
 type Output struct {
-	Index       *int
-	ReturnIndex int
-	ReturnType  string
-	Condition   Conditioner
-	Component   Component
+	Index          *int
+	ReturnIndex    int
+	ReturnType     string
+	Condition      Conditioner
+	Component      Component
+	ReturnCurrency string
 }
 
 type Component struct {
@@ -114,14 +116,16 @@ type ConditionFunctionCalled struct {
 
 type ConditionOutput struct {
 	Condition
-	Predicate Predicate
-	Attribute string
+	Predicate         Predicate
+	Attribute         string
+	AttributeCurrency string
 }
 
 type ConditionEvent struct {
 	Condition
-	Predicate Predicate
-	Attribute string
+	Predicate         Predicate
+	Attribute         string
+	AttributeCurrency string
 }
 
 type Predicate int

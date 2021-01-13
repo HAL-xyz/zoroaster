@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/aws/aws-sdk-go/service/ses"
@@ -53,6 +54,7 @@ func (z mockETHCli) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, e
 }
 
 var mockCli mockETHCli
+var mockTokenApi = tokenapi.New(mockCli)
 
 func TestHandleWebHookPost(t *testing.T) {
 
@@ -162,7 +164,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches1 := trigger.MatchEvent(tg1, logs, mockCli)
+	matches1 := trigger.MatchEvent(tg1, logs, mockTokenApi)
 
 	outcome := handleWebHookPost(url, matches1[0], mockHttpClient{})
 
@@ -320,7 +322,7 @@ func TestHandleEmailWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, logs, mockCli)
+	matches := trigger.MatchEvent(tg1, logs, mockTokenApi)
 
 	matches[0].EventParams["extraAddresses"] = []string{"yes@hal.xyz", "nope@hal.xyz"}
 

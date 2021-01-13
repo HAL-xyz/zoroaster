@@ -1,4 +1,4 @@
-package trigger
+package tokenapi
 
 import (
 	"encoding/hex"
@@ -11,7 +11,12 @@ import (
 	"strings"
 )
 
-func EncodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
+type Input struct {
+	ParameterType  string
+	ParameterValue string
+}
+
+func (t TokenAPI) EncodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
 
 	xabi, err := abi.JSON(strings.NewReader(cntABI))
 	if err != nil {

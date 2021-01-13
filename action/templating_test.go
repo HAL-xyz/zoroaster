@@ -21,7 +21,7 @@ func TestTemplateWithAllConversions(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, logs, mockCli)
+	matches := trigger.MatchEvent(tg1, logs, mockTokenApi)
 
 	matches[0].EventParams["someBigNumber"] = "629000000000000000"
 	matches[0].EventParams["unixTimestamp"] = "1602631929"
@@ -40,7 +40,7 @@ func TestTemplateWithDecConversion(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, logs, mockCli)
+	matches := trigger.MatchEvent(tg1, logs, mockTokenApi)
 
 	matches[0].EventParams["someBigNumber"] = "629000000000000000"
 	matches[0].EventParams["smallerNumber"] = "21000000000000"
@@ -97,7 +97,7 @@ func TestFillTemplate1(t *testing.T) {
 	b.Timestamp = 1554828248
 	b.Transactions = append(b.Transactions, *tx)
 
-	matches := trigger.MatchTransaction(tg, &b)
+	matches := trigger.MatchTransaction(tg, &b, mockTokenApi)
 
 	template, err := ioutil.ReadFile("../resources/emails/1-wat-templ.txt")
 	assert.NoError(t, err)
@@ -302,7 +302,7 @@ func TestEmailTemplateEvent(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, logs, mockCli)
+	matches := trigger.MatchEvent(tg1, logs, mockTokenApi)
 
 	matches[0].EventParams["arrayParam"] = []string{"hello", "world", "yo yo"}
 

@@ -7,6 +7,8 @@ import (
 	"strconv"
 )
 
+var Zconf = NewConfig() // Global conf
+
 type ZConfiguration struct {
 	Stage                 Stage
 	ConfigFile            string

@@ -3,15 +3,16 @@ package trigger
 import (
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/abidec"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
-func MatchTransaction(trigger *Trigger, block *ethrpc.Block) []*TxMatch {
+func MatchTransaction(trigger *Trigger, block *ethrpc.Block, tokenApi tokenapi.ITokenAPI) []*TxMatch {
 	txMatches := make([]*TxMatch, 0)
 	for i, tx := range block.Transactions {
-		if validateTrigger(trigger, &tx) {
+		if validateTrigger(trigger, &tx, tokenApi) {
 			// we discard errors here bc not every match will have input data
 			fnArgsData, _ := abidec.DecodeInputData(tx.Input, trigger.ContractABI)
 			for k, v := range fnArgsData {
@@ -32,16 +33,16 @@ func MatchTransaction(trigger *Trigger, block *ethrpc.Block) []*TxMatch {
 	return txMatches
 }
 
-func validateTrigger(tg *Trigger, transaction *ethrpc.Transaction) bool {
+func validateTrigger(tg *Trigger, transaction *ethrpc.Transaction, tokenApi tokenapi.ITokenAPI) bool {
 	match := true
 	for _, f := range tg.Filters {
-		filterMatch := validateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerUUID)
+		filterMatch := validateFilter(transaction, &f, tg.ContractAdd, &tg.ContractABI, tg.TriggerUUID, tokenApi)
 		match = match && filterMatch // a Trigger matches if all filters match
 	}
 	return match
 }
 
-func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgUUID string) bool {
+func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, tgUUID string, tokenApi tokenapi.ITokenAPI) bool {
 	cxtLog := log.WithFields(log.Fields{
 		"trigger_id": tgUUID,
 		"tx_hash":    ts.Hash,
@@ -91,7 +92,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			cxtLog.Debugf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
 			return false
 		}
-		isValid, _ := ValidateParam(rawParam, f.ParameterType, v.Attribute, v.Predicate, f.Index, Component{})
+		isValid, _ := ValidateParam(rawParam, f.ParameterType, "", v.Attribute, "", v.Predicate, f.Index, Component{}, tokenApi)
 		return isValid
 	case ConditionFunctionCalled:
 		if !isValidContractAbi(abi, cnt, ts.To, tgUUID) {

@@ -71,6 +71,19 @@ func validatePredBigInt(p Predicate, cv *big.Int, tv *big.Int) bool {
 	}
 }
 
+func validatePredBigFloat(p Predicate, cv *big.Float, tv *big.Float) bool {
+	switch p {
+	case Eq:
+		return cv.Cmp(tv) == 0
+	case SmallerThan:
+		return cv.Cmp(tv) == -1
+	case BiggerThan:
+		return cv.Cmp(tv) == 1
+	default:
+		return false
+	}
+}
+
 func validatePredBigIntArray(p Predicate, cvs []*big.Int, tv *big.Int, index *int) bool {
 	if index != nil {
 		if *index > len(cvs) {

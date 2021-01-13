@@ -6,6 +6,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -51,14 +52,15 @@ func (db mockDB) GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, 
 
 func TestMatchContractsForBlock(t *testing.T) {
 
-	lastBlock, err := config.CliMain.EthBlockNumber()
+	var api = tokenapi.New(rpc.New(ethrpc.New(config.Zconf.EthNode), "mainnet test client"))
+
+	lastBlock, err := api.GetRPCCli().EthBlockNumber()
 	assert.NoError(t, err)
 
-	cnMatches := matchContractsForBlock(lastBlock, 1554828248, "0x", mockDB{}, config.CliMain)
+	cnMatches := matchContractsForBlock(lastBlock, 1554828248, "0x", mockDB{}, api)
 
 	assert.Equal(t, 1, len(cnMatches))
 	assert.Equal(t, lastBlock, cnMatches[0].BlockNumber)
-	fmt.Println(cnMatches[0].AllValues)
 }
 
 // ETHRPC Client mock, returns 189
@@ -112,9 +114,10 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	assert.Equal(t, "false", status)
 
 	ethSuccessMock := mockETHCli{}
+	mockTokenApiSuccess := tokenapi.New(ethSuccessMock)
 
 	// success
-	cnMatches := matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethSuccessMock)
+	cnMatches := matchContractsForBlock(0000, 1554828248, "0x", psqlClient, mockTokenApiSuccess)
 	assert.Equal(t, 1, len(cnMatches))
 
 	// now trigger status will be triggered=true
@@ -135,7 +138,7 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	}
 
 	// subsequent calls won't match, because triggered is set to true
-	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethSuccessMock)
+	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, mockTokenApiSuccess)
 	assert.Equal(t, 0, len(cnMatches))
 
 	// trigger is still set to true
@@ -150,7 +153,9 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 
 	// the rpc call fails and MatchContracts() returns an error; triggered remains true
 	ethErrorMock := mockETHCliWithError{}
-	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethErrorMock)
+	mockTokenApiError := tokenapi.New(ethErrorMock)
+
+	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, mockTokenApiError)
 	assert.Equal(t, 0, len(cnMatches))
 
 	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
@@ -164,7 +169,9 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 
 	// now the eth cli returns a non-matching value, matches should be zero, triggered=false
 	ethNoMatchMock := mockETHCliNoMatch{}
-	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethNoMatchMock)
+	mockTokenApiNoMatch := tokenapi.New(ethNoMatchMock)
+
+	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, mockTokenApiNoMatch)
 	assert.Equal(t, 0, len(cnMatches))
 
 	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))
@@ -177,7 +184,7 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 	assert.Equal(t, "false", status)
 
 	// back to success, matches=1, triggered=true
-	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, ethSuccessMock)
+	cnMatches = matchContractsForBlock(0000, 1554828248, "0x", psqlClient, mockTokenApiSuccess)
 	assert.Equal(t, 1, len(cnMatches))
 
 	status, err = psqlClient.ReadString(fmt.Sprintf("SELECT triggered FROM triggers WHERE uuid = '%s'", triggerUUID))

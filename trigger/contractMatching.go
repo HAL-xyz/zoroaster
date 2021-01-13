@@ -3,23 +3,30 @@ package trigger
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/abidec"
-	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
-func MatchContract(client rpc.IEthRpc, tg *Trigger, blockNo int) (*CnMatch, error) {
+func MatchContract(tokenApi tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMatch, error) {
 
-	methodId, err := EncodeMethod(tg.FunctionName, tg.ContractABI, tg.Inputs)
-	if err != nil {
-		return nil, fmt.Errorf("trigger %s: cannot encode method: %s", tg.TriggerUUID, err)
+	tokenApiInputs := make([]tokenapi.Input, len(tg.Inputs))
+	for i, e := range tg.Inputs {
+		tokenApiInputs[i] = tokenapi.Input{
+			ParameterType:  e.ParameterType,
+			ParameterValue: e.ParameterValue,
+		}
 	}
-	rawData, err := MakeEthRpcCall(client, tg.ContractAdd, methodId, blockNo)
+
+	methodId, err := tokenApi.EncodeMethod(tg.FunctionName, tg.ContractABI, tokenApiInputs)
 	if err != nil {
-		return nil, fmt.Errorf("rpc call failed for trigger %s with error : %s", tg.TriggerUUID, err)
+		return nil, fmt.Errorf("cannot encode method: %s", err)
+	}
+	rawData, err := tokenApi.MakeEthRpcCall(tg.ContractAdd, methodId, blockNo)
+	if err != nil {
+		return nil, fmt.Errorf("rpc call failed with error : %s", err)
 	}
 
 	//log.Debug("result from call is -> ", rawData)
@@ -34,7 +41,7 @@ func MatchContract(client rpc.IEthRpc, tg *Trigger, blockNo int) (*CnMatch, erro
 		if expectedOutput.ReturnIndex < len(allValuesLs) {
 			rawParam := getRawParam(allValuesLs[expectedOutput.ReturnIndex])
 			cond := expectedOutput.Condition.(ConditionOutput)
-			yes, matchedValue := ValidateParam(rawParam, expectedOutput.ReturnType, cond.Attribute, cond.Predicate, expectedOutput.Index, expectedOutput.Component)
+			yes, matchedValue := ValidateParam(rawParam, expectedOutput.ReturnType, expectedOutput.ReturnCurrency, cond.Attribute, cond.AttributeCurrency, cond.Predicate, expectedOutput.Index, expectedOutput.Component, tokenApi)
 			if yes {
 				matchingValues = append(matchingValues, fmt.Sprintf("%v", matchedValue))
 			}
@@ -59,20 +66,4 @@ func getRawParam(param interface{}) []byte {
 		log.Debug(err)
 	}
 	return rawParamOut
-}
-
-func MakeEthRpcCall(client rpc.IEthRpc, cntAddress, data string, blockNumber int) (string, error) {
-
-	params := ethrpc.T{
-		To: cntAddress,
-		// the from field is a random hardcoded address
-		// because the ethrpc library for now doesn't support
-		// an empty from field :(
-		From: "0x2e34c46ad2f08a66bc9ff2e9fe5918590551e958",
-		Data: data,
-	}
-
-	hexBlockNo := fmt.Sprintf("0x%x", blockNumber)
-
-	return client.EthCall(params, hexBlockNo)
 }

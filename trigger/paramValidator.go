@@ -3,6 +3,7 @@ package trigger
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
@@ -23,7 +24,8 @@ import (
 // This means that when validating strings, bytes and arrays
 // we simply compare their Keccak hash
 
-func ValidateTopicParam(topicParam string, paramType string, attribute string, predicate Predicate, index *int) (bool, string) {
+func ValidateTopicParam(topicParam, paramType, paramCurrency string, condition ConditionEvent, tokenApi tokenapi.ITokenAPI) (bool, string) {
+	attribute := condition.Attribute
 
 	// bool
 	if paramType == "bool" {
@@ -62,7 +64,15 @@ func ValidateTopicParam(topicParam string, paramType string, attribute string, p
 	// int
 	intRgx := regexp.MustCompile(`u?int\d*$`)
 	if intRgx.MatchString(paramType) {
-		return validatePredBigInt(predicate, utils.MakeBigInt(topicParam), utils.MakeBigInt(attribute)), topicParam
+		if paramCurrency != "" {
+			convertedValue, err := convertToCurrency(tokenApi, paramCurrency, condition.AttributeCurrency, utils.MakeBigInt(topicParam))
+			if err != nil {
+				return false, ""
+			}
+			return validatePredBigFloat(condition.Predicate, convertedValue, utils.MakeBigFloat(attribute)), convertedValue.String()
+		}
+
+		return validatePredBigInt(condition.Predicate, utils.MakeBigInt(topicParam), utils.MakeBigInt(attribute)), topicParam
 	}
 
 	// int[N] and int[] - Keccak hash, only Eq supported
@@ -77,10 +87,11 @@ func ValidateTopicParam(topicParam string, paramType string, attribute string, p
 
 func ValidateParam(
 	rawParam []byte,
-	parameterType, attribute string,
+	parameterType, parameterCurrency, attribute, attributeCurrency string,
 	predicate Predicate,
 	index *int,
-	component Component) (bool, interface{}) {
+	component Component,
+	tokenApi tokenapi.ITokenAPI) (bool, interface{}) {
 
 	var err error
 
@@ -92,7 +103,7 @@ func ValidateParam(
 			return false, nil
 		}
 		compValue := param.(map[string]interface{})[component.Name]
-		return ValidateParam(getRawParam(compValue), component.Type, attribute, predicate, index, Component{})
+		return ValidateParam(getRawParam(compValue), component.Type, parameterCurrency, attribute, attributeCurrency, predicate, index, Component{}, tokenApi)
 	}
 	// uint8
 	if parameterType == "uint8[]" {
@@ -180,6 +191,13 @@ func ValidateParam(
 			log.Debug(err)
 			return false, nil
 		}
+		if parameterCurrency != "" {
+			convertedValue, err := convertToCurrency(tokenApi, parameterCurrency, attributeCurrency, param)
+			if err != nil {
+				return false, nil
+			}
+			return validatePredBigFloat(predicate, convertedValue, utils.MakeBigFloat(attribute)), param
+		}
 		return validatePredBigInt(predicate, param, utils.MakeBigInt(attribute)), param
 	}
 	// u?int[] && u?int[N]
@@ -191,6 +209,13 @@ func ValidateParam(
 			return false, nil
 		}
 		if index != nil && *index < len(param) && predicate == Eq {
+			if parameterCurrency != "" {
+				convertedValue, err := convertToCurrency(tokenApi, parameterCurrency, attributeCurrency, param[*index])
+				if err != nil {
+					return false, nil
+				}
+				return validatePredBigFloat(predicate, convertedValue, utils.MakeBigFloat(attribute)), param
+			}
 			return validatePredBigIntArray(predicate, param, utils.MakeBigInt(attribute), index), param[*index]
 		}
 		return validatePredBigIntArray(predicate, param, utils.MakeBigInt(attribute), index), param
@@ -481,4 +506,16 @@ func compareBytesWithParameter(b []byte, p string) bool {
 	param := bytes.TrimRight(common.Hex2Bytes(p), "\x00")
 
 	return common.Bytes2Hex(param) == common.Bytes2Hex(b)
+}
+
+func convertToCurrency(tokenApi tokenapi.ITokenAPI, parameterCurrency, attributeCurrency string, param *big.Int) (*big.Float, error) {
+	exchangeRate, err := tokenApi.GetExchangeRate(parameterCurrency, attributeCurrency)
+	if err != nil {
+		return new(big.Float), err
+	}
+	decimals := tokenApi.Decimals(parameterCurrency)
+	scaledValue := utils.MakeBigFloat(tokenApi.FromWei(param, decimals))
+	convertedValue := scaledValue.Mul(scaledValue, utils.MakeBigFloat(exchangeRate))
+
+	return convertedValue, nil
 }

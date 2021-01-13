@@ -4,6 +4,7 @@ import (
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/sirupsen/logrus"
@@ -15,11 +16,11 @@ func EventMatcher(
 	blocksChan chan *ethrpc.Block,
 	matchesChan chan trigger.IMatch,
 	idb aws.IDB,
-	rpcCli rpc.IEthRpc) {
+	tokenApi tokenapi.ITokenAPI) {
 
 	for {
 		block := <-blocksChan
-		rpcCli.ResetCounterAndLogStats(block.Number - 1)
+		tokenApi.GetRPCCli().ResetCounterAndLogStats(block.Number - 1)
 		start := time.Now()
 		logrus.Info("Events: new -> ", block.Number)
 
@@ -28,14 +29,14 @@ func EventMatcher(
 			logrus.Fatal(err)
 		}
 
-		logs, err := getLogsForBlock(rpcCli, block.Hash, triggers)
+		logs, err := getLogsForBlock(tokenApi.GetRPCCli(), block.Hash, triggers)
 		if err != nil {
 			logrus.Fatalf("cannot fetch logs for block %d: %s\n", block.Number, err)
 		}
 		// fmt.Println(utils.GimmePrettyJson(logs))
 
 		for _, tg := range triggers {
-			matchingEvents := trigger.MatchEvent(tg, logs, rpcCli)
+			matchingEvents := trigger.MatchEvent(tg, logs, tokenApi)
 			for _, match := range matchingEvents {
 				matchUUID, err := idb.LogMatch(match)
 				if err != nil {

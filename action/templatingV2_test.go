@@ -1,7 +1,7 @@
 package action
 
 import (
-	"fmt"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/stretchr/testify/assert"
 	"math/big"
@@ -13,7 +13,7 @@ func TestTxMatching(t *testing.T) {
 	block, _ := trigger.GetBlockFromFile("../resources/blocks/block1.json")
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/t2.json")
 
-	matches := trigger.MatchTransaction(tg, block)
+	matches := trigger.MatchTransaction(tg, block, mockTokenApi)
 
 	templateText := `
 Block Number is: {{ .Block.Number }}
@@ -178,7 +178,7 @@ func TestEventMatching(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, logs, mockETHCli{})
+	matches := trigger.MatchEvent(tg1, logs, mockTokenApi)
 
 	matches[0].EventParams["arrayParam"] = []string{"hello", "world", "yo yo"}
 
@@ -432,19 +432,41 @@ func TestMathFunctions(t *testing.T) {
 }
 
 func TestTokenAPI(t *testing.T) {
+	assert.Equal(t, 0, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+
 	template := `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "usd" }}`
 	rendered, err := renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
+	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
 
 	template = `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "USD" }}`
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
+	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
 
 	template = `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "xxx" }}`
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.Error(t, err)
-	fmt.Println(rendered)
 	assert.Equal(t, "", rendered)
+	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+
+	template = `{{ toFiat "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" "USD" }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.NotEqual(t, "0", rendered)
+	assert.Equal(t, 2, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+
+	template = `{{ toFiat "0x0000000000000000000000000000000000000000" "USD" }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.NotEqual(t, "0", rendered)
+	assert.Equal(t, 2, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+
+	template = `{{ toFiat "0x194ebd173f6cdace046c53eacce9b953f28411d1" "USD" }}`
+	rendered, err = renderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.NotEqual(t, "0", rendered)
+	assert.Equal(t, 3, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
 }

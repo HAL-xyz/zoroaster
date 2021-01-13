@@ -11,34 +11,35 @@ import (
 func TestNewTriggerJson(t *testing.T) {
 	json, _ := ioutil.ReadFile("../resources/triggers/t1.json")
 	_, err := NewTriggerJson(string(json))
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 }
 
-// WaT
-func TestTriggerJson_ToTrigger(t *testing.T) {
-	json, _ := ioutil.ReadFile("../resources/triggers/t1.json")
+func TestWaT(t *testing.T) {
+	json, err := ioutil.ReadFile("../resources/triggers/t1.json")
+	assert.NoError(t, err)
 
-	tjs, _ := NewTriggerJson(string(json))
+	tjs, err := NewTriggerJson(string(json))
+	assert.NoError(t, err)
 	trig, err := tjs.ToTrigger()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	_, ok := trig.Filters[0].Condition.(ConditionTo)
 	assert.True(t, ok)
 }
 
-// WaC
-func TestTriggerJson_ToTrigger2(t *testing.T) {
-	json, _ := ioutil.ReadFile("../resources/triggers/wac1.json")
+func TestWaC(t *testing.T) {
+	json, err := ioutil.ReadFile("../resources/triggers/wac1.json")
+	assert.NoError(t, err)
 
-	tjs, _ := NewTriggerJson(string(json))
+	tjs, err := NewTriggerJson(string(json))
+	assert.NoError(t, err)
 	trig, err := tjs.ToTrigger()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	_, ok := trig.Outputs[0].Condition.(ConditionOutput)
 	assert.True(t, ok)
 }
 
-// WaC with Components
 func TestWaCWithComponents(t *testing.T) {
 	js := `
 {
@@ -71,29 +72,158 @@ func TestWaCWithComponents(t *testing.T) {
 	assert.Equal(t, "uint256", tg.Outputs[0].Component.Type)
 }
 
-// WaE
-func TestTriggerJson_ToTrigger3(t *testing.T) {
-	json, _ := ioutil.ReadFile("../resources/triggers/ev1.json")
+func TestWaE(t *testing.T) {
+	json, err := ioutil.ReadFile("../resources/triggers/ev1.json")
+	assert.NoError(t, err)
 
-	tjs, _ := NewTriggerJson(string(json))
+	tjs, err := NewTriggerJson(string(json))
+	assert.NoError(t, err)
 	trig, err := tjs.ToTrigger()
-	assert.Nil(t, err)
+	assert.NoError(t, err)
 
 	_, ok := trig.Filters[0].Condition.(ConditionEvent)
 	assert.True(t, ok)
 	assert.Equal(t, "Transfer", trig.Filters[0].EventName)
 }
 
+func TestWaEWithAttributeCurrency(t *testing.T) {
+	js := `
+{
+  "Filters": [
+	{
+	  "FilterType":"CheckEventParameter",
+	  "EventName": "ProtectionAdded",
+	  "ParameterName":"_reserveAmount",
+	  "ParameterType":"uint256",
+	  "ParameterCurrency": "_reserveToken",
+	  "Condition":{
+		"Predicate":"Eq",
+		"Attribute":"677420000",
+		"AttributeCurrency": "usd"
+	  }
+	}
+  ],
+  "ContractABI": "",
+  "ContractAdd": "0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55",
+  "TriggerName": "NewAdd1",
+  "TriggerType": "WatchEvents"
+}
+`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+	assert.Equal(t, "_reserveToken", tg.Filters[0].ParameterCurrency)
+
+	c, ok := tg.Filters[0].Condition.(ConditionEvent)
+	assert.True(t, ok)
+	assert.Equal(t, "usd", c.AttributeCurrency)
+}
+
+func TestWaEWithAttributeCurrencyMalformed(t *testing.T) {
+	js := `
+{
+  "Filters": [
+	{
+	  "FilterType":"CheckEventParameter",
+	  "EventName": "ProtectionAdded",
+	  "ParameterName":"_reserveAmount",
+	  "ParameterType":"uint256",
+	  "Condition":{
+		"Predicate":"Eq",
+		"Attribute":"677420000"
+		"AttributeCurrency":"usd"
+	  }
+	}
+  ],
+  "ContractABI": "",
+  "ContractAdd": "0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55",
+  "TriggerName": "NewAdd1",
+  "TriggerType": "WatchEvents"
+}
+`
+	_, err := NewTriggerFromJson(js)
+	assert.Error(t, err)
+}
+
+func TestWaCWithAttributeCurrency(t *testing.T) {
+	js := `
+{
+   "Inputs":[
+   ],
+   "Outputs":[
+      {
+         "Condition":{
+            "Attribute":"10000000000000",
+            "Predicate":"BiggerThan",
+			"AttributeCurrency": "usd"
+         },
+         "ReturnType":"tuple",
+         "ReturnIndex":0,
+		 "ReturnCurrency":"0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+         "Component":{
+               "Name":"d",
+               "Type":"uint256"
+		 }
+      }
+   ],
+   "ContractABI":"",
+   "ContractAdd":"0x8d22F1a9dCe724D8c1B4c688D75f17A2fE2D32df",
+   "TriggerName":"some trigger",
+   "TriggerType":"WatchContracts",
+   "FunctionName":"getSpotPrice"
+}
+`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	c, ok := tg.Outputs[0].Condition.(ConditionOutput)
+	assert.True(t, ok)
+
+	assert.Equal(t, "usd", c.AttributeCurrency)
+	assert.Equal(t, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", tg.Outputs[0].ReturnCurrency)
+}
+
+func TestWaCWithAttributeCurrencyMalformed(t *testing.T) {
+	js := `
+{
+   "Inputs":[
+   ],
+   "Outputs":[
+      {
+         "Condition":{
+            "Attribute":"10000000000000",
+            "Predicate":"BiggerThan",
+			"AttributeCurrency": "usd"
+         },
+         "ReturnType":"tuple",
+         "ReturnIndex":0,
+		 "ReturnCurrency":"0xeeeeeee",
+         "Component":{
+               "Name":"d",
+               "Type":"uint256"
+		 }
+      }
+   ],
+   "ContractABI":"",
+   "ContractAdd":"0x8d22F1a9dCe724D8c1B4c688D75f17A2fE2D32df",
+   "TriggerName":"some trigger",
+   "TriggerType":"WatchContracts",
+   "FunctionName":"getSpotPrice"
+}
+`
+	_, err := NewTriggerFromJson(js)
+	assert.Error(t, err)
+}
+
 func TestMalformedJsonTrigger(t *testing.T) {
 	// handle broken TriggerJson creation
-	_, ok := NewTriggerFromJson("def not json")
-	assert.NotNil(t, ok)
+	_, err := NewTriggerFromJson("def not json")
+	assert.Error(t, err)
 
 	// handle broken Trigger creation
-	_, ok2 := GetTriggerFromFile("../resources/triggers/t11.json")
-	assert.NotNil(t, ok2)
+	_, err2 := GetTriggerFromFile("../resources/triggers/t11.json")
+	assert.Error(t, err2)
 
 	// handle some valid but random json
-	_, ok3 := NewTriggerFromJson(`{ "hello": 1 }`)
-	assert.NotNil(t, ok3)
+	_, err3 := NewTriggerFromJson(`{ "hello": 1 }`)
+	assert.Error(t, err3)
 }

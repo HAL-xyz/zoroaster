@@ -1,7 +1,6 @@
 package trigger
 
 import (
-	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/utils"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -18,11 +17,11 @@ func TestValidateFilter1(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// BasicFilter / To
-	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[0], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(&block.Transactions[1], &trigger.Filters[0], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[0], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(&block.Transactions[1], &trigger.Filters[0], cnt, abi, tid, mockTokenApi), false)
 
 	// BasicFilter / Nonce
-	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[2], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[2], cnt, abi, tid, mockTokenApi), true)
 }
 
 func TestValidateFilter2(t *testing.T) {
@@ -31,8 +30,8 @@ func TestValidateFilter2(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// Address
-	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[1], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(&block.Transactions[1], &trigger.Filters[1], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(&block.Transactions[1], &trigger.Filters[1], cnt, abi, tid, mockTokenApi), false)
 }
 
 func TestValidateFilter3(t *testing.T) {
@@ -41,8 +40,8 @@ func TestValidateFilter3(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// From
-	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[0], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(&block.Transactions[5], &trigger.Filters[0], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[0], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(&block.Transactions[5], &trigger.Filters[0], cnt, abi, tid, mockTokenApi), false)
 }
 
 func TestValidateFilter4(t *testing.T) {
@@ -51,19 +50,19 @@ func TestValidateFilter4(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// Value
-	assert.Equal(t, validateFilter(&block.Transactions[2], &trigger.Filters[0], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[0], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(&block.Transactions[2], &trigger.Filters[0], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[0], cnt, abi, tid, mockTokenApi), false)
 
 	// Gas
-	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[1], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(&block.Transactions[5], &trigger.Filters[1], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(&block.Transactions[0], &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(&block.Transactions[5], &trigger.Filters[1], cnt, abi, tid, mockTokenApi), false)
 
 	// GasPrice
-	assert.Equal(t, validateFilter(&block.Transactions[7], &trigger.Filters[2], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(&block.Transactions[4], &trigger.Filters[2], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(&block.Transactions[7], &trigger.Filters[2], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(&block.Transactions[4], &trigger.Filters[2], cnt, abi, tid, mockTokenApi), false)
 
 	// Nonce
-	assert.Equal(t, validateFilter(&block.Transactions[5], &trigger.Filters[3], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(&block.Transactions[5], &trigger.Filters[3], cnt, abi, tid, mockTokenApi), true)
 }
 
 func TestValidateFilter5(t *testing.T) {
@@ -72,19 +71,19 @@ func TestValidateFilter5(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// uint256[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid), false)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid, mockTokenApi), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid, mockTokenApi), false)
 
 	// bytes14[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[3], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[4], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[3], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[4], cnt, abi, tid, mockTokenApi), true)
 
 	// Gas
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[5], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[5], cnt, abi, tid, mockTokenApi), true)
 
 	// Nonce
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[6], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[6], cnt, abi, tid, mockTokenApi), true)
 }
 
 func TestValidateFilter6(t *testing.T) {
@@ -93,12 +92,12 @@ func TestValidateFilter6(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// address[N]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid, mockTokenApi), true)
 
 	// uint256[N]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[3], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[3], cnt, abi, tid, mockTokenApi), true)
 }
 
 func TestValidateFilter7(t *testing.T) {
@@ -107,13 +106,13 @@ func TestValidateFilter7(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// uint256
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid, mockTokenApi), true)
 
 	// bool
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
 
 	// int128
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid, mockTokenApi), true)
 }
 
 func TestValidateFilter8(t *testing.T) {
@@ -122,13 +121,13 @@ func TestValidateFilter8(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// int128[N]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid, mockTokenApi), true)
 
 	// int[N]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
 
 	// int40
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid, mockTokenApi), true)
 }
 
 func TestValidateFilter9(t *testing.T) {
@@ -137,18 +136,18 @@ func TestValidateFilter9(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// int32
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid, mockTokenApi), true)
 
 	// int32[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
 
 	// int32[6]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[10], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[10], cnt, abi, tid, mockTokenApi), true)
 
 	// Index int32[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[7], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[8], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[7], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[8], cnt, abi, tid, mockTokenApi), false)
 }
 
 func TestValidateFilter10(t *testing.T) {
@@ -157,15 +156,15 @@ func TestValidateFilter10(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// address[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[3], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[4], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[3], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[4], cnt, abi, tid, mockTokenApi), true)
 
 	// bytes1[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[5], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[5], cnt, abi, tid, mockTokenApi), true)
 
 	// string[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[6], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[9], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[6], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[9], cnt, abi, tid, mockTokenApi), false)
 }
 
 func TestValidateFilter11(t *testing.T) {
@@ -177,11 +176,11 @@ func TestValidateFilter11(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// wrong func param type - for now we're just happy to log and assume the filter didn't match
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid), false)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[0], cnt, abi, tid, mockTokenApi), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid, mockTokenApi), false)
 
 	// checkFunctionCalled
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid, mockTokenApi), true)
 
 	log.SetLevel(log.DebugLevel)
 }
@@ -192,19 +191,19 @@ func TestValidateFilter12(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// Index on bigInt[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[2], cnt, abi, tid, mockTokenApi), false)
 
 	// Index on address[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[3], cnt, abi, tid), true)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[4], cnt, abi, tid), false)
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[5], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[3], cnt, abi, tid, mockTokenApi), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[4], cnt, abi, tid, mockTokenApi), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[5], cnt, abi, tid, mockTokenApi), false)
 
 	// ConditionFunctionCalled
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[6], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[6], cnt, abi, tid, mockTokenApi), true)
 
 	// address[]
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[7], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[7], cnt, abi, tid, mockTokenApi), true)
 }
 
 func TestValidateFilter13(t *testing.T) {
@@ -217,11 +216,11 @@ func TestValidateFilter13(t *testing.T) {
 
 	// CheckFunctionParameter - different method name
 	trigger.Filters[7].FunctionName = "xxx"
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[7], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[7], cnt, abi, tid, mockTokenApi), false)
 
 	// ConditionFunctionCalled - wrong ABI
 	trigger.ContractABI = "xxx"
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[6], cnt, abi, tid), false)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[6], cnt, abi, tid, mockTokenApi), false)
 
 	log.SetLevel(log.DebugLevel)
 }
@@ -232,7 +231,7 @@ func TestValidateFilter14(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// uint32
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
 }
 
 func TestValidateFilter15(t *testing.T) {
@@ -241,7 +240,7 @@ func TestValidateFilter15(t *testing.T) {
 	tid, abi, cnt := trigger.TriggerUUID, &trigger.ContractABI, trigger.ContractAdd
 
 	// uint16
-	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid), true)
+	assert.Equal(t, validateFilter(tx, &trigger.Filters[1], cnt, abi, tid, mockTokenApi), true)
 }
 
 // Testing one Trigger vs one Transaction
@@ -249,17 +248,17 @@ func TestValidateTrigger(t *testing.T) {
 	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
 	trigger, _ := GetTriggerFromFile("../resources/triggers/t1.json")
 
-	assert.Equal(t, validateTrigger(trigger, &block.Transactions[0]), true)
-	assert.Equal(t, validateTrigger(trigger, &block.Transactions[1]), false)
+	assert.Equal(t, validateTrigger(trigger, &block.Transactions[0], mockTokenApi), true)
+	assert.Equal(t, validateTrigger(trigger, &block.Transactions[1], mockTokenApi), false)
 }
 
 func TestValidateTrigger2(t *testing.T) {
 	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
 	trigger, _ := GetTriggerFromFile("../resources/triggers/t2.json")
 
-	assert.Equal(t, validateTrigger(trigger, &block.Transactions[6]), true)
-	assert.Equal(t, validateTrigger(trigger, &block.Transactions[1]), false)
-	assert.Equal(t, validateTrigger(trigger, &block.Transactions[8]), true)
+	assert.Equal(t, validateTrigger(trigger, &block.Transactions[6], mockTokenApi), true)
+	assert.Equal(t, validateTrigger(trigger, &block.Transactions[1], mockTokenApi), false)
+	assert.Equal(t, validateTrigger(trigger, &block.Transactions[8], mockTokenApi), true)
 }
 
 func TestValidateTriggerWithNoInputData(t *testing.T) {
@@ -267,8 +266,8 @@ func TestValidateTriggerWithNoInputData(t *testing.T) {
 	trigger, err := GetTriggerFromFile("../resources/triggers/t15.json")
 	assert.NoError(t, err)
 
-	block, err := config.CliMain.EthGetBlockByNumber(9466264, true)
-	res := MatchTransaction(trigger, block)
+	block, err := TokenApiMainnet.GetRPCCli().EthGetBlockByNumber(9466264, true)
+	res := MatchTransaction(trigger, block, mockTokenApi)
 
 	assert.Equal(t, 1, len(res))
 	assert.Equal(t, "0xd11c6e75052c838c944608c478da95c09c2d239e417afbcb869c87469643ce57", res[0].Tx.Hash)
@@ -281,7 +280,7 @@ func TestMatchTrigger(t *testing.T) {
 	block, _ := GetBlockFromFile("../resources/blocks/block1.json")
 	trigger, _ := GetTriggerFromFile("../resources/triggers/t2.json")
 
-	matches := MatchTransaction(trigger, block)
+	matches := MatchTransaction(trigger, block, mockTokenApi)
 
 	assert.Equal(t, len(matches), 2)
 	assert.Equal(t, *(matches[0].Tx.TransactionIndex), 6)
