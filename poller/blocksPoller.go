@@ -3,6 +3,7 @@ package poller
 import (
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
@@ -26,7 +27,7 @@ func BlocksPoller(
 		log.Fatal(err1, err2, err3)
 	}
 
-	ticker := time.NewTicker(2000 * time.Millisecond)
+	ticker := time.NewTicker(time.Duration(config.Zconf.PollingInterval) * time.Second)
 	for range ticker.C {
 		lastBlockSeen, err := client.EthBlockNumber()
 		if err != nil {

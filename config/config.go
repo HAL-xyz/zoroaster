@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
@@ -14,10 +13,9 @@ type ZConfiguration struct {
 	ConfigFile            string
 	EthNode               string // the main eth node
 	RinkebyNode           string // Rinkeby network, used for tests
-	LogsPath              string
-	LogsFile              string
 	Database              ZoroDB
 	BlocksDelay           int
+	PollingInterval       int
 	TwitterConsumerKey    string
 	TwitterConsumerSecret string
 }
@@ -51,7 +49,6 @@ func (s Stage) String() string {
 
 // ENV variables
 const (
-	logsPath              = "LOGS_PATH"
 	blocksDelay           = "BLOCKS_DELAY"
 	dbHost                = "DB_HOST"
 	dbName                = "DB_NAME"
@@ -62,6 +59,7 @@ const (
 	twitterConsumerKey    = "TWITTER_CONSUMER_KEY"
 	twitterConsumerSecret = "TWITTER_CONSUMER_SECRET"
 	network               = "NETWORK"
+	pollingInterval       = "POLLING_INTERVAL"
 )
 
 // DB tables
@@ -98,12 +96,6 @@ func NewConfig() *ZConfiguration {
 	zconfig.Database.TableActions = tableActions
 	zconfig.Database.TableUsers = tableUsers
 	zconfig.Database.Port = dbPort
-
-	zconfig.LogsFile = os.Getenv(logsPath)
-	if zconfig.LogsFile == "" {
-		log.Fatal("no logs path set in local env ", logsPath)
-	}
-	zconfig.LogsFile = fmt.Sprintf("%s/%s.log", zconfig.LogsPath, zconfig.Stage)
 
 	delay := os.Getenv(blocksDelay)
 	intDelay, err := strconv.Atoi(delay)
@@ -161,6 +153,13 @@ func NewConfig() *ZConfiguration {
 	if zconfig.TwitterConsumerSecret == "" {
 		log.Fatal("no twitter consumer secret set in local env ", twitterConsumerSecret)
 	}
+
+	interval := os.Getenv(pollingInterval)
+	intervalSeconds, err := strconv.Atoi(interval)
+	if interval == "" || err != nil {
+		log.Fatalf("cannot use %s as polling interval", interval)
+	}
+	zconfig.PollingInterval = intervalSeconds
 
 	return &zconfig
 }

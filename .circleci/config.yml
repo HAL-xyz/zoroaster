@@ -50,7 +50,8 @@ workflows:
           container=zoroaster-service,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
           container=zoroaster-service,name=LOGS_PATH,value=${LOGS_PATH},
           container=zoroaster-service,name=NETWORK,value=${NETWORK_ETH_MAINNET},
-          container=zoroaster-service,name=BLOCKS_DELAY,value=${BLOCKS_DELAY}"
+          container=zoroaster-service,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
+          container=zoroaster-service,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_STAGING}"
           filters:
             branches:
               only: staging
@@ -72,7 +73,8 @@ workflows:
           container=zoroaster-service-xdai,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
           container=zoroaster-service-xdai,name=LOGS_PATH,value=${LOGS_PATH},
           container=zoroaster-service-xdai,name=NETWORK,value=${NETWORK_XDAI_MAINNET},
-          container=zoroaster-service-xdai,name=BLOCKS_DELAY,value=${BLOCKS_DELAY}"
+          container=zoroaster-service-xdai,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
+          container=zoroaster-service-xdai,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_XDAI}"
           filters:
             branches:
               only: staging
@@ -94,7 +96,8 @@ workflows:
           container=zoroaster-prod-service,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
           container=zoroaster-prod-service,name=LOGS_PATH,value=${LOGS_PATH},
           container=zoroaster-prod-service,name=NETWORK,value=${NETWORK_ETH_MAINNET},
-          container=zoroaster-prod-service,name=BLOCKS_DELAY,value=${BLOCKS_DELAY}"
+          container=zoroaster-prod-service,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
+          container=zoroaster-prod-service,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_PROD}"
           filters:
             branches:
               only: master
@@ -116,7 +119,8 @@ workflows:
           container=zoroaster-prod-service-xdai,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
           container=zoroaster-prod-service-xdai,name=LOGS_PATH,value=${LOGS_PATH},
           container=zoroaster-prod-service-xdai,name=NETWORK,value=${NETWORK_XDAI_MAINNET},
-          container=zoroaster-prod-service-xdai,name=BLOCKS_DELAY,value=${BLOCKS_DELAY}"
+          container=zoroaster-prod-service-xdai,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
+          container=zoroaster-prod-service-xdai,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_XDAI}"
           filters:
             branches:
               only: master
