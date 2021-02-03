@@ -34,6 +34,7 @@ type TokenAPI struct {
 	tokenAddToPrice *cache.Cache
 	httpCli         *http.Client
 	rpcCli          rpc.IEthRpc
+	tokenCache      *cache.Cache
 }
 
 // package-level singleton accessed through GetTokenAPI()
@@ -42,6 +43,7 @@ var tokenApi = &TokenAPI{
 	tokenAddToPrice: cache.New(5*time.Minute, 5*time.Minute),
 	httpCli:         &http.Client{},
 	rpcCli:          rpc.New(ethrpc.New(config.Zconf.EthNode), "templating client"),
+	tokenCache:      cache.New(12*time.Hour, 12*time.Hour),
 }
 
 func GetTokenAPI() *TokenAPI {
@@ -54,6 +56,7 @@ func New(cli rpc.IEthRpc) *TokenAPI {
 		tokenAddToPrice: cache.New(5*time.Minute, 5*time.Minute),
 		httpCli:         &http.Client{},
 		rpcCli:          cli,
+		tokenCache:      cache.New(12*time.Hour, 12*time.Hour),
 	}
 }
 
@@ -102,7 +105,14 @@ func (t TokenAPI) Decimals(address string) string {
 	if isEthereumAddress(address) {
 		return "18"
 	}
-	return t.callERC20(address, "0x313ce567", "decimals")
+
+	dec, found := t.tokenCache.Get(address)
+	if found {
+		return dec.(string)
+	}
+	dec = t.callERC20(address, "0x313ce567", "decimals")
+	t.tokenCache.Set(address, dec, cache.DefaultExpiration)
+	return dec.(string)
 }
 
 func (t TokenAPI) BalanceOf(token string, user string) string {
