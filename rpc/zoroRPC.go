@@ -48,7 +48,7 @@ func (z *ZoroRPC) ResetCounterAndLogStats(blockNo int) {
 	if z.label == "BlocksPoller" && z.calls <= 1 {
 		return
 	}
-	log.Infof("RPCStats: %s made %d calls for block %d\n", z.label, z.calls, blockNo)
+	log.Infof("RPCStats: %s made %d calls for block %d; cache size is %d", z.label, z.calls, blockNo, z.cache.ItemCount())
 	z.resetCounter()
 }
 

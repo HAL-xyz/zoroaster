@@ -13,8 +13,8 @@ func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, i
 
 	for {
 		block := <-blocksChan
+		api.GetRPCCli().ResetCounterAndLogStats(block.Number - 1)
 		start := time.Now()
-		log.Info("TX: new -> ", block.Number)
 
 		triggers, err := idb.LoadTriggersFromDB(trigger.WaT)
 		if err != nil {

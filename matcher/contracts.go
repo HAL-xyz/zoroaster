@@ -21,7 +21,6 @@ func ContractMatcher(
 		block := <-blocksChan
 		tokenApi.GetRPCCli().ResetCounterAndLogStats(block.Number - 1)
 		start := time.Now()
-		log.Info("CN: new -> ", block.Number)
 
 		triggers, err := idb.LoadTriggersFromDB(trigger.WaC)
 		if err != nil {

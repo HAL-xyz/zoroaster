@@ -22,7 +22,6 @@ func EventMatcher(
 		block := <-blocksChan
 		tokenApi.GetRPCCli().ResetCounterAndLogStats(block.Number - 1)
 		start := time.Now()
-		logrus.Info("Events: new -> ", block.Number)
 
 		triggers, err := idb.LoadTriggersFromDB(trigger.WaE)
 		if err != nil {
