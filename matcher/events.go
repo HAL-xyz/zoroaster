@@ -37,12 +37,12 @@ func EventMatcher(
 		for _, tg := range triggers {
 			matchingEvents := trigger.MatchEvent(tg, logs, tokenApi)
 			for _, match := range matchingEvents {
+				match.BlockTimestamp = block.Timestamp
 				matchUUID, err := idb.LogMatch(match)
 				if err != nil {
 					logrus.Fatal(err)
 				}
 				match.MatchUUID = matchUUID
-				match.BlockTimestamp = block.Timestamp
 				logrus.Debug("\tlogged one event with id ", matchUUID)
 				matchesChan <- *match
 			}
