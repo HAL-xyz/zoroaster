@@ -29,16 +29,13 @@ func ContractMatcher(
 
 		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
 		for _, m := range cnMatches {
-			matchUUID, err := idb.LogMatch(*m)
-			if err != nil {
+			if err = idb.LogMatch(m); err != nil {
 				log.Fatal(err)
 			}
-			m.MatchUUID = matchUUID
-			log.Debug("\tlogged one match with id ", matchUUID)
-			matchesChan <- *m
+			log.Debug("\tlogged one match with id ", m.MatchUUID)
+			matchesChan <- m
 		}
-		err = idb.SetLastBlockProcessed(block.Number, trigger.WaC)
-		if err != nil {
+		if err = idb.SetLastBlockProcessed(block.Number, trigger.WaC); err != nil {
 			log.Fatal(err)
 		}
 		err = idb.LogAnalytics(trigger.WaC, block.Number, len(triggers), block.Timestamp, start, time.Now())

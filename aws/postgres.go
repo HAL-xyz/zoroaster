@@ -189,30 +189,30 @@ func (cli PostgresClient) SetLastBlockProcessed(blockNo int, tgType trigger.TgTy
 	return nil
 }
 
-func (cli PostgresClient) LogMatch(match trigger.IMatch) (string, error) {
+func (cli PostgresClient) LogMatch(match trigger.IMatch) error {
 	matchData, err := json.Marshal(match.ToPersistent())
 	if err != nil {
-		return "", err
+		return err
 	}
 	q := fmt.Sprintf(
 		`INSERT INTO "%s" (
 			"trigger_uuid", "match_data", "created_at")
 			VALUES ($1, $2, $3) RETURNING uuid`, cli.conf.TableMatches)
 	var lastUUID string
-	log.Debug(match.GetTriggerUUID())
 	err = db.QueryRow(q, match.GetTriggerUUID(), strings.ReplaceAll(string(matchData), "\\u0000", ""), time.Now()).Scan(&lastUUID)
 	if err != nil {
-		return "", err
+		return err
 	}
+	match.SetMatchUUID(lastUUID)
 	// also update user's counter
 	upQ := fmt.Sprintf(`UPDATE "%s"
                 SET counter_current_month = counter_current_month + 1 
 				WHERE uuid = '%s' `, cli.conf.TableUsers, match.GetUserUUID())
 	_, err = db.Exec(upQ)
 	if err != nil {
-		return "", err
+		return err
 	}
-	return lastUUID, nil
+	return nil
 }
 
 func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error) {

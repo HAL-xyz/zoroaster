@@ -70,7 +70,7 @@ func TestHandleWebHookPost(t *testing.T) {
 		[]interface{}{"true"},
 	}
 
-	outcome := handleWebHookPost(url, cnMatch, mockHttpClient{})
+	outcome := handleWebHookPost(url, &cnMatch, mockHttpClient{})
 
 	expectedPayload := `{
    "BlockNumber":8888,
@@ -107,7 +107,7 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 		DecodedFnArgs:  map[string]interface{}{},
 		Tx:             tx,
 	}
-	outcome := handleWebHookPost(url, txMatch, mockHttpClient{})
+	outcome := handleWebHookPost(url, &txMatch, mockHttpClient{})
 
 	expectedPayload := `{
   "DecodedData": {
@@ -150,7 +150,7 @@ func TestHandleWebHookWrongStuff(t *testing.T) {
 		[]string{"true"},
 		[]interface{}{"true"},
 	}
-	outcome := handleWebHookPost(url, cnMatch, &http.Client{})
+	outcome := handleWebHookPost(url, &cnMatch, &http.Client{})
 
 	notFoundPattern := strings.HasPrefix(outcome.Outcome, `{"error":"Post https://foo.zyusfddsiu:`)
 	assert.True(t, notFoundPattern)
@@ -232,7 +232,7 @@ func TestHandleEmail1(t *testing.T) {
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
-	outcome := handleEmail(email, match, &mockSESClient{}, "")
+	outcome := handleEmail(email, &match, &mockSESClient{}, "")
 	expectedPayload := `{
  "Recipients":[
     "manlio.poltronieri@gmail.com",
@@ -266,7 +266,7 @@ func TestHandleEmail2(t *testing.T) {
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
-	outcome := handleEmail(email, match, &mockSESClient{}, "")
+	outcome := handleEmail(email, &match, &mockSESClient{}, "")
 
 	expectedPayload := `{
   "Recipients":[
@@ -302,7 +302,7 @@ func TestHandleEmail3(t *testing.T) {
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
-	outcome := handleEmail(email, match, &mockSESClient{}, "")
+	outcome := handleEmail(email, &match, &mockSESClient{}, "")
 	expectedPayload := `{
   "Recipients":[
      "manlio.poltronieri@gmail.com",
@@ -333,7 +333,7 @@ func TestHandleEmailWithEvents(t *testing.T) {
 		Body:    "body",
 	}
 
-	outcome := handleEmail(email, *matches[0], &mockSESClient{}, "")
+	outcome := handleEmail(email, matches[0], &mockSESClient{}, "")
 	expPayload := `{ 
    "Recipients":[ 
       "manlio.poltronieri@gmail.com",
@@ -356,7 +356,7 @@ func TestHandleEmailWithEvents(t *testing.T) {
    "Body":"body",
    "Subject":"Event email test"
 }`
-	outcome = handleEmail(email, *matches[0], &mockSESClient{}, "")
+	outcome = handleEmail(email, matches[0], &mockSESClient{}, "")
 
 	ok, err = utils.AreEqualJSON(expPayload, outcome.Payload)
 	assert.NoError(t, err)
@@ -382,7 +382,7 @@ func TestHandleDiscord(t *testing.T) {
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
-	outcome := handleDiscord(discordMsg, match, &mockHttpClient{}, "")
+	outcome := handleDiscord(discordMsg, &match, &mockHttpClient{}, "")
 
 	expectedPayload := `{"content":"Hello World Test on block 777"}`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
@@ -408,7 +408,7 @@ func TestHandleSlackBot(t *testing.T) {
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
-	outcome := handleSlackBot(slackMsg, match, &mockHttpClient{}, "")
+	outcome := handleSlackBot(slackMsg, &match, &mockHttpClient{}, "")
 
 	expectedPayload := `{"text":"Hello World Test on block 777"}`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)
@@ -448,7 +448,7 @@ func TestHandleTelegramBot(t *testing.T) {
 		BlockHash:      "0x",
 	}
 
-	outcome := handleTelegramBot(payload, match, &mockHttpClient{}, "")
+	outcome := handleTelegramBot(payload, &match, &mockHttpClient{}, "")
 
 	expectedPayload := `
 {
@@ -465,7 +465,7 @@ func TestHandleTelegramBot(t *testing.T) {
 	// test some broken cases
 
 	// 400
-	outcomeBadRequest := handleTelegramBot(payload, match, &mockHttpClient400{}, "")
+	outcomeBadRequest := handleTelegramBot(payload, &match, &mockHttpClient400{}, "")
 	assert.Equal(t, false, outcomeBadRequest.Success)
 
 	// wrong chat id
@@ -475,7 +475,7 @@ func TestHandleTelegramBot(t *testing.T) {
 		ChatId: "wrong", // missing @
 		Format: "HTML",
 	}
-	failedOutcome := handleTelegramBot(brokenChatId, match, &mockHttpClient{}, "")
+	failedOutcome := handleTelegramBot(brokenChatId, &match, &mockHttpClient{}, "")
 	assert.Equal(t, false, failedOutcome.Success)
 
 	// wrong formatting
@@ -485,7 +485,7 @@ func TestHandleTelegramBot(t *testing.T) {
 		ChatId: "-408369343",
 		Format: "whoops", // wrong formatting option
 	}
-	anotherFail := handleTelegramBot(brokenFormatting, match, &mockHttpClient{}, "")
+	anotherFail := handleTelegramBot(brokenFormatting, &match, &mockHttpClient{}, "")
 	assert.Equal(t, false, anotherFail.Success)
 }
 
@@ -507,7 +507,7 @@ func TestHandleNewTemplateSystem(t *testing.T) {
 		BlockTimestamp: 123,
 		BlockHash:      "0x",
 	}
-	outcome := handleSlackBot(slackMsg, match, &mockHttpClient{}, "v2")
+	outcome := handleSlackBot(slackMsg, &match, &mockHttpClient{}, "v2")
 
 	expectedPayload := `{"text":"Hello World Test on block 777"}`
 	ok, _ := utils.AreEqualJSON(expectedPayload, outcome.Payload)

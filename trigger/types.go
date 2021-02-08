@@ -14,6 +14,7 @@ type IMatch interface {
 	GetTriggerUUID() string
 	GetUserUUID() string
 	GetMatchUUID() string
+	SetMatchUUID(uuid string)
 }
 
 // A match persisted on the DB (in its json form)
@@ -162,6 +163,10 @@ func (m TxMatch) GetTriggerUUID() string {
 
 func (m TxMatch) GetMatchUUID() string {
 	return m.MatchUUID
+}
+
+func (m *TxMatch) SetMatchUUID(uuid string) {
+	m.MatchUUID = uuid
 }
 
 func (m TxMatch) GetUserUUID() string {
@@ -323,6 +328,10 @@ func (m CnMatch) GetMatchUUID() string {
 	return m.MatchUUID
 }
 
+func (m *CnMatch) SetMatchUUID(uuid string) {
+	m.MatchUUID = uuid
+}
+
 func (m CnMatch) GetUserUUID() string {
 	return m.Trigger.UserUUID
 }
@@ -466,6 +475,10 @@ func (m EventMatch) GetTriggerUUID() string {
 
 func (m EventMatch) GetMatchUUID() string {
 	return m.MatchUUID
+}
+
+func (m *EventMatch) SetMatchUUID(uuid string) {
+	m.MatchUUID = uuid
 }
 
 func (m EventMatch) GetUserUUID() string {

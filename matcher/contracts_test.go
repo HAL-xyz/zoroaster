@@ -132,9 +132,9 @@ func TestMatchContractsWithRealDB(t *testing.T) {
 
 	// just write the matches to the db
 	for _, m := range cnMatches {
-		uuid, err := psqlClient.LogMatch(m)
+		err := psqlClient.LogMatch(m)
 		assert.NoError(t, err)
-		assert.Len(t, uuid, 36)
+		assert.Len(t, m.MatchUUID, 36)
 	}
 
 	// subsequent calls won't match, because triggered is set to true

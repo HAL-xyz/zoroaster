@@ -24,12 +24,12 @@ func fillBodyTemplate(text string, payload trigger.IMatch, templateVersion strin
 	}
 	// legacy template system
 	switch m := payload.(type) {
-	case trigger.TxMatch:
-		return applyAllTemplateConversions(templateTransaction(text, m))
-	case trigger.CnMatch:
-		return applyAllTemplateConversions(templateContract(text, m))
-	case trigger.EventMatch:
-		return applyAllTemplateConversions(templateEvent(text, m))
+	case *trigger.TxMatch:
+		return applyAllTemplateConversions(templateTransaction(text, *m))
+	case *trigger.CnMatch:
+		return applyAllTemplateConversions(templateContract(text, *m))
+	case *trigger.EventMatch:
+		return applyAllTemplateConversions(templateEvent(text, *m))
 	default:
 		logrus.Warnf("Invalid match type %T", payload)
 		return text

@@ -38,17 +38,14 @@ func EventMatcher(
 			matchingEvents := trigger.MatchEvent(tg, logs, tokenApi)
 			for _, match := range matchingEvents {
 				match.BlockTimestamp = block.Timestamp
-				matchUUID, err := idb.LogMatch(match)
-				if err != nil {
+				if err = idb.LogMatch(match); err != nil {
 					logrus.Fatal(err)
 				}
-				match.MatchUUID = matchUUID
-				logrus.Debug("\tlogged one event with id ", matchUUID)
-				matchesChan <- *match
+				logrus.Debug("\tlogged one event with id ", match.MatchUUID)
+				matchesChan <- match
 			}
 		}
-		err = idb.SetLastBlockProcessed(block.Number, trigger.WaE)
-		if err != nil {
+		if err = idb.SetLastBlockProcessed(block.Number, trigger.WaE); err != nil {
 			logrus.Fatal(err)
 		}
 		logrus.Infof("\tEvents: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)

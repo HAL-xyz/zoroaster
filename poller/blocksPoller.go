@@ -63,7 +63,7 @@ func fetchLastBlock(
 			// Since templating client is shared between WaT/C/E, we reset the stats after every new
 			// block discovered by WaT. This way stats will be overall consistent, although they might
 			// be slightly off on a per-block basis.
-			client.ResetCounterAndLogStats(*lastBlockProcessed) // BlocksPoller eth client
+			client.ResetCounterAndLogStats(*lastBlockProcessed)          // BlocksPoller eth client
 			tokenapi.GetTokenAPI().ResetETHRPCstats(*lastBlockProcessed) // Templating eth client
 		}
 

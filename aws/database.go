@@ -21,7 +21,7 @@ type IDB interface {
 
 	SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error
 
-	LogMatch(match trigger.IMatch) (string, error)
+	LogMatch(match trigger.IMatch) error
 
 	UpdateMatchingTriggers(triggerIds []string)
 

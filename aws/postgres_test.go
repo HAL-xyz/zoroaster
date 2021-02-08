@@ -81,8 +81,9 @@ func TestPostgresClient_All(t *testing.T) {
 		DecodedFnArgs:  map[string]interface{}{},
 		Tx:             tx,
 	}
-	_, err = psqlClient.LogMatch(txMatch)
+	err = psqlClient.LogMatch(&txMatch)
 	assert.NoError(t, err)
+	assert.Len(t, txMatch.MatchUUID, 36)
 
 	// Log Contract Match
 	cnMatch := trigger.CnMatch{
@@ -94,7 +95,7 @@ func TestPostgresClient_All(t *testing.T) {
 		MatchedValues:  []string{},
 		AllValues:      nil,
 	}
-	matchUUID, err := psqlClient.LogMatch(cnMatch)
+	err = psqlClient.LogMatch(&cnMatch)
 	assert.NoError(t, err)
 
 	// Log Event Match
@@ -106,7 +107,7 @@ func TestPostgresClient_All(t *testing.T) {
 		EventParams:    map[string]interface{}{},
 		BlockTimestamp: 888888,
 	}
-	_, err = psqlClient.LogMatch(eventMatch)
+	err = psqlClient.LogMatch(&eventMatch)
 	assert.NoError(t, err)
 
 	// Update Matching Triggers: set triggered=true
@@ -140,7 +141,7 @@ func TestPostgresClient_All(t *testing.T) {
 }`
 	outcome := `{"HttpCode":200}`
 	o1 := trigger.Outcome{payload, outcome, true}
-	err = psqlClient.LogOutcome(&o1, matchUUID)
+	err = psqlClient.LogOutcome(&o1, cnMatch.MatchUUID)
 	assert.NoError(t, err)
 
 	// Get all the active actions
@@ -218,7 +219,7 @@ func TestPostgresClient_All(t *testing.T) {
 		MatchedValues:  []string{},
 		AllValues:      nil,
 	}
-	_, err = psqlClient.LogMatch(batmanMatch)
+	err = psqlClient.LogMatch(&batmanMatch)
 	assert.NoError(t, err)
 
 	newCounter, err := psqlClient.ReadString(fmt.Sprintf("SELECT counter_current_month FROM users WHERE uuid = '%s'", batmanTrigger.UserUUID))

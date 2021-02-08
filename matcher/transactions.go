@@ -23,16 +23,13 @@ func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, i
 		for _, tg := range triggers {
 			matchingTxs := trigger.MatchTransaction(tg, block, api)
 			for _, m := range matchingTxs {
-				matchUUID, err := idb.LogMatch(m)
-				if err != nil {
+				if err = idb.LogMatch(m); err != nil {
 					log.Fatal(err)
 				}
-				m.MatchUUID = matchUUID
-				matchesChan <- *m
+				matchesChan <- m
 			}
 		}
-		err = idb.SetLastBlockProcessed(block.Number, trigger.WaT)
-		if err != nil {
+		if err = idb.SetLastBlockProcessed(block.Number, trigger.WaT); err != nil {
 			log.Fatal(err)
 		}
 		log.Infof("\tTX: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)

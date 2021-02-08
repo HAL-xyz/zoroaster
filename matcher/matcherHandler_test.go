@@ -88,7 +88,7 @@ func TestProcessMatch(t *testing.T) {
 		BlockHash:      "0x",
 	}
 
-	outcomes := ProcessMatch(match, mockDB2{}, &mockSESClient{}, &mockHttpClient{})
+	outcomes := ProcessMatch(&match, mockDB2{}, &mockSESClient{}, &mockHttpClient{})
 
 	// web hook
 	expPayload := `{
