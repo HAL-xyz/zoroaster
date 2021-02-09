@@ -32,22 +32,17 @@ func ContractMatcher(
 			if err = idb.LogMatch(m); err != nil {
 				log.Fatal(err)
 			}
-			log.Debug("\tlogged one match with id ", m.MatchUUID)
+			log.Debug("logged one match with id ", m.MatchUUID)
 			matchesChan <- m
 		}
 		if err = idb.SetLastBlockProcessed(block.Number, trigger.WaC); err != nil {
 			log.Fatal(err)
 		}
-		err = idb.LogAnalytics(trigger.WaC, block.Number, len(triggers), block.Timestamp, start, time.Now())
-		if err != nil {
-			log.Warn("cannot log analytics: ", err)
-		}
+		log.Infof("CN: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)
 	}
 }
 
 func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb aws.IDB, tokenApi tokenapi.ITokenAPI) []*trigger.CnMatch {
-
-	start := time.Now()
 
 	allTriggers, err := idb.LoadTriggersFromDB(trigger.WaC)
 	if err != nil {
@@ -59,7 +54,7 @@ func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb a
 	for _, tg := range allTriggers {
 		match, err := trigger.MatchContract(tokenApi, tg, blockNo)
 		if err != nil {
-			log.Infof("WaC error for trigger %s: %s", tg.TriggerUUID, err.Error())
+			log.Debug("WaC error for trigger %s: %s", tg.TriggerUUID, err.Error())
 			triggersWithErrorsUUIDs = append(triggersWithErrorsUUIDs, tg.TriggerUUID)
 			continue
 		}
@@ -74,7 +69,6 @@ func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb a
 	updateStatusForMatchingTriggers(idb, cnMatches)
 	updateStatusForNonMatchingTriggers(idb, cnMatches, allTriggers, triggersWithErrorsUUIDs)
 
-	log.Infof("\tCN: Processed %d triggers in %s from block %d", len(allTriggers), time.Since(start), blockNo)
 	return matchesToActUpon
 }
 

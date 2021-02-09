@@ -3,7 +3,6 @@ package aws
 import (
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/trigger"
-	"time"
 )
 
 type IDB interface {
@@ -28,8 +27,6 @@ type IDB interface {
 	UpdateNonMatchingTriggers(triggerIds []string)
 
 	GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, error)
-
-	LogAnalytics(tgType trigger.TgType, blockNo, triggersNo, blockTime int, start, end time.Time) error
 
 	ReadSavedMonth() (int, error)
 

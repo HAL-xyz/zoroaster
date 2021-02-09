@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"log"
 	"testing"
-	"time"
 )
 
 var psqlClient = NewPostgresClient(config.Zconf)
@@ -172,10 +171,6 @@ func TestPostgresClient_All(t *testing.T) {
 	v, err := psqlClient.ReadString("SELECT wat_last_block_processed FROM state WHERE network_id='2_eth_rinkeby'")
 	assert.NoError(t, err)
 	assert.Equal(t, "10", v) // this was set at the beginning
-
-	// Write analytics
-	err = psqlClient.LogAnalytics(trigger.WaT, 9999, 100, int(time.Now().Unix()), time.Now(), time.Now().Add(10*time.Second))
-	assert.NoError(t, err)
 
 	/* Test user limits */
 

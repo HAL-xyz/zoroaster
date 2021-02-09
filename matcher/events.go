@@ -48,12 +48,7 @@ func EventMatcher(
 		if err = idb.SetLastBlockProcessed(block.Number, trigger.WaE); err != nil {
 			logrus.Fatal(err)
 		}
-		logrus.Infof("\tEvents: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)
-
-		err = idb.LogAnalytics(trigger.WaE, block.Number, len(triggers), block.Timestamp, start, time.Now())
-		if err != nil {
-			logrus.Warn("cannot log analytics: ", err)
-		}
+		logrus.Infof("Events: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)
 	}
 }
 

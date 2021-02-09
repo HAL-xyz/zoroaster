@@ -2357,7 +2357,7 @@ func TestMatchEvent3(t *testing.T) {
 
 	logs, _ := GetLogsFromFile("../resources/events/logs2.json")
 	matches := MatchEvent(tg, logs, TokenApiMainnet)
-	
+
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9098826, matches[0].Log.BlockNumber)
 }
