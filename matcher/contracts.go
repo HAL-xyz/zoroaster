@@ -7,6 +7,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	log "github.com/sirupsen/logrus"
+	"sync"
 	"time"
 )
 
@@ -49,26 +50,44 @@ func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb a
 		log.Fatal(err)
 	}
 
+	const MAX = 3
+	sem := make(chan int, MAX)
+	mu := &sync.Mutex{}
+	var wg sync.WaitGroup
+
 	var cnMatches []*trigger.CnMatch
 	var triggersWithErrorsUUIDs []string
-	for _, tg := range allTriggers {
-		match, err := trigger.MatchContract(tokenApi, tg, blockNo)
-		if err != nil {
-			log.Debug("WaC error for trigger %s: %s", tg.TriggerUUID, err.Error())
-			triggersWithErrorsUUIDs = append(triggersWithErrorsUUIDs, tg.TriggerUUID)
-			continue
-		}
-		if match != nil {
-			match.BlockTimestamp, match.BlockNumber, match.BlockHash = blockTimestamp, blockNo, blockHash
-			cnMatches = append(cnMatches, match)
-			log.Debugf("\tCN: Trigger %s matched on block %d\n", tg.TriggerUUID, blockNo)
-		}
+
+	for _, trig := range allTriggers {
+		sem <- 1
+		wg.Add(1)
+		go func(api tokenapi.ITokenAPI, tg *trigger.Trigger, bNo int) {
+			defer wg.Done()
+			match, err := trigger.MatchContract(api, tg, bNo)
+			if err != nil {
+				log.Debugf("WaC error for trigger %s: %s", tg.TriggerUUID, err.Error())
+				mu.Lock()
+				triggersWithErrorsUUIDs = append(triggersWithErrorsUUIDs, tg.TriggerUUID)
+				mu.Unlock()
+			}
+			if match != nil {
+				match.BlockTimestamp, match.BlockNumber, match.BlockHash = blockTimestamp, bNo, blockHash
+				mu.Lock()
+				cnMatches = append(cnMatches, match)
+				mu.Unlock()
+				log.Debugf("\tCN: Trigger %s matched on block %d\n", tg.TriggerUUID, bNo)
+			}
+			<-sem
+		}(tokenApi, trig, blockNo)
 	}
+	wg.Wait()
+
 	matchesToActUpon := getMatchesToActUpon(idb, cnMatches)
 
 	updateStatusForMatchingTriggers(idb, cnMatches)
 	updateStatusForNonMatchingTriggers(idb, cnMatches, allTriggers, triggersWithErrorsUUIDs)
 
+	log.Infof("WAC potential matches: %d; errors: %d ", len(cnMatches), len(triggersWithErrorsUUIDs))
 	return matchesToActUpon
 }
 

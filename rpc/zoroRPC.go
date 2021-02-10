@@ -4,6 +4,7 @@ import (
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
+	"sync"
 	"time"
 )
 
@@ -24,6 +25,7 @@ type ZoroRPC struct {
 	label string
 	calls int
 	cache *cache.Cache
+	sync.Mutex
 }
 
 // Returns a new ZoroRPC client
@@ -32,16 +34,20 @@ func New(ethCli *ethrpc.EthRPC, label string) *ZoroRPC {
 		cli:   ethCli,
 		label: label,
 		calls: 0,
-		cache: cache.New(5*time.Minute, 10*time.Minute),
+		cache: cache.New(5*time.Minute, 5*time.Minute),
 	}
 }
 
 func (z *ZoroRPC) resetCounter() {
+	z.Lock()
 	z.calls = 0
+	z.Unlock()
 }
 
 func (z *ZoroRPC) increaseCounterByOne() {
+	z.Lock()
 	z.calls += 1
+	z.Unlock()
 }
 
 func (z *ZoroRPC) ResetCounterAndLogStats(blockNo int) {
