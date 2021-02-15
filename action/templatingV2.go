@@ -28,7 +28,6 @@ func renderTemplateWithData(templateText string, data interface{}) (string, erro
 		"symbol":               tokenapi.GetTokenAPI().Symbol,
 		"decimals":             tokenapi.GetTokenAPI().Decimals,
 		"balanceOf":            tokenapi.GetTokenAPI().BalanceOf,
-		"call":                 tokenapi.GetTokenAPI().Call,
 		"add":                  add,
 		"sub":                  sub,
 		"mul":                  mul,
