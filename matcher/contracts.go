@@ -2,7 +2,7 @@ package matcher
 
 import (
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
@@ -14,7 +14,7 @@ import (
 func ContractMatcher(
 	blocksChan chan *ethrpc.Block,
 	matchesChan chan trigger.IMatch,
-	idb aws.IDB,
+	idb db.IDB,
 	tokenApi tokenapi.ITokenAPI,
 ) {
 
@@ -43,7 +43,7 @@ func ContractMatcher(
 	}
 }
 
-func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb aws.IDB, tokenApi tokenapi.ITokenAPI) []*trigger.CnMatch {
+func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb db.IDB, tokenApi tokenapi.ITokenAPI) []*trigger.CnMatch {
 
 	allTriggers, err := idb.LoadTriggersFromDB(trigger.WaC)
 	if err != nil {
@@ -92,7 +92,7 @@ func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb a
 }
 
 // we only act on a match if it matches AND the triggered flag was set to false
-func getMatchesToActUpon(idb aws.IDB, cnMatches []*trigger.CnMatch) []*trigger.CnMatch {
+func getMatchesToActUpon(idb db.IDB, cnMatches []*trigger.CnMatch) []*trigger.CnMatch {
 	var matchingTriggersUUIDs []string
 	for _, m := range cnMatches {
 		matchingTriggersUUIDs = append(matchingTriggersUUIDs, m.Trigger.TriggerUUID)
@@ -113,7 +113,7 @@ func getMatchesToActUpon(idb aws.IDB, cnMatches []*trigger.CnMatch) []*trigger.C
 }
 
 // set triggered flag to true for all matching 'false' triggers
-func updateStatusForMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch) {
+func updateStatusForMatchingTriggers(idb db.IDB, matches []*trigger.CnMatch) {
 	var matchingTriggersIds []string
 	for _, m := range matches {
 		matchingTriggersIds = append(matchingTriggersIds, m.Trigger.TriggerUUID)
@@ -122,7 +122,7 @@ func updateStatusForMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch) {
 }
 
 // set triggered flag to false for all non-matching 'true' triggers, but excluding triggers with errors
-func updateStatusForNonMatchingTriggers(idb aws.IDB, matches []*trigger.CnMatch, allTriggers []*trigger.Trigger, triggersWithErrors []string) {
+func updateStatusForNonMatchingTriggers(idb db.IDB, matches []*trigger.CnMatch, allTriggers []*trigger.Trigger, triggersWithErrors []string) {
 	setAll := make(map[string]struct{})
 	setMatches := make(map[string]struct{})
 	setErrors := make(map[string]struct{})

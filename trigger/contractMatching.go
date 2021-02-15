@@ -3,7 +3,6 @@ package trigger
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/HAL-xyz/zoroaster/abidec"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	log "github.com/sirupsen/logrus"
@@ -31,7 +30,7 @@ func MatchContract(tokenApi tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMa
 
 	//log.Debug("result from call is -> ", rawData)
 
-	allValuesLs, err := abidec.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), tg.ContractABI, tg.FunctionName)
+	allValuesLs, err := utils.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), tg.ContractABI, tg.FunctionName)
 	if err != nil {
 		return nil, fmt.Errorf(err.Error())
 	}

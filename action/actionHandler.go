@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
@@ -12,16 +11,22 @@ import (
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	log "github.com/sirupsen/logrus"
+	"io"
 	"io/ioutil"
+	"net/http"
 	"regexp"
 	"strings"
 )
+
+type IHttpClient interface {
+	Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
+}
 
 func ProcessActions(
 	actionsString []string,
 	match trigger.IMatch,
 	iEmail sesiface.SESAPI,
-	httpCli aws.IHttpClient) []*trigger.Outcome {
+	httpCli IHttpClient) []*trigger.Outcome {
 
 	actions := getActionsFromString(actionsString)
 	outcomes := make([]*trigger.Outcome, len(actions))
@@ -82,7 +87,7 @@ type WebhookResponse struct {
 	Response string
 }
 
-func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli aws.IHttpClient) *trigger.Outcome {
+func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli IHttpClient) *trigger.Outcome {
 
 	postData, err := json.Marshal(match.ToPostPayload())
 	if err != nil {
@@ -116,7 +121,7 @@ type DiscordPayload struct {
 	Content string `json:"content"`
 }
 
-func handleDiscord(discAttr AttributeDiscord, match trigger.IMatch, httpCli aws.IHttpClient, templVersion string) *trigger.Outcome {
+func handleDiscord(discAttr AttributeDiscord, match trigger.IMatch, httpCli IHttpClient, templVersion string) *trigger.Outcome {
 	payload := DiscordPayload{fillBodyTemplate(discAttr.Body, match, templVersion)}
 
 	postData, err := json.Marshal(payload)
@@ -150,7 +155,7 @@ type SlackPayload struct {
 	Text string `json:"text"`
 }
 
-func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli aws.IHttpClient, templVersion string) *trigger.Outcome {
+func handleSlackBot(slackAttr AttributeSlackBot, match trigger.IMatch, httpCli IHttpClient, templVersion string) *trigger.Outcome {
 	payload := SlackPayload{fillBodyTemplate(slackAttr.Body, match, templVersion)}
 
 	postData, err := json.Marshal(payload)
@@ -187,7 +192,7 @@ type TelegramPayload struct {
 	LinksPreview bool   `json:"disable_web_page_preview"`
 }
 
-func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, httpCli aws.IHttpClient, templVersion string) *trigger.Outcome {
+func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, httpCli IHttpClient, templVersion string) *trigger.Outcome {
 	payload := TelegramPayload{
 		Text:         fillBodyTemplate(telegramAttr.Body, match, templVersion),
 		ChatId:       telegramAttr.ChatId,

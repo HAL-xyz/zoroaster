@@ -2,8 +2,7 @@ package matcher
 
 import (
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/aws"
-	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
@@ -15,7 +14,7 @@ import (
 func EventMatcher(
 	blocksChan chan *ethrpc.Block,
 	matchesChan chan trigger.IMatch,
-	idb aws.IDB,
+	idb db.IDB,
 	tokenApi tokenapi.ITokenAPI) {
 
 	for {
@@ -52,7 +51,7 @@ func EventMatcher(
 	}
 }
 
-func getLogsForBlock(client rpc.IEthRpc, blockHash string, triggers []*trigger.Trigger) ([]ethrpc.Log, error) {
+func getLogsForBlock(client tokenapi.IEthRpc, blockHash string, triggers []*trigger.Trigger) ([]ethrpc.Log, error) {
 	filter := ethrpc.FilterParams{
 		BlockHash: blockHash,
 	}

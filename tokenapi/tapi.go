@@ -4,9 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/abidec"
 	"github.com/HAL-xyz/zoroaster/config"
-	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/patrickmn/go-cache"
 	"io/ioutil"
 	"math"
@@ -18,7 +17,7 @@ import (
 )
 
 type ITokenAPI interface {
-	GetRPCCli() rpc.IEthRpc
+	GetRPCCli() IEthRpc
 	Symbol(address string) string
 	Decimals(address string) string
 	GetCacheTokenPriceCacheCount() int
@@ -32,25 +31,20 @@ type ITokenAPI interface {
 type TokenAPI struct {
 	tokenAddToPrice *cache.Cache
 	httpCli         *http.Client
-	rpcCli          rpc.IEthRpc
+	rpcCli          IEthRpc
 	tokenCache      *cache.Cache
 }
 
 // package-level singleton accessed through GetTokenAPI()
 // some day it would be nice to pass it explicitly as a dependency of the templating system
-var tokenApi = &TokenAPI{
-	tokenAddToPrice: cache.New(5*time.Minute, 5*time.Minute),
-	httpCli:         &http.Client{},
-	rpcCli:          rpc.New(ethrpc.New(config.Zconf.EthNode), "templating client"),
-	tokenCache:      cache.New(12*time.Hour, 12*time.Hour),
-}
+var tokenApi = New(NewZRPC(config.Zconf.EthNode, "templating client"))
 
 func GetTokenAPI() *TokenAPI {
 	return tokenApi
 }
 
 // returns a new TokenAPI
-func New(cli rpc.IEthRpc) *TokenAPI {
+func New(cli IEthRpc) *TokenAPI {
 	return &TokenAPI{
 		tokenAddToPrice: cache.New(5*time.Minute, 5*time.Minute),
 		httpCli:         &http.Client{},
@@ -63,7 +57,7 @@ func (t TokenAPI) GetCacheTokenPriceCacheCount() int {
 	return t.tokenAddToPrice.ItemCount()
 }
 
-func (t TokenAPI) GetRPCCli() rpc.IEthRpc {
+func (t TokenAPI) GetRPCCli() IEthRpc {
 	return t.rpcCli
 }
 
@@ -83,7 +77,7 @@ func (t TokenAPI) callERC20(address, methodHash, methodName string) string {
 	if err != nil {
 		return err.Error()
 	}
-	result, err := abidec.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), erc20abi, methodName)
+	result, err := utils.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), erc20abi, methodName)
 	if err != nil {
 		return err.Error()
 	}

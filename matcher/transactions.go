@@ -2,14 +2,14 @@ package matcher
 
 import (
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
 	"time"
 )
 
-func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, idb aws.IDB, api tokenapi.ITokenAPI) {
+func TxMatcher(blocksChan chan *ethrpc.Block, matchesChan chan trigger.IMatch, idb db.IDB, api tokenapi.ITokenAPI) {
 
 	for {
 		block := <-blocksChan

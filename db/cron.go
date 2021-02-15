@@ -1,7 +1,6 @@
 package db
 
 import (
-	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -12,7 +11,7 @@ import (
 // new month we've seen, and once every hour we
 // compare it with the current month.
 
-func MatchesMonthlyUpdate(idb aws.IDB) {
+func MatchesMonthlyUpdate(idb IDB) {
 
 	ticker := time.NewTicker(1 * time.Minute)
 	for range ticker.C {
@@ -23,7 +22,7 @@ func MatchesMonthlyUpdate(idb aws.IDB) {
 	}
 }
 
-func monthlyDbUpdate(idb aws.IDB, currentMonth time.Month) error {
+func monthlyDbUpdate(idb IDB, currentMonth time.Month) error {
 
 	persistedMonth, err := idb.ReadSavedMonth()
 	if err != nil {

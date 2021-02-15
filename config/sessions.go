@@ -1,4 +1,4 @@
-package aws
+package config
 
 import (
 	"github.com/aws/aws-sdk-go/aws"

@@ -1,4 +1,4 @@
-package aws
+package db
 
 import (
 	"database/sql"

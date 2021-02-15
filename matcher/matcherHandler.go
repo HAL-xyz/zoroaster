@@ -2,13 +2,19 @@ package matcher
 
 import (
 	"github.com/HAL-xyz/zoroaster/action"
-	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/aws/aws-sdk-go/service/ses/sesiface"
 	log "github.com/sirupsen/logrus"
+	"io"
+	"net/http"
 )
 
-func ProcessMatch(match trigger.IMatch, idb aws.IDB, iEmail sesiface.SESAPI, httpCli aws.IHttpClient) []*trigger.Outcome {
+type IHttpClient interface {
+	Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
+}
+
+func ProcessMatch(match trigger.IMatch, idb db.IDB, iEmail sesiface.SESAPI, httpCli IHttpClient) []*trigger.Outcome {
 
 	acts, err := idb.GetActions(match.GetTriggerUUID(), match.GetUserUUID())
 	if err != nil {

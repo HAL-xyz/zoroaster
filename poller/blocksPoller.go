@@ -2,9 +2,8 @@ package poller
 
 import (
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/config"
-	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
@@ -15,8 +14,8 @@ func BlocksPoller(
 	txChan chan *ethrpc.Block,
 	cnChan chan *ethrpc.Block,
 	evChan chan *ethrpc.Block,
-	client rpc.IEthRpc,
-	idb aws.IDB,
+	client tokenapi.IEthRpc,
+	idb db.IDB,
 	blocksDelay int) {
 
 	txLastBlockProcessed, err1 := idb.ReadLastBlockProcessed(trigger.WaT)
@@ -49,7 +48,7 @@ func fetchLastBlock(
 	lastBlockSeen int,
 	lastBlockProcessed *int,
 	ch chan *ethrpc.Block,
-	client rpc.IEthRpc,
+	client tokenapi.IEthRpc,
 	withTxs bool,
 	blocksDelay int) {
 

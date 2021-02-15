@@ -1,4 +1,4 @@
-package rpc
+package tokenapi
 
 import (
 	"github.com/HAL-xyz/ethrpc"
@@ -29,9 +29,11 @@ type ZoroRPC struct {
 }
 
 // Returns a new ZoroRPC client
-func New(ethCli *ethrpc.EthRPC, label string) *ZoroRPC {
+func NewZRPC(node, label string) *ZoroRPC {
+	ethClient := ethrpc.New(node)
+
 	return &ZoroRPC{
-		cli:   ethCli,
+		cli:   ethClient,
 		label: label,
 		calls: 0,
 		cache: cache.New(5*time.Minute, 5*time.Minute),

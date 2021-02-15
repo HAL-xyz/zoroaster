@@ -2,7 +2,7 @@ package matcher
 
 import (
 	"bytes"
-	"github.com/HAL-xyz/zoroaster/aws"
+	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/aws/aws-sdk-go/service/ses"
@@ -42,7 +42,7 @@ func (m *mockSESClient) SendEmail(*ses.SendEmailInput) (*ses.SendEmailOutput, er
 
 // IDB mock
 type mockDB2 struct {
-	aws.IDB
+	db.IDB
 }
 
 func (mockDB2) LogOutcome(outcome *trigger.Outcome, matchUUID string) error {

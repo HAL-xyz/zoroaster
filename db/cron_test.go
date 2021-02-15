@@ -2,14 +2,11 @@ package db
 
 import (
 	"fmt"
-	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
-
-var psqlClient = aws.NewPostgresClient(config.Zconf)
 
 func init() {
 	if config.Zconf.Stage != config.TEST {
@@ -19,6 +16,7 @@ func init() {
 
 func TestMonthlyRun(t *testing.T) {
 
+	var psqlClient = NewPostgresClient(config.Zconf)
 	defer psqlClient.Close()
 
 	// load a User

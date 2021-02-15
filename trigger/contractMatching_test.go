@@ -1,9 +1,7 @@
 package trigger
 
 import (
-	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/config"
-	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -12,8 +10,8 @@ import (
 
 var lastBlockRinkeby int
 var lastBlockMainnet int
-var TokenApiRinkeby = tokenapi.New(rpc.New(ethrpc.New(config.Zconf.RinkebyNode), "rinkeby test client"))
-var TokenApiMainnet = tokenapi.New(rpc.New(ethrpc.New(config.Zconf.EthNode), "mainnet test client"))
+var TokenApiRinkeby = tokenapi.New(tokenapi.NewZRPC(config.Zconf.RinkebyNode, "rinkeby test client"))
+var TokenApiMainnet = tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "mainnet test client"))
 
 func init() {
 	var err error

@@ -3,9 +3,8 @@ package matcher
 import (
 	"fmt"
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/config"
-	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
@@ -14,7 +13,7 @@ import (
 	"testing"
 )
 
-var psqlClient = aws.NewPostgresClient(config.Zconf)
+var psqlClient = db.NewPostgresClient(config.Zconf)
 
 func init() {
 	if config.Zconf.Stage != config.TEST {
@@ -24,7 +23,7 @@ func init() {
 }
 
 type mockDB struct {
-	aws.IDB
+	db.IDB
 }
 
 func (db mockDB) SetLastBlockProcessed(blockNo int, tgType trigger.TgType) error {
@@ -52,7 +51,7 @@ func (db mockDB) GetSilentButMatchingTriggers(triggerUUIDs []string) ([]string, 
 
 func TestMatchContractsForBlock(t *testing.T) {
 
-	var api = tokenapi.New(rpc.New(ethrpc.New(config.Zconf.EthNode), "mainnet test client"))
+	var api = tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "mainnet test client"))
 
 	lastBlock, err := api.GetRPCCli().EthBlockNumber()
 	assert.NoError(t, err)
@@ -65,7 +64,7 @@ func TestMatchContractsForBlock(t *testing.T) {
 
 // ETHRPC Client mock, returns 189
 type mockETHCli struct {
-	rpc.IEthRpc
+	tokenapi.IEthRpc
 }
 
 func (cli mockETHCli) EthCall(transaction ethrpc.T, tag string) (string, error) {
@@ -74,7 +73,7 @@ func (cli mockETHCli) EthCall(transaction ethrpc.T, tag string) (string, error) 
 
 // ETHRPC Client mock, returns 378
 type mockETHCliNoMatch struct {
-	rpc.IEthRpc
+	tokenapi.IEthRpc
 }
 
 func (cli mockETHCliNoMatch) EthCall(transaction ethrpc.T, tag string) (string, error) {
@@ -83,7 +82,7 @@ func (cli mockETHCliNoMatch) EthCall(transaction ethrpc.T, tag string) (string, 
 
 // ETHRPC Client mock, returns an error
 type mockETHCliWithError struct {
-	rpc.IEthRpc
+	tokenapi.IEthRpc
 }
 
 func (cli mockETHCliWithError) EthCall(transaction ethrpc.T, tag string) (string, error) {

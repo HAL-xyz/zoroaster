@@ -2,12 +2,10 @@ package main
 
 import (
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/aws"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/matcher"
 	"github.com/HAL-xyz/zoroaster/poller"
-	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
@@ -18,7 +16,7 @@ import (
 func main() {
 
 	// Load AWS SES session
-	sesSession := aws.GetSESSession()
+	sesSession := config.GetSESSession()
 
 	log.SetLevel(log.InfoLevel)
 	log.SetOutput(os.Stdout)
@@ -26,13 +24,10 @@ func main() {
 	log.Infof("Starting up Zoroaster, stage = %s, network = %s\n", config.Zconf.Stage, config.Zconf.Database.Network)
 
 	// Postgres DB client
-	psqlClient := aws.NewPostgresClient(config.Zconf)
+	psqlClient := db.NewPostgresClient(config.Zconf)
 
 	// HTTP client
 	httpClient := http.Client{}
-
-	// ETH client
-	ethClient := ethrpc.New(config.Zconf.EthNode)
 
 	// Run monthly matches update
 	go db.MatchesMonthlyUpdate(psqlClient)
@@ -46,19 +41,19 @@ func main() {
 	matchesChan := make(chan trigger.IMatch)
 
 	// Poll ETH node
-	pollerCli := rpc.New(ethClient, "BlocksPoller")
+	pollerCli := tokenapi.NewZRPC(config.Zconf.EthNode, "BlocksPoller")
 	go poller.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, pollerCli, psqlClient, config.Zconf.BlocksDelay)
 
 	// Watch a Transaction
-	watApi := tokenapi.New(rpc.New(ethClient, "Watch a Transaction"))
+	watApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch a Transaction"))
 	go matcher.TxMatcher(txBlocksChan, matchesChan, psqlClient, watApi)
 
 	// Watch a Contract
-	wacApi := tokenapi.New(rpc.New(ethClient, "Watch a Contract"))
+	wacApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch a Contract"))
 	go matcher.ContractMatcher(cnBlocksChan, matchesChan, psqlClient, wacApi)
 
 	// Watch an Event
-	waeApi := tokenapi.New(rpc.New(ethClient, "Watch an Event"))
+	waeApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch an Event"))
 	go matcher.EventMatcher(evBlocksChan, matchesChan, psqlClient, waeApi)
 
 	// Main routine - process matches

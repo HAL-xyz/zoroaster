@@ -2,7 +2,6 @@ package trigger
 
 import (
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/abidec"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	log "github.com/sirupsen/logrus"
@@ -14,11 +13,11 @@ func MatchTransaction(trigger *Trigger, block *ethrpc.Block, tokenApi tokenapi.I
 	for i, tx := range block.Transactions {
 		if validateTrigger(trigger, &tx, tokenApi) {
 			// we discard errors here bc not every match will have input data
-			fnArgsData, _ := abidec.DecodeInputData(tx.Input, trigger.ContractABI)
+			fnArgsData, _ := decodeInputData(tx.Input, trigger.ContractABI)
 			for k, v := range fnArgsData {
 				fnArgsData[k] = utils.SprintfInterfaces([]interface{}{v})[0]
 			}
-			fnName, _ := abidec.DecodeInputMethod(&tx.Input, &trigger.ContractABI)
+			fnName, _ := decodeInputMethod(&tx.Input, &trigger.ContractABI)
 
 			match := TxMatch{
 				BlockTimestamp: block.Timestamp,
@@ -81,7 +80,7 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			return false // tx called a different method name
 		}
 		// decode input data
-		decodedData, err := abidec.DecodeInputDataToJsonMap(ts.Input, *abi)
+		decodedData, err := decodeInputDataToJsonMap(ts.Input, *abi)
 		if err != nil {
 			cxtLog.Debugf("cannot decode input data: %v\n", err)
 			return false
@@ -124,7 +123,7 @@ func isValidContractAbi(abi *string, cntAddress string, txTo string, tgUUID stri
 
 // check the trigger's FunctionName value matches the transaction's method
 func matchesMethodName(abi *string, inputData string, funcName string) (bool, error) {
-	methodName, err := abidec.DecodeInputMethod(&inputData, abi)
+	methodName, err := decodeInputMethod(&inputData, abi)
 	if err != nil {
 		return false, err
 	}

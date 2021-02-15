@@ -3,7 +3,6 @@ package trigger
 import (
 	"fmt"
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -12,7 +11,7 @@ import (
 	"testing"
 )
 
-func getLogsForBlock(client rpc.IEthRpc, blockNo int, addresses []string) ([]ethrpc.Log, error) {
+func getLogsForBlock(client tokenapi.IEthRpc, blockNo int, addresses []string) ([]ethrpc.Log, error) {
 	filter := ethrpc.FilterParams{
 		FromBlock: fmt.Sprintf("0x%x", blockNo),
 		ToBlock:   fmt.Sprintf("0x%x", blockNo),
@@ -22,7 +21,7 @@ func getLogsForBlock(client rpc.IEthRpc, blockNo int, addresses []string) ([]eth
 }
 
 type mockETHCli struct {
-	rpc.IEthRpc
+	tokenapi.IEthRpc
 }
 
 func (cli mockETHCli) EthCall(transaction ethrpc.T, tag string) (string, error) {
@@ -56,7 +55,7 @@ func (t mockTApiCurrency) FromWei(wei interface{}, units interface{}) string {
 	return mockTokenApi.FromWei(wei, units)
 }
 
-func (t mockTApiCurrency) GetRPCCli() rpc.IEthRpc {
+func (t mockTApiCurrency) GetRPCCli() tokenapi.IEthRpc {
 	return TokenApiMainnet.GetRPCCli()
 }
 

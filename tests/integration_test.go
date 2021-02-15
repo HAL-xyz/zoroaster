@@ -2,9 +2,8 @@ package tests
 
 import (
 	"encoding/json"
-	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/config"
-	"github.com/HAL-xyz/zoroaster/rpc"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	trig "github.com/HAL-xyz/zoroaster/trigger"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -12,7 +11,7 @@ import (
 	"testing"
 )
 
-var CliMain = rpc.New(ethrpc.New(config.Zconf.EthNode), "mainnet test client")
+var CliMain = tokenapi.NewZRPC(config.Zconf.EthNode, "mainnet test client")
 
 type AllRules struct {
 	Rules []Rule

@@ -1,4 +1,4 @@
-package aws
+package db
 
 import (
 	"fmt"
@@ -10,8 +10,6 @@ import (
 	"log"
 	"testing"
 )
-
-var psqlClient = NewPostgresClient(config.Zconf)
 
 func init() {
 	if config.Zconf.Stage != config.TEST {
@@ -27,6 +25,7 @@ func TestPostgresClient_All(t *testing.T) {
 	// for now I can't be bothered and I'll fit everything in one test,
 	// closing the connection only once, at the end.
 
+	var psqlClient = NewPostgresClient(config.Zconf)
 	defer psqlClient.Close()
 
 	// clear up the database

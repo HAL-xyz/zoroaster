@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/rpc"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/HAL-xyz/zoroaster/utils"
@@ -56,7 +55,7 @@ func (m mockHttpClient400) Post(url, contentType string, body io.Reader) (*http.
 
 // ETHRPC Client mock
 type mockETHCli struct {
-	rpc.IEthRpc
+	tokenapi.IEthRpc
 }
 
 func (z mockETHCli) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error) {

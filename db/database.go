@@ -1,4 +1,4 @@
-package aws
+package db
 
 import (
 	"github.com/HAL-xyz/zoroaster/config"
