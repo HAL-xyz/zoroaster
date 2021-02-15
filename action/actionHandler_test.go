@@ -24,20 +24,33 @@ import (
 type mockHttpClient struct{}
 
 func (m mockHttpClient) Post(url, contentType string, body io.Reader) (*http.Response, error) {
+	respJsn := `
+{
+  "ok": true,
+  "error_code": 200
+}
+`
 	resp := http.Response{
 		StatusCode: 200,
 		Status:     "200 OK",
-		Body:       ioutil.NopCloser(bytes.NewBufferString("Hello World"))}
+		Body:       ioutil.NopCloser(bytes.NewBufferString(respJsn))}
 	return &resp, nil
 }
 
 type mockHttpClient400 struct{}
 
 func (m mockHttpClient400) Post(url, contentType string, body io.Reader) (*http.Response, error) {
+	errJsn := `
+{
+  "ok": false,
+  "error_code": 400,
+  "description": "Bad Request: chat not found"
+}
+`
 	resp := http.Response{
 		StatusCode: 400,
 		Status:     "400 BAD REQUEST",
-		Body:       ioutil.NopCloser(bytes.NewBufferString("Hello World"))}
+		Body:       ioutil.NopCloser(bytes.NewBufferString(errJsn))}
 	return &resp, nil
 }
 
@@ -462,11 +475,17 @@ func TestHandleTelegramBot(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, true, outcome.Success)
 
+	ok, _ = utils.AreEqualJSON(`{"error_code":200,"ok":true}`, outcome.Outcome)
+	assert.True(t, ok)
+
 	// test some broken cases
 
 	// 400
 	outcomeBadRequest := handleTelegramBot(payload, &match, &mockHttpClient400{}, "")
 	assert.Equal(t, false, outcomeBadRequest.Success)
+
+	ok, _ = utils.AreEqualJSON(`{"description":"Bad Request: chat not found","error_code":400,"ok":false}`, outcomeBadRequest.Outcome)
+	assert.True(t, ok)
 
 	// wrong chat id
 	brokenChatId := AttributeTelegramBot{

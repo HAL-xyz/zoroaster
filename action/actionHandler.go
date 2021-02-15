@@ -12,6 +12,7 @@ import (
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
 	"regexp"
 	"strings"
 )
@@ -233,11 +234,21 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 	}
 	defer resp.Body.Close()
 
-	responseCode := WebhookResponse{resp.StatusCode, resp.Status}
-	jsonRespCode, _ := json.Marshal(responseCode)
+	outcome := map[string]interface{}{}
+	body, _ := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(body, &outcome)
+	if err != nil {
+		return &trigger.Outcome{
+			Payload: string(postData),
+			Outcome: makeErrorResponse(err.Error()),
+			Success: false,
+		}
+	}
+	outcomeJs, _ := json.Marshal(outcome)
+
 	return &trigger.Outcome{
 		Payload: string(postData),
-		Outcome: string(jsonRespCode),
+		Outcome: string(outcomeJs),
 		Success: resp.StatusCode == 200,
 	}
 }
