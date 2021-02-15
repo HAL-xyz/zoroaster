@@ -8,6 +8,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/sirupsen/logrus"
 	"regexp"
 	"strings"
@@ -106,8 +107,8 @@ func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI, eventNa
 
 	match := true
 	if evLog.Topics[0] == eventSignature {
-		for _, f := range tg.Filters {
-			filterMatch, err := validateFilterLog(evLog, &f, abiObj, eventName, tokenApi)
+		for i := range tg.Filters {
+			filterMatch, err := validateFilterLog(evLog, &tg.Filters[i], abiObj, eventName, tokenApi)
 			if err != nil {
 				cxtLog.Debug(err)
 			}
@@ -143,7 +144,10 @@ func validateFilterLog(
 		}
 		dv, ok := decodedData[filter.ParameterCurrency]
 		if ok {
-			filter.ParameterCurrency = utils.NormalizeAddress(fmt.Sprintf("%v", dv))
+			add, ok := dv.(common.Address)
+			if ok {
+				filter.ParameterCurrency = utils.NormalizeAddress(add.String())
+			}
 		}
 	}
 
