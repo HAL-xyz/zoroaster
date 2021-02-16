@@ -7,12 +7,14 @@ import (
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/patrickmn/go-cache"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"math"
 	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -20,7 +22,8 @@ type ITokenAPI interface {
 	GetRPCCli() IEthRpc
 	Symbol(address string) string
 	Decimals(address string) string
-	GetCacheTokenPriceCacheCount() int
+	LogFiatStatsAndReset(blockNo int)
+	GetFiatCacheCount() int
 	BalanceOf(token string, user string) string
 	FromWei(wei interface{}, units interface{}) string
 	GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error)
@@ -29,10 +32,12 @@ type ITokenAPI interface {
 }
 
 type TokenAPI struct {
-	tokenAddToPrice *cache.Cache
-	httpCli         *http.Client
-	rpcCli          IEthRpc
-	tokenCache      *cache.Cache
+	fiatCache  *cache.Cache
+	fiatStats  map[string]int
+	httpCli    *http.Client
+	rpcCli     IEthRpc
+	erc20Cache *cache.Cache
+	sync.Mutex
 }
 
 // package-level singleton accessed through GetTokenAPI()
@@ -46,28 +51,39 @@ func GetTokenAPI() *TokenAPI {
 // returns a new TokenAPI
 func New(cli IEthRpc) *TokenAPI {
 	return &TokenAPI{
-		tokenAddToPrice: cache.New(5*time.Minute, 5*time.Minute),
-		httpCli:         &http.Client{},
-		rpcCli:          cli,
-		tokenCache:      cache.New(12*time.Hour, 12*time.Hour),
+		fiatCache:  cache.New(10*time.Minute, 10*time.Minute),
+		fiatStats:  map[string]int{},
+		httpCli:    &http.Client{},
+		rpcCli:     cli,
+		erc20Cache: cache.New(24*time.Hour, 24*time.Hour),
 	}
 }
 
-func (t TokenAPI) GetCacheTokenPriceCacheCount() int {
-	return t.tokenAddToPrice.ItemCount()
+func (t *TokenAPI) LogFiatStatsAndReset(blockNo int) {
+	log.Infof("FiatStats: %s on block %d made %d calls to Coingecko, %d calls to Custom, had %d errors. Cache size is %d",
+		t.rpcCli.GetLabel(), blockNo, t.fiatStats["coingecko"], t.fiatStats["custom"], t.fiatStats["errors"], t.fiatCache.ItemCount())
+	t.Lock()
+	for k := range t.fiatStats {
+		delete(t.fiatStats, k)
+	}
+	t.Unlock()
 }
 
-func (t TokenAPI) GetRPCCli() IEthRpc {
+func (t *TokenAPI) GetFiatCacheCount() int {
+	return t.fiatCache.ItemCount()
+}
+
+func (t *TokenAPI) GetRPCCli() IEthRpc {
 	return t.rpcCli
 }
 
-func (t TokenAPI) ResetETHRPCstats(blockNo int) {
+func (t *TokenAPI) ResetETHRPCstats(blockNo int) {
 	t.rpcCli.ResetCounterAndLogStats(blockNo)
 }
 
 const erc20abi = `[ { "constant": true, "inputs": [], "name": "name", "outputs": [ { "name": "", "type": "string" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "decimals", "outputs": [ { "name": "", "type": "uint8" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "_owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "balance", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "symbol", "outputs": [ { "name": "", "type": "string" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transfer", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [ { "name": "_owner", "type": "address" }, { "name": "_spender", "type": "address" } ], "name": "allowance", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "payable": true, "stateMutability": "payable", "type": "fallback" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "owner", "type": "address" }, { "indexed": true, "name": "spender", "type": "address" }, { "indexed": false, "name": "value", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "from", "type": "address" }, { "indexed": true, "name": "to", "type": "address" }, { "indexed": false, "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" } ]`
 
-func (t TokenAPI) callERC20(address, methodHash, methodName string) string {
+func (t *TokenAPI) callERC20(address, methodHash, methodName string) string {
 
 	lastBlock, err := t.rpcCli.EthBlockNumber()
 	if err != nil {
@@ -87,28 +103,28 @@ func (t TokenAPI) callERC20(address, methodHash, methodName string) string {
 	return address
 }
 
-func (t TokenAPI) Symbol(address string) string {
+func (t *TokenAPI) Symbol(address string) string {
 	if isEthereumAddress(address) {
 		return "ETH"
 	}
 	return t.callERC20(address, "0x95d89b41", "symbol")
 }
 
-func (t TokenAPI) Decimals(address string) string {
+func (t *TokenAPI) Decimals(address string) string {
 	if isEthereumAddress(address) {
 		return "18"
 	}
 
-	dec, found := t.tokenCache.Get(address)
+	dec, found := t.erc20Cache.Get(address)
 	if found {
 		return dec.(string)
 	}
 	dec = t.callERC20(address, "0x313ce567", "decimals")
-	t.tokenCache.Set(address, dec, cache.DefaultExpiration)
+	t.erc20Cache.Set(address, dec, cache.DefaultExpiration)
 	return dec.(string)
 }
 
-func (t TokenAPI) BalanceOf(token string, user string) string {
+func (t *TokenAPI) BalanceOf(token string, user string) string {
 	if isEthereumAddress(token) {
 		return "0"
 	}
@@ -127,7 +143,7 @@ func (t TokenAPI) BalanceOf(token string, user string) string {
 	return t.callERC20(token, methodHash, "balanceOf")
 }
 
-func (t TokenAPI) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
+func (t *TokenAPI) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
 	params := ethrpc.T{
 		To:   cntAddress,
 		From: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
@@ -136,7 +152,7 @@ func (t TokenAPI) MakeEthRpcCall(cntAddress, data string, blockNumber int) (stri
 	return t.rpcCli.EthCall(params, fmt.Sprintf("0x%x", blockNumber))
 }
 
-func (t TokenAPI) FromWei(wei interface{}, units interface{}) string {
+func (t *TokenAPI) FromWei(wei interface{}, units interface{}) string {
 	var unit int
 	switch t := units.(type) {
 	case string:
@@ -172,7 +188,7 @@ func scaleBy(text, scaleBy string) string {
 	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.4f", math.Ceil(res*10000)/10000), "0"), ".")
 }
 
-func (t TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error) {
+func (t *TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error) {
 	tokenAddress = strings.ToLower(tokenAddress)
 	fiatCurrency = strings.ToLower(fiatCurrency)
 
@@ -187,7 +203,7 @@ func (t TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, e
 	key := tokenAddress + fiatCurrency
 
 	// try cache first
-	price, found := t.tokenAddToPrice.Get(key)
+	price, found := t.fiatCache.Get(key)
 	if found {
 		return price.(float32), nil
 	}
@@ -195,7 +211,8 @@ func (t TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, e
 	// call CoinGecko
 	price, err := t.callPriceAPIs(coinGeckoUrl, tokenAddress, fiatCurrency)
 	if err == nil {
-		t.tokenAddToPrice.Set(key, price, 5*time.Minute)
+		t.fiatCache.Set(key, price, cache.DefaultExpiration)
+		t.increaseFiatStats("coingecko")
 		return price.(float32), nil
 	}
 
@@ -203,14 +220,16 @@ func (t TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, e
 	customEndpoint := fmt.Sprintf("https://xyxoolw445.execute-api.us-east-1.amazonaws.com/dev/%s", tokenAddress)
 	price, err = t.callPriceAPIs(customEndpoint, tokenAddress, fiatCurrency)
 	if err == nil {
-		t.tokenAddToPrice.Set(key, price, 5*time.Minute)
+		t.fiatCache.Set(key, price, cache.DefaultExpiration)
+		t.increaseFiatStats("custom")
 		return price.(float32), nil
 	}
 	// sorry :(
+	t.increaseFiatStats("errors")
 	return 0, fmt.Errorf("cannot find %s value for token %s\n", fiatCurrency, tokenAddress)
 }
 
-func (t TokenAPI) callPriceAPIs(url, tokenAddress, fiatCurrency string) (float32, error) {
+func (t *TokenAPI) callPriceAPIs(url, tokenAddress, fiatCurrency string) (float32, error) {
 	// all APIs return data in this format
 	// {
 	// 	 "0xb1cd6e4153b2a390cf00a6556b0fc1458c4a5533": {
@@ -241,6 +260,12 @@ func (t TokenAPI) callPriceAPIs(url, tokenAddress, fiatCurrency string) (float32
 	} else {
 		return 0, fmt.Errorf("not found")
 	}
+}
+
+func (t *TokenAPI) increaseFiatStats(item string) {
+	t.Lock()
+	t.fiatStats[item] += 1
+	t.Unlock()
 }
 
 func isEthereumAddress(s string) bool {

@@ -427,41 +427,48 @@ func TestMathFunctions(t *testing.T) {
 }
 
 func TestTokenAPI(t *testing.T) {
-	assert.Equal(t, 0, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+	assert.Equal(t, 0, tokenapi.GetTokenAPI().GetFiatCacheCount())
+	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template := `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "usd" }}`
 	rendered, err := renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
-	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetFiatCacheCount())
+	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "USD" }}`
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
-	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetFiatCacheCount())
+	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "xxx" }}`
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.Error(t, err)
 	assert.Equal(t, "", rendered)
-	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetFiatCacheCount())
+	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" "USD" }}`
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
-	assert.Equal(t, 2, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+	assert.Equal(t, 2, tokenapi.GetTokenAPI().GetFiatCacheCount())
+	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0x0000000000000000000000000000000000000000" "USD" }}`
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
-	assert.Equal(t, 2, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+	assert.Equal(t, 2, tokenapi.GetTokenAPI().GetFiatCacheCount())
+	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0x194ebd173f6cdace046c53eacce9b953f28411d1" "USD" }}`
 	rendered, err = renderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
-	assert.Equal(t, 3, tokenapi.GetTokenAPI().GetCacheTokenPriceCacheCount())
+	assert.Equal(t, 3, tokenapi.GetTokenAPI().GetFiatCacheCount())
+	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 }

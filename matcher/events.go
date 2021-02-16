@@ -20,6 +20,7 @@ func EventMatcher(
 	for {
 		block := <-blocksChan
 		tokenApi.GetRPCCli().ResetCounterAndLogStats(block.Number - 1)
+		tokenApi.LogFiatStatsAndReset(block.Number - 1)
 		start := time.Now()
 
 		triggers, err := idb.LoadTriggersFromDB(trigger.WaE)

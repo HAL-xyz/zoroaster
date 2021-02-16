@@ -17,6 +17,7 @@ type IEthRpc interface {
 	URL() string
 	EthCall(transaction ethrpc.T, tag string) (string, error)
 	ResetCounterAndLogStats(blockNo int)
+	GetLabel() string
 }
 
 // A wrapper for the ethrpc.EthRPC client.
@@ -38,6 +39,10 @@ func NewZRPC(node, label string) *ZoroRPC {
 		calls: 0,
 		cache: cache.New(5*time.Minute, 5*time.Minute),
 	}
+}
+
+func (z *ZoroRPC) GetLabel() string {
+	return z.label
 }
 
 func (z *ZoroRPC) resetCounter() {
