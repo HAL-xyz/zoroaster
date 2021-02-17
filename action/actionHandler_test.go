@@ -474,7 +474,7 @@ func TestHandleTelegramBot(t *testing.T) {
 	assert.True(t, ok)
 	assert.Equal(t, true, outcome.Success)
 
-	ok, _ = utils.AreEqualJSON(`{"error_code":200,"ok":true}`, outcome.Outcome)
+	ok, _ = utils.AreEqualJSON(`{"HttpCode":200,"Response":"200 OK"}`, outcome.Outcome)
 	assert.True(t, ok)
 
 	// test some broken cases
@@ -483,7 +483,7 @@ func TestHandleTelegramBot(t *testing.T) {
 	outcomeBadRequest := handleTelegramBot(payload, &match, &mockHttpClient400{}, "")
 	assert.Equal(t, false, outcomeBadRequest.Success)
 
-	ok, _ = utils.AreEqualJSON(`{"description":"Bad Request: chat not found","error_code":400,"ok":false}`, outcomeBadRequest.Outcome)
+	ok, _ = utils.AreEqualJSON(`{"HttpCode":400,"Response":"Bad Request: chat not found"}`, outcomeBadRequest.Outcome)
 	assert.True(t, ok)
 
 	// wrong chat id

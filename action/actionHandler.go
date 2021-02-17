@@ -192,6 +192,11 @@ type TelegramPayload struct {
 	LinksPreview bool   `json:"disable_web_page_preview"`
 }
 
+type TelegramResponse struct {
+	Ok          bool   `json:"ok"`
+	Description string `json:"description"`
+}
+
 func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, httpCli IHttpClient, templVersion string) *trigger.Outcome {
 	payload := TelegramPayload{
 		Text:         fillBodyTemplate(telegramAttr.Body, match, templVersion),
@@ -200,6 +205,7 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 		LinksPreview: telegramAttr.DisableLinksPreview,
 	}
 
+	// TODO this logic should be moved to the json unmarshaler
 	chatIdRegex := regexp.MustCompile(`-\d+$|@.+|\d+$`)
 	if !chatIdRegex.MatchString(payload.ChatId) {
 		return &trigger.Outcome{
@@ -209,6 +215,7 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 		}
 	}
 
+	// TODO this logic should be moved to the json unmarshaler
 	validFormats := []string{"Markdown", "MarkdownV2", "HTML"}
 	if !utils.IsIn(payload.Format, validFormats) {
 		return &trigger.Outcome{
@@ -239,9 +246,9 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 	}
 	defer resp.Body.Close()
 
-	outcome := map[string]interface{}{}
+	apiOutcome := TelegramResponse{}
 	body, _ := ioutil.ReadAll(resp.Body)
-	err = json.Unmarshal(body, &outcome)
+	err = json.Unmarshal(body, &apiOutcome)
 	if err != nil {
 		return &trigger.Outcome{
 			Payload: string(postData),
@@ -249,11 +256,16 @@ func handleTelegramBot(telegramAttr AttributeTelegramBot, match trigger.IMatch, 
 			Success: false,
 		}
 	}
-	outcomeJs, _ := json.Marshal(outcome)
+
+	persistentResp := WebhookResponse{resp.StatusCode, resp.Status}
+	if !apiOutcome.Ok {
+		persistentResp.Response = apiOutcome.Description
+	}
+	persistentJsonResp, _ := json.Marshal(persistentResp)
 
 	return &trigger.Outcome{
 		Payload: string(postData),
-		Outcome: string(outcomeJs),
+		Outcome: string(persistentJsonResp),
 		Success: resp.StatusCode == 200,
 	}
 }
