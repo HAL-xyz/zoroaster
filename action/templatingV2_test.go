@@ -50,7 +50,7 @@ Transaction hash is: 0x42c8de77ef5d76f36aea6e051b9059ece6e34619d9fb4a1d97f3224d5
 Transaction value is: 0
 Transaction input data is: 0xa9059cbb000000000000000000000000fea2f9433058cd555fd67cdde8efd7e6031e56c00000000000000000000000000000000000000000000000003782dace9d900000
 `
-	rendered, err := renderTemplateWithData(templateText, matches[0].ToTemplateMatch())
+	rendered, err := RenderTemplateWithData(templateText, matches[0].ToTemplateMatch())
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutcome, rendered)
 
@@ -94,7 +94,7 @@ We also support a bunch of handy functions to manipulate different values:
 {{ etherscanAddressLink .Contract.Address }}
 
 `
-	_, err = renderTemplateWithData(exampleUI, matches[0].ToTemplateMatch())
+	_, err = RenderTemplateWithData(exampleUI, matches[0].ToTemplateMatch())
 	assert.NoError(t, err)
 }
 
@@ -134,7 +134,7 @@ First returned value of inner array is a
 Testing uppercase function is HELLO
 Out of bound value is `
 
-	rendered, err := renderTemplateWithData(templateText, cnMatch.ToTemplateMatch())
+	rendered, err := RenderTemplateWithData(templateText, cnMatch.ToTemplateMatch())
 	assert.Equal(t, expectedOutcome, rendered)
 	assert.Error(t, err) // error isn't nil because of the out of bound indexing
 
@@ -168,7 +168,7 @@ We also support a bunch of handy functions to manipulate different values:
 
 {{ etherscanAddressLink .Contract.Address }}
 `
-	_, err = renderTemplateWithData(exampleUI, cnMatch.ToTemplateMatch())
+	_, err = RenderTemplateWithData(exampleUI, cnMatch.ToTemplateMatch())
 	assert.NoError(t, err)
 }
 
@@ -200,7 +200,7 @@ First element in array parameter is: hello
 Missing param is: 
 Transaction hash is 0xf44984a4b533ac0e7b608c881a856eff44ee8c17b9f4dcf8b4ee74e9c10c0455
 `
-	rendered, err := renderTemplateWithData(templateText, matches[0].ToTemplateMatch())
+	rendered, err := RenderTemplateWithData(templateText, matches[0].ToTemplateMatch())
 	assert.NoError(t, err)
 	assert.Equal(t, expectedOutcome, rendered)
 
@@ -213,7 +213,7 @@ Transaction hash is 0xf44984a4b533ac0e7b608c881a856eff44ee8c17b9f4dcf8b4ee74e9c1
 	{{ end }}
 {{ end }}
 `
-	_, err = renderTemplateWithData(tmpl, matches[0].ToTemplateMatch())
+	_, err = RenderTemplateWithData(tmpl, matches[0].ToTemplateMatch())
 	assert.NoError(t, err)
 
 	exampleUI :=
@@ -252,176 +252,176 @@ We also support a bunch of handy functions to manipulate different values:
 
 {{ etherscanAddressLink .Contract.Address }}
 `
-	_, err = renderTemplateWithData(exampleUI, matches[0].ToTemplateMatch())
+	_, err = RenderTemplateWithData(exampleUI, matches[0].ToTemplateMatch())
 	assert.NoError(t, err)
 }
 
 func TestTemplateFunctions(t *testing.T) {
 
 	template := "{{ hexToASCII . }}"
-	rendered, err := renderTemplateWithData(template, "0x4920686176652031303021")
+	rendered, err := RenderTemplateWithData(template, "0x4920686176652031303021")
 	assert.NoError(t, err)
 	assert.Equal(t, "I have 100!", rendered)
 
 	template = "{{ hexToASCII . }}"
-	rendered, err = renderTemplateWithData(template, "0x534e580000000000000000000000000000000000000000000000000000000000")
+	rendered, err = RenderTemplateWithData(template, "0x534e580000000000000000000000000000000000000000000000000000000000")
 	assert.NoError(t, err)
 	assert.Equal(t, "SNX", rendered)
 
 	template = "{{ hexToInt . }}"
-	rendered, err = renderTemplateWithData(template, "0xEA")
+	rendered, err = RenderTemplateWithData(template, "0xEA")
 	assert.NoError(t, err)
 	assert.Equal(t, "234", rendered)
 
 	template = "{{ hexToInt . }}"
-	rendered, err = renderTemplateWithData(template, "100")
+	rendered, err = RenderTemplateWithData(template, "100")
 	assert.NoError(t, err)
 	assert.Equal(t, "100", rendered)
 
 	template = "{{ etherscanTxLink . }}"
-	rendered, err = renderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	rendered, err = RenderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
 	assert.NoError(t, err)
 	assert.Equal(t, "https://etherscan.io/tx/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
 
 	template = "{{ etherscanAddressLink . }}"
-	rendered, err = renderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	rendered, err = RenderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
 	assert.NoError(t, err)
 	assert.Equal(t, "https://etherscan.io/address/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
 
 	template = "{{ etherscanTokenLink . }}"
-	rendered, err = renderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	rendered, err = RenderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
 	assert.NoError(t, err)
 	assert.Equal(t, "https://etherscan.io/token/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
 
 	template = "{{ fromWei . 18 }}"
-	rendered, err = renderTemplateWithData(template, "629700000000000000")
+	rendered, err = RenderTemplateWithData(template, "629700000000000000")
 	assert.NoError(t, err)
 	assert.Equal(t, "0.6297", rendered)
 
 	template = "{{ fromWei . 6 }}"
-	rendered, err = renderTemplateWithData(template, "629000000000000000")
+	rendered, err = RenderTemplateWithData(template, "629000000000000000")
 	assert.NoError(t, err)
 	assert.Equal(t, "629000000000", rendered)
 
 	template = "{{ fromWei . 6 }}"
-	rendered, err = renderTemplateWithData(template, big.NewInt(629000000000000000))
+	rendered, err = RenderTemplateWithData(template, big.NewInt(629000000000000000))
 	assert.NoError(t, err)
 	assert.Equal(t, "629000000000", rendered)
 
 	template = "{{ fromWei . 6 }}"
-	rendered, err = renderTemplateWithData(template, 629000000000000000)
+	rendered, err = RenderTemplateWithData(template, 629000000000000000)
 	assert.NoError(t, err)
 	assert.Equal(t, "629000000000", rendered)
 
 	template = `{{ fromWei . "6" }}`
-	rendered, err = renderTemplateWithData(template, 629000000000000000)
+	rendered, err = RenderTemplateWithData(template, 629000000000000000)
 	assert.NoError(t, err)
 	assert.Equal(t, "629000000000", rendered)
 
 	template = "{{ humanTime . }}"
-	rendered, err = renderTemplateWithData(template, "1602631929")
+	rendered, err = RenderTemplateWithData(template, "1602631929")
 	assert.NoError(t, err)
 	assert.Equal(t, "13 Oct 20 23:32 UTC", rendered)
 
 	template = "{{ humanTime . }}"
-	rendered, err = renderTemplateWithData(template, 1602631929)
+	rendered, err = RenderTemplateWithData(template, 1602631929)
 	assert.NoError(t, err)
 	assert.Equal(t, "13 Oct 20 23:32 UTC", rendered)
 
 	template = `{{ humanTime . "3:04:05 PM" }}`
-	rendered, err = renderTemplateWithData(template, 1602631929)
+	rendered, err = RenderTemplateWithData(template, 1602631929)
 	assert.NoError(t, err)
 	assert.Equal(t, "11:32:09 PM", rendered)
 
 	template = "{{ symbol . }}"
-	rendered, err = renderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
+	rendered, err = RenderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
 	assert.NoError(t, err)
 	assert.Equal(t, "DAI", rendered)
 
 	template = "{{ symbol . }}"
-	rendered, err = renderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
+	rendered, err = RenderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
 	assert.NoError(t, err)
 	assert.Equal(t, "ETH", rendered)
 
 	template = "{{ symbol . }}"
-	rendered, err = renderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+	rendered, err = RenderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
 	assert.NoError(t, err)
 	assert.Equal(t, "ETH", rendered)
 
 	template = "{{ decimals . }}"
-	rendered, err = renderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
+	rendered, err = RenderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
 	assert.NoError(t, err)
 	assert.Equal(t, "18", rendered)
 
 	template = "{{ decimals . }}"
-	rendered, err = renderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
+	rendered, err = RenderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
 	assert.NoError(t, err)
 	assert.Equal(t, "18", rendered)
 
 	template = "{{ decimals . }}"
 	assert.NoError(t, err)
-	rendered, err = renderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+	rendered, err = RenderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
 	assert.Equal(t, "18", rendered)
 
 	template = `{{ balanceOf "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2" "0x6b175474e89094c44da98b954eedeac495271d0f" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "100000000000000", rendered)
 
 	template = `{{ formatNumber "10000" 2 }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "10,000.00", rendered)
 }
 
 func TestMathFunctions(t *testing.T) {
 	template := `{{ add 10 "20" 30 }}`
-	rendered, err := renderTemplateWithData(template, nil)
+	rendered, err := RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "60", rendered)
 
 	template = `{{ sub 100 "20" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "80", rendered)
 
 	template = `{{ mul 10.55 "4" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "42.2", rendered)
 
 	template = `{{ div 2 "3" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "0.6666666666666666667", rendered)
 
 	template = `{{ round (div 2 "3") 2 }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "0.67", rendered)
 
 	template = `{{ round (mul (div 2 3) 100) 3 }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "66.667", rendered)
 
 	template = `{{ pow 2 8 }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "256", rendered)
 
 	template = `{{ pow "2" "8" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "256", rendered)
 
 	template = `{{ pow 1.0000560291 355 }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "1.02008889279936419637271196253370647336257590813508215370058066207976589819699", rendered)
 
 	template = `{{ round (mul (sub (pow (add (mul (div 9727274683 1000000000000000000) 5760) 1) 364) 1) 100) 2 }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "2.06", rendered)
 }
@@ -431,42 +431,42 @@ func TestTokenAPI(t *testing.T) {
 	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template := `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "usd" }}`
-	rendered, err := renderTemplateWithData(template, nil)
+	rendered, err := RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
 	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetFiatCacheCount())
 	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "USD" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
 	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetFiatCacheCount())
 	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c" "xxx" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.Error(t, err)
 	assert.Equal(t, "", rendered)
 	assert.Equal(t, 1, tokenapi.GetTokenAPI().GetFiatCacheCount())
 	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" "USD" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
 	assert.Equal(t, 2, tokenapi.GetTokenAPI().GetFiatCacheCount())
 	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0x0000000000000000000000000000000000000000" "USD" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
 	assert.Equal(t, 2, tokenapi.GetTokenAPI().GetFiatCacheCount())
 	tokenapi.GetTokenAPI().LogFiatStatsAndReset(999)
 
 	template = `{{ toFiat "0x194ebd173f6cdace046c53eacce9b953f28411d1" "USD" }}`
-	rendered, err = renderTemplateWithData(template, nil)
+	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.NotEqual(t, "0", rendered)
 	assert.Equal(t, 3, tokenapi.GetTokenAPI().GetFiatCacheCount())

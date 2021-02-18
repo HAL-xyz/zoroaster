@@ -1,7 +1,6 @@
 package trigger
 
 import (
-	"fmt"
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
@@ -10,15 +9,6 @@ import (
 	"strings"
 	"testing"
 )
-
-func getLogsForBlock(client tokenapi.IEthRpc, blockNo int, addresses []string) ([]ethrpc.Log, error) {
-	filter := ethrpc.FilterParams{
-		FromBlock: fmt.Sprintf("0x%x", blockNo),
-		ToBlock:   fmt.Sprintf("0x%x", blockNo),
-		Address:   addresses,
-	}
-	return client.EthGetLogs(filter)
-}
 
 type mockETHCli struct {
 	tokenapi.IEthRpc
@@ -69,9 +59,9 @@ func (t mockTApiCurrency) MakeEthRpcCall(cntAddress, data string, blockNumber in
 
 var mockTApiCurr mockTApiCurrency
 
-var logs550, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5690550, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
-var logs551, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5690551, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
-var logs552, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5690552, []string{"0x494b4a86212fee251aa9019fe3cdb92a54d9efa1"})
+var logs550, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5690550, "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1")
+var logs551, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5690551, "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1")
+var logs552, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5690552, "0x494b4a86212fee251aa9019fe3cdb92a54d9efa1")
 
 func TestValidateFilterLog(t *testing.T) {
 
@@ -1666,7 +1656,7 @@ func TestUint8Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	logs, err := getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252401, []string{"0x7be8076f4ea4a4ad08075c2508e481d6c946d12b"})
+	logs, err := TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252401, "0x7be8076f4ea4a4ad08075c2508e481d6c946d12b")
 	assert.NoError(t, err)
 
 	matches := MatchEvent(tg, logs, mockTokenApi)
@@ -1698,7 +1688,7 @@ func TestBytes32Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252045, []string{"0x7a6425c9b3f5521bfa5d71df710a2fb80508319b"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252045, "0x7a6425c9b3f5521bfa5d71df710a2fb80508319b")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -1729,7 +1719,7 @@ func TestBytesEqStartingWith0x(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9243327, []string{"0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9243327, "0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -1760,7 +1750,7 @@ func TestBytesEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9243327, []string{"0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9243327, "0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -1790,7 +1780,7 @@ func TestBoolEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9133542, []string{"0x73866e69c6f6f74fc48539dd541a6df8c8059e04"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9133542, "0x73866e69c6f6f74fc48539dd541a6df8c8059e04")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -1820,7 +1810,7 @@ func TestUint64Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252369, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252369, "0x39755357759ce0d7f32dc8dc45414cca409ae24e")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -1850,7 +1840,7 @@ func TestUint128Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252369, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252369, "0x39755357759ce0d7f32dc8dc45414cca409ae24e")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -1880,7 +1870,7 @@ func XXXTestUint128EqBis(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252460, []string{"0x39755357759ce0d7f32dc8dc45414cca409ae24e"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252460, "0x39755357759ce0d7f32dc8dc45414cca409ae24e")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 2, len(matches))
@@ -1910,7 +1900,7 @@ func TestAddressEqNotDecoded(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252175, []string{"0x14094949152eddbfcd073717200da82fed8dc960"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252175, "0x14094949152eddbfcd073717200da82fed8dc960")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -1970,7 +1960,7 @@ func TestUint256Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9252357, []string{"0xc7af99fe5513eb6710e6d5f44f9989da40f27f26"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252357, "0xc7af99fe5513eb6710e6d5f44f9989da40f27f26")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2010,7 +2000,7 @@ func TestUint256InBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9130794, "0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2040,7 +2030,7 @@ func TestUint256BiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9130794, "0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2090,7 +2080,7 @@ func TestUint256EqBytes32EqAddressEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9130794, []string{"0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9130794, "0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2151,7 +2141,7 @@ func TestMatchEvent8(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9222611, []string{"0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9222611, "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2180,7 +2170,7 @@ func TestMatchEvent7(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5693736, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	var logs, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5693736, "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2219,7 +2209,7 @@ func TestMatchEvent6(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5693736, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	var logs, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5693736, "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2248,7 +2238,7 @@ func TestMatchEvent5(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5693738, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	var logs, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5693738, "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2297,7 +2287,7 @@ func TestMatchEvent4(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiRinkeby.GetRPCCli(), 5693738, []string{"0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1"})
+	var logs, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5693738, "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2393,7 +2383,7 @@ func TestMatchEvent2(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 9099675, []string{"0x080bf510fcbf18b91105470639e9561022937712"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9099675, "0x080bf510fcbf18b91105470639e9561022937712")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
@@ -2505,7 +2495,7 @@ func TestHandleNullTerminatedStrings(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 10679595, []string{"0x9ceb5486eD0F3F2DBCaE906E4192472e88657983"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(10679595, "0x9ceb5486eD0F3F2DBCaE906E4192472e88657983")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Len(t, matches, 1)
@@ -2536,7 +2526,7 @@ func TestIntConversion(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 10696118, []string{"0x1d681d76ce96E4d70a88A00EBbcfc1E47808d0b8"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(10696118, "0x1d681d76ce96E4d70a88A00EBbcfc1E47808d0b8")
 	matches := MatchEvent(tg, logs, mockTokenApi)
 
 	assert.Len(t, matches, 1)
@@ -2579,7 +2569,7 @@ func TestBasicFilters(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11020360, "0xa4fc358455febe425536fd1878be67ffdbdec59a")
 
 	matches := MatchEvent(tg, logs, TokenApiMainnet)
 
@@ -2622,7 +2612,7 @@ func TestBasicFilters2(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11020360, "0xa4fc358455febe425536fd1878be67ffdbdec59a")
 
 	matches := MatchEvent(tg, logs, TokenApiMainnet)
 
@@ -2664,7 +2654,7 @@ func TestBasicFilters3(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11020360, "0xa4fc358455febe425536fd1878be67ffdbdec59a")
 
 	matches := MatchEvent(tg, logs, TokenApiMainnet)
 
@@ -2691,7 +2681,7 @@ func TestTxFromAndToWithoutBasicFilters(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11020360, []string{"0xa4fc358455febe425536fd1878be67ffdbdec59a"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11020360, "0xa4fc358455febe425536fd1878be67ffdbdec59a")
 
 	matches := MatchEvent(tg, logs, TokenApiMainnet)
 
@@ -2727,7 +2717,7 @@ func TestCurrencyWithExplicitCurrenciesData(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11646700, []string{"0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11646700, "0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55")
 
 	matches := MatchEvent(tg, logs, mockTApiCurr)
 	assert.Len(t, matches, 1)
@@ -2761,7 +2751,7 @@ func TestCurrencyWithImplicitCurrencyInTopic(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11646700, []string{"0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11646700, "0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55")
 
 	matches := MatchEvent(tg, logs, mockTApiCurr)
 	assert.Len(t, matches, 1)
@@ -2798,7 +2788,7 @@ func TestCurrencyWithImplicitCurrencyInData(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	var logs, _ = getLogsForBlock(TokenApiMainnet.GetRPCCli(), 11842974, []string{"0x0BABA1Ad5bE3a5C0a66E7ac838a129Bf948f1eA4"})
+	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11842974, "0x0BABA1Ad5bE3a5C0a66E7ac838a129Bf948f1eA4")
 
 	matches := MatchEvent(tg, logs, mockTApiCurr)
 	assert.Len(t, matches, 1)

@@ -1,6 +1,7 @@
 package tokenapi
 
 import (
+	"fmt"
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
@@ -10,7 +11,8 @@ import (
 
 // An interface for eth rpc clients, as used within Zoroaster
 type IEthRpc interface {
-	EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error)
+	EthGetLogsByHash(blockHash string) ([]ethrpc.Log, error)
+	EthGetLogsByNumber(blockNo int, address string) ([]ethrpc.Log, error)
 	EthGetBlockByNumber(number int, withTransactions bool) (*ethrpc.Block, error)
 	EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error)
 	EthBlockNumber() (int, error)
@@ -75,9 +77,24 @@ func (z *ZoroRPC) EthGetBlockByNumber(number int, withTransactions bool) (*ethrp
 	return z.cli.EthGetBlockByNumber(number, withTransactions)
 }
 
-func (z *ZoroRPC) EthGetLogs(params ethrpc.FilterParams) ([]ethrpc.Log, error) {
+// Lookups using only block hash are much faster than using block numbers and/or addresses
+func (z *ZoroRPC) EthGetLogsByHash(blockHash string) ([]ethrpc.Log, error) {
+	filter := ethrpc.FilterParams{
+		BlockHash: blockHash,
+	}
 	z.increaseCounterByOne()
-	return z.cli.EthGetLogs(params)
+	return z.cli.EthGetLogs(filter)
+}
+
+// // Lookups using block numbers and/or addresses are slower, but useful for testing
+func (z *ZoroRPC) EthGetLogsByNumber(blockNo int, address string) ([]ethrpc.Log, error) {
+	filter := ethrpc.FilterParams{
+		FromBlock: fmt.Sprintf("0x%x", blockNo),
+		ToBlock:   fmt.Sprintf("0x%x", blockNo),
+		Address:   []string{address},
+	}
+	z.increaseCounterByOne()
+	return z.cli.EthGetLogs(filter)
 }
 
 func (z *ZoroRPC) EthBlockNumber() (int, error) {

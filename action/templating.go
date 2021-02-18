@@ -19,7 +19,7 @@ var applyAllTemplateConversions = utils.ComposeStringFns(scaleAmounts, fillHuman
 func fillBodyTemplate(text string, payload trigger.IMatch, templateVersion string) string {
 	// new template system
 	if templateVersion == "v2" {
-		rendered, _ := renderTemplateWithData(text, payload.ToTemplateMatch())
+		rendered, _ := RenderTemplateWithData(text, payload.ToTemplateMatch())
 		return rendered
 	}
 	// legacy template system

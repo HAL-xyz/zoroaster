@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func renderTemplateWithData(templateText string, data interface{}) (string, error) {
+func RenderTemplateWithData(templateText string, data interface{}) (string, error) {
 
 	funcMap := template.FuncMap{
 		"upperCase":            strings.ToUpper,

@@ -52,11 +52,11 @@ func EventMatcher(
 	}
 }
 
+// We could ask the block for specific log addresses, but it's faster
+// to ask for all the logs and then filter them out manually.
+// Also, using block hash is much quicker than block number...
 func getLogsForBlock(client tokenapi.IEthRpc, blockHash string, triggers []*trigger.Trigger) ([]ethrpc.Log, error) {
-	filter := ethrpc.FilterParams{
-		BlockHash: blockHash,
-	}
-	logs, err := client.EthGetLogs(filter)
+	logs, err := client.EthGetLogsByHash(blockHash)
 	if err != nil {
 		return nil, err
 	}
