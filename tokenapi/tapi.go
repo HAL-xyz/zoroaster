@@ -23,7 +23,6 @@ type ITokenAPI interface {
 	Symbol(address string) string
 	Decimals(address string) string
 	LogFiatStatsAndReset(blockNo int)
-	GetFiatCacheCount() int
 	BalanceOf(token string, user string) string
 	FromWei(wei interface{}, units interface{}) string
 	GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error)
@@ -69,10 +68,6 @@ func (t *TokenAPI) LogFiatStatsAndReset(blockNo int) {
 	t.Unlock()
 }
 
-func (t *TokenAPI) GetFiatCacheCount() int {
-	return t.fiatCache.ItemCount()
-}
-
 func (t *TokenAPI) GetRPCCli() IEthRpc {
 	return t.rpcCli
 }
@@ -107,21 +102,30 @@ func (t *TokenAPI) Symbol(address string) string {
 	if isEthereumAddress(address) {
 		return "ETH"
 	}
-	return t.callERC20(address, "0x95d89b41", "symbol")
+	key := address + "_sym"
+
+	res, found := t.erc20Cache.Get(key)
+	if found {
+		return res.(string)
+	}
+	res = t.callERC20(address, "0x95d89b41", "symbol")
+	t.erc20Cache.Set(key, res, cache.DefaultExpiration)
+	return res.(string)
 }
 
 func (t *TokenAPI) Decimals(address string) string {
 	if isEthereumAddress(address) {
 		return "18"
 	}
+	key := address + "_dec"
 
-	dec, found := t.erc20Cache.Get(address)
+	res, found := t.erc20Cache.Get(key)
 	if found {
-		return dec.(string)
+		return res.(string)
 	}
-	dec = t.callERC20(address, "0x313ce567", "decimals")
-	t.erc20Cache.Set(address, dec, cache.DefaultExpiration)
-	return dec.(string)
+	res = t.callERC20(address, "0x313ce567", "decimals")
+	t.erc20Cache.Set(key, res, cache.DefaultExpiration)
+	return res.(string)
 }
 
 func (t *TokenAPI) BalanceOf(token string, user string) string {
