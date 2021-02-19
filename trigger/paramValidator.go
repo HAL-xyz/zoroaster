@@ -67,7 +67,6 @@ func ValidateTopicParam(topicParam, paramType, paramCurrency string, condition C
 		if paramCurrency != "" {
 			convertedValue, err := convertToCurrency(tokenApi, paramCurrency, condition.AttributeCurrency, utils.MakeBigInt(topicParam))
 			if err != nil {
-				log.Errorf("failed to convert currency: %s to %s", paramCurrency, condition.AttributeCurrency)
 				return false, ""
 			}
 			return validatePredBigFloat(condition.Predicate, convertedValue, utils.MakeBigFloat(attribute)), convertedValue.String()
@@ -195,7 +194,6 @@ func ValidateParam(
 		if parameterCurrency != "" {
 			convertedValue, err := convertToCurrency(tokenApi, parameterCurrency, attributeCurrency, param)
 			if err != nil {
-				log.Errorf("failed to convert currency: %s to %s", parameterCurrency, attributeCurrency)
 				return false, nil
 			}
 			return validatePredBigFloat(predicate, convertedValue, utils.MakeBigFloat(attribute)), param
@@ -214,7 +212,6 @@ func ValidateParam(
 			if parameterCurrency != "" {
 				convertedValue, err := convertToCurrency(tokenApi, parameterCurrency, attributeCurrency, param[*index])
 				if err != nil {
-					log.Errorf("failed to convert currency: %s to %s", parameterCurrency, attributeCurrency)
 					return false, nil
 				}
 				return validatePredBigFloat(predicate, convertedValue, utils.MakeBigFloat(attribute)), param

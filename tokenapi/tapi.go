@@ -56,8 +56,8 @@ func New(cli IEthRpc) *TokenAPI {
 }
 
 func (t *TokenAPI) LogFiatStatsAndReset(blockNo int) {
-	log.Infof("FiatStats: %s on block %d made %d calls to Coingecko, %d calls to Custom, had %d errors. Cache size is %d",
-		t.rpcCli.GetLabel(), blockNo, t.fiatStats["coingecko"], t.fiatStats["custom"], t.fiatStats["errors"], t.fiatCache.ItemCount())
+	log.Infof("FiatStats: %s on block %d made %d calls to Coingecko, %d calls to Custom, had %d not-found errors, %d network errors. Cache size is %d",
+		t.rpcCli.GetLabel(), blockNo, t.fiatStats["coingecko"], t.fiatStats["custom"], t.fiatStats["not_found"], t.fiatStats["network_error"], t.fiatCache.ItemCount())
 	t.Lock()
 	for k := range t.fiatStats {
 		delete(t.fiatStats, k)
@@ -180,6 +180,22 @@ func scaleBy(text, scaleBy string) string {
 	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.4f", math.Ceil(res*10000)/10000), "0"), ".")
 }
 
+type ApiNetworkErr struct {
+	msg string
+}
+
+func (e ApiNetworkErr) Error() string {
+	return fmt.Sprintf(e.msg)
+}
+
+type ApiNotFoundErr struct {
+	msg string
+}
+
+func (e ApiNotFoundErr) Error() string {
+	return fmt.Sprintf(e.msg)
+}
+
 func (t *TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error) {
 	tokenAddress = strings.ToLower(tokenAddress)
 	fiatCurrency = strings.ToLower(fiatCurrency)
@@ -208,7 +224,13 @@ func (t *TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, 
 		return price.(float32), nil
 	}
 
-	// fallback to our own endpoint
+	if _, ok := err.(ApiNetworkErr); ok {
+		t.increaseFiatStats("network_error")
+		log.Error(err)
+		return 0, err
+	}
+
+	// not found on Coingecko, fallback to our own endpoint
 	customEndpoint := fmt.Sprintf("https://xyxoolw445.execute-api.us-east-1.amazonaws.com/dev/%s", tokenAddress)
 	price, err = t.callPriceAPIs(customEndpoint, tokenAddress, fiatCurrency)
 	if err == nil {
@@ -216,9 +238,20 @@ func (t *TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, 
 		t.increaseFiatStats("custom")
 		return price.(float32), nil
 	}
+
 	// sorry :(
-	t.increaseFiatStats("errors")
-	return 0, fmt.Errorf("cannot find %s value for token %s\n", fiatCurrency, tokenAddress)
+	switch err.(type) {
+	case ApiNetworkErr:
+		t.increaseFiatStats("network_error")
+		log.Error(err)
+	case ApiNotFoundErr:
+		log.Error(err)
+		t.increaseFiatStats("not_found")
+	default:
+		t.increaseFiatStats("unknown_error")
+		log.Errorf("unknown error for currency %s fiat %s", tokenAddress, fiatCurrency)
+	}
+	return 0, err
 }
 
 func (t *TokenAPI) callPriceAPIs(url, tokenAddress, fiatCurrency string) (float32, error) {
@@ -231,26 +264,26 @@ func (t *TokenAPI) callPriceAPIs(url, tokenAddress, fiatCurrency string) (float3
 
 	resp, err := t.httpCli.Get(url)
 	if err != nil {
-		return 0, err
+		return 0, ApiNetworkErr{fmt.Sprintf("network error for currency %s fiat %s, %s", tokenAddress, fiatCurrency, err.Error())}
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return 0, err
+		return 0, ApiNetworkErr{fmt.Sprintf("network error for currency %s fiat %s, %s", tokenAddress, fiatCurrency, err.Error())}
 	}
 
 	var currencyMap map[string]map[string]float32
 	err = json.Unmarshal(body, &currencyMap)
 	if err != nil {
-		return 0, err
+		return 0, ApiNotFoundErr{fmt.Sprintf("not found error for currency %s fiat %s, unexpected json input", tokenAddress, fiatCurrency)}
 	}
 
 	val, ok := currencyMap[tokenAddress][fiatCurrency]
 	if ok {
 		return val, nil
 	} else {
-		return 0, fmt.Errorf("not found")
+		return 0, ApiNotFoundErr{fmt.Sprintf("not found error for currency %s fiat %s", tokenAddress, fiatCurrency)}
 	}
 }
 

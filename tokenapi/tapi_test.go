@@ -52,3 +52,15 @@ func TestTokenAPI_DecimalsAndSymbols(t *testing.T) {
 	assert.NotEqual(t, "", res)
 	assert.Equal(t, 2, tapi.erc20Cache.ItemCount())
 }
+
+func TestTokenAPI_GetExchangeRate(t *testing.T) {
+
+	_, err := tapi.GetExchangeRate("0x9cb9d5429a93174566efa5b5a73cf71e1ca1a8ab", "usd")
+	_, ok := err.(ApiNotFoundErr)
+	assert.True(t, ok)
+
+	_, err = tapi.GetExchangeRate("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee", "xxx")
+	_, ok = err.(ApiNotFoundErr)
+	assert.True(t, ok)
+
+}
