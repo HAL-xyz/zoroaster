@@ -19,11 +19,11 @@ func MatchContract(tokenApi tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMa
 		}
 	}
 
-	methodId, err := tokenApi.EncodeMethod(tg.FunctionName, tg.ContractABI, tokenApiInputs)
+	methodId, err := tokenApi.GetRPCCli().EncodeMethod(tg.FunctionName, tg.ContractABI, tokenApiInputs)
 	if err != nil {
 		return nil, fmt.Errorf("cannot encode method: %s", err)
 	}
-	rawData, err := tokenApi.MakeEthRpcCall(tg.ContractAdd, methodId, blockNo)
+	rawData, err := tokenApi.GetRPCCli().MakeEthRpcCall(tg.ContractAdd, methodId, blockNo)
 	if err != nil {
 		return nil, fmt.Errorf("rpc call failed with error : %s", err)
 	}

@@ -3,7 +3,6 @@ package tokenapi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/patrickmn/go-cache"
@@ -19,15 +18,13 @@ import (
 )
 
 type ITokenAPI interface {
-	GetRPCCli() IEthRpc
 	Symbol(address string) string
 	Decimals(address string) string
-	LogFiatStatsAndReset(blockNo int)
 	BalanceOf(token string, user string) string
 	FromWei(wei interface{}, units interface{}) string
 	GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error)
-	EncodeMethod(methodName, cntABI string, inputs []Input) (string, error)
-	MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error)
+	LogFiatStatsAndReset(blockNo int)
+	GetRPCCli() IEthRpc
 }
 
 type TokenAPI struct {
@@ -84,7 +81,7 @@ func (t *TokenAPI) callERC20(address, methodHash, methodName string) string {
 	if err != nil {
 		return err.Error()
 	}
-	rawData, err := t.MakeEthRpcCall(address, methodHash, lastBlock)
+	rawData, err := t.GetRPCCli().MakeEthRpcCall(address, methodHash, lastBlock)
 	if err != nil {
 		return err.Error()
 	}
@@ -138,22 +135,13 @@ func (t *TokenAPI) BalanceOf(token string, user string) string {
 		ParameterValue: user,
 	}
 
-	methodHash, err := t.EncodeMethod("balanceOf", erc20abi, []Input{paramInput})
+	methodHash, err := t.GetRPCCli().EncodeMethod("balanceOf", erc20abi, []Input{paramInput})
 
 	if err != nil {
 		return err.Error()
 	}
 
 	return t.callERC20(token, methodHash, "balanceOf")
-}
-
-func (t *TokenAPI) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
-	params := ethrpc.T{
-		To:   cntAddress,
-		From: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
-		Data: data,
-	}
-	return t.rpcCli.EthCall(params, fmt.Sprintf("0x%x", blockNumber))
 }
 
 func (t *TokenAPI) FromWei(wei interface{}, units interface{}) string {

@@ -17,9 +17,10 @@ type IEthRpc interface {
 	EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error)
 	EthBlockNumber() (int, error)
 	URL() string
-	EthCall(transaction ethrpc.T, tag string) (string, error)
 	ResetCounterAndLogStats(blockNo int)
 	GetLabel() string
+	EncodeMethod(methodName, cntABI string, inputs []Input) (string, error)
+	MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error)
 }
 
 // A wrapper for the ethrpc.EthRPC client.
@@ -106,15 +107,23 @@ func (z *ZoroRPC) URL() string {
 	return z.cli.URL()
 }
 
-func (z *ZoroRPC) EthCall(transaction ethrpc.T, tag string) (string, error) {
-	key := transaction.To + transaction.Data + tag
+func (z *ZoroRPC) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
+	params := ethrpc.T{
+		To:   cntAddress,
+		From: "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+		Data: data,
+	}
+
+	hexBlockNo := fmt.Sprintf("0x%x", blockNumber)
+
+	key := params.To + params.Data + hexBlockNo
 	val, found := z.cache.Get(key)
 	if found {
 		return val.(string), nil
 	}
 
 	z.increaseCounterByOne()
-	res, err := z.cli.EthCall(transaction, tag)
+	res, err := z.cli.EthCall(params, hexBlockNo)
 	if err == nil {
 		z.cache.Set(key, res, cache.DefaultExpiration)
 	}

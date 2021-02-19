@@ -14,8 +14,12 @@ type mockETHCli struct {
 	tokenapi.IEthRpc
 }
 
-func (cli mockETHCli) EthCall(transaction ethrpc.T, tag string) (string, error) {
+func (cli mockETHCli) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
 	return "0x0000000000000000000000000000000000000000000000212321d502f10fbc4a", nil
+}
+
+func (cli mockETHCli) EncodeMethod(methodName, cntABI string, inputs []tokenapi.Input) (string, error) {
+	return tokenapi.NewZRPC("", "").EncodeMethod(methodName, cntABI, inputs)
 }
 
 func (z mockETHCli) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error) {
@@ -46,15 +50,7 @@ func (t mockTApiCurrency) FromWei(wei interface{}, units interface{}) string {
 }
 
 func (t mockTApiCurrency) GetRPCCli() tokenapi.IEthRpc {
-	return TokenApiMainnet.GetRPCCli()
-}
-
-func (t mockTApiCurrency) EncodeMethod(methodName, cntABI string, inputs []tokenapi.Input) (string, error) {
-	return "0x", nil
-}
-
-func (t mockTApiCurrency) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
-	return "0x0000000000000000000000000000000000000000000000212321d502f10fbc4a", nil
+	return mockCli
 }
 
 var mockTApiCurr mockTApiCurrency
