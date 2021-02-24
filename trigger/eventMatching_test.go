@@ -15,7 +15,7 @@ type mockETHCli struct {
 }
 
 func (cli mockETHCli) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
-	return "0x0000000000000000000000000000000000000000000000212321d502f10fbc4a", nil
+	return "0x000000000000000000000000000000000000000000000058fe992dc845910ad7", nil
 }
 
 func (cli mockETHCli) EncodeMethod(methodName, cntABI string, inputs []tokenapi.Input) (string, error) {

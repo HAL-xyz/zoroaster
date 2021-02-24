@@ -97,13 +97,12 @@ func ValidateParam(
 
 	// tuple
 	if parameterType == "tuple" {
-		var param interface{}
+		var param map[string]json.RawMessage
 		if err = json.Unmarshal(rawParam, &param); err != nil {
 			log.Debug(err)
 			return false, nil
 		}
-		compValue := param.(map[string]interface{})[component.Name]
-		return ValidateParam(getRawParam(compValue), component.Type, parameterCurrency, attribute, attributeCurrency, predicate, index, Component{}, tokenApi)
+		return ValidateParam(getRawParam(param[component.Name]), component.Type, parameterCurrency, attribute, attributeCurrency, predicate, index, Component{}, tokenApi)
 	}
 	// uint8
 	if parameterType == "uint8[]" {

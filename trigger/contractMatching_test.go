@@ -331,7 +331,7 @@ func TestMatchContractTuple(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, match)
 	assert.Len(t, match.MatchedValues, 1)
-	assert.Equal(t, "611274093106585100000", match.MatchedValues[0])
+	assert.Equal(t, "1641659223381694810839", match.MatchedValues[0])
 }
 
 func TestMatchContractCurrency(t *testing.T) {
