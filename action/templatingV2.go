@@ -36,6 +36,7 @@ func RenderTemplateWithData(templateText string, data interface{}) (string, erro
 		"pow":                  pow,
 		"formatNumber":         formatNumber,
 		"toFiat":               tokenapi.GetTokenAPI().GetExchangeRate,
+		"floatToInt":           floatToInt,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -154,4 +155,9 @@ func pow(a, b interface{}) *big.Float {
 
 func formatNumber(number interface{}, precision int) string {
 	return accounting.FormatNumberBigFloat(utils.MakeBigFloat(number), precision, ",", ".")
+}
+
+func floatToInt(s string) int64 {
+	n, _ := strconv.ParseFloat(s, 64)
+	return int64(n)
 }

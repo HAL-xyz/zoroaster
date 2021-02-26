@@ -332,45 +332,21 @@ func TestTemplateFunctions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "11:32:09 PM", rendered)
 
-	template = "{{ symbol . }}"
-	rendered, err = RenderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
-	assert.NoError(t, err)
-	assert.Equal(t, "DAI", rendered)
-
-	template = "{{ symbol . }}"
-	rendered, err = RenderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
-	assert.NoError(t, err)
-	assert.Equal(t, "ETH", rendered)
-
-	template = "{{ symbol . }}"
-	rendered, err = RenderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-	assert.NoError(t, err)
-	assert.Equal(t, "ETH", rendered)
-
-	template = "{{ decimals . }}"
-	rendered, err = RenderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
-	assert.NoError(t, err)
-	assert.Equal(t, "18", rendered)
-
-	template = "{{ decimals . }}"
-	rendered, err = RenderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
-	assert.NoError(t, err)
-	assert.Equal(t, "18", rendered)
-
-	template = "{{ decimals . }}"
-	assert.NoError(t, err)
-	rendered, err = RenderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-	assert.Equal(t, "18", rendered)
-
-	template = `{{ balanceOf "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2" "0x6b175474e89094c44da98b954eedeac495271d0f" }}`
-	rendered, err = RenderTemplateWithData(template, nil)
-	assert.NoError(t, err)
-	assert.Equal(t, "100000000000000", rendered)
-
 	template = `{{ formatNumber "10000" 2 }}`
 	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "10,000.00", rendered)
+
+	// stringified floating point numbers are converted in a strange way so that this happens:
+	template = `{{ if ge "100" "100.0" }} GE {{ else }} Not-GE {{ end }}`
+	rendered, err = RenderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, " Not-GE ", rendered)
+	// we use floatToInt to truncate floats and compare correctly
+	template = `{{ if ge 100 (floatToInt "100.0") }} GE {{ else }} Not-GE {{ end }}`
+	rendered, err = RenderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, " GE ", rendered)
 }
 
 func TestMathFunctions(t *testing.T) {
@@ -423,4 +399,42 @@ func TestMathFunctions(t *testing.T) {
 	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "2.06", rendered)
+}
+
+func TestERC20Functions(t *testing.T) {
+
+	template := "{{ symbol . }}"
+	rendered, err := RenderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
+	assert.NoError(t, err)
+	assert.Equal(t, "DAI", rendered)
+
+	template = "{{ symbol . }}"
+	rendered, err = RenderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
+	assert.NoError(t, err)
+	assert.Equal(t, "ETH", rendered)
+
+	template = "{{ symbol . }}"
+	rendered, err = RenderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+	assert.NoError(t, err)
+	assert.Equal(t, "ETH", rendered)
+
+	template = "{{ decimals . }}"
+	rendered, err = RenderTemplateWithData(template, "0x6b175474e89094c44da98b954eedeac495271d0f")
+	assert.NoError(t, err)
+	assert.Equal(t, "18", rendered)
+
+	template = "{{ decimals . }}"
+	rendered, err = RenderTemplateWithData(template, "0x0000000000000000000000000000000000000000")
+	assert.NoError(t, err)
+	assert.Equal(t, "18", rendered)
+
+	template = "{{ decimals . }}"
+	assert.NoError(t, err)
+	rendered, err = RenderTemplateWithData(template, "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+	assert.Equal(t, "18", rendered)
+
+	template = `{{ balanceOf "0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2" "0x6b175474e89094c44da98b954eedeac495271d0f" }}`
+	rendered, err = RenderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "100000000000000", rendered)
 }
