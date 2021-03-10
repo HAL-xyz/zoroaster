@@ -156,7 +156,7 @@ func TestGetTwitterActionFromJson(t *testing.T) {
 	   "Attributes":{  
 		  "Token":"2329323098204983204983",
 		  "Secret":"sssssssssssht",
-		  "Status":"hey jude"
+		  "Status":"@mentions are not @allowed, but #tags are fine"
 	   }
 	}`
 	a := Action{}
@@ -167,7 +167,7 @@ func TestGetTwitterActionFromJson(t *testing.T) {
 	v, ok := a.Attribute.(AttributeTweet)
 	assert.True(t, ok)
 
-	assert.Equal(t, "hey jude", v.Status)
+	assert.Equal(t, "#mentions are not #allowed, but #tags are fine", v.Status)
 	assert.Equal(t, "2329323098204983204983", v.Token)
 	assert.Equal(t, "sssssssssssht", v.Secret)
 }

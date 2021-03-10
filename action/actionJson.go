@@ -134,7 +134,7 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 		action.Attribute = AttributeTweet{
 			Token:  ajs.Attributes.Token,
 			Secret: ajs.Attributes.Secret,
-			Status: ajs.Attributes.Status,
+			Status: replaceMentionsWithTags(ajs.Attributes.Status),
 		}
 	case "discord":
 		action.Attribute = AttributeDiscord{
@@ -146,4 +146,8 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 		return nil, fmt.Errorf("invalid ActionType %s", ajs.ActionType)
 	}
 	return &action, nil
+}
+
+func replaceMentionsWithTags(s string) string {
+	return strings.ReplaceAll(s, "@", "#")
 }
