@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE triggers DROP COLUMN last_fired;
+
+COMMIT;

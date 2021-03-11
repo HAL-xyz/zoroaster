@@ -501,6 +501,7 @@ const (
 	WaT TgType = iota
 	WaC
 	WaE
+	CronT
 )
 
 func TgTypeToString(tgType TgType) string {
@@ -511,6 +512,8 @@ func TgTypeToString(tgType TgType) string {
 		return "WatchContracts"
 	case WaE:
 		return "WatchEvents"
+	case CronT:
+		return "CronTrigger"
 	default:
 		return ""
 	}

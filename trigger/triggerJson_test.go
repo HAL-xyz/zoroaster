@@ -59,7 +59,7 @@ func TestWaCWithComponents(t *testing.T) {
 		 }
       }
    ],
-   "ContractABI":"[{\"inputs\":[],\"name\":\"getSpotPrice\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"d\",\"type\":\"uint256\"}],\"internalType\":\"struct Decimal.decimal\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+   "ContractABI":"",
    "ContractAdd":"0x8d22F1a9dCe724D8c1B4c688D75f17A2fE2D32df",
    "TriggerName":"some trigger",
    "TriggerType":"WatchContracts",
@@ -70,6 +70,55 @@ func TestWaCWithComponents(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "d", tg.Outputs[0].Component.Name)
 	assert.Equal(t, "uint256", tg.Outputs[0].Component.Type)
+}
+
+func TestCronTrigger(t *testing.T) {
+	js := `
+{
+  "TriggerName":"A time based trigger",
+  "TriggerType":"CronTrigger",
+  "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
+  "ContractABI":"",
+  "FunctionName": "balanceOf",
+  "Inputs": [
+    {
+      "ParameterType":"address",
+      "ParameterValue": "0xda4a4626d3e16e094de3225a751aab7128e96526"
+    }
+  ],
+  "CronJob": {
+	"Rule": "* * * * *",
+	"Timezone": "-0800"
+  }
+}
+`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+
+	assert.Equal(t, "* * * * *", tg.CronJob.Rule)
+	assert.Equal(t, "-0800", tg.CronJob.Timezone)
+
+	js = `
+{
+  "TriggerName":"A broken time based trigger",
+  "TriggerType":"CronTrigger",
+  "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
+  "ContractABI":"",
+  "FunctionName": "balanceOf",
+  "Inputs": [
+    {
+      "ParameterType":"address",
+      "ParameterValue": "0xda4a4626d3e16e094de3225a751aab7128e96526"
+    }
+  ],
+  "CronJob": {
+	"Rule": "* * * * *",
+	"Timezone": "-08"
+  }
+}
+`
+	tg, err = NewTriggerFromJson(js)
+	assert.Error(t, err)
 }
 
 func TestWaE(t *testing.T) {

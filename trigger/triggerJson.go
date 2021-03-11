@@ -6,7 +6,9 @@ import (
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"math/big"
+	"regexp"
 	"strconv"
+	"strings"
 )
 
 type TriggerJson struct {
@@ -19,6 +21,7 @@ type TriggerJson struct {
 	Filters      []FilterJson `json:"Filters"`
 	Inputs       []InputJson  `json:"Inputs"`
 	Outputs      []OutputJson `json:"Outputs"`
+	CronJob      CronJobJson  `json:"CronJob"`
 }
 
 type FilterJson struct {
@@ -58,6 +61,11 @@ type ComponentJson struct {
 	Type string
 }
 
+type CronJobJson struct {
+	Rule     string `json:"Rule"`
+	Timezone string `json:"Timezone"`
+}
+
 // creates a new TriggerJson from JSON
 func NewTriggerJson(input string) (*TriggerJson, error) {
 	tj := TriggerJson{}
@@ -70,15 +78,26 @@ func NewTriggerJson(input string) (*TriggerJson, error) {
 
 // converts a TriggerJson to a Trigger
 func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
+
 	if tjs.TriggerName == "" {
 		return nil, fmt.Errorf("cannot read trigger: missing TriggerName")
 	}
-	validTriggerTypes := []string{"WatchTransactions", "WatchContracts", "WatchEvents"}
+	validTriggerTypes := []string{"WatchTransactions", "WatchContracts", "WatchEvents", "CronTrigger"}
 	if !utils.IsIn(tjs.TriggerType, validTriggerTypes) {
 		return nil, fmt.Errorf("invalid trigger type: %s", tjs.TriggerType)
 	}
+
 	if tjs.TriggerType == "WatchContracts" && tjs.FunctionName == "" {
 		return nil, fmt.Errorf("cannot read WaC trigger: missing FunctionName")
+	}
+
+	if tjs.TriggerType == "CronTrigger" && len(strings.Split(tjs.CronJob.Rule, " ")) != 5 {
+		return nil, fmt.Errorf("invalid CronJob expression: %s", tjs.CronJob.Rule)
+	}
+
+	timeZoneRgx := regexp.MustCompile(`[-+]\d{4}$`)
+	if tjs.TriggerType == "CronTrigger" && !timeZoneRgx.MatchString(tjs.CronJob.Timezone) {
+		return nil, fmt.Errorf("invalid CronJob timezone: %s", tjs.CronJob.Timezone)
 	}
 
 	trigger := Trigger{
@@ -87,6 +106,10 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 		ContractABI:  tjs.ContractABI,
 		ContractAdd:  tjs.ContractAdd,
 		FunctionName: tjs.FunctionName,
+		CronJob: CronJob{
+			Rule:     tjs.CronJob.Rule,
+			Timezone: tjs.CronJob.Timezone,
+		},
 	}
 
 	// populate Input/Output for Watch a Contract

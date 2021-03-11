@@ -3,6 +3,7 @@ package db
 import (
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/trigger"
+	"time"
 )
 
 type IDB interface {
@@ -31,4 +32,6 @@ type IDB interface {
 	ReadSavedMonth() (int, error)
 
 	UpdateSavedMonth(newMonth int) error
+
+	UpdateLastFired(tgUUID string, now time.Time) error
 }

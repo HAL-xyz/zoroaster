@@ -3,6 +3,7 @@ package trigger
 import (
 	"fmt"
 	"math/big"
+	"time"
 )
 
 type Trigger struct {
@@ -16,6 +17,8 @@ type Trigger struct {
 	Inputs       []Input
 	Outputs      []Output
 	UserUUID     string
+	CronJob      CronJob
+	LastFired    time.Time
 }
 
 func (tg Trigger) hasBasicFilters() bool {
@@ -55,6 +58,11 @@ type Output struct {
 type Component struct {
 	Type string
 	Name string
+}
+
+type CronJob struct {
+	Rule     string
+	Timezone string
 }
 
 type Conditioner interface {

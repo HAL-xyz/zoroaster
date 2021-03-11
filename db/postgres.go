@@ -25,6 +25,15 @@ func NewPostgresClient(c *config.ZConfiguration) *PostgresClient {
 	return &client
 }
 
+func (cli PostgresClient) UpdateLastFired(tgUUID string, now time.Time) error {
+	q := fmt.Sprintf(`UPDATE "%s" SET last_fired = $1 WHERE uuid = $2`, cli.conf.TableTriggers)
+	_, err := db.Exec(q, now.UTC(), tgUUID)
+	if err != nil {
+		return fmt.Errorf("cannot set last run date to %s for trigger: %s: %s", now, tgUUID, err)
+	}
+	return nil
+}
+
 func (cli PostgresClient) UpdateSavedMonth(newMonth int) error {
 	// update current month
 	q := fmt.Sprintf(`UPDATE "%s" SET current_month = $1`, cli.conf.TableState)
@@ -203,7 +212,7 @@ func (cli PostgresClient) LogMatch(match trigger.IMatch) error {
 
 func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.Trigger, error) {
 	q := fmt.Sprintf(
-		`SELECT tg_table.uuid, trigger_data, user_uuid
+		`SELECT tg_table.uuid, trigger_data, user_uuid, COALESCE(last_fired, '2000-01-01 00:00:00+00')
 				FROM %s AS tg_table, %s AS usr_table
 				WHERE (tg_table.trigger_data ->> 'TriggerType')::text = '%s'
 				AND tg_table.user_uuid = usr_table.uuid
@@ -218,9 +227,9 @@ func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.
 
 	triggers := make([]*trigger.Trigger, 0)
 	for rows.Next() {
-		var triggerUUID, userUUID string
-		var tg string
-		err = rows.Scan(&triggerUUID, &tg, &userUUID)
+		var triggerUUID, tg, userUUID string
+		var lastFired time.Time
+		err = rows.Scan(&triggerUUID, &tg, &userUUID, &lastFired)
 		if err != nil {
 			return nil, err
 		}
@@ -228,7 +237,7 @@ func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.
 		if err != nil {
 			log.Warnf("trigger uuid %s: %v", triggerUUID, err)
 		} else {
-			trig.TriggerUUID, trig.UserUUID = triggerUUID, userUUID
+			trig.TriggerUUID, trig.UserUUID, trig.LastFired = triggerUUID, userUUID, lastFired
 			triggers = append(triggers, trig)
 		}
 	}

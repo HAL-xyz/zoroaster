@@ -27,7 +27,6 @@ func MatchContract(tokenApi tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMa
 	if err != nil {
 		return nil, fmt.Errorf("rpc call failed with error : %s", err)
 	}
-
 	//log.Debug("result from call is -> ", rawData)
 
 	allValuesLs, err := utils.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), tg.ContractABI, tg.FunctionName)

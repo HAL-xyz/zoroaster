@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"testing"
+	"time"
 )
 
 func init() {
@@ -56,7 +57,14 @@ func TestPostgresClient_All(t *testing.T) {
 	// Load all the active triggers
 	tgs, err := psqlClient.LoadTriggersFromDB(trigger.WaC)
 	assert.NoError(t, err)
-	assert.Len(t, tgs, 1) // only 1 bc the tests run with network = 1_eth_mainnet
+	assert.Len(t, tgs, 1)                                                       // only 1 bc the tests run with network = 1_eth_mainnet
+	assert.Equal(t, "2000-01-01 00:00:00 +0000 UTC", tgs[0].LastFired.String()) // if NULL coalesce to 1/1/2000
+
+	// Update last fired
+	err = psqlClient.UpdateLastFired(triggerUUID, time.Date(2020, time.Month(3), 15, 0, 0, 0, 0, time.UTC))
+	assert.NoError(t, err)
+	tgs, err = psqlClient.LoadTriggersFromDB(trigger.WaC)
+	assert.Equal(t, "2020-03-15 00:00:00 +0000 UTC", tgs[0].LastFired.String())
 
 	// load two Actions
 	_, err = psqlClient.SaveAction(triggerUUID)
