@@ -19,7 +19,10 @@ var applyAllTemplateConversions = utils.ComposeStringFns(scaleAmounts, fillHuman
 func fillBodyTemplate(text string, payload trigger.IMatch, templateVersion string) string {
 	// new template system
 	if templateVersion == "v2" {
-		rendered, _ := RenderTemplateWithData(text, payload.ToTemplateMatch())
+		rendered, err := RenderTemplateWithData(text, payload.ToTemplateMatch())
+		if err != nil {
+			logrus.Debugf("tg %s had template error %s", payload.GetTriggerUUID(), err)
+		}
 		return rendered
 	}
 	// legacy template system
