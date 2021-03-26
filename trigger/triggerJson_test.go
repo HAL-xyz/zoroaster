@@ -150,6 +150,18 @@ func TestMacro(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 	assert.Equal(t, "hello, HAL ;)", tg.Inputs[1].ParameterValue)
+
+}
+
+func TestMap2StringListSorted(t *testing.T) {
+
+	m := map[string]interface{}{
+		"0x345": 2,
+		"0x123": 1,
+		"0xxxx": 2,
+		"00000": 2,
+	}
+	assert.Equal(t, "00000,0x123,0x345,0xxxx", mapToStringListSorted(m))
 }
 
 func TestWaE(t *testing.T) {

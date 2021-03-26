@@ -18,6 +18,7 @@ import (
 )
 
 type ITokenAPI interface {
+	GetAllERC20TokensMap() (map[string]ERC20Token, error)
 	Symbol(address string) string
 	Decimals(address string) string
 	BalanceOf(token string, user string) string

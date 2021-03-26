@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"net/http"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -296,7 +297,7 @@ func expandMacro(s string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			return mapToStringList(tokenMap), nil
+			return mapToStringListSorted(tokenMap), nil
 		},
 	}
 	f, ok := macros[s]
@@ -306,10 +307,14 @@ func expandMacro(s string) (string, error) {
 	return s, nil
 }
 
-func mapToStringList(m map[string]interface{}) string {
-	var s string
+func mapToStringListSorted(m map[string]interface{}) string {
+	var i = 0
+	ls := make([]string, len(m))
 	for k := range m {
-		s = s + "," + k
+		ls[i] = k
+		i++
 	}
-	return s[1:]
+	sort.Strings(ls)
+	s := strings.ReplaceAll(fmt.Sprintf("%s", ls), " ", ",")
+	return s[1:len(s)-1]
 }

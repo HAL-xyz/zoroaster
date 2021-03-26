@@ -9,6 +9,7 @@ import (
 	"github.com/leekchan/accounting"
 	"html/template"
 	"math/big"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -37,6 +38,7 @@ func RenderTemplateWithData(templateText string, data interface{}) (string, erro
 		"formatNumber":         formatNumber,
 		"toFiat":               tokenapi.GetTokenAPI().GetExchangeRate,
 		"floatToInt":           floatToInt,
+		"ERC20Snapshot":        ERC20Snapshot,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -160,4 +162,50 @@ func formatNumber(number interface{}, precision int) string {
 func floatToInt(s string) int64 {
 	n, _ := strconv.ParseFloat(s, 64)
 	return int64(n)
+}
+
+func ERC20Snapshot(allBalancesIfc []interface{}) map[string]*big.Int {
+	// balances are already sorted per address because the multicall is ordered;
+	// here we are just converting the multicall output to []*big.Int
+
+	if len(allBalancesIfc) != 1 {
+		return map[string]*big.Int{}
+	}
+	balances, ok := allBalancesIfc[0].([]string)
+	if !ok {
+		return map[string]*big.Int{}
+	}
+
+	sortedBalances := make([]*big.Int, len(balances))
+	for i, v := range balances {
+		sortedBalances[i] = utils.MakeBigInt(v)
+	}
+
+	// get a sorted list of all the tokens
+	tokenMap, err := tokenapi.GetTokenAPI().GetAllERC20TokensMap()
+	if err != nil {
+		return map[string]*big.Int{}
+	}
+	var i = 0
+	sortedTokenAdds := make([]string, len(tokenMap))
+	for k := range tokenMap {
+		sortedTokenAdds[i] = k
+		i++
+	}
+	sort.Strings(sortedTokenAdds)
+
+	// So now we have:
+	// an [] of all Balances Sorted
+	// an [] of all Tokens Sorted
+
+	// combine []balances and []tokenAdds to a balance map (tokenAdd -> balance)
+	var balanceMap = map[string]*big.Int{}
+
+	for i, balance := range sortedBalances {
+		if balance.Cmp(big.NewInt(0)) == 1 {
+			balanceMap[sortedTokenAdds[i]] = balance
+		}
+	}
+
+	return balanceMap
 }

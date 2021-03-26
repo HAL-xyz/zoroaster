@@ -438,3 +438,19 @@ func TestERC20Functions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "100000000000000", rendered)
 }
+
+func TestERC20Snapshot(t *testing.T) {
+
+	template := `{{ ERC20Snapshot . }}`
+	data := []interface{}{
+		[]string{"100", "0", "99"},
+	}
+	rendered, err := RenderTemplateWithData(template, data)
+	assert.NoError(t, err)
+	assert.Equal(t, "map[0x0000000000000000000000000000000000000000:100 0x000000000000d0151e748d25b766e77efe2a6c83:99]", rendered)
+
+	template = `{{ index (ERC20Snapshot .) "0x0000000000000000000000000000000000000000" }}`
+	rendered, err = RenderTemplateWithData(template, data)
+	assert.NoError(t, err)
+	assert.Equal(t, "100", rendered)
+}
