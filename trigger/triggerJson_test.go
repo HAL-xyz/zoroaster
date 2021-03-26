@@ -121,6 +121,37 @@ func TestCronTrigger(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestMacro(t *testing.T) {
+	js := `
+{
+  "Inputs": [
+    {
+      "ParameterName": "users",
+      "ParameterType": "address[]",
+      "ParameterValue": "0x894cF868881a0781c20105b076adC644cB252203"
+    },
+    {
+      "ParameterName": "tokens",
+      "ParameterType": "address[]",
+      "ParameterValue": "$test"
+    }
+  ],
+  "CronJob": {
+    "Rule": "*/5 * * * *",
+    "Timezone": "-0000"
+  },
+  "ContractABI": "[{\"constant\":true,\"inputs\":[{\"name\":\"user\",\"type\":\"address\"},{\"name\":\"token\",\"type\":\"address\"}],\"name\":\"tokenBalance\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"users\",\"type\":\"address[]\"},{\"name\":\"tokens\",\"type\":\"address[]\"}],\"name\":\"balances\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256[]\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"fallback\"}]", 
+  "ContractAdd": "0xb1f8e55c7f64d203c1400b9d8555d050f94adf39",
+  "TriggerName": "Balances test",
+  "TriggerType": "CronTrigger",
+  "FunctionName": "balances"
+}
+`
+	tg, err := NewTriggerFromJson(js)
+	assert.NoError(t, err)
+	assert.Equal(t, "hello, HAL ;)", tg.Inputs[1].ParameterValue)
+}
+
 func TestWaE(t *testing.T) {
 	json, err := ioutil.ReadFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)

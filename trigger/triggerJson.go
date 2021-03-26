@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"io/ioutil"
 	"math/big"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -112,10 +114,13 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 		},
 	}
 
-	// populate Input/Output for Watch a Contract
+	// populate Input/Output for Watch a Contract & Cron Trigger
 	for _, inputJs := range tjs.Inputs {
-		in := Input{inputJs.ParameterType, inputJs.ParameterValue}
-		trigger.Inputs = append(trigger.Inputs, in)
+		in, err := inputJs.ToInput()
+		if err != nil {
+			return nil, err
+		}
+		trigger.Inputs = append(trigger.Inputs, *in)
 	}
 	for _, outputJs := range tjs.Outputs {
 		cond := ConditionOutput{Condition{}, unpackPredicate(outputJs.Condition.Predicate), outputJs.Condition.Attribute, outputJs.Condition.AttributeCurrency}
@@ -150,6 +155,16 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 		trigger.Filters = append(trigger.Filters, *f)
 	}
 	return &trigger, nil
+}
+
+// converts an InputJson to an Input
+func (inputJs InputJson) ToInput() (*Input, error) {
+	paramValue, err := expandMacro(inputJs.ParameterValue)
+	if err != nil {
+		return nil, err
+	}
+	in := Input{inputJs.ParameterType, paramValue}
+	return &in, nil
 }
 
 // converts a FilterJson to a Filter
@@ -256,4 +271,45 @@ func unpackPredicate(p string) Predicate {
 	default:
 		return -1
 	}
+}
+
+type Expander func(string) (string, error)
+
+func expandMacro(s string) (string, error) {
+
+	var macros = map[string]Expander{
+		"$test": func(string) (string, error) {
+			return "hello, HAL ;)", nil
+		},
+		"$all_erc20_tokens": func(string) (string, error) {
+			resp, err := http.Get(`https://23m8idpr31.execute-api.eu-central-1.amazonaws.com/PROD/v1/all_tokens`)
+			defer resp.Body.Close()
+			if err != nil {
+				return "", err
+			}
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				return "", err
+			}
+			var tokenMap map[string]interface{}
+			err = json.Unmarshal(body, &tokenMap)
+			if err != nil {
+				return "", err
+			}
+			return mapToStringList(tokenMap), nil
+		},
+	}
+	f, ok := macros[s]
+	if ok {
+		return f(s)
+	}
+	return s, nil
+}
+
+func mapToStringList(m map[string]interface{}) string {
+	var s string
+	for k := range m {
+		s = s + "," + k
+	}
+	return s[1:]
 }
