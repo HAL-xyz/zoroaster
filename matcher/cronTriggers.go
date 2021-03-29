@@ -94,8 +94,11 @@ func RunCronTgAgainstBlock(tg *trigger.Trigger, blockNo int, api tokenapi.IToken
 	if err != nil {
 		return nil, fmt.Errorf("rpc call failed with error : %s", err)
 	}
+	if rawData == "0x" {
+		return nil, fmt.Errorf("rpc call failed: returned 0x")
+	}
 
-	//log.Debug("result from call is -> ", rawData)
+	//fmt.Println("result from call is -> ", rawData)
 
 	allValuesLs, err := utils.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), tg.ContractABI, tg.FunctionName)
 	if err != nil {
@@ -103,9 +106,9 @@ func RunCronTgAgainstBlock(tg *trigger.Trigger, blockNo int, api tokenapi.IToken
 	}
 
 	m := &trigger.CnMatch{
-		Trigger:        tg,
-		BlockNumber:    blockNo,
-		AllValues:      utils.SprintfInterfaces(allValuesLs),
+		Trigger:     tg,
+		BlockNumber: blockNo,
+		AllValues:   utils.SprintfInterfaces(allValuesLs),
 	}
 	return m, nil
 }

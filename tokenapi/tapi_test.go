@@ -34,25 +34,6 @@ func TestTokenAPI_GetFiatCacheCount(t *testing.T) {
 
 }
 
-func TestTokenAPI_DecimalsAndSymbols(t *testing.T) {
-
-	res := tapi.Decimals("0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
-	assert.Equal(t, "18", res)
-	assert.Equal(t, 0, tapi.erc20Cache.ItemCount())
-
-	res = tapi.Symbol("0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c")
-	assert.NotEqual(t, "", res)
-	assert.Equal(t, 1, tapi.erc20Cache.ItemCount())
-
-	res = tapi.Decimals("0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c")
-	assert.NotEqual(t, "", res)
-	assert.Equal(t, 2, tapi.erc20Cache.ItemCount())
-
-	res = tapi.Symbol("0x1f573d6fb3f13d689ff844b4ce37794d79a7ff1c")
-	assert.NotEqual(t, "", res)
-	assert.Equal(t, 2, tapi.erc20Cache.ItemCount())
-}
-
 func TestTokenAPI_GetExchangeRate(t *testing.T) {
 
 	_, err := tapi.GetExchangeRate("0x9cb9d5429a93174566efa5b5a73cf71e1ca1a8ab", "usd")

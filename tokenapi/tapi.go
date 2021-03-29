@@ -18,7 +18,7 @@ import (
 )
 
 type ITokenAPI interface {
-	GetAllERC20TokensMap() (map[string]ERC20Token, error)
+	GetAllERC20TokensMap() map[string]ERC20Token
 	Symbol(address string) string
 	Decimals(address string) string
 	BalanceOf(token string, user string) string
@@ -29,11 +29,11 @@ type ITokenAPI interface {
 }
 
 type TokenAPI struct {
-	fiatCache  *cache.Cache
-	fiatStats  map[string]int
-	httpCli    *http.Client
-	rpcCli     IEthRpc
-	erc20Cache *cache.Cache
+	fiatCache *cache.Cache
+	fiatStats map[string]int
+	httpCli   *http.Client
+	rpcCli    IEthRpc
+	tokenMap  map[string]ERC20Token
 	sync.Mutex
 }
 
@@ -47,13 +47,29 @@ func GetTokenAPI() *TokenAPI {
 
 // returns a new TokenAPI
 func New(cli IEthRpc) *TokenAPI {
-	return &TokenAPI{
-		fiatCache:  cache.New(10*time.Minute, 10*time.Minute),
-		fiatStats:  map[string]int{},
-		httpCli:    &http.Client{},
-		rpcCli:     cli,
-		erc20Cache: cache.New(24*time.Hour, 24*time.Hour),
+
+	tapi := TokenAPI{
+		fiatCache: cache.New(10*time.Minute, 10*time.Minute),
+		fiatStats: map[string]int{},
+		httpCli:   &http.Client{},
+		rpcCli:    cli,
 	}
+
+	resp, err := http.Get(`https://23m8idpr31.execute-api.eu-central-1.amazonaws.com/PROD/v1/all_tokens`)
+	defer resp.Body.Close()
+	if err != nil {
+		log.Fatalf("cannot init TokenAPI: %s", err)
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("cannot init TokenAPI: %s", err)
+	}
+	err = json.Unmarshal(body, &tapi.tokenMap)
+	if err != nil {
+		log.Fatalf("cannot init TokenAPI: %s", err)
+	}
+
+	return &tapi
 }
 
 func (t *TokenAPI) LogFiatStatsAndReset(blockNo int) {
@@ -83,25 +99,8 @@ type ERC20Token struct {
 	LogoURI  string `json:"logoURI,omitempty"`
 }
 
-func (t *TokenAPI) GetAllERC20TokensMap() (map[string]ERC20Token, error) {
-
-	// TODO: cache this
-
-	resp, err := http.Get(`https://23m8idpr31.execute-api.eu-central-1.amazonaws.com/PROD/v1/all_tokens`)
-	defer resp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	var tokenMap map[string]ERC20Token
-	err = json.Unmarshal(body, &tokenMap)
-	if err != nil {
-		return nil, err
-	}
-	return tokenMap, nil
+func (t *TokenAPI) GetAllERC20TokensMap() map[string]ERC20Token {
+	return t.tokenMap
 }
 
 const erc20abi = `[ { "constant": true, "inputs": [], "name": "name", "outputs": [ { "name": "", "type": "string" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "decimals", "outputs": [ { "name": "", "type": "uint8" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "_owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "balance", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "symbol", "outputs": [ { "name": "", "type": "string" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transfer", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [ { "name": "_owner", "type": "address" }, { "name": "_spender", "type": "address" } ], "name": "allowance", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "payable": true, "stateMutability": "payable", "type": "fallback" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "owner", "type": "address" }, { "indexed": true, "name": "spender", "type": "address" }, { "indexed": false, "name": "value", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "from", "type": "address" }, { "indexed": true, "name": "to", "type": "address" }, { "indexed": false, "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" } ]`
@@ -127,33 +126,11 @@ func (t *TokenAPI) callERC20(address, methodHash, methodName string) string {
 }
 
 func (t *TokenAPI) Symbol(address string) string {
-	if isEthereumAddress(address) {
-		return "ETH"
-	}
-	key := address + "_sym"
-
-	res, found := t.erc20Cache.Get(key)
-	if found {
-		return res.(string)
-	}
-	res = t.callERC20(address, "0x95d89b41", "symbol")
-	t.erc20Cache.Set(key, res, cache.DefaultExpiration)
-	return res.(string)
+	return t.tokenMap[address].Symbol
 }
 
 func (t *TokenAPI) Decimals(address string) string {
-	if isEthereumAddress(address) {
-		return "18"
-	}
-	key := address + "_dec"
-
-	res, found := t.erc20Cache.Get(key)
-	if found {
-		return res.(string)
-	}
-	res = t.callERC20(address, "0x313ce567", "decimals")
-	t.erc20Cache.Set(key, res, cache.DefaultExpiration)
-	return res.(string)
+	return fmt.Sprintf("%d", t.tokenMap[address].Decimals)
 }
 
 func (t *TokenAPI) BalanceOf(token string, user string) string {

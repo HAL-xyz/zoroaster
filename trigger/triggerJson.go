@@ -316,5 +316,5 @@ func mapToStringListSorted(m map[string]interface{}) string {
 	}
 	sort.Strings(ls)
 	s := strings.ReplaceAll(fmt.Sprintf("%s", ls), " ", ",")
-	return s[1:len(s)-1]
+	return s[1 : len(s)-1]
 }

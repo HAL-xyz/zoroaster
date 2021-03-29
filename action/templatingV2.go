@@ -181,14 +181,10 @@ func ERC20Snapshot(allBalancesIfc []interface{}) map[string]*big.Int {
 		sortedBalances[i] = utils.MakeBigInt(v)
 	}
 
-	// get a sorted list of all the tokens
-	tokenMap, err := tokenapi.GetTokenAPI().GetAllERC20TokensMap()
-	if err != nil {
-		return map[string]*big.Int{}
-	}
+	// make a sorted list of all the tokens
 	var i = 0
-	sortedTokenAdds := make([]string, len(tokenMap))
-	for k := range tokenMap {
+	sortedTokenAdds := make([]string, len(tokenapi.GetTokenAPI().GetAllERC20TokensMap()))
+	for k := range tokenapi.GetTokenAPI().GetAllERC20TokensMap() {
 		sortedTokenAdds[i] = k
 		i++
 	}
