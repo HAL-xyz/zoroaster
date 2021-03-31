@@ -1,0 +1,34 @@
+{
+  "0x03042482d64577a7bdb282260e2ea4c8a89c064b": {
+    "chainId": 1,
+    "name": "Centaur",
+    "address": "0x03042482d64577a7bdb282260e2ea4c8a89c064b",
+    "symbol": "CNTR",
+    "decimals": 18,
+    "logoURI": "https://assets.coingecko.com/coins/images/12743/thumb/logo_%2898%29.png?1602630445"
+  },
+  "0x03066da434e5264ef0b32f787923f974a5726fdc": {
+    "chainId": 1,
+    "name": "Basis Coin Share",
+    "address": "0x03066da434e5264ef0b32f787923f974a5726fdc",
+    "symbol": "BCS",
+    "decimals": 18,
+    "logoURI": "https://assets.coingecko.com/coins/images/13530/thumb/Basiscoin_Share.png?1609406623"
+  },
+  "0x030ba81f1c18d280636f32af80b9aad02cf0854e": {
+    "chainId": 1,
+    "name": "AaveinterestbearingWETH",
+    "address": "0x030ba81f1c18d280636f32af80b9aad02cf0854e",
+    "symbol": "aWETH",
+    "decimals": 18,
+    "logoURI": "https://tokens.1inch.exchange/0x030ba81f1c18d280636f32af80b9aad02cf0854e.png"
+  },
+  "0x0316eb71485b0ab14103307bf65a021042c6d380": {
+    "chainId": 1,
+    "name": "Huobi BTC",
+    "address": "0x0316eb71485b0ab14103307bf65a021042c6d380",
+    "symbol": "HBTC",
+    "decimals": 18,
+    "logoURI": "https://assets.coingecko.com/coins/images/12407/thumb/Unknown-5.png?1599624896"
+  }
+}
