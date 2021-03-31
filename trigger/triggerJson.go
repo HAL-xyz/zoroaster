@@ -3,11 +3,10 @@ package trigger
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/common"
-	"io/ioutil"
 	"math/big"
-	"net/http"
 	"regexp"
 	"sort"
 	"strconv"
@@ -117,11 +116,7 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 
 	// populate Input/Output for Watch a Contract & Cron Trigger
 	for _, inputJs := range tjs.Inputs {
-		in, err := inputJs.ToInput()
-		if err != nil {
-			return nil, err
-		}
-		trigger.Inputs = append(trigger.Inputs, *in)
+		trigger.Inputs = append(trigger.Inputs, *(inputJs.ToInput()))
 	}
 	for _, outputJs := range tjs.Outputs {
 		cond := ConditionOutput{Condition{}, unpackPredicate(outputJs.Condition.Predicate), outputJs.Condition.Attribute, outputJs.Condition.AttributeCurrency}
@@ -159,13 +154,8 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 }
 
 // converts an InputJson to an Input
-func (inputJs InputJson) ToInput() (*Input, error) {
-	paramValue, err := expandMacro(inputJs.ParameterValue)
-	if err != nil {
-		return nil, err
-	}
-	in := Input{inputJs.ParameterType, paramValue}
-	return &in, nil
+func (inputJs InputJson) ToInput() *Input {
+	return &Input{inputJs.ParameterType, expandMacro(inputJs.ParameterValue)}
 }
 
 // converts a FilterJson to a Filter
@@ -274,44 +264,30 @@ func unpackPredicate(p string) Predicate {
 	}
 }
 
-type Expander func(string) (string, error)
+type Expander func(string) string
 
-func expandMacro(s string) (string, error) {
+func expandMacro(s string) string {
 
 	var macros = map[string]Expander{
-		"$test": func(string) (string, error) {
-			return "hello, HAL ;)", nil
+		"$test": func(string) string {
+			return "hello, HAL ;)"
 		},
-		"$all_erc20_tokens": func(string) (string, error) {
-			resp, err := http.Get(`https://23m8idpr31.execute-api.eu-central-1.amazonaws.com/PROD/v1/all_tokens`)
-			defer resp.Body.Close()
-			if err != nil {
-				return "", err
-			}
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return "", err
-			}
-			var tokenMap map[string]interface{}
-			err = json.Unmarshal(body, &tokenMap)
-			if err != nil {
-				return "", err
-			}
-			return mapToStringListSorted(tokenMap), nil
+		"$all_erc20_tokens": func(string) string {
+			return mapToStringListSorted(tokenapi.GetTokenAPI().GetAllERC20TokensMap())
 		},
 	}
 	f, ok := macros[s]
 	if ok {
 		return f(s)
 	}
-	return s, nil
+	return s
 }
 
-func mapToStringListSorted(m map[string]interface{}) string {
+func mapToStringListSorted(m map[string]tokenapi.ERC20Token) string {
 	var i = 0
 	ls := make([]string, len(m))
-	for k := range m {
-		ls[i] = k
+	for _, v := range m {
+		ls[i] = v.Address
 		i++
 	}
 	sort.Strings(ls)

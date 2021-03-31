@@ -38,7 +38,7 @@ func RenderTemplateWithData(templateText string, data interface{}) (string, erro
 		"formatNumber":         formatNumber,
 		"toFiat":               tokenapi.GetTokenAPI().GetExchangeRate,
 		"floatToInt":           floatToInt,
-		"ERC20Snapshot":        ERC20Snapshot,
+		"ERC20Snapshot":        eRC20Snapshot,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -164,7 +164,7 @@ func floatToInt(s string) int64 {
 	return int64(n)
 }
 
-func ERC20Snapshot(allBalancesIfc []interface{}) map[string]*big.Int {
+func eRC20Snapshot(allBalancesIfc []interface{}) map[string]*big.Int {
 	// balances are already sorted per address because the multicall is ordered;
 	// here we are just converting the multicall output to []*big.Int
 
