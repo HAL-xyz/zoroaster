@@ -33,10 +33,12 @@ func RenderTemplateWithData(templateText string, data interface{}) (string, erro
 		"sub":                  sub,
 		"mul":                  mul,
 		"div":                  div,
+		"percentageVariation":  percentageVariation,
 		"round":                utils.Round,
 		"pow":                  pow,
 		"formatNumber":         formatNumber,
 		"toFiat":               tokenapi.GetTokenAPI().GetExchangeRate,
+		"toFiatAt":             tokenapi.GetTokenAPI().GetExchangeRateAtDate,
 		"floatToInt":           floatToInt,
 		"ERC20Snapshot":        eRC20Snapshot,
 	}
@@ -129,6 +131,16 @@ func mul(a, b interface{}) *big.Float {
 	x := utils.MakeBigFloat(a)
 	y := utils.MakeBigFloat(b)
 	return x.Mul(x, y)
+}
+
+func percentageVariation(new, old interface{}) string {
+	diff := sub(new, old)
+	variation := mul(div(diff, old), 100)
+	//sign := ""
+	//if variation.Sign() == 1 {
+	//	sign = "+"
+	//}
+	return fmt.Sprintf("%s%%", formatNumber(variation.String(), 2))
 }
 
 func div(a, b interface{}) *big.Float {
