@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/config"
-	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -30,14 +29,14 @@ type ITokenAPI interface {
 }
 
 type TokenAPI struct {
-	fiatCache *cache.Cache
+	fiatCache        *cache.Cache
 	fiatCacheHistory *cache.Cache
-	fiatStats map[string]int
-	httpCli   *http.Client
-	rpcCli    IEthRpc
-	tokenMap  map[string]ERC20Token
-	TokenEndpoint string
-	coingeckoIdsMap map[string]string
+	fiatStats        map[string]int
+	httpCli          *http.Client
+	rpcCli           IEthRpc
+	tokenMap         map[string]ERC20Token
+	TokenEndpoint    string
+	coingeckoIdsMap  map[string]string
 	sync.Mutex
 }
 
@@ -53,13 +52,13 @@ func GetTokenAPI() *TokenAPI {
 func New(cli IEthRpc) *TokenAPI {
 
 	tapi := TokenAPI{
-		fiatCache: cache.New(10*time.Minute, 10*time.Minute),
+		fiatCache:        cache.New(10*time.Minute, 10*time.Minute),
 		fiatCacheHistory: cache.New(12*time.Hour, 12*time.Hour),
-		fiatStats: map[string]int{},
-		httpCli:   &http.Client{},
-		rpcCli:    cli,
-		TokenEndpoint: "https://23m8idpr31.execute-api.eu-central-1.amazonaws.com/PROD/v1",
-		coingeckoIdsMap: map[string]string{},
+		fiatStats:        map[string]int{},
+		httpCli:          &http.Client{},
+		rpcCli:           cli,
+		TokenEndpoint:    "https://23m8idpr31.execute-api.eu-central-1.amazonaws.com/PROD/v1",
+		coingeckoIdsMap:  map[string]string{},
 	}
 
 	return &tapi
@@ -83,15 +82,6 @@ func (t *TokenAPI) ResetETHRPCstats(blockNo int) {
 	t.rpcCli.ResetCounterAndLogStats(blockNo)
 }
 
-type ERC20Token struct {
-	ChainId  int    `json:"chainId"`
-	Name     string `json:"name"`
-	Address  string `json:"address"`
-	Symbol   string `json:"symbol"`
-	Decimals int    `json:"decimals"`
-	LogoURI  string `json:"logoURI,omitempty"`
-}
-
 // The token list is initialized lazily, e.g. the first time this method is called, rather
 // than when the client is created. This allows us to mock the token map for tests.
 func (t *TokenAPI) GetAllERC20TokensMap() map[string]ERC20Token {
@@ -111,28 +101,6 @@ func (t *TokenAPI) GetAllERC20TokensMap() map[string]ERC20Token {
 		}
 	}
 	return t.tokenMap
-}
-
-const erc20abi = `[ { "constant": true, "inputs": [], "name": "name", "outputs": [ { "name": "", "type": "string" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_spender", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "approve", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "totalSupply", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_from", "type": "address" }, { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transferFrom", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [], "name": "decimals", "outputs": [ { "name": "", "type": "uint8" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [ { "name": "_owner", "type": "address" } ], "name": "balanceOf", "outputs": [ { "name": "balance", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": true, "inputs": [], "name": "symbol", "outputs": [ { "name": "", "type": "string" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "constant": false, "inputs": [ { "name": "_to", "type": "address" }, { "name": "_value", "type": "uint256" } ], "name": "transfer", "outputs": [ { "name": "", "type": "bool" } ], "payable": false, "stateMutability": "nonpayable", "type": "function" }, { "constant": true, "inputs": [ { "name": "_owner", "type": "address" }, { "name": "_spender", "type": "address" } ], "name": "allowance", "outputs": [ { "name": "", "type": "uint256" } ], "payable": false, "stateMutability": "view", "type": "function" }, { "payable": true, "stateMutability": "payable", "type": "fallback" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "owner", "type": "address" }, { "indexed": true, "name": "spender", "type": "address" }, { "indexed": false, "name": "value", "type": "uint256" } ], "name": "Approval", "type": "event" }, { "anonymous": false, "inputs": [ { "indexed": true, "name": "from", "type": "address" }, { "indexed": true, "name": "to", "type": "address" }, { "indexed": false, "name": "value", "type": "uint256" } ], "name": "Transfer", "type": "event" } ]`
-
-func (t *TokenAPI) callERC20(address, methodHash, methodName string) string {
-
-	lastBlock, err := t.rpcCli.EthBlockNumber()
-	if err != nil {
-		return err.Error()
-	}
-	rawData, err := t.GetRPCCli().MakeEthRpcCall(address, methodHash, lastBlock)
-	if err != nil {
-		return err.Error()
-	}
-	result, err := utils.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), erc20abi, methodName)
-	if err != nil {
-		return err.Error()
-	}
-	if len(result) == 1 {
-		return fmt.Sprintf("%v", result[0])
-	}
-	return address
 }
 
 func (t *TokenAPI) Symbol(address string) string {
@@ -184,34 +152,6 @@ func (t *TokenAPI) FromWei(wei interface{}, units interface{}) string {
 	default:
 		return fmt.Sprintf("cannot use %v of type %T as wei input", wei, wei)
 	}
-}
-
-func scaleBy(text, scaleBy string) string {
-	v := new(big.Float)
-	v, ok := v.SetString(text)
-	if !ok {
-		return text
-	}
-	scale, _ := new(big.Float).SetString(scaleBy)
-	res, _ := new(big.Float).Quo(v, scale).Float64()
-
-	return strings.TrimRight(strings.TrimRight(fmt.Sprintf("%.4f", math.Ceil(res*10000)/10000), "0"), ".")
-}
-
-type ApiNetworkErr struct {
-	msg string
-}
-
-func (e ApiNetworkErr) Error() string {
-	return fmt.Sprintf(e.msg)
-}
-
-type ApiNotFoundErr struct {
-	msg string
-}
-
-func (e ApiNotFoundErr) Error() string {
-	return fmt.Sprintf(e.msg)
 }
 
 func (t *TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error) {
@@ -305,23 +245,6 @@ func (t *TokenAPI) callPriceAPIs(url, tokenAddress, fiatCurrency string) (float3
 	}
 }
 
-func (t *TokenAPI) increaseFiatStats(item string) {
-	t.Lock()
-	t.fiatStats[item] += 1
-	t.Unlock()
-}
-
-func isEthereumAddress(s string) bool {
-	return strings.ToLower(s) == "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" || strings.ToLower(s) == "0x0000000000000000000000000000000000000000"
-}
-
-type GeckoIDSJson []struct {
-	ID        string `json:"id"`
-	Platforms struct {
-		Ethereum string `json:"ethereum"`
-	} `json:"platforms"`
-}
-
 func (t *TokenAPI) GetExchangeRateAtDate(tokenAddress, fiatCurrency, when string) (float32, error) {
 	tokenAddress = strings.ToLower(tokenAddress)
 	fiatCurrency = strings.ToLower(fiatCurrency)
@@ -387,15 +310,4 @@ func (t *TokenAPI) GetExchangeRateAtDate(tokenAddress, fiatCurrency, when string
 	t.increaseFiatStats("coingecko")
 
 	return historicalPrice, nil
-}
-
-func parseCurrencyDate(when string) string {
-	switch when {
-	case "yesterday":
-		return time.Now().Add(-24 * time.Hour).Format("02-01-2006")
-	case "last_week":
-		return time.Now().Add(-168 * time.Hour).Format("02-01-2006")
-	default:
-		return ""
-	}
 }
