@@ -1,0 +1,52 @@
+{
+  "id": "usd-coin",
+  "symbol": "usdc",
+  "name": "USD Coin",
+  "image": {
+    "thumb": "https://assets.coingecko.com/coins/images/6319/thumb/USD_Coin_icon.png?1547042389",
+    "small": "https://assets.coingecko.com/coins/images/6319/small/USD_Coin_icon.png?1547042389"
+  },
+  "market_data": {
+    "current_price": {
+      "eur": 0.8899086371590333,
+      "gbp": 0.7613767705921551,
+      "usd": 1.0013701468328524
+    },
+    "market_cap": {
+      "eur": 219061025.79737324,
+      "gbp": 187421460.38346907,
+      "usd": 246498530.75745434
+    },
+    "total_volume": {
+      "eur": 4232124099.3842225,
+      "gbp": 3620867182.2999215,
+      "usd": 4762199796.53696
+    }
+  },
+  "community_data": {
+    "facebook_likes": null,
+    "twitter_followers": null,
+    "reddit_average_posts_48h": 0,
+    "reddit_average_comments_48h": 0,
+    "reddit_subscribers": null,
+    "reddit_accounts_active_48h": null
+  },
+  "developer_data": {
+    "forks": 41,
+    "stars": 69,
+    "subscribers": 10,
+    "total_issues": 22,
+    "closed_issues": 21,
+    "pull_requests_merged": 230,
+    "pull_request_contributors": 13,
+    "code_additions_deletions_4_weeks": {
+      "additions": 0,
+      "deletions": 0
+    },
+    "commit_count_4_weeks": 1
+  },
+  "public_interest_stats": {
+    "alexa_rank": 93571,
+    "bing_matches": null
+  }
+}

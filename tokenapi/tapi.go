@@ -24,17 +24,20 @@ type ITokenAPI interface {
 	BalanceOf(token string, user string) string
 	FromWei(wei interface{}, units interface{}) string
 	GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error)
+	GetExchangeRateAtDate(tokenAddress, fiatCurrency, when string) (float32, error)
 	LogFiatStatsAndReset(blockNo int)
 	GetRPCCli() IEthRpc
 }
 
 type TokenAPI struct {
 	fiatCache *cache.Cache
+	fiatCacheHistory *cache.Cache
 	fiatStats map[string]int
 	httpCli   *http.Client
 	rpcCli    IEthRpc
 	tokenMap  map[string]ERC20Token
 	TokenEndpoint string
+	coingeckoIdsMap map[string]string
 	sync.Mutex
 }
 
@@ -51,10 +54,12 @@ func New(cli IEthRpc) *TokenAPI {
 
 	tapi := TokenAPI{
 		fiatCache: cache.New(10*time.Minute, 10*time.Minute),
+		fiatCacheHistory: cache.New(12*time.Hour, 12*time.Hour),
 		fiatStats: map[string]int{},
 		httpCli:   &http.Client{},
 		rpcCli:    cli,
 		TokenEndpoint: "https://23m8idpr31.execute-api.eu-central-1.amazonaws.com/PROD/v1",
+		coingeckoIdsMap: map[string]string{},
 	}
 
 	return &tapi
@@ -308,4 +313,89 @@ func (t *TokenAPI) increaseFiatStats(item string) {
 
 func isEthereumAddress(s string) bool {
 	return strings.ToLower(s) == "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" || strings.ToLower(s) == "0x0000000000000000000000000000000000000000"
+}
+
+type GeckoIDSJson []struct {
+	ID        string `json:"id"`
+	Platforms struct {
+		Ethereum string `json:"ethereum"`
+	} `json:"platforms"`
+}
+
+func (t *TokenAPI) GetExchangeRateAtDate(tokenAddress, fiatCurrency, when string) (float32, error) {
+	tokenAddress = strings.ToLower(tokenAddress)
+	fiatCurrency = strings.ToLower(fiatCurrency)
+
+	// first time we run this we download the full list of token-ids for Coingecko
+	if len(t.coingeckoIdsMap) == 0 {
+		resp, err := http.Get("https://api.coingecko.com/api/v3/coins/list?include_platform=true")
+		if err != nil {
+			log.Fatal(err)
+		}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ids := GeckoIDSJson{}
+		err = json.Unmarshal(body, &ids)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// create a map tokenAdd -> coinGecko-id
+		for _, e := range ids {
+			if e.Platforms.Ethereum != "" {
+				t.coingeckoIdsMap[e.Platforms.Ethereum] = e.ID
+			}
+		}
+		// add ETH entries
+		t.coingeckoIdsMap["0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"] = "ethereum"
+		t.coingeckoIdsMap["0x0000000000000000000000000000000000000000"] = "ethereum"
+	}
+
+	// try cache first
+	key := tokenAddress + fiatCurrency + when
+
+	price, found := t.fiatCacheHistory.Get(key)
+	if found {
+		return price.(float32), nil
+	}
+
+	// make request using date
+	url := fmt.Sprintf("https://api.coingecko.com/api/v3/coins/%s/history?date=%s&localization=false", t.coingeckoIdsMap[tokenAddress], parseCurrencyDate(when))
+	resp, err := http.Get(url)
+	if err != nil {
+		return 0, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return 0, err
+	}
+
+	m := map[string]json.RawMessage{}
+	if err = json.Unmarshal(body, &m); err != nil {
+		return 0, err
+	}
+
+	mm := map[string]map[string]float32{}
+	if err = json.Unmarshal(m["market_data"], &mm); err != nil {
+		return 0, err
+	}
+
+	historicalPrice := mm["current_price"][fiatCurrency]
+	t.fiatCacheHistory.Set(key, historicalPrice, cache.DefaultExpiration)
+	t.increaseFiatStats("coingecko")
+
+	return historicalPrice, nil
+}
+
+func parseCurrencyDate(when string) string {
+	switch when {
+	case "yesterday":
+		return time.Now().Add(-24 * time.Hour).Format("02-01-2006")
+	case "last_week":
+		return time.Now().Add(-168 * time.Hour).Format("02-01-2006")
+	default:
+		return ""
+	}
 }
