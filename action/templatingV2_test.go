@@ -457,9 +457,16 @@ func TestERC20Functions(t *testing.T) {
 	assert.Equal(t, "100000000000000", rendered)
 }
 
+func TestConversionRates(t *testing.T) {
+	template := `this should not {{ toFiat "0x" "usd"}} completely break the parsing`
+	rendered, err := RenderTemplateWithData(template, nil)
+	assert.NoError(t, err) // we've hidden the error
+	assert.Equal(t, "this should not 0 completely break the parsing", rendered)
+}
+
 func TestERC20Snapshot(t *testing.T) {
 
-	err := setupGock("resources/tokenList.json", tokenapi.GetTokenAPI().TokenEndpoint, "/all_tokens" )
+	err := setupGock("resources/tokenList.json", tokenapi.GetTokenAPI().TokenEndpoint, "/all_tokens")
 	assert.NoError(t, err)
 
 	template := `{{ ERC20Snapshot . }}`

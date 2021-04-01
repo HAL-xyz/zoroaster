@@ -37,8 +37,8 @@ func RenderTemplateWithData(templateText string, data interface{}) (string, erro
 		"round":                utils.Round,
 		"pow":                  pow,
 		"formatNumber":         formatNumber,
-		"toFiat":               tokenapi.GetTokenAPI().GetExchangeRate,
-		"toFiatAt":             tokenapi.GetTokenAPI().GetExchangeRateAtDate,
+		"toFiat":               wrapGetExchangeRate,
+		"toFiatAt":             wrapGetExchangeRateAtDate,
 		"floatToInt":           floatToInt,
 		"ERC20Snapshot":        eRC20Snapshot,
 	}
@@ -216,4 +216,24 @@ func eRC20Snapshot(allBalancesIfc []interface{}) map[string]*big.Int {
 	}
 
 	return balanceMap
+}
+
+// The template system doesn't like functions that return (T, error);
+// in fact, it will abort parsing the template altogether.
+// So we're wrapping the original functions to provide a dummy exchange value in case of errors;
+// this way the result won't make sense, but at least it won't break everything.
+func wrapGetExchangeRate(tokenAddress, fiatCurrency string) float32 {
+	res, err := tokenapi.GetTokenAPI().GetExchangeRate(tokenAddress, fiatCurrency)
+	if err != nil {
+		return 0
+	}
+	return res
+}
+
+func wrapGetExchangeRateAtDate(tokenAddress, fiatCurrency, when string) float32 {
+	res, err := tokenapi.GetTokenAPI().GetExchangeRateAtDate(tokenAddress, fiatCurrency, when)
+	if err != nil {
+		return 0
+	}
+	return res
 }

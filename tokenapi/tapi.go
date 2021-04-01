@@ -158,6 +158,10 @@ func (t *TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, 
 	tokenAddress = strings.ToLower(tokenAddress)
 	fiatCurrency = strings.ToLower(fiatCurrency)
 
+	if len(tokenAddress) != 42 {
+		return 0, fmt.Errorf("invalid token address: %s", tokenAddress)
+	}
+
 	var coinGeckoUrl string
 	if isEthereumAddress(tokenAddress) {
 		coinGeckoUrl = fmt.Sprintf("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=%s", fiatCurrency)
