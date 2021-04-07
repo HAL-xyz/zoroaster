@@ -18,7 +18,7 @@ func main() {
 	// Load AWS SES session
 	sesSession := config.GetSESSession()
 
-	log.SetLevel(log.DebugLevel)
+	log.SetLevel(config.Zconf.LogLevel)
 	log.SetOutput(os.Stdout)
 
 	log.Infof("Starting up Zoroaster, stage = %s, network = %s\n", config.Zconf.Stage, config.Zconf.Database.Network)

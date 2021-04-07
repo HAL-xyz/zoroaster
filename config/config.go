@@ -10,7 +10,7 @@ var Zconf = NewConfig() // Global conf
 
 type ZConfiguration struct {
 	Stage                 Stage
-	ConfigFile            string
+	LogLevel              log.Level
 	EthNode               string // the main eth node
 	RinkebyNode           string // Rinkeby network, used for tests
 	Database              ZoroDB
@@ -39,12 +39,12 @@ type Stage int
 
 const (
 	TEST Stage = iota
-	DEV
+	STAGING
 	PROD
 )
 
 func (s Stage) String() string {
-	return [...]string{"TEST", "DEV", "PROD"}[s]
+	return [...]string{"TEST", "STAGING", "PROD"}[s]
 }
 
 // ENV variables
@@ -81,12 +81,15 @@ func NewConfig() *ZConfiguration {
 	switch stage {
 	case "TEST":
 		zconfig.Stage = TEST
-	case "DEV":
-		zconfig.Stage = DEV
+		zconfig.LogLevel = log.DebugLevel
+	case "STAGING":
+		zconfig.Stage = STAGING
+		zconfig.LogLevel = log.DebugLevel
 	case "PROD":
 		zconfig.Stage = PROD
+		zconfig.LogLevel = log.InfoLevel
 	default:
-		log.Fatal("local env STAGE must be TEST, DEV or PROD")
+		log.Fatal("local env STAGING must be TEST, STAGING or PROD")
 	}
 
 	zconfig.Database.TableTriggers = tableTriggers
