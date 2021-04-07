@@ -57,14 +57,10 @@ func shouldFire(tg *trigger.Trigger, now time.Time) bool {
 
 	const referenceLayout = "-0700"
 	tz, _ := time.Parse(referenceLayout, tg.CronJob.Timezone)
-	lastFired := localizeDate(tg.LastFired, tz.Location())
-
+	lastFired := tg.LastFired.In(tz.Location())
 	nextTime := expr.Next(lastFired)
-	return now.Equal(nextTime) || now.After(nextTime)
-}
 
-func localizeDate(d time.Time, loc *time.Location) time.Time {
-	return time.Date(d.Year(), d.Month(), d.Day(), d.Hour(), d.Minute(), d.Second(), d.Nanosecond(), loc)
+	return now.Equal(nextTime) || now.After(nextTime)
 }
 
 func filterTgsToRun(tgs []*trigger.Trigger, now time.Time) []*trigger.Trigger {

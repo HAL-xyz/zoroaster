@@ -21,6 +21,12 @@ func newDateWithTime(day, month, year, hour, min int) time.Time {
 	return time.Date(year, time.Month(month), day, hour, min, 0, 0, time.UTC)
 }
 
+func newDateWithSeconds(day, month, year, hour, min, sec int) time.Time {
+	return time.Date(year, time.Month(month), day, hour, min, sec, 0, time.UTC)
+}
+
+var api = tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "mainnet test client"))
+
 func TestCronExecutor(t *testing.T) {
 
 	// clear up the database
@@ -64,7 +70,6 @@ func TestCronExecutor(t *testing.T) {
 	uuid1, err := psqlClient.SaveTrigger(tg1, true, false, userUUID, "1_eth_mainnet")
 	uuid2, err := psqlClient.SaveTrigger(tg2, true, false, userUUID, "1_eth_mainnet")
 
-	var api = tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "mainnet test client"))
 	ch := make(chan trigger.IMatch, 2)
 	assert.Equal(t, 0, len(ch))
 
@@ -173,20 +178,36 @@ func TestShouldFire(t *testing.T) {
 func TestShouldFireWithTimezone(t *testing.T) {
 
 	tg6 := &trigger.Trigger{
-		CronJob:   trigger.CronJob{Rule: "10 15 * * *", Timezone: "+0100"}, // at 14:10 every day at +0100
-		LastFired: newDateWithTime(1, 1, 2000, 10, 0),                      // next time: 14:10
+		CronJob:   trigger.CronJob{Rule: "10 15 * * *", Timezone: "+0100"}, // daily at 14:10 UTC
+		LastFired: newDateWithTime(1, 1, 2000, 10, 0),                      // next time: 14:10 UTC
 	}
 	assert.False(t, shouldFire(tg6, newDateWithTime(1, 1, 2000, 14, 0))) // before next time
 	assert.True(t, shouldFire(tg6, newDateWithTime(1, 1, 2000, 14, 10))) // eq next time already!
 	assert.True(t, shouldFire(tg6, newDateWithTime(1, 1, 2000, 15, 30))) // after next time
 
 	tg7 := &trigger.Trigger{
-		CronJob:   trigger.CronJob{Rule: "10 23 * * *", Timezone: "-0100"}, // at 00:10 every of the *next* day at -0100
-		LastFired: newDateWithTime(1, 1, 2000, 10, 0),                      // next time: 00:10 on Jan 2nd
+		CronJob:   trigger.CronJob{Rule: "10 23 * * *", Timezone: "-0100"}, // at 00:10 of the *next* day UTC
+		LastFired: newDateWithTime(1, 1, 2000, 10, 0),                      // next time: 00:10 on Jan 2nd UTC
 	}
 	assert.False(t, shouldFire(tg7, newDateWithTime(1, 1, 2000, 23, 15))) // still before next time!
 	assert.True(t, shouldFire(tg7, newDateWithTime(2, 1, 2000, 00, 10)))  // eq next time
 	assert.True(t, shouldFire(tg7, newDateWithTime(2, 1, 2000, 15, 30)))  // after next time
+
+	tg1 := &trigger.Trigger{
+		CronJob:   trigger.CronJob{Rule: "* * * * *", Timezone: "+0100"}, // every minute
+		LastFired: newDateWithSeconds(1, 1, 2000, 15, 0, 0),              // next time: 15:01 UTC
+	}
+	assert.False(t, shouldFire(tg1, newDateWithSeconds(1, 1, 2000, 15, 00, 07))) // still before next time!
+	assert.True(t, shouldFire(tg1, newDateWithSeconds(1, 1, 2000, 15, 01, 00)))  // eq next time
+	assert.True(t, shouldFire(tg1, newDateWithTime(1, 1, 2000, 15, 30)))         // after next time
+
+	tg2 := &trigger.Trigger{
+		CronJob:   trigger.CronJob{Rule: "10 */1 * * *", Timezone: "+0100"}, // at 10 past every hour
+		LastFired: newDateWithSeconds(1, 1, 2000, 15, 10, 0),                // next time: 16:10 UTC
+	}
+	assert.False(t, shouldFire(tg2, newDateWithTime(1, 1, 2000, 15, 30)))       // still before next time!
+	assert.True(t, shouldFire(tg2, newDateWithSeconds(1, 1, 2000, 16, 10, 00))) // eq next time
+	assert.True(t, shouldFire(tg2, newDateWithTime(1, 1, 2000, 16, 30)))        // after next time
 }
 
 func TestTriggersToExec(t *testing.T) {
