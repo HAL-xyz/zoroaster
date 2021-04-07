@@ -1,7 +1,6 @@
 package action
 
 import (
-	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
@@ -466,17 +465,14 @@ func TestConversionRates(t *testing.T) {
 
 func TestERC20Snapshot(t *testing.T) {
 
-	err := setupGock("resources/tokenList.json", tokenapi.GetTokenAPI().TokenEndpoint, "/all_tokens")
-	assert.NoError(t, err)
-
 	template := `{{ ERC20Snapshot . }}`
 	data := []interface{}{[]string{"100", "0", "99"}}
 
 	rendered, err := RenderTemplateWithData(template, data)
 	assert.NoError(t, err)
-	assert.Equal(t, "map[0x03042482d64577a7bdb282260e2ea4c8a89c064b:100 0x030ba81f1c18d280636f32af80b9aad02cf0854e:99]", rendered)
+	assert.Equal(t, "map[0x0000000000000000000000000000000000000000:100 0x000000000000d0151e748d25b766e77efe2a6c83:99]", rendered)
 
-	template = `{{ index (ERC20Snapshot .) "0x03042482d64577a7bdb282260e2ea4c8a89c064b" }}`
+	template = `{{ index (ERC20Snapshot .) "0x0000000000000000000000000000000000000000" }}`
 	rendered, err = RenderTemplateWithData(template, data)
 	assert.NoError(t, err)
 	assert.Equal(t, "100", rendered)

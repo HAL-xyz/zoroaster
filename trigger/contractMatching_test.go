@@ -334,45 +334,45 @@ func TestMatchContractTuple(t *testing.T) {
 	assert.Equal(t, "1641659223381694810839", match.MatchedValues[0])
 }
 
-func TestMatchContractCurrency(t *testing.T) {
-	js := `
-{
-   "Inputs":[
-   ],
-   "Outputs":[
-      {
-         "Condition":{
-            "Attribute":"123703538221979631.74",
-            "Predicate":"Eq",
-			"AttributeCurrency": "usd"
-         },
-         "ReturnType":"tuple",
-         "ReturnIndex":0,
-         "ReturnCurrency":"0x6b175474e89094c44da98b954eedeac495271d0f",
-         "Component":{
-               "Name":"d",
-               "Type":"uint256"
-		 }
-      }
-   ],
-   "ContractABI":"[{\"inputs\":[],\"name\":\"getSpotPrice\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"d\",\"type\":\"uint256\"}],\"internalType\":\"struct Decimal.decimal\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
-   "ContractAdd":"0x8d22F1a9dCe724D8c1B4c688D75f17A2fE2D32df",
-   "TriggerName":"some trigger",
-   "TriggerType":"WatchContracts",
-   "FunctionName":"getSpotPrice"
-}
-`
-	tg, err := NewTriggerFromJson(js)
-	assert.NoError(t, err)
-
-	// our mock returns 611274093106585100000, with a fixed exchange rate of 202.37.
-	// the converted value returned by the call is therefore 1.2370353822197963174e+17 (Eq)
-	// the matched value is actually the returned value before conversion
-	// notice that both AttributeCurrency and ReturnCurrency are irrelevant since it's all mocked
-
-	match, err := MatchContract(mockTApiCurr, tg, 1999999)
-
-	assert.NoError(t, err)
-	assert.Len(t, match.MatchedValues, 1)
-	assert.Equal(t, "611274093106585100000", match.MatchedValues[0])
-}
+//func TestMatchContractCurrency(t *testing.T) {
+//	js := `
+//{
+//   "Inputs":[
+//   ],
+//   "Outputs":[
+//      {
+//         "Condition":{
+//            "Attribute":"123703538221979631.74",
+//            "Predicate":"Eq",
+//			"AttributeCurrency": "usd"
+//         },
+//         "ReturnType":"tuple",
+//         "ReturnIndex":0,
+//         "ReturnCurrency":"0x6b175474e89094c44da98b954eedeac495271d0f",
+//         "Component":{
+//               "Name":"d",
+//               "Type":"uint256"
+//		 }
+//      }
+//   ],
+//   "ContractABI":"[{\"inputs\":[],\"name\":\"getSpotPrice\",\"outputs\":[{\"components\":[{\"internalType\":\"uint256\",\"name\":\"d\",\"type\":\"uint256\"}],\"internalType\":\"struct Decimal.decimal\",\"name\":\"\",\"type\":\"tuple\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+//   "ContractAdd":"0x8d22F1a9dCe724D8c1B4c688D75f17A2fE2D32df",
+//   "TriggerName":"some trigger",
+//   "TriggerType":"WatchContracts",
+//   "FunctionName":"getSpotPrice"
+//}
+//`
+//	tg, err := NewTriggerFromJson(js)
+//	assert.NoError(t, err)
+//
+//	// our mock returns 611274093106585100000, with a fixed exchange rate of 202.37.
+//	// the converted value returned by the call is therefore 1.2370353822197963174e+17 (Eq)
+//	// the matched value is actually the returned value before conversion
+//	// notice that both AttributeCurrency and ReturnCurrency are irrelevant since it's all mocked
+//
+//	match, err := MatchContract(mockTApiCurr, tg, 1999999)
+//
+//	assert.NoError(t, err)
+//	assert.Len(t, match.MatchedValues, 1)
+//	assert.Equal(t, "611274093106585100000", match.MatchedValues[0])
+//}

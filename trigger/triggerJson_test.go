@@ -155,12 +155,19 @@ func TestMacro(t *testing.T) {
 }
 
 func TestMap2StringListSorted(t *testing.T) {
-
 	m := map[string]tokenapi.ERC20Token{
-		"0x345": {},
-		"0x123": {},
-		"0xxxx": {},
-		"00000": {},
+		"0x345": {
+			Address: "0x345",
+		},
+		"0x123": {
+			Address: "0x123",
+		},
+		"0xxxx": {
+			Address: "0xxxx",
+		},
+		"00000": {
+			Address: "00000",
+		},
 	}
 	assert.Equal(t, "00000,0x123,0x345,0xxxx", mapToStringListSorted(m))
 }

@@ -77,7 +77,9 @@ func TestTokenAPI_GetExchangeRateAtDate(t *testing.T) {
 	res, err := tapi.GetExchangeRateAtDate("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "usd", "yesterday")
 	assert.NoError(t, err)
 
-	assert.Equal(t, 2, len(tapi.coingeckoIdsMap))
+	assert.Equal(t, 4, len(tapi.coingeckoIdsMap))
+	assert.Equal(t, "ethereum", tapi.coingeckoIdsMap["0x0000000000000000000000000000000000000000"])
+	assert.Equal(t, "ethereum", tapi.coingeckoIdsMap["0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"])
 	assert.Equal(t, "usd-coin", tapi.coingeckoIdsMap["0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"])
 	assert.Equal(t, float32(1.0013702), res)
 	assert.Equal(t, 1, tapi.fiatCacheHistory.ItemCount())

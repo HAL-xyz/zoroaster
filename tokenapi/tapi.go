@@ -60,8 +60,28 @@ func New(cli IEthRpc) *TokenAPI {
 		TokenEndpoint:    "https://23m8idpr31.execute-api.eu-central-1.amazonaws.com/PROD/v1",
 		coingeckoIdsMap:  map[string]string{},
 	}
-
 	return &tapi
+}
+
+// Initialize the ERC20 map of all tokens.
+// Only the methods that actually need the map will call this, so we don't
+// load it every time we create an instance of token api for whatever reason
+func (t *TokenAPI) init() {
+	if len(t.tokenMap) == 0 {
+		resp, err := http.Get(fmt.Sprintf("%s/all_tokens", t.TokenEndpoint))
+		defer resp.Body.Close()
+		if err != nil {
+			log.Fatalf("cannot init TokenAPI: %s", err)
+		}
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatalf("cannot init TokenAPI: %s", err)
+		}
+		err = json.Unmarshal(body, &t.tokenMap)
+		if err != nil {
+			log.Fatalf("cannot init TokenAPI: %s", err)
+		}
+	}
 }
 
 func (t *TokenAPI) LogFiatStatsAndReset(blockNo int) {
@@ -85,29 +105,17 @@ func (t *TokenAPI) ResetETHRPCstats(blockNo int) {
 // The token list is initialized lazily, e.g. the first time this method is called, rather
 // than when the client is created. This allows us to mock the token map for tests.
 func (t *TokenAPI) GetAllERC20TokensMap() map[string]ERC20Token {
-	if len(t.tokenMap) == 0 {
-		resp, err := http.Get(fmt.Sprintf("%s/all_tokens", t.TokenEndpoint))
-		defer resp.Body.Close()
-		if err != nil {
-			log.Fatalf("cannot init TokenAPI: %s", err)
-		}
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("cannot init TokenAPI: %s", err)
-		}
-		err = json.Unmarshal(body, &t.tokenMap)
-		if err != nil {
-			log.Fatalf("cannot init TokenAPI: %s", err)
-		}
-	}
+	t.init()
 	return t.tokenMap
 }
 
 func (t *TokenAPI) Symbol(address string) string {
+	t.init()
 	return t.tokenMap[address].Symbol
 }
 
 func (t *TokenAPI) Decimals(address string) string {
+	t.init()
 	return fmt.Sprintf("%d", t.tokenMap[address].Decimals)
 }
 
