@@ -101,7 +101,7 @@ func TestCronTrigger(t *testing.T) {
 
 	js = `
 {
-  "TriggerName":"A broken time based trigger",
+  "TriggerName":"A broken time based trigger (timezone)",
   "TriggerType":"CronTrigger",
   "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
   "ContractABI":"",
@@ -115,6 +115,28 @@ func TestCronTrigger(t *testing.T) {
   "CronJob": {
 	"Rule": "* * * * *",
 	"Timezone": "-08"
+  }
+}
+`
+	tg, err = NewTriggerFromJson(js)
+	assert.Error(t, err)
+
+	js = `
+{
+  "TriggerName":"A broken time based trigger (rule)",
+  "TriggerType":"CronTrigger",
+  "ContractAdd":"0xbb9bc244d798123fde783fcc1c72d3bb8c189413",
+  "ContractABI":"",
+  "FunctionName": "balanceOf",
+  "Inputs": [
+    {
+      "ParameterType":"address",
+      "ParameterValue": "0xda4a4626d3e16e094de3225a751aab7128e96526"
+    }
+  ],
+  "CronJob": {
+	"Rule": "* ? * * &",
+	"Timezone": "-0800"
   }
 }
 `

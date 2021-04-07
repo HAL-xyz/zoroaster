@@ -6,6 +6,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/gorhill/cronexpr"
 	"math/big"
 	"regexp"
 	"sort"
@@ -93,13 +94,16 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 		return nil, fmt.Errorf("cannot read WaC trigger: missing FunctionName")
 	}
 
-	if tjs.TriggerType == "CronTrigger" && len(strings.Split(tjs.CronJob.Rule, " ")) != 5 {
-		return nil, fmt.Errorf("invalid CronJob expression: %s", tjs.CronJob.Rule)
-	}
+	if tjs.TriggerType == "CronTrigger" {
+		_, err := cronexpr.Parse(tjs.CronJob.Rule)
+		if err != nil {
+			return nil, fmt.Errorf("invalid CronJob expression: %s", tjs.CronJob.Rule)
+		}
 
-	timeZoneRgx := regexp.MustCompile(`[-+]\d{4}$`)
-	if tjs.TriggerType == "CronTrigger" && !timeZoneRgx.MatchString(tjs.CronJob.Timezone) {
-		return nil, fmt.Errorf("invalid CronJob timezone: %s", tjs.CronJob.Timezone)
+		timeZoneRgx := regexp.MustCompile(`[-+]\d{4}$`)
+		if !timeZoneRgx.MatchString(tjs.CronJob.Timezone) {
+			return nil, fmt.Errorf("invalid CronJob timezone: %s", tjs.CronJob.Timezone)
+		}
 	}
 
 	trigger := Trigger{
