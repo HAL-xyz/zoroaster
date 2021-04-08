@@ -98,3 +98,12 @@ func TestTokenAPI_GetExchangeRateAtDate(t *testing.T) {
 	assert.Equal(t, float32(1.0013702), res)
 	assert.Equal(t, 2, tapi.fiatCacheHistory.ItemCount())
 }
+func TestCallERC20API(t *testing.T) {
+
+	_ = setupGock("resources/tokenLookup.json", tapi.TokenEndpoint, "token")
+
+	token, err := tapi.callERC20api("0x6b175474e89094c44da98b954eedeac495271d0f")
+	assert.NoError(t, err)
+	assert.Equal(t, "DAI", token.Symbol)
+	assert.Equal(t, 18, token.Decimals)
+}

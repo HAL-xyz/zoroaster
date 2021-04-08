@@ -1,0 +1,10 @@
+{
+  "0x6b175474e89094c44da98b954eedeac495271d0f": {
+    "chainId": 1,
+    "name": "Dai",
+    "address": "0x6b175474e89094c44da98b954eedeac495271d0f",
+    "symbol": "DAI",
+    "decimals": 18,
+    "logoURI": "https://assets.coingecko.com/coins/images/9956/thumb/dai-multi-collateral-mcd.png?1574218774"
+  }
+}

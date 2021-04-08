@@ -111,12 +111,28 @@ func (t *TokenAPI) GetAllERC20TokensMap() map[string]ERC20Token {
 
 func (t *TokenAPI) Symbol(address string) string {
 	t.init()
-	return t.tokenMap[address].Symbol
+	_, ok := t.tokenMap[address]
+	if ok {
+		return t.tokenMap[address].Symbol
+	}
+	token, err := t.callERC20api(address)
+	if err != nil {
+		return ""
+	}
+	return token.Symbol
 }
 
 func (t *TokenAPI) Decimals(address string) string {
 	t.init()
-	return fmt.Sprintf("%d", t.tokenMap[address].Decimals)
+	_, ok := t.tokenMap[address]
+	if ok {
+		return fmt.Sprintf("%d", t.tokenMap[address].Decimals)
+	}
+	token, err := t.callERC20api(address)
+	if err != nil {
+		return "18"
+	}
+	return fmt.Sprintf("%d", token.Decimals)
 }
 
 func (t *TokenAPI) BalanceOf(token string, user string) string {
@@ -255,6 +271,24 @@ func (t *TokenAPI) callPriceAPIs(url, tokenAddress, fiatCurrency string) (float3
 	} else {
 		return 0, ApiNotFoundErr{fmt.Sprintf("not found error for currency %s fiat %s", tokenAddress, fiatCurrency)}
 	}
+}
+
+func (t *TokenAPI) callERC20api(address string) (ERC20Token, error) {
+	resp, err := http.Get(fmt.Sprintf("%s/token?address=%s", t.TokenEndpoint, address))
+	if err != nil {
+		return ERC20Token{}, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return ERC20Token{}, err
+	}
+	var tokenMap map[string]ERC20Token
+	err = json.Unmarshal(body, &tokenMap)
+	if err != nil {
+		return ERC20Token{}, err
+	}
+	return tokenMap[address], nil
 }
 
 func (t *TokenAPI) GetExchangeRateAtDate(tokenAddress, fiatCurrency, when string) (float32, error) {
