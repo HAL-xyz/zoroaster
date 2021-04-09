@@ -27,9 +27,13 @@ func CronExecutor(idb db.IDB, now time.Time, api tokenapi.ITokenAPI, matchesChan
 		logrus.Fatal(err)
 	}
 
+	tgsToRun := filterTgsToRun(allTriggers, now)
+	if len(tgsToRun) == 0 {
+		return
+	}
+
 	lastBlock := fetchLastBlock(api)
 
-	tgsToRun := filterTgsToRun(allTriggers, now)
 	for _, tg := range tgsToRun {
 		if err = idb.UpdateLastFired(tg.TriggerUUID, now.UTC()); err != nil {
 			logrus.Fatal(err)
