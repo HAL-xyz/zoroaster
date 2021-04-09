@@ -57,7 +57,7 @@ func main() {
 	go matcher.EventMatcher(evBlocksChan, matchesChan, psqlClient, waeApi)
 
 	// Cron Triggers
-	cronApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Cron Trig"))
+	cronApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.BackupNode, "Cron Trig"))
 	go matcher.CronScheduler(psqlClient, cronApi, matchesChan)
 
 	// Main routine - process matches

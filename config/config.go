@@ -12,6 +12,7 @@ type ZConfiguration struct {
 	Stage                 Stage
 	LogLevel              log.Level
 	EthNode               string // the main eth node
+	BackupNode            string // a backup node for special occasions
 	RinkebyNode           string // Rinkeby network, used for tests
 	Database              ZoroDB
 	BlocksDelay           int
@@ -55,6 +56,7 @@ const (
 	dbUsr                 = "DB_USR"
 	dbPwd                 = "DB_PWD"
 	ethNode               = "ETH_NODE"
+	backupNode            = "BACKUP_NODE"
 	rinkebyNode           = "RINKEBY_NODE"
 	twitterConsumerKey    = "TWITTER_CONSUMER_KEY"
 	twitterConsumerSecret = "TWITTER_CONSUMER_SECRET"
@@ -139,6 +141,11 @@ func NewConfig() *ZConfiguration {
 	zconfig.EthNode = os.Getenv(ethNode)
 	if zconfig.EthNode == "" {
 		log.Fatal("no eth node set in local env ", ethNode)
+	}
+
+	zconfig.BackupNode = os.Getenv(backupNode)
+	if zconfig.BackupNode == "" {
+		log.Fatal("no backup node set in local env ", backupNode)
 	}
 
 	// Rinkeby node is only required for tests
