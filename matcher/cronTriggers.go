@@ -36,7 +36,7 @@ func CronExecutor(idb db.IDB, now time.Time, api tokenapi.ITokenAPI, matchesChan
 		}
 		m, err := RunCronTgAgainstBlock(tg, lastBlock.Number, api)
 		if err != nil {
-			logrus.Debug(err)
+			logrus.Warnf("cannot exec cron trig %s: %s", tg.TriggerUUID, err)
 			continue
 		}
 		m.BlockTimestamp, m.BlockHash = lastBlock.Timestamp, lastBlock.Hash
@@ -46,7 +46,7 @@ func CronExecutor(idb db.IDB, now time.Time, api tokenapi.ITokenAPI, matchesChan
 		}
 		matchesChan <- m
 	}
-	logrus.Infof("CronT: total tgs: %d; fired: %d in  %s", len(allTriggers), len(tgsToRun), time.Since(start))
+	logrus.Infof("CronT: total tgs: %d; executed: %d in  %s", len(allTriggers), len(tgsToRun), time.Since(start))
 }
 
 func shouldFire(tg *trigger.Trigger, now time.Time) bool {

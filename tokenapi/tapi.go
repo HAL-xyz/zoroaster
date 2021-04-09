@@ -52,8 +52,8 @@ func GetTokenAPI() *TokenAPI {
 func New(cli IEthRpc) *TokenAPI {
 
 	tapi := TokenAPI{
-		fiatCache:        cache.New(10*time.Minute, 10*time.Minute),
-		fiatCacheHistory: cache.New(12*time.Hour, 12*time.Hour),
+		fiatCache:        cache.New(15*time.Minute, 15*time.Minute),
+		fiatCacheHistory: cache.New(24*time.Hour, 24*time.Hour),
 		fiatStats:        map[string]int{},
 		httpCli:          &http.Client{},
 		rpcCli:           cli,

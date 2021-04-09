@@ -5,6 +5,7 @@ import (
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
+	"net/http"
 	"sync"
 	"time"
 )
@@ -34,7 +35,7 @@ type ZoroRPC struct {
 
 // Returns a new ZoroRPC client
 func NewZRPC(node, label string) *ZoroRPC {
-	ethClient := ethrpc.New(node)
+	ethClient := ethrpc.New(node, ethrpc.WithHttpClient(&http.Client{Timeout: 30 * time.Second}))
 
 	return &ZoroRPC{
 		cli:   ethClient,
