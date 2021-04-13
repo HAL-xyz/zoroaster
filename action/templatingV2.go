@@ -171,9 +171,16 @@ func formatNumber(number interface{}, precision int) string {
 	return accounting.FormatNumberBigFloat(utils.MakeBigFloat(number), precision, ",", ".")
 }
 
-func floatToInt(s string) int64 {
-	n, _ := strconv.ParseFloat(s, 64)
-	return int64(n)
+func floatToInt(i interface{}) int64 {
+	switch v := i.(type) {
+	case string:
+		n, _ := strconv.ParseFloat(v, 64)
+		return int64(n)
+	case *big.Float:
+		return floatToInt(v.String())
+	default:
+		return 0
+	}
 }
 
 func eRC20Snapshot(allBalancesIfc []interface{}) map[string]*big.Int {
