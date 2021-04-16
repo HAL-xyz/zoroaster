@@ -2,7 +2,6 @@ package trigger
 
 import (
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
@@ -164,11 +163,7 @@ func validateFilterLog(
 	}
 	dataParam, ok := decodedData[filter.ParameterName]
 	if ok {
-		jsn, err := json.Marshal(dataParam)
-		if err != nil {
-			return false, err
-		}
-		isValid, _ := ValidateParam(jsn, filter.ParameterType, filter.ParameterCurrency, condition.Attribute, condition.AttributeCurrency, condition.Predicate, filter.Index, Component{}, tokenApi)
+		isValid, _ := ValidateParam(dataParam, filter.ParameterType, filter.ParameterCurrency, condition.Attribute, condition.AttributeCurrency, condition.Predicate, filter.Index, Component{}, tokenApi)
 		return isValid, nil
 	}
 

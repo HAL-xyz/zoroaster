@@ -86,7 +86,7 @@ func ValidateTopicParam(topicParam, paramType, paramCurrency string, condition C
 }
 
 func ValidateParam(
-	rawParam []byte,
+	ifcParam interface{},
 	parameterType, parameterCurrency, attribute, attributeCurrency string,
 	predicate Predicate,
 	index *int,
@@ -94,6 +94,7 @@ func ValidateParam(
 	tokenApi tokenapi.ITokenAPI) (bool, interface{}) {
 
 	var err error
+	rawParam, _ := json.Marshal(ifcParam)
 
 	// tuple
 	if parameterType == "tuple" {
@@ -102,7 +103,7 @@ func ValidateParam(
 			log.Debug(err)
 			return false, nil
 		}
-		return ValidateParam(getRawParam(param[component.Name]), component.Type, parameterCurrency, attribute, attributeCurrency, predicate, index, Component{}, tokenApi)
+		return ValidateParam(param[component.Name], component.Type, parameterCurrency, attribute, attributeCurrency, predicate, index, Component{}, tokenApi)
 	}
 	// uint8
 	if parameterType == "uint8[]" {

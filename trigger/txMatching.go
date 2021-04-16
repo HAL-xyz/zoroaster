@@ -80,18 +80,17 @@ func validateFilter(ts *ethrpc.Transaction, f *Filter, cnt string, abi *string, 
 			return false // tx called a different method name
 		}
 		// decode input data
-		decodedData, err := decodeInputDataToJsonMap(ts.Input, *abi)
+		dataMap, err := decodeInputData(ts.Input, *abi)
 		if err != nil {
 			cxtLog.Debugf("cannot decode input data: %v\n", err)
 			return false
 		}
-		// extract parameter
-		rawParam, ok := decodedData[f.ParameterName]
+		dataParam, ok := dataMap[f.ParameterName]
 		if !ok {
 			cxtLog.Debugf("cannot find param %s in contract %s\n", f.ParameterName, ts.To)
 			return false
 		}
-		isValid, _ := ValidateParam(rawParam, f.ParameterType, "", v.Attribute, "", v.Predicate, f.Index, Component{}, tokenApi)
+		isValid, _ := ValidateParam(dataParam, f.ParameterType, "", v.Attribute, "", v.Predicate, f.Index, Component{}, tokenApi)
 		return isValid
 	case ConditionFunctionCalled:
 		if !isValidContractAbi(abi, cnt, ts.To, tgUUID) {

@@ -1,11 +1,9 @@
 package trigger
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
-	log "github.com/sirupsen/logrus"
 	"strings"
 )
 
@@ -37,9 +35,8 @@ func MatchContract(tokenApi tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMa
 	matchingValues := make([]string, 0)
 	for _, expectedOutput := range tg.Outputs {
 		if expectedOutput.ReturnIndex < len(allValuesLs) {
-			rawParam := getRawParam(allValuesLs[expectedOutput.ReturnIndex])
 			cond := expectedOutput.Condition.(ConditionOutput)
-			yes, matchedValue := ValidateParam(rawParam, expectedOutput.ReturnType, expectedOutput.ReturnCurrency, cond.Attribute, cond.AttributeCurrency, cond.Predicate, expectedOutput.Index, expectedOutput.Component, tokenApi)
+			yes, matchedValue := ValidateParam(allValuesLs[expectedOutput.ReturnIndex], expectedOutput.ReturnType, expectedOutput.ReturnCurrency, cond.Attribute, cond.AttributeCurrency, cond.Predicate, expectedOutput.Index, expectedOutput.Component, tokenApi)
 			if yes {
 				matchingValues = append(matchingValues, fmt.Sprintf("%v", matchedValue))
 			}
@@ -54,14 +51,4 @@ func MatchContract(tokenApi tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMa
 		}, nil
 	}
 	return nil, nil
-}
-
-func getRawParam(param interface{}) []byte {
-	jsnBytes, _ := json.Marshal(param)
-	var rawParamOut json.RawMessage
-	err := json.Unmarshal(jsnBytes, &rawParamOut)
-	if err != nil {
-		log.Debug(err)
-	}
-	return rawParamOut
 }
