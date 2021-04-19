@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/HAL-xyz/ethrpc"
 	"github.com/HAL-xyz/zoroaster/trigger"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
@@ -184,7 +185,7 @@ func TestEventMatching(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, logs, mockTokenApi)
+	matches := trigger.MatchEvent(tg1, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	matches[0].EventParams["arrayParam"] = []string{"hello", "world", "yo yo"}
 
@@ -470,7 +471,7 @@ func TestERC20Snapshot(t *testing.T) {
 
 	rendered, err := RenderTemplateWithData(template, data)
 	assert.NoError(t, err)
-	assert.Equal(t, "map[0x0000000000000000000000000000000000000000:100 0x000000000000d0151e748d25b766e77efe2a6c83:99]", rendered)
+	assert.Equal(t, "map[0x0000000000000000000000000000000000000000:100 0x0000000000004946c0e9f43f4dee607b0ef1fa1c:99]", rendered)
 
 	template = `{{ index (ERC20Snapshot .) "0x0000000000000000000000000000000000000000" }}`
 	rendered, err = RenderTemplateWithData(template, data)

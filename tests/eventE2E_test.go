@@ -49,7 +49,7 @@ func TestWaEWithCustomTemplate(t *testing.T) {
 	assert.NoError(t, err)
 
 	logs, _ := tapi.GetRPCCli().EthGetLogsByNumber(blockNumber, tg.ContractAdd)
-	matches := trigger.MatchEvent(tg, logs, tapi)
+	matches := trigger.MatchEvent(tg, logs, nil, tapi)
 
 	assert.Equal(t, 1, len(matches))
 

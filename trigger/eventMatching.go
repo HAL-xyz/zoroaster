@@ -13,22 +13,9 @@ import (
 	"strings"
 )
 
-func MatchEvent(tg *Trigger, logs []ethrpc.Log, tokenApi tokenapi.ITokenAPI) []*EventMatch {
-	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
-	if err != nil {
-		logrus.Debug(err)
-		return []*EventMatch{}
-	}
+func MatchEvent(tg *Trigger, logs []ethrpc.Log, txs []ethrpc.Transaction, tokenApi tokenapi.ITokenAPI) []*EventMatch {
 
-	// EventName must be the same for every Filter, so we just get the first one
-	var eventName string
-	for _, f := range tg.Filters {
-		if f.FilterType == "CheckEventParameter" || f.FilterType == "CheckEventEmitted" {
-			eventName = f.EventName
-			break
-		}
-	}
-	if eventName == "" {
+	if tg.eventName() == "" {
 		logrus.Debug("no valid Event Name found in trigger ", tg.TriggerUUID)
 		return []*EventMatch{}
 	}
@@ -38,19 +25,16 @@ func MatchEvent(tg *Trigger, logs []ethrpc.Log, tokenApi tokenapi.ITokenAPI) []*
 		if utils.NormalizeAddress(log.Address) != utils.NormalizeAddress(tg.ContractAdd) {
 			continue
 		}
-		if validateTriggerLog(&log, tg, &abiObj, eventName, tokenApi) || validateEmittedEvent(&log, tg, eventName) {
-			tx, err := tokenApi.GetRPCCli().EthGetTransactionByHash(log.TransactionHash)
-			if err != nil {
-				logrus.Error("cannot fetch tx by hash: ", err)
+		if validateTriggerLog(&log, tg, tokenApi) || validateEmittedEvent(&log, tg) {
+			tx := getTxByHash(log.TransactionHash, txs)
+			if !validateBasicFiltersForEvent(tg, &tx) {
 				continue
 			}
-			if tg.hasBasicFilters() {
-				if !validateBasicFiltersForEvent(tg, tx) {
-					continue
-				}
-			}
-			decodedData, _ := decodeDataField(log.Data, eventName, &abiObj)
-			topicsMap := getTopicsMap(&abiObj, eventName, &log)
+
+			// make a new EventMatch
+			abiObj, _ := tg.getABIObj() // at this point we know this won't fail
+			decodedData, _ := decodeDataField(log.Data, tg.eventName(), &abiObj)
+			topicsMap := getTopicsMap(&abiObj, tg.eventName(), &log)
 			ev := EventMatch{
 				Tg:          tg,
 				Log:         &logs[i],
@@ -65,6 +49,9 @@ func MatchEvent(tg *Trigger, logs []ethrpc.Log, tokenApi tokenapi.ITokenAPI) []*
 }
 
 func validateBasicFiltersForEvent(tg *Trigger, tx *ethrpc.Transaction) bool {
+	if !tg.hasBasicFilters() {
+		return true
+	}
 	allFiltersMatch := true
 	for _, f := range tg.Filters {
 		switch v := f.Condition.(type) {
@@ -79,10 +66,10 @@ func validateBasicFiltersForEvent(tg *Trigger, tx *ethrpc.Transaction) bool {
 	return allFiltersMatch
 }
 
-func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger, eventName string) bool {
+func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger) bool {
 	for _, f := range tg.Filters {
 		if f.FilterType == "CheckEventEmitted" {
-			eventSignature, _ := getEventSignature(tg.ContractABI, eventName)
+			eventSignature, _ := getEventSignature(tg.ContractABI, tg.eventName())
 			if evLog.Topics[0] == eventSignature {
 				return true
 			}
@@ -91,25 +78,26 @@ func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger, eventName string) bool
 	return false
 }
 
-func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, abiObj *abi.ABI, eventName string, tokenApi tokenapi.ITokenAPI) bool {
-	cxtLog := logrus.WithFields(logrus.Fields{
-		"trigger_id": tg.TriggerUUID,
-		"tx_hash":    evLog.TransactionHash,
-		"block_no":   evLog.BlockNumber,
-	})
+func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, tokenApi tokenapi.ITokenAPI) bool {
 
-	eventSignature, err := getEventSignature(tg.ContractABI, eventName)
+	eventSignature, err := getEventSignature(tg.ContractABI, tg.eventName())
 	if err != nil {
-		cxtLog.Debug(err)
+		logrus.Debug(err)
+		return false
+	}
+
+	abiObj, err := tg.getABIObj()
+	if err != nil {
+		logrus.Debug(err)
 		return false
 	}
 
 	match := true
 	if evLog.Topics[0] == eventSignature {
 		for i := range tg.Filters {
-			filterMatch, err := validateFilterLog(evLog, &tg.Filters[i], abiObj, eventName, tokenApi)
+			filterMatch, err := validateFilterLog(evLog, &tg.Filters[i], &abiObj, tg.eventName(), tokenApi)
 			if err != nil {
-				cxtLog.Debug(err)
+				logrus.Debug(err)
 			}
 			match = match && filterMatch // a Trigger matches if all filters match
 		}
@@ -243,4 +231,15 @@ func makeEventParams(data map[string]interface{}, topics map[string]string) map[
 		paramsMap[k] = utils.SprintfInterfaces([]interface{}{v})[0]
 	}
 	return paramsMap
+}
+
+func getTxByHash(hash string, txs []ethrpc.Transaction) ethrpc.Transaction {
+	tx := ethrpc.Transaction{}
+	for _, t := range txs {
+		if t.Hash == hash {
+			tx = t
+			break
+		}
+	}
+	return tx
 }

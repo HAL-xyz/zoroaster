@@ -22,13 +22,6 @@ func (cli mockETHCli) EncodeMethod(methodName, cntABI string, inputs []tokenapi.
 	return tokenapi.NewZRPC("", "").EncodeMethod(methodName, cntABI, inputs)
 }
 
-func (z mockETHCli) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error) {
-	return &ethrpc.Transaction{
-		From: "0x000",
-		To:   "0x111",
-	}, nil
-}
-
 var mockCli mockETHCli
 
 var mockTokenApi = tokenapi.New(mockCli)
@@ -77,10 +70,10 @@ func TestValidateFilterLog(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, res2)
 
-	res3 := validateTriggerLog(&logs[0], tg, &abiObj, "Transfer", mockTokenApi)
+	res3 := validateTriggerLog(&logs[0], tg, mockTokenApi)
 	assert.True(t, res3)
 
-	res4 := validateTriggerLog(&logs[1], tg, &abiObj, "Transfer", mockTokenApi)
+	res4 := validateTriggerLog(&logs[1], tg, mockTokenApi)
 	assert.False(t, res4)
 }
 
@@ -109,7 +102,7 @@ func TestAddressFixedArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -139,7 +132,7 @@ func TestAddressFixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -173,7 +166,7 @@ func TestAddressFixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -203,7 +196,7 @@ func TestAddressFixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -233,7 +226,7 @@ func TestAddressFixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -263,7 +256,7 @@ func TestAddressFixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -294,7 +287,7 @@ func TestAddressDynamicArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -324,7 +317,7 @@ func TestAddressDynamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -358,7 +351,7 @@ func TestAddressDynamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -388,7 +381,7 @@ func TestAddressDynamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -418,7 +411,7 @@ func TestAddressDynamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -448,7 +441,7 @@ func TestAddressDynamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -479,7 +472,7 @@ func TestBoolFixedArrayEqAtPosition1(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -509,7 +502,7 @@ func TestBoolFixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -543,7 +536,7 @@ func TestBoolFixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -573,7 +566,7 @@ func TestBoolFixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -603,7 +596,7 @@ func TestBoolFixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -633,7 +626,7 @@ func TestBoolFixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -664,7 +657,7 @@ func TestBoolDynamicArrayEqAtPosition1(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -694,7 +687,7 @@ func TestBoolDynamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -728,7 +721,7 @@ func TestBoolDynamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -758,7 +751,7 @@ func TestBoolDynamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -788,7 +781,7 @@ func TestBoolDynamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -818,7 +811,7 @@ func TestBoolDynamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs550, mockTokenApi)
+	matches := MatchEvent(tg, logs550, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690550, matches[0].Log.BlockNumber)
@@ -848,7 +841,7 @@ func TestBytes16EqWithOX(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -878,7 +871,7 @@ func TestBytes16Eq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -908,7 +901,7 @@ func TestInt256FixedArrayEqAtPosition1(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -937,7 +930,7 @@ func TestInt256FixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -970,7 +963,7 @@ func TestInt256FixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -999,7 +992,7 @@ func TestInt256FixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1028,7 +1021,7 @@ func TestInt256FixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1057,7 +1050,7 @@ func TestInt256FixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1087,7 +1080,7 @@ func TestInt256DinamicArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1116,7 +1109,7 @@ func TestInt256DinamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1149,7 +1142,7 @@ func TestInt256DinamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1178,7 +1171,7 @@ func TestInt256DinamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1207,7 +1200,7 @@ func TestInt256DinamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1236,7 +1229,7 @@ func TestInt256DinamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTokenApi)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690551, matches[0].Log.BlockNumber)
@@ -1265,7 +1258,7 @@ func TestStringFixedArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1295,7 +1288,7 @@ func TestStringFixedArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1328,7 +1321,7 @@ func TestStringFixedArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1357,7 +1350,7 @@ func TestStringFixedArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1386,7 +1379,7 @@ func TestStringFixedArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1415,7 +1408,7 @@ func TestStringFixedArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1448,7 +1441,7 @@ func TestStringDinamicArrayLengthInBetween(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1477,7 +1470,7 @@ func TestStringDinamicArrayLengthSmallerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1506,7 +1499,7 @@ func TestStringDinamicArrayLengthBiggerThan(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1535,7 +1528,7 @@ func TestStringDinamicArrayLengthEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1565,7 +1558,7 @@ func TestStringDinamicArrayEqAtPosition0(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1594,7 +1587,7 @@ func TestStringDinamicArrayIsIn(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1623,7 +1616,7 @@ func TestStringEq(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs552, mockTokenApi)
+	matches := MatchEvent(tg, logs552, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5690552, matches[0].Log.BlockNumber)
@@ -1655,7 +1648,7 @@ func TestUint8Eq(t *testing.T) {
 	logs, err := TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252401, "0x7be8076f4ea4a4ad08075c2508e481d6c946d12b")
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 2, len(matches))
 	assert.Equal(t, 9252401, matches[0].Log.BlockNumber)
@@ -1685,7 +1678,7 @@ func TestBytes32Eq(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252045, "0x7a6425c9b3f5521bfa5d71df710a2fb80508319b")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252045, matches[0].Log.BlockNumber)
@@ -1716,7 +1709,7 @@ func TestBytesEqStartingWith0x(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9243327, "0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
@@ -1747,7 +1740,7 @@ func TestBytesEq(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9243327, "0xc2058f5d9736e8df8ba03ca3582b7cd6ac613658")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9243327, matches[0].Log.BlockNumber)
@@ -1777,7 +1770,7 @@ func TestBoolEq(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9133542, "0x73866e69c6f6f74fc48539dd541a6df8c8059e04")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9133542, matches[0].Log.BlockNumber)
@@ -1807,7 +1800,7 @@ func TestUint64Eq(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252369, "0x39755357759ce0d7f32dc8dc45414cca409ae24e")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
@@ -1837,7 +1830,7 @@ func TestUint128Eq(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252369, "0x39755357759ce0d7f32dc8dc45414cca409ae24e")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252369, matches[0].Log.BlockNumber)
@@ -1867,7 +1860,7 @@ func XXXTestUint128EqBis(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252460, "0x39755357759ce0d7f32dc8dc45414cca409ae24e")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 2, len(matches))
 	assert.Equal(t, 9252460, matches[0].Log.BlockNumber)
@@ -1897,7 +1890,7 @@ func TestAddressEqNotDecoded(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252175, "0x14094949152eddbfcd073717200da82fed8dc960")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252175, matches[0].Log.BlockNumber)
@@ -1957,7 +1950,7 @@ func TestUint256Eq(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9252357, "0xc7af99fe5513eb6710e6d5f44f9989da40f27f26")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9252357, matches[0].Log.BlockNumber)
@@ -1997,7 +1990,7 @@ func TestUint256InBetween(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9130794, "0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
@@ -2027,7 +2020,7 @@ func TestUint256BiggerThan(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9130794, "0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
@@ -2077,7 +2070,7 @@ func TestUint256EqBytes32EqAddressEq(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9130794, "0xa52e014b3f5cc48287c2d483a3e026c32cc76e6d")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9130794, matches[0].Log.BlockNumber)
@@ -2107,7 +2100,7 @@ func TestMatchEvent9(t *testing.T) {
 	assert.NoError(t, err)
 
 	logs, _ := GetLogsFromFile("../resources/events/logs3.json")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 2, len(matches))
 	assert.Equal(t, "0xdcbc1c05240f31ff3ad067ef1ee35ce4997762752e3a095284754544f4c709d7", matches[0].Log.Topics[0])
@@ -2138,7 +2131,7 @@ func TestMatchEvent8(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9222611, "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9222611, matches[0].Log.BlockNumber)
@@ -2167,7 +2160,7 @@ func TestMatchEvent7(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5693736, "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693736, matches[0].Log.BlockNumber)
@@ -2206,7 +2199,7 @@ func TestMatchEvent6(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5693736, "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693736, matches[0].Log.BlockNumber)
@@ -2235,7 +2228,7 @@ func TestMatchEvent5(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5693738, "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693738, matches[0].Log.BlockNumber)
@@ -2284,7 +2277,7 @@ func TestMatchEvent4(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiRinkeby.GetRPCCli().EthGetLogsByNumber(5693738, "0x63cbf20c5e2a2a6599627fdce8b9f0cc3b782be1")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 5693738, matches[0].Log.BlockNumber)
@@ -2341,7 +2334,8 @@ func TestMatchEvent3(t *testing.T) {
 	assert.NoError(t, err)
 
 	logs, _ := GetLogsFromFile("../resources/events/logs2.json")
-	matches := MatchEvent(tg, logs, TokenApiMainnet)
+	block, _ := TokenApiMainnet.GetRPCCli().EthGetBlockByNumber(9098826, true)
+	matches := MatchEvent(tg, logs, block.Transactions, TokenApiMainnet)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9098826, matches[0].Log.BlockNumber)
@@ -2380,7 +2374,7 @@ func TestMatchEvent2(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(9099675, "0x080bf510fcbf18b91105470639e9561022937712")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches))
 	assert.Equal(t, 9099675, matches[0].Log.BlockNumber)
@@ -2392,14 +2386,14 @@ func TestMatchEvent1(t *testing.T) {
 
 	tg1, err := GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
-	matches1 := MatchEvent(tg1, logs, mockTokenApi)
+	matches1 := MatchEvent(tg1, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 1, len(matches1))
 	assert.Equal(t, "677420000", matches1[0].EventParams["value"])
 
 	tg2, err := GetTriggerFromFile("../resources/triggers/ev2.json")
 	assert.NoError(t, err)
-	matches2 := MatchEvent(tg2, logs, mockTokenApi)
+	matches2 := MatchEvent(tg2, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Equal(t, 3, len(matches2))
 	assert.Equal(t, "677420000", matches2[0].EventParams["value"])
@@ -2462,7 +2456,7 @@ func TestMatchEventEmitted(t *testing.T) {
 
 	logs, _ := GetLogsFromFile("../resources/events/logs1.json")
 
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 	assert.Equal(t, 7, len(matches))
 }
 
@@ -2492,7 +2486,7 @@ func TestHandleNullTerminatedStrings(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(10679595, "0x9ceb5486eD0F3F2DBCaE906E4192472e88657983")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Len(t, matches, 1)
 }
@@ -2523,7 +2517,7 @@ func TestIntConversion(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(10696118, "0x1d681d76ce96E4d70a88A00EBbcfc1E47808d0b8")
-	matches := MatchEvent(tg, logs, mockTokenApi)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	assert.Len(t, matches, 1)
 	assert.Equal(t, "68", matches[0].EventParams["taskReceiptId"])
@@ -2566,8 +2560,8 @@ func TestBasicFilters(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11020360, "0xa4fc358455febe425536fd1878be67ffdbdec59a")
-
-	matches := MatchEvent(tg, logs, TokenApiMainnet)
+	block, _ := TokenApiMainnet.GetRPCCli().EthGetBlockByNumber(11020360, true)
+	matches := MatchEvent(tg, logs, block.Transactions, TokenApiMainnet)
 
 	assert.Len(t, matches, 1)
 	assert.Equal(t, "0xf3ad7a80c7debe37db5cee1e3ed45f31a5629e5e", matches[0].TxFrom)
@@ -2609,8 +2603,8 @@ func TestBasicFilters2(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11020360, "0xa4fc358455febe425536fd1878be67ffdbdec59a")
-
-	matches := MatchEvent(tg, logs, TokenApiMainnet)
+	block, _ := TokenApiMainnet.GetRPCCli().EthGetBlockByNumber(11020360, true)
+	matches := MatchEvent(tg, logs, block.Transactions, TokenApiMainnet)
 
 	assert.Len(t, matches, 0)
 }
@@ -2651,8 +2645,8 @@ func TestBasicFilters3(t *testing.T) {
 	assert.NoError(t, err)
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11020360, "0xa4fc358455febe425536fd1878be67ffdbdec59a")
-
-	matches := MatchEvent(tg, logs, TokenApiMainnet)
+	block, _ := TokenApiMainnet.GetRPCCli().EthGetBlockByNumber(11020360, true)
+	matches := MatchEvent(tg, logs, block.Transactions, TokenApiMainnet)
 
 	assert.Len(t, matches, 1)
 	assert.Equal(t, "0xf3ad7a80c7debe37db5cee1e3ed45f31a5629e5e", matches[0].TxFrom)
@@ -2679,7 +2673,8 @@ func TestTxFromAndToWithoutBasicFilters(t *testing.T) {
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11020360, "0xa4fc358455febe425536fd1878be67ffdbdec59a")
 
-	matches := MatchEvent(tg, logs, TokenApiMainnet)
+	block, _ := TokenApiMainnet.GetRPCCli().EthGetBlockByNumber(11020360, true)
+	matches := MatchEvent(tg, logs, block.Transactions, TokenApiMainnet)
 
 	assert.Len(t, matches, 1)
 	assert.Equal(t, "0xf3ad7a80c7debe37db5cee1e3ed45f31a5629e5e", matches[0].TxFrom)
@@ -2715,7 +2710,7 @@ func TestCurrencyWithExplicitCurrenciesData(t *testing.T) {
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11646700, "0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55")
 
-	matches := MatchEvent(tg, logs, mockTApiCurr)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTApiCurr)
 	assert.Len(t, matches, 1)
 }
 
@@ -2749,7 +2744,7 @@ func TestCurrencyWithImplicitCurrencyInTopic(t *testing.T) {
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11646700, "0xf5fab5dbd2f3bf675de4cb76517d4767013cfb55")
 
-	matches := MatchEvent(tg, logs, mockTApiCurr)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTApiCurr)
 	assert.Len(t, matches, 1)
 
 	// make sure we modified ParameterCurrency
@@ -2786,7 +2781,7 @@ func TestCurrencyWithImplicitCurrencyInData(t *testing.T) {
 
 	var logs, _ = TokenApiMainnet.GetRPCCli().EthGetLogsByNumber(11842974, "0x0BABA1Ad5bE3a5C0a66E7ac838a129Bf948f1eA4")
 
-	matches := MatchEvent(tg, logs, mockTApiCurr)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTApiCurr)
 	assert.Len(t, matches, 1)
 
 	// make sure we modified ParameterCurrency
@@ -2822,7 +2817,7 @@ func TestCurrencyWithExplicitCurrenciesDataArray(t *testing.T) {
 	tg, err := NewTriggerFromJson(js)
 	assert.NoError(t, err)
 
-	matches := MatchEvent(tg, logs551, mockTApiCurr)
+	matches := MatchEvent(tg, logs551, []ethrpc.Transaction{}, mockTApiCurr)
 
 	assert.Equal(t, 1, len(matches))
 }
@@ -2854,7 +2849,7 @@ func TestCurrencyWithExplicitCurrenciesTopicInt(t *testing.T) {
 	assert.NoError(t, err)
 
 	logs, _ := GetLogsFromFile("../resources/events/logs2.json")
-	matches := MatchEvent(tg, logs, mockTApiCurr)
+	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTApiCurr)
 
 	assert.Equal(t, 1, len(matches))
 }

@@ -40,7 +40,7 @@ func BlocksPoller(
 		fetchLastBlock(lastBlockSeen, &cnLastBlockProcessed, cnChan, client, false, blocksDelay)
 
 		// Watch an Event
-		fetchLastBlock(lastBlockSeen, &evLastBlockProcessed, evChan, client, false, blocksDelay)
+		fetchLastBlock(lastBlockSeen, &evLastBlockProcessed, evChan, client, true, blocksDelay)
 	}
 }
 

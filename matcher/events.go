@@ -35,7 +35,7 @@ func EventMatcher(
 		// fmt.Println(utils.GimmePrettyJson(logs))
 
 		for _, tg := range triggers {
-			matchingEvents := trigger.MatchEvent(tg, logs, tokenApi)
+			matchingEvents := trigger.MatchEvent(tg, logs, block.Transactions, tokenApi)
 			for _, match := range matchingEvents {
 				match.BlockTimestamp = block.Timestamp
 				if err = idb.LogMatch(match); err != nil {

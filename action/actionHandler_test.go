@@ -57,13 +57,6 @@ type mockETHCli struct {
 	tokenapi.IEthRpc
 }
 
-func (z mockETHCli) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error) {
-	return &ethrpc.Transaction{
-		From: "0x000",
-		To:   "0x111",
-	}, nil
-}
-
 var mockCli mockETHCli
 var mockTokenApi = tokenapi.New(mockCli)
 
@@ -175,7 +168,7 @@ func TestHandleWebhookWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches1 := trigger.MatchEvent(tg1, logs, mockTokenApi)
+	matches1 := trigger.MatchEvent(tg1, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	outcome := handleWebHookPost(url, matches1[0], mockHttpClient{})
 
@@ -333,7 +326,7 @@ func TestHandleEmailWithEvents(t *testing.T) {
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
-	matches := trigger.MatchEvent(tg1, logs, mockTokenApi)
+	matches := trigger.MatchEvent(tg1, logs, []ethrpc.Transaction{}, mockTokenApi)
 
 	matches[0].EventParams["extraAddresses"] = []string{"yes@hal.xyz", "nope@hal.xyz"}
 

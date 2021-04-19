@@ -2,7 +2,9 @@ package trigger
 
 import (
 	"fmt"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"math/big"
+	"strings"
 	"time"
 )
 
@@ -28,6 +30,26 @@ func (tg Trigger) hasBasicFilters() bool {
 		}
 	}
 	return false
+}
+
+func (tg Trigger) eventName() string {
+	// EventName must be the same for every Filter, so we just get the first one
+	var eventName string
+	for _, f := range tg.Filters {
+		if f.FilterType == "CheckEventParameter" || f.FilterType == "CheckEventEmitted" {
+			eventName = f.EventName
+			break
+		}
+	}
+	return eventName
+}
+
+func (tg Trigger) getABIObj() (abi.ABI, error) {
+	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
+	if err != nil {
+		return abi.ABI{}, err
+	}
+	return abiObj, nil
 }
 
 type Filter struct {

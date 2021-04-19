@@ -15,9 +15,7 @@ type IEthRpc interface {
 	EthGetLogsByHash(blockHash string) ([]ethrpc.Log, error)
 	EthGetLogsByNumber(blockNo int, address string) ([]ethrpc.Log, error)
 	EthGetBlockByNumber(number int, withTransactions bool) (*ethrpc.Block, error)
-	EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error)
 	EthBlockNumber() (int, error)
-	URL() string
 	ResetCounterAndLogStats(blockNo int)
 	GetLabel() string
 	EncodeMethod(methodName, cntABI string, inputs []Input) (string, error)
@@ -69,11 +67,6 @@ func (z *ZoroRPC) ResetCounterAndLogStats(blockNo int) {
 	z.resetCounter()
 }
 
-func (z *ZoroRPC) EthGetTransactionByHash(hash string) (*ethrpc.Transaction, error) {
-	z.increaseCounterByOne()
-	return z.cli.EthGetTransactionByHash(hash)
-}
-
 func (z *ZoroRPC) EthGetBlockByNumber(number int, withTransactions bool) (*ethrpc.Block, error) {
 	z.increaseCounterByOne()
 	return z.cli.EthGetBlockByNumber(number, withTransactions)
@@ -102,10 +95,6 @@ func (z *ZoroRPC) EthGetLogsByNumber(blockNo int, address string) ([]ethrpc.Log,
 func (z *ZoroRPC) EthBlockNumber() (int, error) {
 	z.increaseCounterByOne()
 	return z.cli.EthBlockNumber()
-}
-
-func (z *ZoroRPC) URL() string {
-	return z.cli.URL()
 }
 
 func (z *ZoroRPC) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
