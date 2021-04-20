@@ -5,9 +5,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
-	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/sirupsen/logrus"
-	"strings"
 	"time"
 )
 
@@ -28,7 +26,7 @@ func EventMatcher(
 			logrus.Fatal(err)
 		}
 
-		logs, err := getLogsForBlock(tokenApi.GetRPCCli(), block.Hash, triggers)
+		logs, err := getLogsForBlock(tokenApi.GetRPCCli(), block.Hash)
 		if err != nil {
 			logrus.Fatalf("cannot fetch logs for block %d: %s\n", block.Number, err)
 		}
@@ -52,29 +50,10 @@ func EventMatcher(
 	}
 }
 
-// We could ask the block for specific log addresses, but it's faster
-// to ask for all the logs and then filter them out manually.
-// Also, using block hash is much quicker than block number...
-func getLogsForBlock(client tokenapi.IEthRpc, blockHash string, triggers []*trigger.Trigger) ([]ethrpc.Log, error) {
+func getLogsForBlock(client tokenapi.IEthRpc, blockHash string) ([]ethrpc.Log, error) {
 	logs, err := client.EthGetLogsByHash(blockHash)
 	if err != nil {
 		return nil, err
 	}
-	var relevantLogs []ethrpc.Log
-	uniqueTgAddresses := getUniqueTriggerAddresses(triggers)
-	for i, log := range logs {
-		if utils.IsIn(strings.ToLower(log.Address), uniqueTgAddresses) {
-			relevantLogs = append(relevantLogs, logs[i])
-		}
-	}
-	logrus.Debugf("fetched %d total logs and %d relevant logs\n", len(logs), len(relevantLogs))
-	return relevantLogs, nil
-}
-
-func getUniqueTriggerAddresses(tgs []*trigger.Trigger) []string {
-	var ads = make([]string, len(tgs))
-	for i, tg := range tgs {
-		ads[i] = strings.ToLower(tg.ContractAdd)
-	}
-	return utils.Uniques(ads)
+	return logs, nil
 }

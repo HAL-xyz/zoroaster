@@ -14,7 +14,6 @@ import (
 )
 
 func MatchEvent(tg *Trigger, logs []ethrpc.Log, txs []ethrpc.Transaction, tokenApi tokenapi.ITokenAPI) []*EventMatch {
-
 	if tg.eventName() == "" {
 		logrus.Debug("no valid Event Name found in trigger ", tg.TriggerUUID)
 		return []*EventMatch{}
@@ -22,7 +21,7 @@ func MatchEvent(tg *Trigger, logs []ethrpc.Log, txs []ethrpc.Transaction, tokenA
 
 	var eventMatches []*EventMatch
 	for i, log := range logs {
-		if utils.NormalizeAddress(log.Address) != utils.NormalizeAddress(tg.ContractAdd) {
+		if !isRelevantLog(log.Address, tg.ContractAdd, tokenApi) {
 			continue
 		}
 		if validateTriggerLog(&log, tg, tokenApi) || validateEmittedEvent(&log, tg) {
@@ -242,4 +241,17 @@ func getTxByHash(hash string, txs []ethrpc.Transaction) ethrpc.Transaction {
 		}
 	}
 	return tx
+}
+
+// isRelevantLog decides if the inspected logAdd is to be considered a match, given the tgAdd.
+// there are two cases:
+// 1 - there is an exact match; in this case, it is obviously relevant
+// 2 - the tgAdd is set to the keyword `all_erc20_tokens`; in this case, the inspected logAdd will be considered
+// relevant as long as it is the address of any erc20 token we know.
+func isRelevantLog(logAdd, tgAdd string, api tokenapi.ITokenAPI) bool {
+	if tgAdd == "all_erc20_tokens" {
+		_, ok := api.GetAllERC20TokensMap()[utils.NormalizeAddress(logAdd)]
+		return ok
+	}
+	return utils.NormalizeAddress(logAdd) == utils.NormalizeAddress(tgAdd)
 }
