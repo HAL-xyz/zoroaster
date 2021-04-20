@@ -68,28 +68,59 @@ func (z *ZoroRPC) ResetCounterAndLogStats(blockNo int) {
 }
 
 func (z *ZoroRPC) EthGetBlockByNumber(number int, withTransactions bool) (*ethrpc.Block, error) {
+	key := "get_block" + fmt.Sprintf("%d", number)
+	val, found := z.cache.Get(key)
+	if found {
+		return val.(*ethrpc.Block), nil
+	}
+
 	z.increaseCounterByOne()
-	return z.cli.EthGetBlockByNumber(number, withTransactions)
+	res, err := z.cli.EthGetBlockByNumber(number, withTransactions)
+	if err == nil {
+		z.cache.Set(key, res, cache.DefaultExpiration)
+	}
+	return res, err
 }
 
 // Lookups using only block hash are much faster than using block numbers and/or addresses
 func (z *ZoroRPC) EthGetLogsByHash(blockHash string) ([]ethrpc.Log, error) {
+	key := "get_logs" + blockHash
+	val, found := z.cache.Get(key)
+	if found {
+		return val.([]ethrpc.Log), nil
+	}
+
 	filter := ethrpc.FilterParams{
 		BlockHash: blockHash,
 	}
 	z.increaseCounterByOne()
-	return z.cli.EthGetLogs(filter)
+
+	res, err := z.cli.EthGetLogs(filter)
+	if err == nil {
+		z.cache.Set(key, res, cache.DefaultExpiration)
+	}
+	return res, err
 }
 
-// // Lookups using block numbers and/or addresses are slower, but useful for testing
+// Lookups using block numbers and/or addresses are slower, but useful for testing
 func (z *ZoroRPC) EthGetLogsByNumber(blockNo int, address string) ([]ethrpc.Log, error) {
+	key := "get_logs" + fmt.Sprintf("%d", blockNo)
+	val, found := z.cache.Get(key)
+	if found {
+		return val.([]ethrpc.Log), nil
+	}
+
 	filter := ethrpc.FilterParams{
 		FromBlock: fmt.Sprintf("0x%x", blockNo),
 		ToBlock:   fmt.Sprintf("0x%x", blockNo),
 		Address:   []string{address},
 	}
 	z.increaseCounterByOne()
-	return z.cli.EthGetLogs(filter)
+	res, err := z.cli.EthGetLogs(filter)
+	if err == nil {
+		z.cache.Set(key, res, cache.DefaultExpiration)
+	}
+	return res, err
 }
 
 func (z *ZoroRPC) EthBlockNumber() (int, error) {
