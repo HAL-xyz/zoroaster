@@ -60,6 +60,17 @@ func (tg Trigger) getABIObj() (abi.ABI, error) {
 	return abiObj, nil
 }
 
+// this is only used by WaC at the moment;
+// the idea is that triggers with the same key effectively make the same eth_call,
+// so we can use it to group triggers together.
+func (tg Trigger) getKey() string {
+	var params string
+	for _, in := range tg.Inputs {
+		params += in.ParameterValue
+	}
+	return fmt.Sprintf("%s+%s+%s", tg.FunctionName, tg.ContractAdd, params)
+}
+
 type Filter struct {
 	FilterType        string
 	ParameterName     string

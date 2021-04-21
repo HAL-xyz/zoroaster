@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
+	"github.com/alethio/web3-multicall-go/multicall"
 	"github.com/ethereum/go-ethereum/common"
 	log "github.com/sirupsen/logrus"
 	"math/big"
@@ -95,6 +96,17 @@ func ValidateParam(
 
 	var err error
 	rawParam, _ := json.Marshal(ifcParam)
+
+	// multicall's BigIntJSONString type;
+	// for some reason they transform big.Int to a Json string (with quotes, argh)
+	// so here we're just changing it back to a good old big.Int
+	if v, ok := ifcParam.(*multicall.BigIntJSONString); ok {
+		bigIntString, _ := v.MarshalJSON()
+		bigIntClean := bytes.Trim(bigIntString, `"`)
+		ret := big.NewInt(0)
+		ret.SetString(string(bigIntClean), 10)
+		return ValidateParam(ret, parameterType, parameterCurrency, attribute, attributeCurrency, predicate, index, component, tokenApi)
+	}
 
 	// tuple
 	if parameterType == "tuple" {
