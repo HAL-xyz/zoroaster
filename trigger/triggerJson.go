@@ -15,6 +15,7 @@ import (
 )
 
 type TriggerJson struct {
+	TriggerUUID  string       `json:"TriggerUUID"`
 	TriggerName  string       `json:"TriggerName"`
 	TriggerType  string       `json:"TriggerType"`
 	CreationDate string       `json:"CreationDate"`
@@ -107,6 +108,7 @@ func (tjs *TriggerJson) ToTrigger() (*Trigger, error) {
 	}
 
 	trigger := Trigger{
+		TriggerUUID:  tjs.TriggerUUID,
 		TriggerName:  tjs.TriggerName,
 		TriggerType:  tjs.TriggerType,
 		ContractABI:  tjs.ContractABI,

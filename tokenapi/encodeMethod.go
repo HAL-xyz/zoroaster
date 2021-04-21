@@ -16,12 +16,7 @@ type Input struct {
 	ParameterValue string
 }
 
-func encodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
-
-	xabi, err := abi.JSON(strings.NewReader(cntABI))
-	if err != nil {
-		return "", err
-	}
+func MakeObjectsFromInput(inputs []Input) ([]interface{}, error) {
 
 	args := make([]interface{}, len(inputs))
 	for i, in := range inputs {
@@ -267,7 +262,22 @@ func encodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
 			args[i] = params
 			continue
 		}
-		return "", fmt.Errorf("Unsupported param type: %s\n", in.ParameterType)
+		return []interface{}{}, fmt.Errorf("Unsupported param type: %s\n", in.ParameterType)
+	}
+
+	return args, nil
+}
+
+func encodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
+
+	xabi, err := abi.JSON(strings.NewReader(cntABI))
+	if err != nil {
+		return "", err
+	}
+
+	args, err := MakeObjectsFromInput(inputs)
+	if err != nil {
+		return "", err
 	}
 
 	result, err := xabi.Pack(methodName, args...)

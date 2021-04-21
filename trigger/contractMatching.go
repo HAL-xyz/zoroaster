@@ -13,11 +13,16 @@ func MatchContract(api tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMatch, 
 		return nil, fmt.Errorf(err.Error())
 	}
 
+	return matchTriggerWithResult(tg, result, api), nil
+}
+
+func matchTriggerWithResult(tg *Trigger, decodedData []interface{}, api tokenapi.ITokenAPI) *CnMatch {
+
 	matchingValues := make([]string, 0)
 	for _, expectedOutput := range tg.Outputs {
-		if expectedOutput.ReturnIndex < len(result) {
+		if expectedOutput.ReturnIndex < len(decodedData) {
 			cond := expectedOutput.Condition.(ConditionOutput)
-			yes, matchedValue := ValidateParam(result[expectedOutput.ReturnIndex], expectedOutput.ReturnType, expectedOutput.ReturnCurrency, cond.Attribute, cond.AttributeCurrency, cond.Predicate, expectedOutput.Index, expectedOutput.Component, api)
+			yes, matchedValue := ValidateParam(decodedData[expectedOutput.ReturnIndex], expectedOutput.ReturnType, expectedOutput.ReturnCurrency, cond.Attribute, cond.AttributeCurrency, cond.Predicate, expectedOutput.Index, expectedOutput.Component, api)
 			if yes {
 				matchingValues = append(matchingValues, fmt.Sprintf("%v", matchedValue))
 			}
@@ -26,11 +31,11 @@ func MatchContract(api tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMatch, 
 
 	if len(matchingValues) == len(tg.Outputs) { // all filters match
 		return &CnMatch{
-			MatchUUID:     "", // this will be set by Postgres once we persist
 			Trigger:       tg,
 			MatchedValues: matchingValues,
-			AllValues:     utils.SprintfInterfaces(result),
-		}, nil
+			AllValues:     utils.SprintfInterfaces(decodedData),
+		}
 	}
-	return nil, nil
+
+	return nil
 }

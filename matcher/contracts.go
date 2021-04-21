@@ -29,7 +29,17 @@ func ContractMatcher(
 			log.Fatal(err)
 		}
 
+		var newMatches []*trigger.CnMatch
+		if block.Number%3 == 0 {
+			newMatches = matchContractsForBlockMulti(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
+		}
+
 		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
+
+		if block.Number%3 == 0 && len(cnMatches) != len(newMatches) {
+			log.Warnf("problems! Got %d old-matches and %d mul-matches", len(cnMatches), len(newMatches))
+		}
+
 		for _, m := range cnMatches {
 			if err = idb.LogMatch(m); err != nil {
 				log.Fatal(err)
@@ -42,6 +52,26 @@ func ContractMatcher(
 		}
 		log.Infof("CN: Processed %d triggers in %s from block %d", len(triggers), time.Since(start), block.Number)
 	}
+}
+
+func matchContractsForBlockMulti(blockNo, blockTimestamp int, blockHash string, idb db.IDB, api tokenapi.ITokenAPI) []*trigger.CnMatch {
+
+	start := time.Now()
+	tgs, err := idb.LoadTriggersFromDB(trigger.WaC)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	matches, tgsWithErrors := trigger.MatchTriggersMulti(tgs, api, blockNo)
+	setBlocksMetadata(matches, blockNo, blockTimestamp, blockHash)
+
+	matchesToActUpon := getMatchesToActUpon(idb, matches)
+
+	//updateStatusForMatchingTriggers(idb, matches)
+	//updateStatusForNonMatchingTriggers(idb, matches, tgs, tgsWithErrors)
+
+	log.Infof("WAC-mul #%d potential matches: %d; errors: %d; time: %s", blockNo, len(matches), len(tgsWithErrors), time.Since(start))
+	return matchesToActUpon
 }
 
 func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb db.IDB, tokenApi tokenapi.ITokenAPI) []*trigger.CnMatch {
@@ -88,8 +118,16 @@ func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb d
 	updateStatusForMatchingTriggers(idb, cnMatches)
 	updateStatusForNonMatchingTriggers(idb, cnMatches, allTriggers, triggersWithErrorsUUIDs)
 
-	log.Infof("WAC potential matches: %d; errors: %d ", len(cnMatches), len(triggersWithErrorsUUIDs))
+	log.Infof("WAC-old #%d potential matches: %d; errors: %d ", blockNo, len(cnMatches), len(triggersWithErrorsUUIDs))
 	return matchesToActUpon
+}
+
+func setBlocksMetadata(matches []*trigger.CnMatch, blockNo, blockTimestamp int, blockHash string) {
+	for i := range matches {
+		matches[i].BlockNumber = blockNo
+		matches[i].BlockTimestamp = blockTimestamp
+		matches[i].BlockHash = blockHash
+	}
 }
 
 // we only act on a match if it matches AND the triggered flag was set to false
