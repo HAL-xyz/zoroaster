@@ -67,7 +67,10 @@ func New(cli IEthRpc) *TokenAPI {
 // Only the methods that actually need the map will call this, so we don't
 // load it every time we create an instance of token api for whatever reason
 func (t *TokenAPI) init() {
-	if len(t.tokenMap) == 0 {
+	t.Lock()
+	tokenMapLength := len(t.tokenMap)
+	t.Unlock()
+	if tokenMapLength == 0 {
 		resp, err := http.Get(fmt.Sprintf("%s/all_tokens", t.TokenEndpoint))
 		defer resp.Body.Close()
 		if err != nil {
@@ -77,7 +80,9 @@ func (t *TokenAPI) init() {
 		if err != nil {
 			log.Fatalf("cannot init TokenAPI: %s", err)
 		}
+		t.Lock()
 		err = json.Unmarshal(body, &t.tokenMap)
+		t.Unlock()
 		if err != nil {
 			log.Fatalf("cannot init TokenAPI: %s", err)
 		}
