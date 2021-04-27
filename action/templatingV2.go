@@ -7,11 +7,11 @@ import (
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/leekchan/accounting"
-	"html/template"
 	"math/big"
 	"sort"
 	"strconv"
 	"strings"
+	"text/template"
 	"time"
 )
 
@@ -41,6 +41,7 @@ func RenderTemplateWithData(templateText string, data interface{}) (string, erro
 		"toFiatAt":             wrapGetExchangeRateAtDate,
 		"floatToInt":           floatToInt,
 		"ERC20Snapshot":        eRC20Snapshot,
+		"ethCall":              ethCall,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -243,4 +244,18 @@ func wrapGetExchangeRateAtDate(tokenAddress, fiatCurrency, when string) float32 
 		return 0
 	}
 	return res
+}
+
+func ethCall(address string, blockNo, returnedPosition int, method string, args ...string) string {
+
+	res, err := tokenapi.GetTokenAPI().EthCall(address, method, blockNo, args...)
+	if err != nil {
+		return err.Error()
+	}
+	if returnedPosition >= len(res) {
+		return fmt.Sprintf("invalid returned position %d", returnedPosition)
+	}
+
+	printableResults := utils.SprintfInterfaces(res)
+	return fmt.Sprintf("%v", printableResults[returnedPosition])
 }

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/HAL-xyz/zoroaster/utils"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/patrickmn/go-cache"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -25,6 +27,7 @@ type ITokenAPI interface {
 	GetExchangeRate(tokenAddress, fiatCurrency string) (float32, error)
 	GetExchangeRateAtDate(tokenAddress, fiatCurrency, when string) (float32, error)
 	LogFiatStatsAndReset(blockNo int)
+	EthCall(address, method string, blockNo int, args ...string) ([]interface{}, error)
 	GetRPCCli() IEthRpc
 }
 
@@ -361,4 +364,71 @@ func (t *TokenAPI) GetExchangeRateAtDate(tokenAddress, fiatCurrency, when string
 	t.increaseFiatStats("coingecko")
 
 	return historicalPrice, nil
+}
+
+// EthCall is a high level helper that executes a view call against a contract
+// It fetches the ABI from Etherscan
+// TODO: allow optional abi, and input parameters
+func (t *TokenAPI) EthCall(address, method string, blockNo int, args ...string) ([]interface{}, error) {
+
+	var etherscanUrl = fmt.Sprintf("https://api.etherscan.io/api?module=contract&action=getabi&address=%s&apikey=%s", address, config.Zconf.EtherscanKey)
+
+	resp, err := http.Get(etherscanUrl)
+	if err != nil {
+		return []interface{}{}, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return []interface{}{}, err
+	}
+
+	m := map[string]string{}
+	if err = json.Unmarshal(body, &m); err != nil {
+		return []interface{}{}, err
+	}
+	if m["message"] != "OK" {
+		return []interface{}{}, fmt.Errorf(m["message"])
+	}
+
+	abiJsn := m["result"]
+	abiObj, err := abi.JSON(strings.NewReader(abiJsn))
+	if err != nil {
+		return []interface{}{}, err
+	}
+	inputMethod, ok := abiObj.Methods[method]
+	if !ok {
+		return []interface{}{}, fmt.Errorf("cannot find method %s", method)
+	}
+
+	// create our own Input
+	inputs := make([]Input, len(args))
+	// set the values
+	for i, arg := range args {
+		inputs[i] = Input{
+			ParameterValue: arg,
+		}
+	}
+	// set the types
+	for i, in := range inputMethod.Inputs {
+		inputs[i].ParameterType = in.Type.String()
+	}
+
+	methodId, err := t.GetRPCCli().EncodeMethod(method, abiJsn, inputs)
+	if err != nil {
+		return []interface{}{}, fmt.Errorf("cannot encode method: %s", err)
+	}
+	rawData, err := t.GetRPCCli().MakeEthRpcCall(address, methodId, blockNo)
+	if err != nil {
+		return []interface{}{}, fmt.Errorf("rpc call failed with error : %s", err)
+	}
+	if rawData == "0x" {
+		return []interface{}{}, fmt.Errorf("rpc call failed: returned 0x")
+	}
+
+	result, err := utils.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), abiJsn, method)
+	if err != nil {
+		return []interface{}{}, err
+	}
+
+	return result, nil
 }

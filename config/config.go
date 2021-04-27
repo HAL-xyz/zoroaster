@@ -19,6 +19,7 @@ type ZConfiguration struct {
 	PollingInterval       int
 	TwitterConsumerKey    string
 	TwitterConsumerSecret string
+	EtherscanKey          string
 }
 
 type ZoroDB struct {
@@ -62,6 +63,7 @@ const (
 	twitterConsumerSecret = "TWITTER_CONSUMER_SECRET"
 	network               = "NETWORK"
 	pollingInterval       = "POLLING_INTERVAL"
+	etherscanKey          = "ETHERSCAN_KEY"
 )
 
 // DB tables
@@ -162,6 +164,11 @@ func NewConfig() *ZConfiguration {
 	zconfig.TwitterConsumerSecret = os.Getenv(twitterConsumerSecret)
 	if zconfig.TwitterConsumerSecret == "" {
 		log.Fatal("no twitter consumer secret set in local env ", twitterConsumerSecret)
+	}
+
+	zconfig.EtherscanKey = os.Getenv(etherscanKey)
+	if zconfig.EtherscanKey == "" {
+		log.Fatal("no etherscan key set in local env ", etherscanKey)
 	}
 
 	interval := os.Getenv(pollingInterval)

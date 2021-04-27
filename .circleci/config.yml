@@ -49,10 +49,10 @@ workflows:
           container=zoroaster-service,name=RINKEBY_NODE,value=${RINKEBY_NODE},
           container=zoroaster-service,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
           container=zoroaster-service,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
-          container=zoroaster-service,name=LOGS_PATH,value=${LOGS_PATH},
-          container=zoroaster-service,name=NETWORK,value=${NETWORK_ETH_MAINNET},
+          container=zoroaster-service,name=NETWORK,value=1_eth_mainnet,
           container=zoroaster-service,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
-          container=zoroaster-service,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_STAGING}"
+          container=zoroaster-service,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_STAGING},
+          container=zoroaster-service,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
           filters:
             branches:
               only: staging
@@ -73,10 +73,10 @@ workflows:
           container=zoroaster-service-xdai,name=RINKEBY_NODE,value=${RINKEBY_NODE},
           container=zoroaster-service-xdai,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
           container=zoroaster-service-xdai,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
-          container=zoroaster-service-xdai,name=LOGS_PATH,value=${LOGS_PATH},
-          container=zoroaster-service-xdai,name=NETWORK,value=${NETWORK_XDAI_MAINNET},
+          container=zoroaster-service-xdai,name=NETWORK,value=3_xdai_mainnet,
           container=zoroaster-service-xdai,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
-          container=zoroaster-service-xdai,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_XDAI}"
+          container=zoroaster-service-xdai,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_XDAI},
+          container=zoroaster-service-xdai,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
           filters:
             branches:
               only: staging
@@ -97,10 +97,10 @@ workflows:
           container=zoroaster-prod-service,name=RINKEBY_NODE,value=${RINKEBY_NODE},
           container=zoroaster-prod-service,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
           container=zoroaster-prod-service,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
-          container=zoroaster-prod-service,name=LOGS_PATH,value=${LOGS_PATH},
-          container=zoroaster-prod-service,name=NETWORK,value=${NETWORK_ETH_MAINNET},
+          container=zoroaster-prod-service,name=NETWORK,value=1_eth_mainnet,
           container=zoroaster-prod-service,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
-          container=zoroaster-prod-service,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_PROD}"
+          container=zoroaster-prod-service,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_PROD},
+          container=zoroaster-prod-service,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
           filters:
             branches:
               only: master
@@ -121,10 +121,10 @@ workflows:
           container=zoroaster-prod-service-xdai,name=RINKEBY_NODE,value=${RINKEBY_NODE},
           container=zoroaster-prod-service-xdai,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
           container=zoroaster-prod-service-xdai,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
-          container=zoroaster-prod-service-xdai,name=LOGS_PATH,value=${LOGS_PATH},
-          container=zoroaster-prod-service-xdai,name=NETWORK,value=${NETWORK_XDAI_MAINNET},
+          container=zoroaster-prod-service-xdai,name=NETWORK,value=3_xdai_mainnet,
           container=zoroaster-prod-service-xdai,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
-          container=zoroaster-prod-service-xdai,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_XDAI}"
+          container=zoroaster-prod-service-xdai,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_XDAI},
+          container=zoroaster-prod-service-xdai,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
           filters:
             branches:
               only: master
