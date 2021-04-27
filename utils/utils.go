@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"math"
 	"math/big"
@@ -500,30 +499,4 @@ func decodeIntArray(array interface{}) ([]string, bool) {
 		}
 	}
 	return out, worked // only return worked=true on arrays and slices
-}
-
-func DecodeParamsIntoList(data string, cntABI string, methodName string) ([]interface{}, error) {
-
-	encb, err := hex.DecodeString(data)
-	if err != nil {
-		return nil, fmt.Errorf("invalid hex: %s", data)
-	}
-
-	xabi, err := abi.JSON(strings.NewReader(cntABI))
-	if err != nil {
-		return nil, fmt.Errorf("cannot read abi: %s", err)
-	}
-
-	methodObj, ok := xabi.Methods[methodName]
-	if !ok {
-		return nil, fmt.Errorf("method %s not found", methodName)
-	}
-
-	ls, err := methodObj.Outputs.UnpackValues(encb)
-
-	if err != nil {
-		return nil, fmt.Errorf("cannot unpack outputs: %s", err)
-	}
-
-	return ls, nil
 }

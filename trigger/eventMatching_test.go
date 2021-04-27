@@ -19,10 +19,6 @@ func (cli mockETHCli) MakeEthRpcCall(cntAddress, data string, blockNumber int) (
 	return "0x000000000000000000000000000000000000000000000058fe992dc845910ad7", nil
 }
 
-func (cli mockETHCli) EncodeMethod(methodName, cntABI string, inputs []tokenapi.Input) (string, error) {
-	return tokenapi.NewZRPC("", "").EncodeMethod(methodName, cntABI, inputs)
-}
-
 var mockCli mockETHCli
 
 var mockTokenApi = tokenapi.New(mockCli)

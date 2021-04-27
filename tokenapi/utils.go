@@ -1,10 +1,15 @@
 package tokenapi
 
 import (
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
-	"github.com/HAL-xyz/zoroaster/utils"
+	"github.com/HAL-xyz/zoroaster/config"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"io/ioutil"
 	"math"
 	"math/big"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -21,7 +26,7 @@ func (t *TokenAPI) callERC20(address, methodHash, methodName string) string {
 	if err != nil {
 		return err.Error()
 	}
-	result, err := utils.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), erc20abi, methodName)
+	result, err := decodeParams(strings.TrimPrefix(rawData, "0x"), erc20abi, methodName)
 	if err != nil {
 		return err.Error()
 	}
@@ -62,4 +67,53 @@ func parseCurrencyDate(when string) string {
 	default:
 		return ""
 	}
+}
+
+func decodeParams(data string, cntABI string, methodName string) ([]interface{}, error) {
+
+	encb, err := hex.DecodeString(data)
+	if err != nil {
+		return nil, fmt.Errorf("invalid hex: %s", data)
+	}
+
+	xabi, err := abi.JSON(strings.NewReader(cntABI))
+	if err != nil {
+		return nil, fmt.Errorf("cannot read abi: %s", err)
+	}
+
+	methodObj, ok := xabi.Methods[methodName]
+	if !ok {
+		return nil, fmt.Errorf("method %s not found", methodName)
+	}
+
+	ls, err := methodObj.Outputs.UnpackValues(encb)
+
+	if err != nil {
+		return nil, fmt.Errorf("cannot unpack outputs: %s", err)
+	}
+
+	return ls, nil
+}
+
+func fetchAbi(address string) (string, error) {
+	var etherscanUrl = fmt.Sprintf("https://api.etherscan.io/api?module=contract&action=getabi&address=%s&apikey=%s", address, config.Zconf.EtherscanKey)
+
+	resp, err := http.Get(etherscanUrl)
+	if err != nil {
+		return "", err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	m := map[string]string{}
+	if err = json.Unmarshal(body, &m); err != nil {
+		return "", err
+	}
+	if m["message"] != "OK" {
+		return "", err
+	}
+
+	return m["result"], nil
 }

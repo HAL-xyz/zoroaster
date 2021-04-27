@@ -44,6 +44,14 @@ func (tg Trigger) eventName() string {
 	return eventName
 }
 
+func (tg Trigger) CallArgs() []string {
+	args := make([]string, len(tg.Inputs))
+	for i, e := range tg.Inputs {
+		args[i] = e.ParameterValue
+	}
+	return args
+}
+
 func (tg Trigger) getABIObj() (abi.ABI, error) {
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 	if err != nil {

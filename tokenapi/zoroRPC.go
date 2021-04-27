@@ -18,7 +18,6 @@ type IEthRpc interface {
 	EthBlockNumber() (int, error)
 	ResetCounterAndLogStats(blockNo int)
 	GetLabel() string
-	EncodeMethod(methodName, cntABI string, inputs []Input) (string, error)
 	MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error)
 }
 

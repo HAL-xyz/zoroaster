@@ -248,7 +248,7 @@ func wrapGetExchangeRateAtDate(tokenAddress, fiatCurrency, when string) float32 
 
 func ethCall(address string, blockNo, returnedPosition int, method string, args ...string) string {
 
-	res, err := tokenapi.GetTokenAPI().EthCall(address, method, blockNo, args...)
+	res, err := tokenapi.GetTokenAPI().EthCall(address, method, "", blockNo, args...)
 	if err != nil {
 		return err.Error()
 	}

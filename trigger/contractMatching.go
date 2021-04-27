@@ -4,50 +4,32 @@ import (
 	"fmt"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
-	"strings"
 )
 
-func MatchContract(tokenApi tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMatch, error) {
+func MatchContract(api tokenapi.ITokenAPI, tg *Trigger, blockNo int) (*CnMatch, error) {
 
-	tokenApiInputs := make([]tokenapi.Input, len(tg.Inputs))
-	for i, e := range tg.Inputs {
-		tokenApiInputs[i] = tokenapi.Input{
-			ParameterType:  e.ParameterType,
-			ParameterValue: e.ParameterValue,
-		}
-	}
-
-	methodId, err := tokenApi.GetRPCCli().EncodeMethod(tg.FunctionName, tg.ContractABI, tokenApiInputs)
-	if err != nil {
-		return nil, fmt.Errorf("cannot encode method: %s", err)
-	}
-	rawData, err := tokenApi.GetRPCCli().MakeEthRpcCall(tg.ContractAdd, methodId, blockNo)
-	if err != nil {
-		return nil, fmt.Errorf("rpc call failed with error : %s", err)
-	}
-	//log.Debug("result from call is -> ", rawData)
-
-	allValuesLs, err := utils.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), tg.ContractABI, tg.FunctionName)
+	result, err := api.EthCall(tg.ContractAdd, tg.FunctionName, tg.ContractABI, blockNo, tg.CallArgs()...)
 	if err != nil {
 		return nil, fmt.Errorf(err.Error())
 	}
 
 	matchingValues := make([]string, 0)
 	for _, expectedOutput := range tg.Outputs {
-		if expectedOutput.ReturnIndex < len(allValuesLs) {
+		if expectedOutput.ReturnIndex < len(result) {
 			cond := expectedOutput.Condition.(ConditionOutput)
-			yes, matchedValue := ValidateParam(allValuesLs[expectedOutput.ReturnIndex], expectedOutput.ReturnType, expectedOutput.ReturnCurrency, cond.Attribute, cond.AttributeCurrency, cond.Predicate, expectedOutput.Index, expectedOutput.Component, tokenApi)
+			yes, matchedValue := ValidateParam(result[expectedOutput.ReturnIndex], expectedOutput.ReturnType, expectedOutput.ReturnCurrency, cond.Attribute, cond.AttributeCurrency, cond.Predicate, expectedOutput.Index, expectedOutput.Component, api)
 			if yes {
 				matchingValues = append(matchingValues, fmt.Sprintf("%v", matchedValue))
 			}
 		}
 	}
+
 	if len(matchingValues) == len(tg.Outputs) { // all filters match
 		return &CnMatch{
 			MatchUUID:     "", // this will be set by Postgres once we persist
 			Trigger:       tg,
 			MatchedValues: matchingValues,
-			AllValues:     utils.SprintfInterfaces(allValuesLs),
+			AllValues:     utils.SprintfInterfaces(result),
 		}, nil
 	}
 	return nil, nil

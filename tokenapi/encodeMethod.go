@@ -16,7 +16,7 @@ type Input struct {
 	ParameterValue string
 }
 
-func (z ZoroRPC) EncodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
+func encodeMethod(methodName, cntABI string, inputs []Input) (string, error) {
 
 	xabi, err := abi.JSON(strings.NewReader(cntABI))
 	if err != nil {

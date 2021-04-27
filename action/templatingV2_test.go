@@ -205,7 +205,7 @@ Event name is Transfer
 Event from param is: 0xcd95b32c98423172e04b1c76841e5a73f4532a7f
 Event value param is: 677420000
 First element in array parameter is: hello
-Missing param is: <no value>g
+Missing param is: <no value>
 Transaction hash is 0xf44984a4b533ac0e7b608c881a856eff44ee8c17b9f4dcf8b4ee74e9c10c0455
 `
 	rendered, err := RenderTemplateWithData(templateText, matches[0].ToTemplateMatch())
@@ -483,14 +483,16 @@ func TestERC20Snapshot(t *testing.T) {
 func TestEthCall(t *testing.T) {
 	blockNo, err := tokenapi.GetTokenAPI().GetRPCCli().EthBlockNumber()
 	assert.NoError(t, err)
-	template := `{{ ethCall "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984" . 0 "name" }}`
 
+	template := `{{ ethCall "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984" . 0 "balanceOf" "0x41ac4e73e8dE10E9A902785989Fbc28E7cdc5abC" }}`
 	rendered, err := RenderTemplateWithData(template, blockNo)
 	assert.NoError(t, err)
-	assert.Equal(t, "Uniswap", rendered)
+	assert.Equal(t, "300000000000000000000", rendered)
 
-	// let's try to pass args
-	//template := `{{ ethCall "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984" 12322479 0 "balanceOf" "0x41ac4e73e8dE10E9A902785989Fbc28E7cdc5abC" }}`
+	//template = `{{ ethCall "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984" . 0 "name" }}`
+	//rendered, err = RenderTemplateWithData(template, blockNo)
+	//assert.NoError(t, err)
+	//assert.Equal(t, "Uniswap", rendered)
 }
 
 func setupGock(filename, url, path string) error {

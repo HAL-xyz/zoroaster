@@ -9,7 +9,6 @@ import (
 	"github.com/HAL-xyz/zoroaster/utils"
 	"github.com/gorhill/cronexpr"
 	"github.com/sirupsen/logrus"
-	"strings"
 	"time"
 )
 
@@ -78,29 +77,8 @@ func filterTgsToRun(tgs []*trigger.Trigger, now time.Time) []*trigger.Trigger {
 }
 
 func RunCronTgAgainstBlock(tg *trigger.Trigger, blockNo int, api tokenapi.ITokenAPI) (*trigger.CnMatch, error) {
-	tokenApiInputs := make([]tokenapi.Input, len(tg.Inputs))
-	for i, e := range tg.Inputs {
-		tokenApiInputs[i] = tokenapi.Input{
-			ParameterType:  e.ParameterType,
-			ParameterValue: e.ParameterValue,
-		}
-	}
 
-	methodId, err := api.GetRPCCli().EncodeMethod(tg.FunctionName, tg.ContractABI, tokenApiInputs)
-	if err != nil {
-		return nil, fmt.Errorf("cannot encode method: %s", err)
-	}
-	rawData, err := api.GetRPCCli().MakeEthRpcCall(tg.ContractAdd, methodId, blockNo)
-	if err != nil {
-		return nil, fmt.Errorf("rpc call failed with error : %s", err)
-	}
-	if rawData == "0x" {
-		return nil, fmt.Errorf("rpc call failed: returned 0x")
-	}
-
-	//fmt.Println("result from call is -> ", rawData)
-
-	allValuesLs, err := utils.DecodeParamsIntoList(strings.TrimPrefix(rawData, "0x"), tg.ContractABI, tg.FunctionName)
+	result, err := api.EthCall(tg.ContractAdd, tg.FunctionName, tg.ContractABI, blockNo, tg.CallArgs()...)
 	if err != nil {
 		return nil, fmt.Errorf(err.Error())
 	}
@@ -108,7 +86,7 @@ func RunCronTgAgainstBlock(tg *trigger.Trigger, blockNo int, api tokenapi.IToken
 	m := &trigger.CnMatch{
 		Trigger:     tg,
 		BlockNumber: blockNo,
-		AllValues:   utils.SprintfInterfaces(allValuesLs),
+		AllValues:   utils.SprintfInterfaces(result),
 	}
 	return m, nil
 }
