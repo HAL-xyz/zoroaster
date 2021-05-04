@@ -59,11 +59,11 @@ func TestValidateFilterLog(t *testing.T) {
 
 	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
 
-	res, err := validateFilterLog(&logs[0], &tg.Filters[0], &abiObj, tg.Filters[0].EventName, mockTokenApi)
+	res, err := validateFilterLog(&logs[0], tg.Filters[0], &abiObj, tg.Filters[0].EventName, mockTokenApi)
 	assert.NoError(t, err)
 	assert.True(t, res)
 
-	res2, err := validateFilterLog(&logs[0], &tg.Filters[1], &abiObj, tg.Filters[0].EventName, mockTokenApi)
+	res2, err := validateFilterLog(&logs[0], tg.Filters[1], &abiObj, tg.Filters[0].EventName, mockTokenApi)
 	assert.NoError(t, err)
 	assert.True(t, res2)
 
@@ -2744,8 +2744,10 @@ func TestCurrencyWithImplicitCurrencyInTopic(t *testing.T) {
 	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTApiCurr)
 	assert.Len(t, matches, 1)
 
-	// make sure we modified ParameterCurrency
-	assert.Equal(t, "0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9", tg.Filters[0].ParameterCurrency)
+	// make sure we DO NOT modify ParameterCurrency. Why?
+	// Because if the trigger matches twice (or more) within the same block, _reserveToken will
+	// NOT be overwritten.
+	assert.Equal(t, "_reserveToken", tg.Filters[0].ParameterCurrency)
 }
 
 func TestCurrencyWithImplicitCurrencyInData(t *testing.T) {
@@ -2781,8 +2783,8 @@ func TestCurrencyWithImplicitCurrencyInData(t *testing.T) {
 	matches := MatchEvent(tg, logs, []ethrpc.Transaction{}, mockTApiCurr)
 	assert.Len(t, matches, 1)
 
-	// make sure we modified ParameterCurrency
-	assert.Equal(t, "0x0000000000000000000000000000000000000000", tg.Filters[0].ParameterCurrency)
+	// make sure we DO NOT modify ParameterCurrency
+	assert.Equal(t, "token", tg.Filters[0].ParameterCurrency)
 }
 
 func TestCurrencyWithExplicitCurrenciesDataArray(t *testing.T) {

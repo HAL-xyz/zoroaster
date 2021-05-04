@@ -516,6 +516,5 @@ func convertToCurrency(tokenApi tokenapi.ITokenAPI, parameterCurrency, attribute
 	decimals := tokenApi.Decimals(parameterCurrency)
 	scaledValue := utils.MakeBigFloat(tokenApi.FromWei(param, decimals))
 	convertedValue := scaledValue.Mul(scaledValue, utils.MakeBigFloat(exchangeRate))
-
 	return convertedValue, nil
 }

@@ -94,7 +94,7 @@ func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, tokenApi tokenapi.IToken
 	match := true
 	if evLog.Topics[0] == eventSignature {
 		for i := range tg.Filters {
-			filterMatch, err := validateFilterLog(evLog, &tg.Filters[i], &abiObj, tg.eventName(), tokenApi)
+			filterMatch, err := validateFilterLog(evLog, tg.Filters[i], &abiObj, tg.eventName(), tokenApi)
 			if err != nil {
 				logrus.Debug(err)
 			}
@@ -108,7 +108,7 @@ func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, tokenApi tokenapi.IToken
 
 func validateFilterLog(
 	evLog *ethrpc.Log,
-	filter *Filter,
+	filter Filter,
 	abiObj *abi.ABI,
 	eventName string,
 	tokenApi tokenapi.ITokenAPI) (bool, error) {
