@@ -135,6 +135,10 @@ func mul(a, b interface{}) *big.Float {
 }
 
 func percentageVariation(new, old interface{}) string {
+	if fmt.Sprintf("%v", old) == "0" {
+		return "0%"
+	}
+
 	diff := sub(new, old)
 	variation := mul(div(diff, old), 100)
 	//sign := ""

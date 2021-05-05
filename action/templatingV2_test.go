@@ -418,6 +418,11 @@ func TestMathFunctions(t *testing.T) {
 	rendered, err = RenderTemplateWithData(template, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, "-33.33%", rendered)
+
+	template = `{{ percentageVariation 100 0 }}`
+	rendered, err = RenderTemplateWithData(template, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, "0%", rendered)
 }
 
 func TestERC20Functions(t *testing.T) {
