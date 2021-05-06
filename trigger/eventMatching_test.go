@@ -5,9 +5,7 @@ import (
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/utils"
-	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/stretchr/testify/assert"
-	"strings"
 	"testing"
 )
 
@@ -57,7 +55,7 @@ func TestValidateFilterLog(t *testing.T) {
 	tg, err := GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
 
-	abiObj, err := abi.JSON(strings.NewReader(tg.ContractABI))
+	abiObj, _ := tg.getABIObj()
 
 	res, err := validateFilterLog(&logs[0], tg.Filters[0], &abiObj, tg.Filters[0].EventName, mockTokenApi)
 	assert.NoError(t, err)
@@ -67,10 +65,10 @@ func TestValidateFilterLog(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, res2)
 
-	res3 := validateTriggerLog(&logs[0], tg, mockTokenApi)
+	res3 := validateTriggerLog(&logs[0], tg, mockTokenApi, abiObj)
 	assert.True(t, res3)
 
-	res4 := validateTriggerLog(&logs[1], tg, mockTokenApi)
+	res4 := validateTriggerLog(&logs[1], tg, mockTokenApi, abiObj)
 	assert.False(t, res4)
 }
 

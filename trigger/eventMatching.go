@@ -24,14 +24,19 @@ func MatchEvent(tg *Trigger, logs []ethrpc.Log, txs []ethrpc.Transaction, tokenA
 		if !isRelevantLog(log.Address, tg.ContractAdd, tokenApi) {
 			continue
 		}
-		if validateTriggerLog(&log, tg, tokenApi) || validateEmittedEvent(&log, tg) {
+		// loading ABIs is expensive, so we want to do it as little as possible
+		abiObj, err := tg.getABIObj()
+		if err != nil {
+			logrus.Debug(err)
+			return []*EventMatch{}
+		}
+		if validateTriggerLog(&log, tg, tokenApi, abiObj) || validateEmittedEvent(&log, tg, abiObj) {
 			tx := getTxByHash(log.TransactionHash, txs)
 			if !validateBasicFiltersForEvent(tg, &tx) {
 				continue
 			}
 
 			// make a new EventMatch
-			abiObj, _ := tg.getABIObj() // at this point we know this won't fail
 			decodedData, _ := decodeDataField(log.Data, tg.eventName(), &abiObj)
 			topicsMap := getTopicsMap(&abiObj, tg.eventName(), &log)
 			ev := EventMatch{
@@ -65,10 +70,11 @@ func validateBasicFiltersForEvent(tg *Trigger, tx *ethrpc.Transaction) bool {
 	return allFiltersMatch
 }
 
-func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger) bool {
+func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger, abiObj abi.ABI) bool {
+
 	for _, f := range tg.Filters {
 		if f.FilterType == "CheckEventEmitted" {
-			eventSignature, _ := getEventSignature(tg.ContractABI, tg.eventName())
+			eventSignature, _ := getEventSignature(abiObj, tg.eventName())
 			if evLog.Topics[0] == eventSignature {
 				return true
 			}
@@ -77,15 +83,9 @@ func validateEmittedEvent(evLog *ethrpc.Log, tg *Trigger) bool {
 	return false
 }
 
-func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, tokenApi tokenapi.ITokenAPI) bool {
+func validateTriggerLog(evLog *ethrpc.Log, tg *Trigger, tokenApi tokenapi.ITokenAPI, abiObj abi.ABI) bool {
 
-	eventSignature, err := getEventSignature(tg.ContractABI, tg.eventName())
-	if err != nil {
-		logrus.Debug(err)
-		return false
-	}
-
-	abiObj, err := tg.getABIObj()
+	eventSignature, err := getEventSignature(abiObj, tg.eventName())
 	if err != nil {
 		logrus.Debug(err)
 		return false
@@ -186,18 +186,7 @@ func getTopicsMap(abiObj *abi.ABI, eventName string, evLog *ethrpc.Log) map[stri
 	return finalMap
 }
 
-func getEventSignature(cntABI string, eventName string) (string, error) {
-	// let's find out the Event specified by our trigger
-	// this is equivalent to:
-	// eventSignature := []byte("ItemSet(bytes32,bytes32)")
-	// hash := crypto.Keccak256Hash(eventSignature)
-	// but slightly easier because I don't have to make up the
-	// string-form of the event signature ItemSet(bytes32,bytes32)
-
-	abiObj, err := abi.JSON(strings.NewReader(cntABI))
-	if err != nil {
-		return "", err
-	}
+func getEventSignature(abiObj abi.ABI, eventName string) (string, error) {
 	for _, event := range abiObj.Events {
 		if event.Name == eventName {
 			return event.ID.Hex(), nil
