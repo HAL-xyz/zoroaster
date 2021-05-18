@@ -33,11 +33,12 @@ func ContractMatcher(
 		var matches []*trigger.CnMatch
 		// multicall is only supported on eth mainnet atm
 		if config.Zconf.Database.Network == "1_eth_mainnet" {
-			matches = matchContractsForBlockMulti(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
+			matches = matchContractsForBlockMulti(block.Number, idb, tokenApi)
 		} else {
-			matches = matchContractsForBlock(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
+			matches = matchContractsForBlock(block.Number, idb, tokenApi)
 		}
 
+		setBlocksMetadata(matches, block.Number, block.Timestamp, block.Hash)
 		for _, m := range matches {
 			if err = idb.LogMatch(m); err != nil {
 				log.Fatal(err)
@@ -52,7 +53,7 @@ func ContractMatcher(
 	}
 }
 
-func matchContractsForBlockMulti(blockNo, blockTimestamp int, blockHash string, idb db.IDB, api tokenapi.ITokenAPI) []*trigger.CnMatch {
+func matchContractsForBlockMulti(blockNo int, idb db.IDB, api tokenapi.ITokenAPI) []*trigger.CnMatch {
 
 	start := time.Now()
 	tgs, err := idb.LoadTriggersFromDB(trigger.WaC)
@@ -61,18 +62,17 @@ func matchContractsForBlockMulti(blockNo, blockTimestamp int, blockHash string, 
 	}
 
 	matches, tgsWithErrors := trigger.MatchTriggersMulti(tgs, api, blockNo)
-	setBlocksMetadata(matches, blockNo, blockTimestamp, blockHash)
 
 	matchesToActUpon := getMatchesToActUpon(idb, matches)
 
 	updateStatusForMatchingTriggers(idb, matches)
 	updateStatusForNonMatchingTriggers(idb, matches, tgs, tgsWithErrors)
 
-	log.Infof("WAC-mul #%d potential matches: %d; errors: %d; time: %s", blockNo, len(matches), len(tgsWithErrors), time.Since(start))
+	log.Infof("WAC_mul #%d potential matches: %d; errors: %d; time: %s", blockNo, len(matches), len(tgsWithErrors), time.Since(start))
 	return matchesToActUpon
 }
 
-func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb db.IDB, tokenApi tokenapi.ITokenAPI) []*trigger.CnMatch {
+func matchContractsForBlock(blockNo int, idb db.IDB, tokenApi tokenapi.ITokenAPI) []*trigger.CnMatch {
 
 	allTriggers, err := idb.LoadTriggersFromDB(trigger.WaC)
 	if err != nil {
@@ -100,7 +100,6 @@ func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb d
 				mu.Unlock()
 			}
 			if match != nil {
-				match.BlockTimestamp, match.BlockNumber, match.BlockHash = blockTimestamp, bNo, blockHash
 				mu.Lock()
 				cnMatches = append(cnMatches, match)
 				mu.Unlock()
@@ -116,7 +115,7 @@ func matchContractsForBlock(blockNo, blockTimestamp int, blockHash string, idb d
 	updateStatusForMatchingTriggers(idb, cnMatches)
 	updateStatusForNonMatchingTriggers(idb, cnMatches, allTriggers, triggersWithErrorsUUIDs)
 
-	log.Infof("WAC-old #%d potential matches: %d; errors: %d ", blockNo, len(cnMatches), len(triggersWithErrorsUUIDs))
+	log.Infof("WAC_old #%d potential matches: %d; errors: %d ", blockNo, len(cnMatches), len(triggersWithErrorsUUIDs))
 	return matchesToActUpon
 }
 
