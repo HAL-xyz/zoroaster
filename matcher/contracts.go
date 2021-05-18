@@ -61,7 +61,12 @@ func matchContractsForBlockMulti(blockNo int, idb db.IDB, api tokenapi.ITokenAPI
 		log.Fatal(err)
 	}
 
-	matches, tgsWithErrors := trigger.MatchTriggersMulti(tgs, api, blockNo)
+	matches, tgsWithErrors, err := trigger.MatchTriggersMulti(tgs, api, blockNo)
+
+	if err != nil {
+		log.Errorf("mc failed on #%d (%s) - doing nothing", blockNo, err)
+		return []*trigger.CnMatch{}
+	}
 
 	matchesToActUpon := getMatchesToActUpon(idb, matches)
 

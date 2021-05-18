@@ -9,12 +9,12 @@ import (
 	"sync"
 )
 
-func MatchTriggersMulti(tgs []*Trigger, api tokenapi.ITokenAPI, blockNo int) ([]*CnMatch, []string) {
+func MatchTriggersMulti(tgs []*Trigger, api tokenapi.ITokenAPI, blockNo int) ([]*CnMatch, []string, error) {
 
 	resMap, err := runMulticallForTriggers(tgs, blockNo, api)
 	if err != nil {
 		log.Warnf("MatchTriggersMulti failed: %s", err)
-		return []*CnMatch{}, []string{}
+		return []*CnMatch{}, []string{}, err
 	}
 	var tgsWithErrorsUUIDs []string
 
@@ -31,7 +31,7 @@ func MatchTriggersMulti(tgs []*Trigger, api tokenapi.ITokenAPI, blockNo int) ([]
 			tgsWithErrorsUUIDs = append(tgsWithErrorsUUIDs, tg.TriggerUUID)
 		}
 	}
-	return cnMatches, tgsWithErrorsUUIDs
+	return cnMatches, tgsWithErrorsUUIDs, nil
 }
 
 func runMulticallForTriggers(tgs []*Trigger, blockNo int, api tokenapi.ITokenAPI) (*multicall.Result, error) {
@@ -48,7 +48,7 @@ func runMulticallForTriggers(tgs []*Trigger, blockNo int, api tokenapi.ITokenAPI
 	var finalRes multicall.Result
 	finalRes.Calls = make(map[string]multicall.CallResult, len(views))
 
-	chunks := chunkViews(views, 100)
+	chunks := chunkViews(views, 50)
 
 	chunkResults := make(chan *multicall.Result, len(chunks))
 	chunkErrors := make(chan error, len(chunks))

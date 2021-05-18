@@ -166,8 +166,9 @@ func TestMatchTriggersMulti(t *testing.T) {
 	assert.Equal(t, true, res.Calls[tg3.getKey()].Success)
 
 	// Test Trigger -> multicall -> Matches
-	matches, tgsWithErrors := MatchTriggersMulti(tgs, tokenapi.GetTokenAPI(), lastBlockMainnet)
+	matches, tgsWithErrors, err := MatchTriggersMulti(tgs, tokenapi.GetTokenAPI(), lastBlockMainnet)
 	assert.Equal(t, 3, len(matches))
 	assert.Equal(t, 1, len(tgsWithErrors))
+	assert.NoError(t, err)
 
 }
