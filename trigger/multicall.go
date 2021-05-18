@@ -48,7 +48,7 @@ func runMulticallForTriggers(tgs []*Trigger, blockNo int, api tokenapi.ITokenAPI
 	var finalRes multicall.Result
 	finalRes.Calls = make(map[string]multicall.CallResult, len(views))
 
-	chunks := chunkViews(views, 50)
+	chunks := chunkViews(views, 100)
 
 	chunkResults := make(chan *multicall.Result, len(chunks))
 	chunkErrors := make(chan error, len(chunks))
@@ -58,7 +58,6 @@ func runMulticallForTriggers(tgs []*Trigger, blockNo int, api tokenapi.ITokenAPI
 		wg.Add(1)
 		go func(cn []multicall.ViewCall) {
 			defer wg.Done()
-			log.Debug("Executing batch of ", len(cn))
 			chunkResult, err := mc.Call(cn, fmt.Sprintf("0x%x", blockNo))
 			if err != nil {
 				chunkErrors <- fmt.Errorf("mc call failed: %s", err)

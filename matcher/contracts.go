@@ -2,6 +2,7 @@ package matcher
 
 import (
 	"github.com/HAL-xyz/ethrpc"
+	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
@@ -29,18 +30,15 @@ func ContractMatcher(
 			log.Fatal(err)
 		}
 
-		var newMatches []*trigger.CnMatch
-		if block.Number%3 == 0 {
-			newMatches = matchContractsForBlockMulti(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
+		var matches []*trigger.CnMatch
+		// multicall is only supported on eth mainnet atm
+		if config.Zconf.Database.Network == "1_eth_mainnet" {
+			matches = matchContractsForBlockMulti(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
+		} else {
+			matches = matchContractsForBlock(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
 		}
 
-		cnMatches := matchContractsForBlock(block.Number, block.Timestamp, block.Hash, idb, tokenApi)
-
-		if block.Number%3 == 0 && len(cnMatches) != len(newMatches) {
-			log.Warnf("problems! Got %d old-matches and %d mul-matches", len(cnMatches), len(newMatches))
-		}
-
-		for _, m := range cnMatches {
+		for _, m := range matches {
 			if err = idb.LogMatch(m); err != nil {
 				log.Fatal(err)
 			}
@@ -67,8 +65,8 @@ func matchContractsForBlockMulti(blockNo, blockTimestamp int, blockHash string, 
 
 	matchesToActUpon := getMatchesToActUpon(idb, matches)
 
-	//updateStatusForMatchingTriggers(idb, matches)
-	//updateStatusForNonMatchingTriggers(idb, matches, tgs, tgsWithErrors)
+	updateStatusForMatchingTriggers(idb, matches)
+	updateStatusForNonMatchingTriggers(idb, matches, tgs, tgsWithErrors)
 
 	log.Infof("WAC-mul #%d potential matches: %d; errors: %d; time: %s", blockNo, len(matches), len(tgsWithErrors), time.Since(start))
 	return matchesToActUpon
