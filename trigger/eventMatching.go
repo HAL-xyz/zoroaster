@@ -19,16 +19,17 @@ func MatchEvent(tg *Trigger, logs []ethrpc.Log, txs []ethrpc.Transaction, tokenA
 		return []*EventMatch{}
 	}
 
+	// loading ABIs is expensive, so we want to do it as little as possible
+	abiObj, err := tg.getABIObj()
+	if err != nil {
+		logrus.Debug(err)
+		return []*EventMatch{}
+	}
+
 	var eventMatches []*EventMatch
 	for i, log := range logs {
 		if !isRelevantLog(log.Address, tg.ContractAdd, tokenApi) {
 			continue
-		}
-		// loading ABIs is expensive, so we want to do it as little as possible
-		abiObj, err := tg.getABIObj()
-		if err != nil {
-			logrus.Debug(err)
-			return []*EventMatch{}
 		}
 		if validateTriggerLog(&log, tg, tokenApi, abiObj) || validateEmittedEvent(&log, tg, abiObj) {
 			tx := getTxByHash(log.TransactionHash, txs)
@@ -170,7 +171,6 @@ func validateFilterLog(
 func getTopicsMap(abiObj *abi.ABI, eventName string, evLog *ethrpc.Log) map[string]string {
 	finalMap := make(map[string]string)
 	myEvent := abiObj.Events[eventName]
-	intRgx := regexp.MustCompile(`u?int\d*$`)
 
 	var i = 1 // topic_name_0 is the event signature so we start from 1
 	for _, input := range myEvent.Inputs {
@@ -244,3 +244,6 @@ func isRelevantLog(logAdd, tgAdd string, api tokenapi.ITokenAPI) bool {
 	}
 	return utils.NormalizeAddress(logAdd) == utils.NormalizeAddress(tgAdd)
 }
+
+// global because it's expensive to compute
+var intRgx = regexp.MustCompile(`u?int\d*$`)
