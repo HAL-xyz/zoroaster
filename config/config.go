@@ -17,9 +17,11 @@ type ZConfiguration struct {
 	Database              ZoroDB
 	BlocksDelay           int
 	PollingInterval       int
+	BlocksInterval        int
 	TwitterConsumerKey    string
 	TwitterConsumerSecret string
 	EtherscanKey          string
+	Network               string
 }
 
 type ZoroDB struct {
@@ -34,7 +36,6 @@ type ZoroDB struct {
 	Name          string
 	Port          int
 	Password      string
-	Network       string
 }
 
 type Stage int
@@ -63,6 +64,7 @@ const (
 	twitterConsumerSecret = "TWITTER_CONSUMER_SECRET"
 	network               = "NETWORK"
 	pollingInterval       = "POLLING_INTERVAL"
+	blocksInterval        = "BLOCKS_INTERVAL"
 	etherscanKey          = "ETHERSCAN_KEY"
 )
 
@@ -135,8 +137,8 @@ func NewConfig() *ZConfiguration {
 		log.Fatal("no db password set in local env ", dbPwd)
 	}
 
-	zconfig.Database.Network = os.Getenv(network)
-	if zconfig.Database.Network == "" {
+	zconfig.Network = os.Getenv(network)
+	if zconfig.Network == "" {
 		log.Fatal("no network set in local env ", network)
 	}
 
@@ -178,5 +180,16 @@ func NewConfig() *ZConfiguration {
 	}
 	zconfig.PollingInterval = intervalSeconds
 
+	blocksInterval := os.Getenv(blocksInterval)
+	blocksIntervalSeconds, err := strconv.Atoi(blocksInterval)
+	if blocksInterval == "" || err != nil {
+		log.Fatalf("cannot use %s as blocks interval", blocksInterval)
+	}
+	zconfig.BlocksInterval = blocksIntervalSeconds
+
 	return &zconfig
+}
+
+func (c ZConfiguration) IsNetworkETHMainnet() bool {
+	return c.Network == "1_eth_mainnet"
 }

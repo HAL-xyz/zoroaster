@@ -21,7 +21,7 @@ func main() {
 	log.SetLevel(config.Zconf.LogLevel)
 	log.SetOutput(os.Stdout)
 
-	log.Infof("Starting up Zoroaster, stage = %s, network = %s\n", config.Zconf.Stage, config.Zconf.Database.Network)
+	log.Infof("Starting up Zoroaster, stage = %s, network = %s\n", config.Zconf.Stage, config.Zconf.Network)
 
 	// Postgres DB client
 	psqlClient := db.NewPostgresClient(config.Zconf)

@@ -16,7 +16,8 @@ import (
 var db *sql.DB
 
 type PostgresClient struct {
-	conf *config.ZoroDB
+	conf    *config.ZoroDB
+	network string
 }
 
 func NewPostgresClient(c *config.ZConfiguration) *PostgresClient {
@@ -164,7 +165,7 @@ func (cli PostgresClient) ReadLastBlockProcessed(tgType trigger.TgType) (int, er
 	q := fmt.Sprintf(
 		`SELECT %s_last_block_processed
 			FROM %s
-		    WHERE network_id = '%s'`, trigger.TgTypeToPrefix(tgType), cli.conf.TableState, cli.conf.Network)
+		    WHERE network_id = '%s'`, trigger.TgTypeToPrefix(tgType), cli.conf.TableState, cli.network)
 	err := db.QueryRow(q).Scan(&blockNo)
 	if err != nil {
 		return 0, fmt.Errorf("cannot read last block processed: %s", err)
@@ -176,7 +177,7 @@ func (cli PostgresClient) SetLastBlockProcessed(blockNo int, tgType trigger.TgTy
 	stringTgType := trigger.TgTypeToPrefix(tgType)
 	q := fmt.Sprintf(`UPDATE "%s" 
 		SET %s_last_block_processed = $1, %s_date = $2
-	    WHERE network_id = '%s'`, cli.conf.TableState, stringTgType, stringTgType, cli.conf.Network)
+	    WHERE network_id = '%s'`, cli.conf.TableState, stringTgType, stringTgType, cli.network)
 	_, err := db.Exec(q, blockNo, time.Now())
 	if err != nil {
 		return fmt.Errorf("cannot set last block processed: %s", err)
@@ -218,7 +219,7 @@ func (cli PostgresClient) LoadTriggersFromDB(tgType trigger.TgType) ([]*trigger.
 				AND tg_table.user_uuid = usr_table.uuid
 				AND counter_current_month < actions_monthly_cap
 				AND tg_table.is_active = true
-                AND tg_table.network_id = '%s'`, cli.conf.TableTriggers, cli.conf.TableUsers, trigger.TgTypeToString(tgType), cli.conf.Network)
+                AND tg_table.network_id = '%s'`, cli.conf.TableTriggers, cli.conf.TableUsers, trigger.TgTypeToString(tgType), cli.network)
 	rows, err := db.Query(q)
 	if err != nil {
 		return nil, err
@@ -271,4 +272,5 @@ func (cli *PostgresClient) initDB(c *config.ZConfiguration) {
 	}
 
 	cli.conf = &c.Database
+	cli.network = c.Network
 }

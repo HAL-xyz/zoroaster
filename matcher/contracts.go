@@ -23,6 +23,11 @@ func ContractMatcher(
 		block := <-blocksChan
 		tokenApi.GetRPCCli().ResetCounterAndLogStats(block.Number - 1)
 		tokenApi.LogFiatStatsAndReset(block.Number - 1)
+
+		if block.Number%config.Zconf.BlocksInterval != 0 {
+			continue
+		}
+
 		start := time.Now()
 
 		triggers, err := idb.LoadTriggersFromDB(trigger.WaC)
@@ -32,7 +37,7 @@ func ContractMatcher(
 
 		var matches []*trigger.CnMatch
 		// multicall is only supported on eth mainnet atm
-		if config.Zconf.Database.Network == "1_eth_mainnet" {
+		if config.Zconf.IsNetworkETHMainnet() {
 			matches = matchContractsForBlockMulti(block.Number, idb, tokenApi)
 		} else {
 			matches = matchContractsForBlock(block.Number, idb, tokenApi)

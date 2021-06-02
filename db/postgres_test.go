@@ -16,7 +16,7 @@ func init() {
 	if config.Zconf.Stage != config.TEST {
 		log.Fatal("$STAGE must be TEST to run db tests")
 	}
-	if config.Zconf.Database.Network != "1_eth_mainnet" {
+	if !config.Zconf.IsNetworkETHMainnet() {
 		log.Fatal("$NETWORK must be 1_eth_mainnet to run tests ")
 	}
 }
