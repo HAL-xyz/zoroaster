@@ -42,7 +42,7 @@ func main() {
 
 	// Poll ETH node
 	pollerCli := tokenapi.NewZRPC(config.Zconf.EthNode, "BlocksPoller")
-	go poller.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, pollerCli, psqlClient, config.Zconf.BlocksDelay)
+	go poller.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, psqlClient, pollerCli)
 
 	// Watch a Transaction
 	watApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch a Transaction"))

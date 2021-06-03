@@ -15,7 +15,7 @@ type ZConfiguration struct {
 	BackupNode            string // a backup node for special occasions
 	RinkebyNode           string // Rinkeby network, used for tests
 	Database              ZoroDB
-	BlocksDelay           int
+	BlocksDelaySeconds    int
 	PollingInterval       int
 	BlocksInterval        int
 	TwitterConsumerKey    string
@@ -111,7 +111,7 @@ func NewConfig() *ZConfiguration {
 	if delay == "" || err != nil {
 		log.Fatalf("cannot use %s as block delay", delay)
 	}
-	zconfig.BlocksDelay = intDelay
+	zconfig.BlocksDelaySeconds = intDelay
 
 	zconfig.Database.Host = os.Getenv(dbHost)
 	if zconfig.Database.Host == "" {

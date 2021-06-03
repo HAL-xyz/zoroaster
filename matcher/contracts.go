@@ -24,9 +24,12 @@ func ContractMatcher(
 		tokenApi.GetRPCCli().ResetCounterAndLogStats(block.Number - 1)
 		tokenApi.LogFiatStatsAndReset(block.Number - 1)
 
+		log.Infof("in: %d, interval: %d, modulo: %d ", block.Number, config.Zconf.BlocksInterval, block.Number%config.Zconf.BlocksInterval)
 		if block.Number%config.Zconf.BlocksInterval != 0 {
+			log.Info("skipping ", block.Number)
 			continue
 		}
+		log.Info("not skipping ", block.Number)
 
 		start := time.Now()
 
