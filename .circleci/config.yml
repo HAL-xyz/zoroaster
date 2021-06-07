@@ -50,7 +50,7 @@ workflows:
           container=zoroaster-service,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
           container=zoroaster-service,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
           container=zoroaster-service,name=NETWORK,value=1_eth_mainnet,
-          container=zoroaster-service,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
+          container=zoroaster-service,name=BLOCKS_DELAY,value=3,
           container=zoroaster-service,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_ETH_MAINNET},
           container=zoroaster-service,name=BLOCKS_INTERVAL,value=${BLOCKS_INTERVAL_ETH_MAINNET},
           container=zoroaster-service,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
@@ -75,7 +75,7 @@ workflows:
           container=zoroaster-service-xdai,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
           container=zoroaster-service-xdai,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
           container=zoroaster-service-xdai,name=NETWORK,value=3_xdai_mainnet,
-          container=zoroaster-service-xdai,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
+          container=zoroaster-service-xdai,name=BLOCKS_DELAY,value=5,
           container=zoroaster-service-xdai,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_XDAI},
           container=zoroaster-service-xdai,name=BLOCKS_INTERVAL,value=${BLOCKS_INTERVAL_XDAI},
           container=zoroaster-service-xdai,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
@@ -100,7 +100,7 @@ workflows:
           container=zoroaster-prod-service,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
           container=zoroaster-prod-service,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
           container=zoroaster-prod-service,name=NETWORK,value=1_eth_mainnet,
-          container=zoroaster-prod-service,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
+          container=zoroaster-prod-service,name=BLOCKS_DELAY,value=3,
           container=zoroaster-prod-service,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_ETH_MAINNET},
           container=zoroaster-prod-service,name=BLOCKS_INTERVAL,value=${BLOCKS_INTERVAL_ETH_MAINNET},
           container=zoroaster-prod-service,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
@@ -125,10 +125,35 @@ workflows:
           container=zoroaster-prod-service-xdai,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
           container=zoroaster-prod-service-xdai,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
           container=zoroaster-prod-service-xdai,name=NETWORK,value=3_xdai_mainnet,
-          container=zoroaster-prod-service-xdai,name=BLOCKS_DELAY,value=${BLOCKS_DELAY},
+          container=zoroaster-prod-service-xdai,name=BLOCKS_DELAY,value=5,
           container=zoroaster-prod-service-xdai,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_XDAI},
           container=zoroaster-prod-service-xdai,name=BLOCKS_INTERVAL,value=${BLOCKS_INTERVAL_XDAI},
           container=zoroaster-prod-service-xdai,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
+          filters:
+            branches:
+              only: master
+          requires:
+            - build-and-push
+      - aws-ecs/deploy-service-update:
+          family: "zoroaster-prod-service-polygon"
+          cluster-name: "halxyz-prod-cluster"
+          container-image-name-updates: "container=zoroaster-prod-service-polygon,tag=${CIRCLE_BRANCH}"
+          container-env-var-updates: "
+          container=zoroaster-prod-service-polygon,name=STAGE,value=PROD,
+          container=zoroaster-prod-service-polygon,name=DB_HOST,value=${DB_HOST},
+          container=zoroaster-prod-service-polygon,name=DB_NAME,value=${DB_NAME_PROD},
+          container=zoroaster-prod-service-polygon,name=DB_USR,value=${DB_USR},
+          container=zoroaster-prod-service-polygon,name=DB_PWD,value=${DB_PWD},
+          container=zoroaster-prod-service-polygon,name=ETH_NODE,value=${ETH_NODE_POLYGON},
+          container=zoroaster-prod-service-polygon,name=BACKUP_NODE,value=${ETH_NODE_POLYGON},
+          container=zoroaster-prod-service-polygon,name=RINKEBY_NODE,value=${RINKEBY_NODE},
+          container=zoroaster-prod-service-polygon,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
+          container=zoroaster-prod-service-polygon,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
+          container=zoroaster-prod-service-polygon,name=NETWORK,value=5_polygon_mainnet,
+          container=zoroaster-prod-service-polygon,name=BLOCKS_DELAY,value=7,
+          container=zoroaster-prod-service-polygon,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_POLYGON},
+          container=zoroaster-prod-service-polygon,name=BLOCKS_INTERVAL,value=${BLOCKS_INTERVAL_POLYGON},
+          container=zoroaster-prod-service-polygon,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
           filters:
             branches:
               only: master
