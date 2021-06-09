@@ -26,7 +26,7 @@ func EventMatcher(
 			logrus.Fatal(err)
 		}
 
-		logs, err := getLogsForBlock(tokenApi.GetRPCCli(), block.Hash)
+		logs, err := getLogsForBlock(tokenApi.GetRPCCli(), block.Hash, block.Number, 3, nil)
 		if err != nil {
 			logrus.Fatalf("cannot fetch logs for block %d: %s\n", block.Number, err)
 		}
@@ -50,10 +50,15 @@ func EventMatcher(
 	}
 }
 
-func getLogsForBlock(client tokenapi.IEthRpc, blockHash string) ([]ethrpc.Log, error) {
+func getLogsForBlock(client tokenapi.IEthRpc, blockHash string, blockNo, retries int, lastErr error) ([]ethrpc.Log, error) {
+	if retries == 0 {
+		return nil, lastErr
+	}
 	logs, err := client.EthGetLogsByHash(blockHash)
 	if err != nil {
-		return nil, err
+		logrus.Warnf("cannot fetch logs for block #%d, err: %v - retrying %d times", blockNo, err, retries)
+		time.Sleep(500 * time.Millisecond)
+		return getLogsForBlock(client, blockHash, blockNo, retries-1, err)
 	}
 	return logs, nil
 }
