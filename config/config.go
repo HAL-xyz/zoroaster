@@ -193,3 +193,11 @@ func NewConfig() *ZConfiguration {
 func (c ZConfiguration) IsNetworkETHMainnet() bool {
 	return c.Network == "1_eth_mainnet"
 }
+
+func (c ZConfiguration) IsNetworkPolygon() bool {
+	return c.Network == "5_polygon_mainnet"
+}
+
+func (c ZConfiguration) IsNetworkXDAI() bool {
+	return c.Network == "3_xdai_mainnet"
+}
