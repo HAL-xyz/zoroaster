@@ -290,11 +290,21 @@ func expandMacro(s string) string {
 }
 
 func mapToStringListSorted(m map[string]tokenapi.ERC20Token) string {
+	// only use tokens on eth main net
+	ethTokensNo := 0
+	for _, t := range m {
+		if t.ChainId == 1 {
+			ethTokensNo++
+		}
+	}
+
 	var i = 0
-	ls := make([]string, len(m))
+	ls := make([]string, ethTokensNo)
 	for _, v := range m {
-		ls[i] = v.Address
-		i++
+		if v.ChainId == 1 {
+			ls[i] = v.Address
+			i++
+		}
 	}
 	sort.Strings(ls)
 	s := strings.ReplaceAll(fmt.Sprintf("%s", ls), " ", ",")

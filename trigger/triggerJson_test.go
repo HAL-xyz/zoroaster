@@ -180,15 +180,23 @@ func TestMap2StringListSorted(t *testing.T) {
 	m := map[string]tokenapi.ERC20Token{
 		"0x345": {
 			Address: "0x345",
+			ChainId: 1,
 		},
 		"0x123": {
 			Address: "0x123",
+			ChainId: 1,
 		},
 		"0xxxx": {
 			Address: "0xxxx",
+			ChainId: 1,
 		},
 		"00000": {
 			Address: "00000",
+			ChainId: 1,
+		},
+		"00001": {
+			Address: "00001",
+			ChainId: 5,
 		},
 	}
 	assert.Equal(t, "00000,0x123,0x345,0xxxx", mapToStringListSorted(m))
