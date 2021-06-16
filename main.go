@@ -41,23 +41,23 @@ func main() {
 	matchesChan := make(chan trigger.IMatch)
 
 	// Poll ETH node
-	pollerCli := tokenapi.NewZRPC(config.Zconf.EthNode, "BlocksPoller")
+	pollerCli := tokenapi.NewZRPC(config.Zconf.EthNode, "BlocksPoller", tokenapi.WithRetries(4))
 	go poller.BlocksPoller(txBlocksChan, cnBlocksChan, evBlocksChan, pollerCli, psqlClient, config.Zconf.BlocksDelay)
 
 	// Watch a Transaction
-	watApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch a Transaction"))
+	watApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch a Transaction", tokenapi.WithRetries(4)))
 	go matcher.TxMatcher(txBlocksChan, matchesChan, psqlClient, watApi)
 
 	// Watch a Contract
-	wacApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch a Contract"))
+	wacApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch a Contract", tokenapi.WithRetries(4)))
 	go matcher.ContractMatcher(cnBlocksChan, matchesChan, psqlClient, wacApi)
 
 	// Watch an Event
-	waeApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch an Event"))
+	waeApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.EthNode, "Watch an Event", tokenapi.WithRetries(4)))
 	go matcher.EventMatcher(evBlocksChan, matchesChan, psqlClient, waeApi)
 
 	// Cron Triggers
-	cronApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.BackupNode, "Cron Trig"))
+	cronApi := tokenapi.New(tokenapi.NewZRPC(config.Zconf.BackupNode, "Cron Trig", tokenapi.WithRetries(4)))
 	go matcher.CronScheduler(psqlClient, cronApi, matchesChan)
 
 	// Main routine - process matches

@@ -1,6 +1,7 @@
 package tokenapi
 
 import (
+	"fmt"
 	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/h2non/gock.v1"
@@ -11,7 +12,7 @@ import (
 
 var tapi = New(NewZRPC(config.Zconf.EthNode, "test"))
 
-func setupGock(filename, url, path string) error {
+func setupGock(filename, url, path, method string) error {
 	testJSON, err := os.Open(filename)
 	defer testJSON.Close()
 	if err != nil {
@@ -21,10 +22,14 @@ func setupGock(filename, url, path string) error {
 	if err != nil {
 		return err
 	}
-	gock.New(url).
-		Get(path).
-		Reply(200).
-		JSON(testByte)
+	switch method {
+	case "GET":
+		gock.New(url).Get(path).Reply(200).JSON(testByte)
+	case "POST":
+		gock.New(url).Post(path).Reply(200).JSON(testByte)
+	default:
+		return fmt.Errorf("cannot use %s as http method", method)
+	}
 
 	return nil
 }
@@ -68,9 +73,9 @@ func TestTokenAPI_GetExchangeRateAtDate(t *testing.T) {
 
 	const baseUrl = "https://api.coingecko.com"
 
-	_ = setupGock("resources/coin_list.json", baseUrl, "/api/v3/coins/list")
-	_ = setupGock("resources/history.json", baseUrl, "/api/v3/coins/usd-coin/history")
-	_ = setupGock("resources/history.json", baseUrl, "/api/v3/coins/usdex-2/history")
+	_ = setupGock("resources/coin_list.json", baseUrl, "/api/v3/coins/list", "GET")
+	_ = setupGock("resources/history.json", baseUrl, "/api/v3/coins/usd-coin/history", "GET")
+	_ = setupGock("resources/history.json", baseUrl, "/api/v3/coins/usdex-2/history", "GET")
 
 	assert.Equal(t, 0, tapi.fiatCacheHistory.ItemCount())
 
@@ -100,7 +105,7 @@ func TestTokenAPI_GetExchangeRateAtDate(t *testing.T) {
 }
 func TestCallERC20API(t *testing.T) {
 
-	_ = setupGock("resources/tokenLookup.json", tapi.TokenEndpoint, "token")
+	_ = setupGock("resources/tokenLookup.json", tapi.TokenEndpoint, "token", "GET")
 
 	token, err := tapi.callERC20api("0x6b175474e89094c44da98b954eedeac495271d0f")
 	assert.NoError(t, err)

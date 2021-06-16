@@ -28,17 +28,29 @@ type ZoroRPC struct {
 	calls int
 	cache *cache.Cache
 	sync.Mutex
+	retries int
 }
 
 // Returns a new ZoroRPC client
-func NewZRPC(node, label string) *ZoroRPC {
-	ethClient := ethrpc.New(node, ethrpc.WithHttpClient(&http.Client{Timeout: 30 * time.Second}))
+func NewZRPC(node, label string, options ...func(rpc *ZoroRPC)) *ZoroRPC {
+	zoroCli := &ZoroRPC{
+		cli:     ethrpc.New(node, ethrpc.WithHttpClient(&http.Client{Timeout: 10 * time.Second})),
+		label:   label,
+		calls:   0,
+		cache:   cache.New(5*time.Minute, 5*time.Minute),
+		retries: 1,
+	}
 
-	return &ZoroRPC{
-		cli:   ethClient,
-		label: label,
-		calls: 0,
-		cache: cache.New(5*time.Minute, 5*time.Minute),
+	for _, opt := range options {
+		opt(zoroCli)
+	}
+
+	return zoroCli
+}
+
+func WithRetries(n int) func(rpc *ZoroRPC) {
+	return func(rpc *ZoroRPC) {
+		rpc.retries = n
 	}
 }
 
@@ -80,22 +92,34 @@ func (z *ZoroRPC) ResetCounterAndLogStats(blockNo int) {
 }
 
 func (z *ZoroRPC) EthGetBlockByNumber(number int, withTransactions bool) (*ethrpc.Block, error) {
+	var res *ethrpc.Block
+	var err error
+
 	key := "get_block" + fmt.Sprintf("%d", number)
 	val, found := z.cacheGet(key)
 	if found {
 		return val.(*ethrpc.Block), nil
 	}
 
-	z.increaseCounterByOne()
-	res, err := z.cli.EthGetBlockByNumber(number, withTransactions)
-	if err == nil {
-		z.cacheSet(key, res)
+	for i := 0; i < z.retries; i++ {
+		res, err := z.cli.EthGetBlockByNumber(number, withTransactions)
+		z.increaseCounterByOne()
+		if err == nil {
+			z.cacheSet(key, res)
+			return res, nil
+		} else {
+			log.Warnf("call GetBlockByNumber failed; attempt #%d", i+1)
+			time.Sleep(time.Duration(i*i+1) * time.Second)
+		}
 	}
 	return res, err
 }
 
 // Lookups using only block hash are much faster than using block numbers and/or addresses
 func (z *ZoroRPC) EthGetLogsByHash(blockHash string) ([]ethrpc.Log, error) {
+	var res []ethrpc.Log
+	var err error
+
 	key := "get_logs" + blockHash
 	val, found := z.cacheGet(key)
 	if found {
@@ -105,17 +129,26 @@ func (z *ZoroRPC) EthGetLogsByHash(blockHash string) ([]ethrpc.Log, error) {
 	filter := ethrpc.FilterParams{
 		BlockHash: blockHash,
 	}
-	z.increaseCounterByOne()
 
-	res, err := z.cli.EthGetLogs(filter)
-	if err == nil {
-		z.cacheSet(key, res)
+	for i := 0; i < z.retries; i++ {
+		res, err = z.cli.EthGetLogs(filter)
+		z.increaseCounterByOne()
+		if err == nil {
+			z.cacheSet(key, res)
+			return res, nil
+		} else {
+			log.Warnf("call GetLogsByHash failed; attempt #%d", i+1)
+			time.Sleep(time.Duration(i*i+1) * time.Second)
+		}
 	}
 	return res, err
 }
 
 // Lookups using block numbers and/or addresses are slower, but useful for testing
 func (z *ZoroRPC) EthGetLogsByNumber(blockNo int, address string) ([]ethrpc.Log, error) {
+	var res []ethrpc.Log
+	var err error
+
 	key := "get_logs" + fmt.Sprintf("%d", blockNo)
 	val, found := z.cacheGet(key)
 	if found {
@@ -127,17 +160,37 @@ func (z *ZoroRPC) EthGetLogsByNumber(blockNo int, address string) ([]ethrpc.Log,
 		ToBlock:   fmt.Sprintf("0x%x", blockNo),
 		Address:   []string{address},
 	}
-	z.increaseCounterByOne()
-	res, err := z.cli.EthGetLogs(filter)
-	if err == nil {
-		z.cacheSet(key, res)
+
+	for i := 0; i < z.retries; i++ {
+		res, err = z.cli.EthGetLogs(filter)
+		z.increaseCounterByOne()
+		if err == nil {
+			z.cacheSet(key, res)
+			return res, nil
+		} else {
+			log.Warnf("call GetLogsByNumber failed; attempt #%d", i+1)
+			time.Sleep(time.Duration(i*i+1) * time.Second)
+		}
 	}
 	return res, err
 }
 
 func (z *ZoroRPC) EthBlockNumber() (int, error) {
-	z.increaseCounterByOne()
-	return z.cli.EthBlockNumber()
+	var res int
+	var err error
+
+	for i := 0; i < z.retries; i++ {
+		res, err = z.cli.EthBlockNumber()
+		z.increaseCounterByOne()
+		if err == nil {
+			return res, err
+		} else {
+			timeout := i*i + 1
+			log.Warnf("call EthBlockNumber failed; attempt #%d; retrying in %d seconds", i+1, timeout)
+			time.Sleep(time.Duration(timeout) * time.Second)
+		}
+	}
+	return res, err
 }
 
 func (z *ZoroRPC) MakeEthRpcCall(cntAddress, data string, blockNumber int) (string, error) {
