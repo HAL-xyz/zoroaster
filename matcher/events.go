@@ -2,7 +2,6 @@ package matcher
 
 import (
 	"github.com/HAL-xyz/ethrpc"
-	"github.com/HAL-xyz/zoroaster/config"
 	"github.com/HAL-xyz/zoroaster/db"
 	"github.com/HAL-xyz/zoroaster/tokenapi"
 	"github.com/HAL-xyz/zoroaster/trigger"
@@ -20,14 +19,6 @@ func EventMatcher(
 		block := <-blocksChan
 		tokenApi.GetRPCCli().ResetCounterAndLogStats(block.Number - 1)
 		tokenApi.LogFiatStatsAndReset(block.Number - 1)
-
-		// temporarily disable events processing as Infura is broken :(
-		if config.Zconf.IsNetworkPolygon() {
-			if err := idb.SetLastBlockProcessed(block.Number, trigger.WaE); err != nil {
-				logrus.Fatal(err)
-			}
-			continue
-		}
 
 		start := time.Now()
 
