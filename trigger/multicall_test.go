@@ -83,13 +83,13 @@ func TestMatchTriggersMulti(t *testing.T) {
     {
       "ParameterName": "account",
       "ParameterType": "address",
-      "ParameterValue": "0x41ac4e73e8dE10E9A902785989Fbc28E7cdc5abC"
+      "ParameterValue": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984"
     }
   ],
   "Outputs": [
     {
       "Condition": {
-        "Attribute": "1",
+        "Attribute": "100",
         "Predicate": "BiggerThan"
       },
       "ReturnName": "balanceOf-0",
