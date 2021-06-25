@@ -11,15 +11,32 @@ import (
 
 func MatchTriggersMulti(tgs []*Trigger, api tokenapi.ITokenAPI, blockNo int) ([]*CnMatch, []string, error) {
 
-	resMap, err := runMulticallForTriggers(tgs, blockNo, api)
+	// ATM the multicall library doesn't support tuples.
+	// We could extend it to support them, either natively or by passing the whole ABI to the multicall;
+	// for now we're in a hurry and we just use normal calls for those triggers.
+	tupleTgs, otherTgs := separateTupleTgs(tgs)
+
+	var cnMatches []*CnMatch
+	var tgsWithErrorsUUIDs []string
+
+	// single call, for triggers with tuples
+	for _, tg := range tupleTgs {
+		match, err := MatchContract(api, tg, blockNo)
+		if err != nil {
+			tgsWithErrorsUUIDs = append(tgsWithErrorsUUIDs, tg.TriggerUUID)
+		} else if match != nil {
+			cnMatches = append(cnMatches, match)
+		}
+	}
+
+	// multicall, for all other triggers
+	resMap, err := runMulticallForTriggers(otherTgs, blockNo, api)
 	if err != nil {
 		log.Warnf("MatchTriggersMulti failed: %s", err)
 		return []*CnMatch{}, []string{}, err
 	}
-	var tgsWithErrorsUUIDs []string
 
-	var cnMatches []*CnMatch
-	for _, tg := range tgs {
+	for _, tg := range otherTgs {
 		res, found := resMap.Calls[tg.getKey()]
 		if found && res.Success {
 			match := matchTriggerWithResult(tg, res.Decoded, api)
@@ -31,6 +48,7 @@ func MatchTriggersMulti(tgs []*Trigger, api tokenapi.ITokenAPI, blockNo int) ([]
 			tgsWithErrorsUUIDs = append(tgsWithErrorsUUIDs, tg.TriggerUUID)
 		}
 	}
+
 	return cnMatches, tgsWithErrorsUUIDs, nil
 }
 
@@ -129,6 +147,7 @@ func makeViewMethod(tg *Trigger) (string, error) {
 		}
 		outputTypes += out.Type.String()
 	}
+	//outputTypes = strings.ReplaceAll(strings.ReplaceAll(outputTypes, "(", ""), ")", "")
 
 	return fmt.Sprintf("%s(%s)(%s)", tg.FunctionName, inputTypes, outputTypes), nil
 }
@@ -162,4 +181,20 @@ func makeDistinctViews(tgs []*Trigger) multicall.ViewCalls {
 		}
 	}
 	return views
+}
+
+func separateTupleTgs(tgs []*Trigger) (tupleTgs []*Trigger, otherTgs []*Trigger) {
+
+	for _, tg := range tgs {
+		for _, o := range tg.Outputs {
+			if o.ReturnType == "tuple" {
+				tupleTgs = append(tupleTgs, tg)
+				continue
+			} else {
+				otherTgs = append(otherTgs, tg)
+				continue
+			}
+		}
+	}
+	return tupleTgs, otherTgs
 }
