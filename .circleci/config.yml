@@ -159,3 +159,28 @@ workflows:
               only: master
           requires:
             - build-and-push
+      - aws-ecs/deploy-service-update:
+          family: "zoroaster-prod-service-binance"
+          cluster-name: "halxyz-prod-cluster"
+          container-image-name-updates: "container=zoroaster-prod-service-binance,tag=${CIRCLE_BRANCH}"
+          container-env-var-updates: "
+          container=zoroaster-prod-service-binance,name=STAGE,value=PROD,
+          container=zoroaster-prod-service-binance,name=DB_HOST,value=${DB_HOST},
+          container=zoroaster-prod-service-binance,name=DB_NAME,value=${DB_NAME_PROD},
+          container=zoroaster-prod-service-binance,name=DB_USR,value=${DB_USR},
+          container=zoroaster-prod-service-binance,name=DB_PWD,value=${DB_PWD},
+          container=zoroaster-prod-service-binance,name=ETH_NODE,value=${ETH_NODE_BINANCE},
+          container=zoroaster-prod-service-binance,name=BACKUP_NODE,value=${ETH_NODE_BINANCE},
+          container=zoroaster-prod-service-binance,name=RINKEBY_NODE,value=${RINKEBY_NODE},
+          container=zoroaster-prod-service-binance,name=TWITTER_CONSUMER_KEY,value=${TWITTER_CONSUMER_KEY},
+          container=zoroaster-prod-service-binance,name=TWITTER_CONSUMER_SECRET,value=${TWITTER_CONSUMER_SECRET},
+          container=zoroaster-prod-service-binance,name=NETWORK,value=4_binance_mainnet,
+          container=zoroaster-prod-service-binance,name=BLOCKS_DELAY,value=${BLOCKS_DELAY_BINANCE},
+          container=zoroaster-prod-service-binance,name=POLLING_INTERVAL,value=${POLLING_INTERVAL_BINANCE},
+          container=zoroaster-prod-service-binance,name=BLOCKS_INTERVAL,value=${BLOCKS_INTERVAL_BINANCE},
+          container=zoroaster-prod-service-binance,name=ETHERSCAN_KEY,value=${ETHERSCAN_KEY}"
+          filters:
+            branches:
+              only: master
+          requires:
+            - build-and-push
