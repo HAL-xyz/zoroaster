@@ -63,7 +63,10 @@ var mockTokenApi = tokenapi.New(mockCli)
 func TestHandleWebHookPost(t *testing.T) {
 
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/wac1.json")
-	url := AttributeWebhookPost{URI: "https://hal.xyz"}
+	awp := AttributeWebhookPost{
+		URI:  "https://hal.xyz",
+		Body: "{{ .Block.Number }}, {{ humanTime .Block.Timestamp }}",
+	}
 	cnMatch := trigger.CnMatch{
 		tg,
 		8888,
@@ -74,7 +77,7 @@ func TestHandleWebHookPost(t *testing.T) {
 		[]interface{}{"true"},
 	}
 
-	outcome := handleWebHookPost(url, &cnMatch, mockHttpClient{})
+	outcome := handleWebHookPost(awp, &cnMatch, mockHttpClient{})
 
 	expectedPayload := `{
    "BlockNumber":8888,
@@ -88,7 +91,8 @@ func TestHandleWebHookPost(t *testing.T) {
    },
    "TriggerName":"wac 1",
    "TriggerType":"WatchContracts",
-   "TriggerUUID":""
+   "TriggerUUID":"",
+   "Body":"8888, 09 Apr 19 16:44 UTC"
 }`
 	areEq, err := utils.AreEqualJSON(outcome.Payload, expectedPayload)
 	assert.NoError(t, err)
@@ -98,7 +102,10 @@ func TestHandleWebHookPost(t *testing.T) {
 }
 
 func TestHandleWebhookPostWithTxMatch(t *testing.T) {
-	url := AttributeWebhookPost{URI: "https://hal.xyz"}
+	awp := AttributeWebhookPost{
+		URI:  "https://hal.xyz",
+		Body: "{{ .Block.Number }}, {{ humanTime .Block.Timestamp }}",
+	}
 	tg, _ := trigger.GetTriggerFromFile("../resources/triggers/t1.json")
 	tg.ContractABI = "" // otherwise it's a pain to test
 	tx, _ := trigger.GetTransactionFromFile("../resources/transactions/tx1.json")
@@ -111,7 +118,7 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
 		DecodedFnArgs:  map[string]interface{}{},
 		Tx:             tx,
 	}
-	outcome := handleWebHookPost(url, &txMatch, mockHttpClient{})
+	outcome := handleWebHookPost(awp, &txMatch, mockHttpClient{})
 
 	expectedPayload := `{
   "DecodedData": {
@@ -134,7 +141,8 @@ func TestHandleWebhookPostWithTxMatch(t *testing.T) {
   },
   "TriggerName": "Basic/To, Basic/Nonce, FP/Address",
   "TriggerType": "WatchTransactions",
-  "TriggerUUID": "" 
+  "TriggerUUID": "",
+  "Body":"7669714, 09 Apr 19 16:44 UTC"
 }`
 	ok, err := utils.AreEqualJSON(outcome.Payload, expectedPayload)
 	assert.NoError(t, err)
@@ -163,14 +171,17 @@ func TestHandleWebHookWrongStuff(t *testing.T) {
 
 func TestHandleWebhookWithEvents(t *testing.T) {
 
-	url := AttributeWebhookPost{URI: "https://hal.xyz"}
+	awp := AttributeWebhookPost{
+		URI:  "https://hal.xyz",
+		Body: "{{ .Block.Number }}, {{ humanTime .Block.Timestamp }}",
+	}
 	tg1, err := trigger.GetTriggerFromFile("../resources/triggers/ev1.json")
 	assert.NoError(t, err)
 	logs, err := trigger.GetLogsFromFile("../resources/events/logs1.json")
 	assert.NoError(t, err)
 	matches1 := trigger.MatchEvent(tg1, logs, []ethrpc.Transaction{}, mockTokenApi)
 
-	outcome := handleWebHookPost(url, matches1[0], mockHttpClient{})
+	outcome := handleWebHookPost(awp, matches1[0], mockHttpClient{})
 
 	expectedPayload := `{
    "ContractAdd":"0xdac17f958d2ee523a2206206994597c13d831ec7",
@@ -196,7 +207,8 @@ func TestHandleWebhookWithEvents(t *testing.T) {
    },
    "TriggerName":"Watch an Event",
    "TriggerType":"WatchEvents",
-   "TriggerUUID":""
+   "TriggerUUID":"",
+   "Body":"8496661, 01 Jan 70 00:00 UTC"
 }`
 	ok, err := utils.AreEqualJSON(expectedPayload, outcome.Payload)
 	assert.NoError(t, err)

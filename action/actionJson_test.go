@@ -24,8 +24,10 @@ func TestGetWebhookActionFromJson(t *testing.T) {
    "UserUUID":1,
    "TriggerUUID":30,
    "ActionType":"webhook_post",
+   "TemplateVersion":"v2",
    "Attributes":{
-      "URI":"uri"
+      "URI":"uri",
+      "Body":"some body template here"
    }
 }`
 	a := Action{}
@@ -33,10 +35,18 @@ func TestGetWebhookActionFromJson(t *testing.T) {
 	err := json.Unmarshal([]byte(s), &a)
 	assert.NoError(t, err)
 
-	v, ok := a.Attribute.(AttributeWebhookPost)
-	assert.True(t, ok)
+	expectedAct := Action{
+		TriggerID:  30,
+		UserID:     1,
+		ActionType: "webhook_post",
+		Attribute: AttributeWebhookPost{
+			URI:  "uri",
+			Body: "some body template here",
+		},
+		TemplateVersion: "v2",
+	}
 
-	assert.Equal(t, "uri", v.URI)
+	assert.Equal(t, expectedAct, a)
 }
 
 func TestGetEmailActionFromJson(t *testing.T) {

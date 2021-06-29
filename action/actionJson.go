@@ -15,7 +15,8 @@ type Action struct {
 }
 
 type AttributeWebhookPost struct {
-	URI string
+	URI  string
+	Body string
 }
 
 type AttributeDiscord struct {
@@ -106,7 +107,10 @@ func (ajs *ActionJson) ToAction() (*Action, error) {
 
 	switch strings.ToLower(ajs.ActionType) {
 	case "webhook_post":
-		action.Attribute = AttributeWebhookPost{URI: ajs.Attributes.URI}
+		action.Attribute = AttributeWebhookPost{
+			URI:  ajs.Attributes.URI,
+			Body: ajs.Attributes.Body,
+		}
 	case "email":
 		action.Attribute = AttributeEmail{
 			To:      ajs.Attributes.To,

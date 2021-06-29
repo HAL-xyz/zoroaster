@@ -89,18 +89,27 @@ type WebhookResponse struct {
 
 func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli IHttpClient) *trigger.Outcome {
 
-	postData, err := json.Marshal(match.ToPostPayload())
+	matchData, _ := json.Marshal(match.ToPostPayload())
+	var m map[string]interface{}
+	err := json.Unmarshal(matchData, &m)
+
+	if awp.Body != "" {
+		m["Body"] = fillBodyTemplate(awp.Body, match, "v2")
+	}
+
+	payload, err := json.Marshal(m)
+
 	if err != nil {
 		return &trigger.Outcome{
-			Payload: fmt.Sprintf("%v", match.ToPostPayload()), // bc the marshaling failed
+			Payload: fmt.Sprintf("%v", m), // bc the marshaling failed
 			Outcome: makeErrorResponse(err.Error()),
 			Success: false,
 		}
 	}
-	resp, err := httpCli.Post(awp.URI, "application/json", bytes.NewBuffer(postData))
+	resp, err := httpCli.Post(awp.URI, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return &trigger.Outcome{
-			Payload: string(postData),
+			Payload: string(payload),
 			Outcome: makeErrorResponse(err.Error()),
 			Success: false,
 		}
@@ -111,7 +120,7 @@ func handleWebHookPost(awp AttributeWebhookPost, match trigger.IMatch, httpCli I
 	jsonRespCode, _ := json.Marshal(responseCode)
 
 	return &trigger.Outcome{
-		Payload: string(postData),
+		Payload: string(payload),
 		Outcome: string(jsonRespCode),
 		Success: resp.StatusCode == 200,
 	}
