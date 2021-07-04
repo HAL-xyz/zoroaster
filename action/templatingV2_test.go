@@ -301,6 +301,36 @@ func TestTemplateFunctions(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, "https://etherscan.io/token/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
 
+	template = "{{ bscscanTokenLink . }}"
+	rendered, err = RenderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	assert.NoError(t, err)
+	assert.Equal(t, "https://bscscan.com/token/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
+
+	template = "{{ bscscanTxLink . }}"
+	rendered, err = RenderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	assert.NoError(t, err)
+	assert.Equal(t, "https://bscscan.com/tx/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
+
+	template = "{{ bscscanAddressLink . }}"
+	rendered, err = RenderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	assert.NoError(t, err)
+	assert.Equal(t, "https://bscscan.com/address/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
+
+	template = "{{ polygonscanTokenLink . }}"
+	rendered, err = RenderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	assert.NoError(t, err)
+	assert.Equal(t, "https://polygonscan.com/token/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
+
+	template = "{{ polygonscanTxLink . }}"
+	rendered, err = RenderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	assert.NoError(t, err)
+	assert.Equal(t, "https://polygonscan.com/tx/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
+
+	template = "{{ polygonscanAddressLink . }}"
+	rendered, err = RenderTemplateWithData(template, "0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7")
+	assert.NoError(t, err)
+	assert.Equal(t, "https://polygonscan.com/address/0xfdb96f7387559ebfc41e88e21962414eb527484f578ce87996f8733352ab2ee7", rendered)
+
 	template = "{{ fromWei . 18 }}"
 	rendered, err = RenderTemplateWithData(template, "629700000000000000")
 	assert.NoError(t, err)

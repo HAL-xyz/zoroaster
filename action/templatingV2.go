@@ -18,30 +18,36 @@ import (
 func RenderTemplateWithData(templateText string, data interface{}) (string, error) {
 
 	funcMap := template.FuncMap{
-		"upperCase":            strings.ToUpper,
-		"hexToASCII":           hexToASCII,
-		"hexToInt":             hexToInt,
-		"etherscanTxLink":      etherscanTxLink,
-		"etherscanAddressLink": etherscanAddressLink,
-		"etherscanTokenLink":   etherscanTokenLink,
-		"fromWei":              tokenapi.GetTokenAPI().FromWei,
-		"humanTime":            timestampToHumanTime,
-		"symbol":               tokenapi.GetTokenAPI().Symbol,
-		"decimals":             tokenapi.GetTokenAPI().Decimals,
-		"balanceOf":            tokenapi.GetTokenAPI().BalanceOf,
-		"add":                  add,
-		"sub":                  sub,
-		"mul":                  mul,
-		"div":                  div,
-		"percentageVariation":  percentageVariation,
-		"round":                utils.Round,
-		"pow":                  pow,
-		"formatNumber":         formatNumber,
-		"toFiat":               wrapGetExchangeRate,
-		"toFiatAt":             wrapGetExchangeRateAtDate,
-		"floatToInt":           floatToInt,
-		"ERC20Snapshot":        eRC20Snapshot,
-		"ethCall":              ethCall,
+		"upperCase":              strings.ToUpper,
+		"hexToASCII":             hexToASCII,
+		"hexToInt":               hexToInt,
+		"etherscanTxLink":        etherscanTxLink,
+		"etherscanAddressLink":   etherscanAddressLink,
+		"etherscanTokenLink":     etherscanTokenLink,
+		"bscscanTxLink":          bscscanTxLink,
+		"bscscanAddressLink":     bscscanAddressLink,
+		"bscscanTokenLink":       bscscanTokenLink,
+		"polygonscanTxLink":      polygonscanTxLink,
+		"polygonscanAddressLink": polygonscanAddressLink,
+		"polygonscanTokenLink":   polygonscanTokenLink,
+		"fromWei":                tokenapi.GetTokenAPI().FromWei,
+		"humanTime":              timestampToHumanTime,
+		"symbol":                 tokenapi.GetTokenAPI().Symbol,
+		"decimals":               tokenapi.GetTokenAPI().Decimals,
+		"balanceOf":              tokenapi.GetTokenAPI().BalanceOf,
+		"add":                    add,
+		"sub":                    sub,
+		"mul":                    mul,
+		"div":                    div,
+		"percentageVariation":    percentageVariation,
+		"round":                  utils.Round,
+		"pow":                    pow,
+		"formatNumber":           formatNumber,
+		"toFiat":                 wrapGetExchangeRate,
+		"toFiatAt":               wrapGetExchangeRateAtDate,
+		"floatToInt":             floatToInt,
+		"ERC20Snapshot":          eRC20Snapshot,
+		"ethCall":                ethCall,
 	}
 
 	tmpl := template.New("").Funcs(funcMap)
@@ -90,6 +96,30 @@ func etherscanAddressLink(address string) string {
 
 func etherscanTokenLink(token string) string {
 	return fmt.Sprintf("https://etherscan.io/token/%s", token)
+}
+
+func bscscanTxLink(hash string) string {
+	return fmt.Sprintf("https://bscscan.com/tx/%s", hash)
+}
+
+func bscscanAddressLink(address string) string {
+	return fmt.Sprintf("https://bscscan.com/address/%s", address)
+}
+
+func bscscanTokenLink(token string) string {
+	return fmt.Sprintf("https://bscscan.com/token/%s", token)
+}
+
+func polygonscanTxLink(hash string) string {
+	return fmt.Sprintf("https://polygonscan.com/tx/%s", hash)
+}
+
+func polygonscanAddressLink(address string) string {
+	return fmt.Sprintf("https://polygonscan.com/address/%s", address)
+}
+
+func polygonscanTokenLink(token string) string {
+	return fmt.Sprintf("https://polygonscan.com/token/%s", token)
 }
 
 func timestampToHumanTime(timestamp interface{}, optionalFormatting ...string) string {
