@@ -57,6 +57,18 @@ func TestTokenAPI_GetFiatCacheCount(t *testing.T) {
 	_, err = tapi.GetExchangeRate("0x0000000000000000000000000000000000000000", "usd")
 	assert.NoError(t, err)
 	assert.Equal(t, 2, tapi.fiatCache.ItemCount())
+
+	// token on Binance
+	config.Zconf.Network = "4_binance_mainnet"
+	_, err = tapi.GetExchangeRate("0xe9e7cea3dedca5984780bafc599bd69add087d56", "usd")
+	assert.NoError(t, err)
+	assert.Equal(t, 3, tapi.fiatCache.ItemCount())
+
+	// token on Polygon
+	config.Zconf.Network = "5_polygon_mainnet"
+	_, err = tapi.GetExchangeRate("0xb33eaad8d922b1083446dc23f610c2567fb5180f", "usd")
+	assert.NoError(t, err)
+	assert.Equal(t, 4, tapi.fiatCache.ItemCount())
 }
 
 func TestTokenAPI_GetExchangeRate(t *testing.T) {

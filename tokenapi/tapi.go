@@ -198,7 +198,7 @@ func (t *TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, 
 		coinGeckoUrl = fmt.Sprintf("https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=%s", fiatCurrency)
 		tokenAddress = "ethereum"
 	} else {
-		coinGeckoUrl = fmt.Sprintf("https://api.coingecko.com/api/v3/simple/token_price/ethereum?contract_addresses=%s&vs_currencies=%s", tokenAddress, fiatCurrency)
+		coinGeckoUrl = fmt.Sprintf("https://api.coingecko.com/api/v3/simple/token_price/%s?contract_addresses=%s&vs_currencies=%s", getCoingeckoNetwork(), tokenAddress, fiatCurrency)
 	}
 
 	key := tokenAddress + fiatCurrency
@@ -245,6 +245,22 @@ func (t *TokenAPI) GetExchangeRate(tokenAddress, fiatCurrency string) (float32, 
 		log.Errorf("unknown error for currency %s fiat %s", tokenAddress, fiatCurrency)
 	}
 	return 0, err
+}
+
+func getCoingeckoNetwork() string {
+	if config.Zconf.IsNetworkETHMainnet() {
+		return "ethereum"
+	}
+	if config.Zconf.IsNetworkPolygon() {
+		return "polygon-pos"
+	}
+	if config.Zconf.IsNetworkXDAI() {
+		return "xdai"
+	}
+	if config.Zconf.IsNetworkBinance() {
+		return "binance-smart-chain"
+	}
+	return ""
 }
 
 func (t *TokenAPI) callPriceAPIs(url, tokenAddress, fiatCurrency string) (float32, error) {

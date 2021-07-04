@@ -201,3 +201,7 @@ func (c ZConfiguration) IsNetworkPolygon() bool {
 func (c ZConfiguration) IsNetworkXDAI() bool {
 	return c.Network == "3_xdai_mainnet"
 }
+
+func (c ZConfiguration) IsNetworkBinance() bool {
+	return c.Network == "4_binance_mainnet"
+}
